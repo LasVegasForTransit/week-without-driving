@@ -1,11 +1,10 @@
-# LVBT site repository
+# Week Without Driving Las Vegas
 
-A Turborepo workspace following the LVBT repository standard, with an Astro site under `apps/site`
-that deploys to Cloudflare Workers as static assets. It was created with:
-
-```bash
-npx create-turbo@latest --example https://github.com/LasVegasForTransit/repository-tooling/tree/main/examples/with-astro
-```
+The site at [lvwwd.org](https://lvwwd.org): the Las Vegas edition of the national
+[Week Without Driving](https://weekwithoutdriving.org/) challenge, run by
+[Las Vegans for Better Transit](https://lasvegasfortransit.org). It is one page under `apps/site`,
+built with Astro and deployed to Cloudflare Workers as static assets, in a Turborepo workspace that
+follows the LVBT repository standard.
 
 ## Getting started
 
@@ -15,18 +14,19 @@ pnpm check       # the same check CI runs
 pnpm dev         # the site at http://127.0.0.1:4321
 ```
 
-Then rename the root package and the Worker in `apps/site/wrangler.jsonc`, set `site` in
-`apps/site/astro.config.ts`, and replace the scopes in `.lvbt/commit-scopes.txt` with this
-repository's boundaries.
+## Where things are
 
-## Layout
+- `apps/site/src/pages/index.astro` is the page; `apps/site/src/lib/wwd.ts` holds the dates,
+  hashtag, giveaway rules, partner roster, and resource links, so the yearly update is a few values
+  there rather than a copy-edit of the page
+- `apps/site/src/layouts/BaseLayout.astro` carries the campaign bar, the LVBT credit footer, and the
+  meta tags
+- `apps/site/worker/index.ts` is the Worker in front of the assets; it only sends `www.lvwwd.org` to
+  the apex
+- `apps/site/wrangler.jsonc` names the Worker and its two custom domains
 
-- `apps/site` is the Astro site: pages under `src/pages`, layouts under `src/layouts`, Tailwind in
-  `src/styles/global.css`, unit tests under `tests/`, end-to-end tests under `tests/e2e/`
-- `packages/` for libraries the site shares with other apps
-
-`pnpm run deploy` builds and runs `wrangler deploy` for every app with a wrangler config;
-`.github/workflows/deploy.yml` does the same on every push to `main`.
+`pnpm run deploy` builds and runs `wrangler deploy`; `.github/workflows/deploy.yml` does the same on
+every push to `main` with the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets.
 
 Lint, format, TypeScript, and test settings extend the `@lvbt/*` packages from
 [`LasVegasForTransit/repository-tooling`](https://github.com/LasVegasForTransit/repository-tooling).

@@ -1,1 +1,1311 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/* ── File map ────────────────────────────────────────────────────────────
+   1. .prose re-point + footnote styling (unlayered, see comment below)
+   2. @font-face — vendored Public Sans variable
+   3. :root — page padding, z-ladder, chrome recipe, brand primitives
+   4. @theme — semantic color roles + MD3 type scale (generates utilities)
+   5. Dark theme — prefers-color-scheme re-point of the role tokens
+   6. Top-level @property/@keyframes + scroll progress + <main> entrance
+   7. View transitions (cross-document, CSS-only)
+   8. @layer base — element defaults, focus, skip link, header/nav chrome
+   9. body[data-canvas='dark'] — unlayered header inversion
+   10. @layer components — anchors, gestures (.lift/.press), links, prose-doc,
+       containers, rules, reveals, forms
+   11. Ember glow (dark only)
+
+   Print styles live in src/styles/print.css (sitewide) and in scoped blocks
+   on /qr, /brand, and /projects (page-specific). The unlayered zone is
+   machine-checked by scripts/audit/brand-tokens.ts; "where a style lives"
+   is documented in docs/explanation/design-system.md. */
+
+/* Tailwind Typography plugin, re-pointed at this project's semantic color
+   tokens instead of its default gray scale — keeps long-form documents
+   (e.g. the letters archive) on-brand without hand-rolling every rule
+   `.prose-doc` already covers for other content. Deliberately unlayered
+   (not inside @layer components/utilities): the plugin's own `.prose`
+   defaults land in a layer that otherwise wins over same-specificity rules
+   declared in @layer components, and unlayered CSS always outranks any
+   layered CSS regardless of source order. */
+.prose {
+  --tw-prose-body: var(--color-on-surface);
+  --tw-prose-headings: var(--color-on-surface);
+  --tw-prose-lead: var(--color-on-surface-variant);
+  --tw-prose-links: var(--color-link);
+  --tw-prose-bold: var(--color-on-surface);
+  --tw-prose-counters: var(--color-on-surface-variant);
+  --tw-prose-bullets: var(--color-on-surface);
+  --tw-prose-hr: var(--color-outline-variant);
+  --tw-prose-quotes: var(--color-on-surface);
+  --tw-prose-quote-borders: var(--color-primary);
+  --tw-prose-captions: var(--color-on-surface-variant);
+  --tw-prose-code: var(--color-on-surface);
+  --tw-prose-th-borders: var(--color-outline-variant);
+  --tw-prose-td-borders: var(--color-outline-variant);
+}
+
+/* Footnotes (remark-gfm output: section[data-footnotes], data-footnote-ref,
+   data-footnote-backref) — supplementary content, de-emphasized relative to
+   the letter body. Unlayered for the same reason as .prose above. */
+.prose section[data-footnotes] {
+  margin-top: 3em;
+  padding-top: 1.25em;
+  border-top: 1px solid var(--color-outline-variant);
+  font-size: var(--text-body-sm);
+}
+
+.prose section[data-footnotes] h2 {
+  /* Un-hide the auto-generated "Footnotes" label as plain metadata text —
+     Body small, same role as any other caption/secondary-note copy on the
+     site. No uppercase/letter-spaced "eyebrow" treatment; that pattern is
+     retired sitewide. */
+  position: static;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.75em;
+  padding: 0;
+  white-space: normal;
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+}
+
+.prose section[data-footnotes] ol {
+  color: var(--color-on-surface-variant);
+}
+
+.prose section[data-footnotes] li {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose section[data-footnotes] li + li {
+  margin-top: 0.5em;
+}
+
+.prose section[data-footnotes] li p {
+  /* Each footnote is a single short paragraph — the plugin's full
+     paragraph margin (sized off the base prose scale, not this section's
+     smaller font) is what was creating the oversized gap between items. */
+  margin: 0;
+}
+
+.prose [data-footnote-ref],
+.prose .data-footnote-backref {
+  color: var(--color-on-surface-variant);
+  text-decoration-color: color-mix(in srgb, var(--color-on-surface-variant) 50%, transparent);
+}
+
+/* Public Sans (variable) — vendored from @fontsource-variable/public-sans@5.2.7,
+   latin subset only (files/public-sans-latin-wght-normal.woff2). Served from the
+   stable /fonts/ path (immutable-cached in public/_headers) so BaseLayout can
+   preload it without Astro's content-hash rotating the URL. `optional` renders
+   the fallback and never swaps if the font misses the first-paint window — the
+   preload almost always lets it make the window. To trade zero-shift for always
+   showing the brand font, change `optional` to `swap`. */
+@font-face {
+  font-family: 'Public Sans Variable';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url('/fonts/public-sans-latin.woff2') format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ── Brand primitives ───────────────────────────────────────────────────
+   Raw palette values. Plain :root (not @theme) so Tailwind generates NO
+   utilities for them — they exist only to be referenced by the semantic
+   role tokens in @theme. Non-flipping: the same hex in light and dark.
+   "No pure black or white" (see design-system.md): Ink and Cream, plus a
+   warm charcoal ramp for dark-mode elevation and a brighter Ember for
+   ember-as-text on dark. */
+:root {
+  /* Page-edge padding. Same clamp used by .container-page; lifted to a
+     variable so other rules (hr.container-page, the print zone) can reuse
+     the expression without duplicating it. Plain :root (not @theme) so
+     Tailwind doesn't generate utilities for it — same reason as the palette
+     primitives below. */
+  --page-pad: clamp(1.25rem, 4vw, 3rem);
+
+  /* Site-chrome stacking ladder. Markup consumes these via Tailwind's var
+     shorthand (z-(--z-footer)). Two relations are load-bearing and
+     cross-file: the footer (60) must sit over the scroll-progress bar (55)
+     and the stuck header (50), and the mobile-nav overlay (65) must sit
+     over the footer. The skip link (100) tops everything. */
+  --z-header: 50;
+  --z-scroll-progress: 55;
+  --z-footer: 60;
+  --z-mobile-nav: 65;
+  --z-skip-link: 100;
+
+  /* Sticky frosted-chrome recipe, shared by the stuck header's keyframe and
+     the vision page's section-progress bar. The utility spelling of the same
+     recipe (backdrop-blur-md backdrop-saturate-150 + border-outline-variant/15)
+     appears on Header, BrandSection, and the join role bar — keep all of
+     them in agreement when tuning. */
+  --chrome-blur: blur(12px) saturate(1.5);
+  --chrome-hairline: color-mix(in srgb, var(--color-outline-variant) 15%, transparent);
+
+  --ink: #0f1115;
+  --paper: #f7f4ec;
+  --paper-raised: #efe9db; /* light-mode elevation: a warm step down from paper so cards/panels read as distinct surfaces */
+  --ember: #e5471a;
+  --coral: #ec7049;
+  --rust: #bf3a10;
+  --peach: #ffe9d6;
+  --stone: #4a4e57;
+  /* Muted text on dark slabs. Light theme keeps the cool value the prior
+     dark-band remap used; dark theme warms it for the "Valley after dark" read. */
+  --slab-muted-light: #a8acb4;
+  --warm-muted: #b0a99c;
+  /* Warm charcoal ramp — dark-mode surfaces, never pure black. */
+  --charcoal-1: #191a1d; /* page surface */
+  --charcoal-2: #232428; /* surface-container (elevation 1) */
+  --charcoal-3: #2d2f34; /* punctuation slab (elevation 2) */
+  --charcoal-line: #72757d; /* outline on dark — lightened to clear 3:1 against --charcoal-1 and --ink (WCAG 1.4.11) */
+  --ember-bright: #ff8a5c; /* ember-as-text on dark (MD3: primary lightens) */
+  --ember-container: #47210f; /* primary-container surface on dark */
+  --on-ember-container-dark: #ffd9c7;
+}
+
+@theme {
+  --font-sans: 'Public Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Color: MD3 semantic role tokens ──────────────────────────────────
+     These reference the brand primitives above and are re-pointed under
+     @media (prefers-color-scheme: dark) further down, so overriding a role
+     var at runtime flips every consumer. Light values equal the prior
+     palette exactly, so introducing this layer is a no-op in light mode.
+     Minimal surface set (surface + one container level + inverse) per the
+     "don't add elevation layers" rule in design-system.md. */
+
+  /* Neutral surfaces + text */
+  --color-surface: var(--paper);
+  --color-on-surface: var(--ink);
+  --color-on-surface-variant: var(--stone);
+  --color-surface-container: var(--paper-raised); /* distinct raised surface in both themes */
+  /* The "punctuation slab" (Cliff band, footer, featured cards). NOT MD3
+     inverse-surface — light mode expresses emphasis by INVERSION (a near-black
+     band on cream), dark mode by ELEVATION (a slightly raised warm charcoal on
+     the near-black page). Dark in BOTH themes — never a bright surface. Its
+     text (on-slab) is cream in both. */
+  --color-slab: var(--ink);
+  --color-on-slab: var(--paper);
+  --color-on-slab-variant: var(--slab-muted-light);
+  --color-outline: var(--ink);
+  --color-outline-variant: var(--ink);
+
+  /* Accent (Ember). Fill stays saturated in both themes; ember-as-text
+     (primary-ink) and the container pair lighten in dark. on-primary is Cream
+     (--paper) — light text reads better on the Ember fill. (Cream on Ember is
+     ~3.6:1, under WCAG AA; a deliberate look-over-number call.) */
+  --color-primary: var(--ember);
+  --color-on-primary: var(--paper);
+  --color-primary-container: var(--peach);
+  --color-on-primary-container: var(--ink);
+  --color-primary-warm: var(--coral);
+  --color-primary-ink: var(--rust);
+  /* Peach — the soft accent used for links/labels on the dark slab. Stays
+     light in both themes (reads well on Ink and on warm charcoal). */
+  --color-primary-soft: var(--peach);
+  --color-link: var(--color-primary-ink);
+
+  /* MD3 type-token series. Display sizes are bumped well above MD3
+     defaults to preserve the editorial feel; headline/title/body/label
+     stay close to MD3 so the scale reads proportionally. */
+
+  --text-display-lg: clamp(2.5rem, 5vw + 1rem, 5.5rem);
+  --text-display-lg--line-height: 0.95;
+  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-lg--font-weight: 900;
+
+  --text-display-md: clamp(2.25rem, 4vw + 1rem, 4.5rem);
+  --text-display-md--line-height: 0.95;
+  --text-display-md--letter-spacing: -0.03em;
+  --text-display-md--font-weight: 800;
+
+  --text-display-sm: clamp(1.875rem, 2vw + 1rem, 3rem);
+  --text-display-sm--line-height: 1;
+  --text-display-sm--letter-spacing: -0.025em;
+  --text-display-sm--font-weight: 800;
+
+  --text-headline-lg: clamp(1.75rem, 1.5vw + 1rem, 2.75rem);
+  --text-headline-lg--line-height: 1.05;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 800;
+
+  --text-headline-md: 1.75rem;
+  --text-headline-md--line-height: 1.1;
+  --text-headline-md--letter-spacing: -0.02em;
+  --text-headline-md--font-weight: 800;
+
+  --text-headline-sm: 1.5rem;
+  --text-headline-sm--line-height: 1.15;
+  --text-headline-sm--letter-spacing: -0.015em;
+  --text-headline-sm--font-weight: 700;
+
+  --text-title-lg: clamp(1.25rem, 0.4vw + 1rem, 1.5rem);
+  --text-title-lg--line-height: 1.2;
+  --text-title-lg--letter-spacing: -0.01em;
+  --text-title-lg--font-weight: 700;
+
+  --text-title-md: 1rem;
+  --text-title-md--line-height: 1.3;
+  --text-title-md--letter-spacing: 0;
+  --text-title-md--font-weight: 700;
+
+  --text-title-sm: 0.875rem;
+  --text-title-sm--line-height: 1.3;
+  --text-title-sm--letter-spacing: 0;
+  --text-title-sm--font-weight: 700;
+
+  --text-body-lg: clamp(1.125rem, 0.4vw + 1rem, 1.25rem);
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: 0;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.55;
+  --text-body-md--letter-spacing: 0;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: 0;
+  --text-body-sm--font-weight: 400;
+
+  --text-label-lg: 0.875rem;
+  --text-label-lg--line-height: 1.4;
+  --text-label-lg--letter-spacing: 0.06em;
+  --text-label-lg--font-weight: 600;
+
+  --text-label-md: 0.75rem;
+  --text-label-md--line-height: 1.4;
+  --text-label-md--letter-spacing: 0.12em;
+  --text-label-md--font-weight: 600;
+
+  --text-label-sm: 0.6875rem;
+  --text-label-sm--line-height: 1.4;
+  --text-label-sm--letter-spacing: 0.12em;
+  --text-label-sm--font-weight: 600;
+}
+
+/* ── Dark theme ──────────────────────────────────────────────────────────
+   Device-driven only (prefers-color-scheme) — no manual toggle. Re-points
+   the semantic role tokens to dark values; every consumer follows via var().
+   MUST be unlayered so it outranks @theme, which Tailwind v4 emits into
+   @layer theme. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-surface: var(--charcoal-1);
+    --color-on-surface: var(--paper);
+    --color-on-surface-variant: var(--warm-muted);
+    --color-surface-container: var(--charcoal-2);
+    --color-slab: var(--charcoal-3);
+    --color-on-slab: var(--paper);
+    --color-on-slab-variant: var(--warm-muted);
+    --color-outline: var(--charcoal-line);
+    --color-outline-variant: var(--paper);
+
+    --color-primary: var(--ember);
+    --color-on-primary: var(--paper);
+    --color-primary-container: var(--ember-container);
+    --color-on-primary-container: var(--on-ember-container-dark);
+    --color-primary-warm: var(--coral);
+    --color-primary-ink: var(--ember-bright);
+    --color-primary-soft: var(--peach);
+    --color-link: var(--color-primary-ink);
+  }
+}
+
+/* Typed custom property that powers smooth shadow interpolation on `.lift`.
+   Declared as a <number> so the engine can animate it linearly; without
+   @property a raw custom property would snap discretely. */
+@property --lift-shadow-strength {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+/* Custom @keyframes live at the top level so Lightning CSS doesn't prune
+   them when nested inside @supports. Only the actually-consumed keyframes
+   are here; reveal animations are transition-based (see @layer components). */
+@keyframes scroll-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Scroll-progress hairline. Pinned to the top of the viewport above the
+   sticky header. Default state (transform: scaleX(0)) keeps it invisible
+   in browsers without scroll-driven animations; the @supports block ties
+   it to root scroll. The real DOM element lives in BaseLayout.astro. */
+.site-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary);
+  z-index: var(--z-scroll-progress);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .site-scroll-progress {
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+/* First-paint entrance on the page's main content. @starting-style fires
+   once per element creation: on initial page load the new `<main>` fades in
+   from transparent. View transitions still drive cross-route navigation —
+   this only fires when there's no previous document state (first visit,
+   hard refresh). Opacity only, deliberately no transform: a transform on
+   <main> makes it the containing block for fixed-position descendants
+   (the join role bar today) for the 400ms of the transition, yanking them
+   out of viewport anchoring. The rise gesture lives in the view-transition
+   route-rise-in keyframe instead. */
+main {
+  transition: opacity 400ms var(--ease-out);
+}
+@starting-style {
+  main {
+    opacity: 0;
+  }
+}
+
+/* Single reduced-motion override for the new top-level animated elements.
+   The global wildcard in @layer base already caps animation- and
+   transition-durations at 0.01ms, but `animation: none` is more decisive
+   for the scroll-progress bar (otherwise it'd snap to scaleX(1) at the
+   end of a 0.01ms animation and stay there). */
+/* stylelint-disable declaration-no-important -- reduced-motion a11y reset */
+@media (prefers-reduced-motion: reduce) {
+  .site-scroll-progress {
+    animation: none !important;
+    transform: scaleX(0) !important;
+  }
+  main {
+    transition: none !important;
+  }
+}
+/* stylelint-enable declaration-no-important */
+
+/* Cross-document view transitions, CSS-only. Chrome 126+ and Safari 18+
+   animate between same-origin navigations as if they were a single SPA;
+   no client router, no JavaScript. Non-supporting browsers (Firefox as
+   of early 2026) full-reload as before — pure progressive enhancement.
+   Named elements (`site-header`, `footer-stripe` — see Header.astro and
+   Footer.astro) persist visually across the transition; unnamed content
+   cross-fades through the default `root` group. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Tune the default cross-fade to match the site's 200ms MD3 easing. The
+   `root` group is the body content; named groups (site-header, footer-
+   stripe) inherit this duration. Reduced-motion override below. */
+::view-transition-group(*) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-out);
+}
+
+/* Give the page body (`root`) a directional cross-fade instead of a flat
+   opacity dissolve: the incoming page settles up into place while the
+   outgoing one fades. Depth + opacity only — no scale — matching the site's
+   motion vocabulary. Named groups (site-header, footer-stripe) keep morphing
+   in place; only the unnamed `root` snapshot uses these. The reduced-motion
+   block below already disables all view-transition animations. */
+@keyframes route-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes route-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+::view-transition-old(root) {
+  animation: 180ms var(--ease-out) both route-fade-out;
+}
+::view-transition-new(root) {
+  animation: 260ms var(--ease-out) both route-rise-in;
+}
+
+/* QR presenter shared element. The footer's Scan-cards glyph and the first code
+   on /qr both carry `.qr-portal`, but the name is only assigned during a
+   navigation INTO /qr (type `to-qr`, tagged by /scripts/route-transition.js) —
+   so the glyph container-transforms into the live code on the way in. Every
+   other navigation, including Exit, skips the morph: the destination glyph is
+   normally below the fold, so morphing to it would fling the code off-screen. */
+html:active-view-transition-type(to-qr) .qr-portal {
+  view-transition-name: qr-launch;
+}
+
+/* Leaving /qr (type `from-qr`): the presenter sinks away while the destination
+   rises in via the default `route-rise-in` above — a clear reverse rather than
+   a flat cut. */
+@keyframes route-sink-out {
+  to {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+html:active-view-transition-type(from-qr)::view-transition-old(root) {
+  animation: 220ms var(--ease-out) both route-sink-out;
+}
+
+/* stylelint-disable declaration-no-important -- reduced-motion a11y reset */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+/* stylelint-enable declaration-no-important */
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --external-link-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7ZM19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7Z'/%3E%3C/svg%3E");
+    /* Brand-paint native form controls (checkbox, radio, range, progress)
+       site-wide without per-component overrides. Universally supported. */
+    accent-color: var(--color-primary);
+    /* Permit transitioning to/from keyword lengths (`height: auto`, etc.)
+       for future disclosure / accordion patterns. No-op elsewhere. */
+    interpolate-size: allow-keywords;
+    font-feature-settings:
+      'tnum' 0,
+      'cv11' 1;
+    /* Sticky-offset anchor for elements that pin below the site header.
+       Single source of truth — vision.css and the projects-page sticky
+       initiative bar both read this. Matches Header.astro's py-4 + the
+       two-line logo. */
+    --lvbt-header-h: 4.5rem;
+  }
+
+  html {
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  /* Interactive surfaces that invert to On Surface also need their
+     on-surface-variant descendants to invert. Remap the role on the active
+     surface instead of adding per-child group-hover classes everywhere. */
+  :is(.hover\:bg-on-surface:hover, .focus-visible\:bg-on-surface:focus-visible) {
+    --color-on-surface-variant: var(--color-surface);
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+
+  a {
+    color: inherit;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  /* Auto-grow `<textarea>` with its content. Chrome 123+ ships this; older
+     engines ignore the property and fall back to manual resize. No textareas
+     exist on the site yet — this is forward-looking infrastructure so any
+     future contact form / project intake field gets the behavior for free. */
+  textarea {
+    field-sizing: content;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  /* Tabular numerals for stat blocks */
+  .tnum,
+  [data-tnum] {
+    font-feature-settings:
+      'tnum' 1,
+      'lnum' 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    border-radius: 0;
+  }
+
+  .skip-link {
+    /* Fixed (not absolute) so it stays anchored to the viewport: a keyboard
+       user who tabs after scrolling still gets the link at the top of the
+       screen instead of it being parked off-screen at the document top. */
+    position: fixed;
+    top: 5rem; /* sits below the top app bar instead of overlapping the logo */
+    left: 50%;
+    z-index: var(--z-skip-link);
+    background: var(--color-slab);
+    color: var(--color-on-slab);
+    padding: 0.625rem 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    transform: translate(-50%, -0.5rem);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 150ms,
+      transform 150ms var(--ease-out);
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* stylelint-disable declaration-no-important -- reduced-motion a11y reset */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  /* stylelint-enable declaration-no-important */
+
+  /* Sub-pixel ink hairline shadow on the stuck header — reads as physical
+     elevation (chrome floating above content) rather than just a blurred
+     band. The transition on box-shadow on [data-site-header] handles the
+     fade-in; matched in the scroll-driven keyframe below. */
+  [data-site-header] {
+    transition:
+      box-shadow 200ms var(--ease-out),
+      border-color 200ms var(--ease-out);
+  }
+  [data-site-header][data-stuck] {
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-on-surface) 8%, transparent);
+  }
+
+  /* Modern engines (Chrome 115+, Safari 18+) drive the sticky header's
+     stuck-state visuals from root scroll position — no JS round trip.
+     Mirrors what header-stuck.js installs via [data-stuck]; the JS path
+     still runs as the fallback for browsers without scroll-driven
+     animations AND as the source of truth for the [data-stuck] attribute,
+     which the dark-canvas inversions above gate on. Both paths apply the
+     same final values, so co-running them is idempotent. */
+  @supports (animation-timeline: scroll()) {
+    [data-site-header] {
+      animation: site-header-stuck linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 1px;
+    }
+  }
+
+  /* ─── Mobile navigation overlay ──────────────────────────────────── */
+
+  /* Hamburger bars: smooth morph to × on expand.
+     Gap between bars is 5px; bar height is 1.5px.
+     Bar 1 center → bar 2 center = 1.5 + 5 = 6.5px, same for bar 3. */
+  [data-nav-toggle] span {
+    transition:
+      transform 220ms var(--ease-out),
+      opacity 220ms var(--ease-out);
+  }
+  /* Forced-colors (Windows High Contrast) strips background fills, which is
+     all the bars are — repaint them with the system button-text color so the
+     toggle stays visible. */
+  @media (forced-colors: active) {
+    [data-nav-toggle] span {
+      background-color: ButtonText;
+    }
+  }
+  [data-nav-toggle][aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  [data-nav-toggle][aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+  [data-nav-toggle][aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+
+  /* Dark canvas: bars should be paper-colored when header is transparent */
+  body[data-canvas='dark']
+    [data-site-header]:not([data-stuck]):not([data-nav-open])
+    [data-nav-toggle] {
+    color: var(--paper);
+  }
+
+  /* Hide the Join CTA while the overlay is open */
+  [data-site-header][data-nav-open] [data-mobile-join] {
+    display: none;
+  }
+
+  /* Overlay expands down from the header edge */
+  [data-nav-overlay] {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition:
+      clip-path 260ms var(--ease-out),
+      visibility 0s 260ms;
+  }
+  [data-site-header][data-nav-open] + [data-nav-overlay] {
+    clip-path: inset(0 0 0% 0);
+    visibility: visible;
+    transition:
+      clip-path 260ms var(--ease-out),
+      visibility 0s;
+  }
+}
+
+/* Top-level keyframe for the scroll-driven header — survives Lightning
+   CSS purging here because the @supports block above references it via
+   the `animation:` shorthand. */
+@keyframes site-header-stuck {
+  to {
+    backdrop-filter: var(--chrome-blur);
+    border-bottom-color: var(--chrome-hairline);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-on-surface) 8%, transparent);
+  }
+}
+
+/* Immersive-canvas opt-in. Pages set <BaseLayout canvas="dark">; we paint
+   the root surface ink so a transparent sticky header reads as part of the
+   hero rather than a cream stripe above it. The Header swaps back to the
+   standard cream-blur treatment once its sentinel scrolls off — owned by
+   the data-stuck attribute and applies to every page identically.
+
+   Lives at top level (unlayered) so it outranks Tailwind's utility-layer
+   neutral background utilities, `border-b`, and similar classes on [data-site-header].
+   Inside @layer base, utilities would win regardless of specificity. */
+body[data-canvas='dark'] {
+  background: var(--color-surface);
+}
+body[data-canvas='dark'] [data-site-header] {
+  transition:
+    background-color 200ms var(--ease-out),
+    color 200ms var(--ease-out),
+    border-color 200ms var(--ease-out);
+}
+body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open]) {
+  background-color: transparent;
+  border-bottom-color: transparent;
+}
+body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open]) a {
+  color: var(--paper);
+}
+body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open]) a:hover {
+  color: var(--color-primary);
+}
+body[data-canvas='dark']
+  [data-site-header]:not([data-stuck]):not([data-nav-open])
+  a[aria-current='page'] {
+  color: var(--color-primary);
+}
+body[data-canvas='dark']
+  [data-site-header]:not([data-stuck]):not([data-nav-open])
+  a
+  span.text-primary {
+  color: var(--color-primary);
+}
+body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open]) .press {
+  background-color: var(--paper);
+  color: var(--ink);
+}
+body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open]) .press:hover {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+@layer components {
+  .heading-anchor {
+    color: inherit;
+    display: inline;
+    position: relative;
+    text-decoration: none;
+  }
+
+  .heading-anchor__glyph {
+    color: var(--color-on-surface-variant);
+    display: inline-block;
+    font-size: 0.68em;
+    font-weight: 700;
+    margin-inline-start: 0.35em;
+    opacity: 0;
+    position: relative;
+    transition:
+      color 150ms var(--ease-out),
+      opacity 150ms var(--ease-out);
+  }
+
+  .heading-anchor:hover .heading-anchor__glyph,
+  .heading-anchor:focus-visible .heading-anchor__glyph,
+  .heading-anchor[data-copied] .heading-anchor__glyph {
+    opacity: 1;
+  }
+
+  .heading-anchor[data-copied] .heading-anchor__glyph {
+    color: var(--color-primary-ink);
+  }
+
+  .heading-anchor[data-copied] .heading-anchor__glyph::after {
+    background: var(--color-surface-container);
+    border: 1px solid color-mix(in srgb, var(--color-outline) 18%, transparent);
+    color: var(--color-primary-ink);
+    content: 'Copied';
+    font-size: var(--text-body-sm);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+    margin-inline-start: 0;
+    padding: 0.3rem 0.45rem;
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 0.45rem);
+    transform: translateY(-50%);
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  .lift {
+    /* Always render the shadow shape; modulate opacity via the typed
+       --lift-shadow-strength custom property so hover/rest interpolates
+       smoothly instead of snapping in/out. */
+    --lift-shadow-strength: 0;
+    box-shadow: 0 12px 30px -16px
+      color-mix(
+        in srgb,
+        var(--color-on-surface) calc(var(--lift-shadow-strength) * 25%),
+        transparent
+      );
+    transition-property: transform, --lift-shadow-strength, background-color, color, border-color;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
+  }
+  /* Hover and keyboard-focus share the same lift gesture so tabbing
+     through cards feels as tactile as mousing over them. Depth comes
+     from the translate + shadow alone; no scale, since scale on hover
+     reads as template-default rather than a considered gesture. */
+  .lift:hover,
+  .lift:focus-visible {
+    transform: translateY(-4px);
+    --lift-shadow-strength: 1;
+  }
+  .lift:active {
+    transform: translateY(0);
+    transition-duration: 100ms;
+  }
+
+  .press {
+    transition:
+      transform 200ms var(--ease-out),
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out),
+      padding 200ms var(--ease-out);
+  }
+  /* Click feedback: button pushes down 1px into the page surface rather
+     than scaling. The press reads as a physical depression — the gesture
+     a real button would make — instead of a UI element shrinking, which
+     is the generic AI-template tell. */
+  .press:active {
+    transform: translateY(1px);
+    transition-duration: 100ms;
+  }
+
+  .nav-link {
+    position: relative;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 0 2px;
+    padding-bottom: 0.35em;
+    margin-bottom: -0.35em;
+    transition:
+      background-size 200ms var(--ease-out),
+      color 160ms var(--ease-out);
+  }
+  [data-site-header] .nav-link[aria-current='page'] {
+    color: var(--color-primary-ink);
+  }
+  .nav-link:hover,
+  .nav-link[aria-current='page'] {
+    background-size: 100% 2px;
+  }
+  /* The gradient underline above is background paint, which forced-colors
+     removes. Fall back to a real text underline for the hover/active state. */
+  @media (forced-colors: active) {
+    .nav-link:hover,
+    .nav-link[aria-current='page'] {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.3em;
+    }
+  }
+  /* On first paint, the active page's underline arrives by scaling in
+     from the left edge — matches the hover gesture, so the page feels
+     "freshly landed" rather than statically marked. Browsers without
+     @starting-style render the final scaleX(1) immediately. */
+  @starting-style {
+    .nav-link[aria-current='page'] {
+      background-size: 0 2px;
+    }
+  }
+
+  :where(
+    a[href^='http://']:not(
+        [href^='http://lasvegasfortransit.org'],
+        [href^='http://www.lasvegasfortransit.org'],
+        .block,
+        .flex,
+        .grid,
+        .inline-flex,
+        [data-external-icon='false']
+      ),
+    a[href^='https://']:not(
+        [href^='https://lasvegasfortransit.org'],
+        [href^='https://www.lasvegasfortransit.org'],
+        .block,
+        .flex,
+        .grid,
+        .inline-flex,
+        [data-external-icon='false']
+      )
+  )::after {
+    content: '\00a0';
+    display: inline;
+    width: var(--external-link-icon-size, 0.86em);
+    height: var(--external-link-icon-size, 0.86em);
+    margin-inline-start: var(--external-link-icon-gap, 0.28em);
+    padding-inline-end: var(--external-link-icon-size, 0.86em);
+    vertical-align: -0.12em;
+    flex: none;
+    background-color: currentColor;
+    -webkit-mask-image: var(--external-link-icon);
+    mask-image: var(--external-link-icon);
+    -webkit-mask-position: right center;
+    mask-position: right center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: var(--external-link-icon-size, 0.86em) var(--external-link-icon-size, 0.86em);
+    mask-size: var(--external-link-icon-size, 0.86em) var(--external-link-icon-size, 0.86em);
+  }
+
+  /* Forced-colors strips the mask's background paint, leaving a blank gap
+     where the icon was — fall back to a text glyph so external links keep a
+     visible marker. Selector mirrors the exclusion list above. */
+  @media (forced-colors: active) {
+    :where(
+      a[href^='http://']:not(
+          [href^='http://lasvegasfortransit.org'],
+          [href^='http://www.lasvegasfortransit.org'],
+          .block,
+          .flex,
+          .grid,
+          .inline-flex,
+          [data-external-icon='false']
+        ),
+      a[href^='https://']:not(
+          [href^='https://lasvegasfortransit.org'],
+          [href^='https://www.lasvegasfortransit.org'],
+          .block,
+          .flex,
+          .grid,
+          .inline-flex,
+          [data-external-icon='false']
+        )
+    )::after {
+      content: ' \2197';
+      width: auto;
+      padding-inline-end: 0;
+      background-color: transparent;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+
+  /* Arrow glyph nudge: any element with a `.arrow` span inside a `.lift`
+     or `.press` ancestor gets a 3px translateX on hover.
+     Markup is `<span class="arrow">→</span>` after the label. Inline-block
+     so transform applies; rest-state has the natural typeset position. */
+  :where(.lift, .press) .arrow {
+    display: inline-block;
+    transition: transform 200ms var(--ease-out);
+  }
+  :where(.lift, .press):hover .arrow,
+  :where(.lift, .press):focus-visible .arrow {
+    transform: translateX(3px);
+  }
+
+  .lede {
+    font-size: var(--text-body-lg);
+    line-height: var(--text-body-lg--line-height);
+    color: var(--color-on-surface-variant);
+    text-wrap: pretty;
+    --content-link-color: var(--color-on-surface);
+    --content-link-hover: var(--color-primary-ink);
+    --content-link-decoration: color-mix(in srgb, var(--color-primary-ink) 70%, transparent);
+  }
+
+  .prose-doc {
+    font-size: var(--text-body-md);
+    line-height: 1.7;
+    text-wrap: pretty;
+    --prose-cite-color: var(--color-on-surface-variant);
+    --content-link-color: inherit;
+    --content-link-hover: var(--color-primary-ink);
+    --content-link-decoration: color-mix(in srgb, var(--color-primary-ink) 70%, transparent);
+  }
+
+  /* Readable prose wraps "pretty" so paragraphs avoid orphans and stranded short
+     last lines. Headings keep their own text-wrap: balance (set directly on the
+     element above), which wins over this inherited value. */
+  [data-readable] {
+    text-wrap: pretty;
+  }
+
+  /* Content links inside a dark slab: rest at the slab's cream text, hover to
+     peach. Keyed on semantic slab classes so links stay visible on the
+     charcoal slab in dark. */
+  :is(.lede, .prose-doc):is(.bg-slab, .band-ink),
+  :is(.bg-slab, .band-ink) :is(.lede, .prose-doc) {
+    --prose-cite-color: var(--color-on-slab-variant);
+    --content-link-color: var(--color-on-slab);
+    --content-link-hover: var(--color-primary-soft);
+    --content-link-decoration: color-mix(in srgb, var(--color-primary-soft) 82%, transparent);
+  }
+
+  :where(.body-link, .lede a, .prose-doc a) {
+    color: var(--content-link-color, inherit);
+    font-weight: 600;
+    text-decoration-line: underline;
+    text-decoration-color: var(--content-link-decoration, currentColor);
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.16em;
+    text-decoration-skip-ink: auto;
+    transition:
+      color 160ms var(--ease-out),
+      text-decoration-color 160ms var(--ease-out),
+      text-decoration-thickness 160ms var(--ease-out);
+  }
+
+  :where(.body-link, .lede a, .prose-doc a):hover,
+  :where(.body-link, .lede a, .prose-doc a):focus-visible {
+    color: var(--content-link-hover, var(--color-primary-ink));
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 0.16em;
+  }
+
+  /* The first thing in a prose-doc article has its top margin stripped so
+     it lines up with the top of any sibling column (e.g., the project
+     detail aside). The container is responsible for the visual gap above. */
+  .prose-doc > :first-child {
+    margin-top: 0;
+  }
+
+  /* Body content adjacency — only between text-block siblings. Headings get
+     their own uniform content-scaled margin (below) so they look the same
+     wherever they land in the document. */
+  .prose-doc :is(p, ul, ol, blockquote) + :is(p, ul, ol, blockquote) {
+    margin-top: 0.9em;
+  }
+
+  .prose-doc h2 {
+    font-size: var(--text-headline-lg);
+    line-height: var(--text-headline-lg--line-height);
+    letter-spacing: var(--text-headline-lg--letter-spacing);
+    font-weight: var(--text-headline-lg--font-weight);
+    margin-top: 2rem;
+    margin-bottom: 0.5em;
+  }
+
+  .prose-doc h3 {
+    font-size: var(--text-headline-sm);
+    line-height: var(--text-headline-sm--line-height);
+    letter-spacing: var(--text-headline-sm--letter-spacing);
+    font-weight: var(--text-headline-sm--font-weight);
+    margin-top: 1.5rem;
+    margin-bottom: 0.25em;
+  }
+
+  /* Role/job-posting pages: the page <h1> (the role title) owns the top of the
+     hierarchy, so the in-body section headings ("About the role", "What you'll
+     do") step down from the default doc scale. At the doc default they share
+     --text-headline-lg with the <h1> and read as peers, flattening the page. */
+  .prose-doc.prose-posting h2 {
+    font-size: var(--text-headline-sm);
+    line-height: var(--text-headline-sm--line-height);
+    letter-spacing: var(--text-headline-sm--letter-spacing);
+    font-weight: var(--text-headline-sm--font-weight);
+  }
+
+  /* List markers — Tailwind preflight strips these by default. Without these
+     rules every bullet list in a project body or doc page renders flat. */
+  .prose-doc ul {
+    list-style-type: disc;
+    padding-inline-start: 1.5rem;
+  }
+
+  .prose-doc ol {
+    list-style-type: decimal;
+    padding-inline-start: 1.5rem;
+  }
+
+  .prose-doc li {
+    margin-block: 0.18em;
+  }
+
+  .prose-doc li::marker {
+    color: var(--color-on-surface-variant);
+  }
+
+  .prose-doc li > p {
+    margin: 0;
+  }
+
+  .prose-doc ul ul,
+  .prose-doc ol ul {
+    list-style-type: circle;
+    margin-block: 0.25em;
+  }
+
+  .prose-doc strong {
+    font-weight: 700;
+  }
+
+  .prose-doc blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 1.25rem;
+    font-size: var(--text-body-lg);
+    line-height: 1.4;
+    color: inherit;
+    font-weight: 500;
+  }
+
+  .prose-doc blockquote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    font-style: normal;
+    color: var(--prose-cite-color);
+  }
+
+  .container-prose {
+    max-width: 68ch;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  .container-page {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: var(--page-pad);
+  }
+
+  .rule-thick {
+    border-top: 6px solid var(--color-outline-variant);
+  }
+
+  hr.rule-thick,
+  hr.rule-thin {
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    color: inherit;
+    height: 0;
+    opacity: 1;
+  }
+
+  /* hr.border draws at the outer edge, not the content edge.
+     Subtract container padding so the line aligns with body text. */
+  hr.container-page {
+    padding-inline: 0;
+    max-width: calc(80rem - 2 * var(--page-pad));
+  }
+
+  .rule-thin {
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 50%, var(--color-surface));
+  }
+
+  /* Bold flourish: horizontal stripes and section dividers draw themselves
+     across the page on first paint via @starting-style. The default state
+     is FULLY VISIBLE — if @starting-style isn't supported or the animation
+     is skipped for any reason, the element is still there. Only the
+     transition-in is animated, no JS dependency. Targets:
+       - <hr class="rule-thick"> section breaks on every major page
+       - <hr class="rule-thin"> finer horizontal rules
+       - .reveal-stripe — the footer's orange brand stripe
+     Trade-off vs IntersectionObserver: for elements far below the fold,
+     the 800ms transition completes before the user scrolls there, so
+     they're seen fully drawn rather than mid-draw. Acceptable — the
+     animation is for first-paint character; the rules' job is to be
+     visible. */
+  hr.rule-thick,
+  hr.rule-thin,
+  .reveal-stripe {
+    transition: clip-path 800ms var(--ease-out);
+  }
+  @starting-style {
+    hr.rule-thick,
+    hr.rule-thin,
+    .reveal-stripe {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  .reveal-ready .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 600ms var(--ease-out);
+  }
+  .reveal-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Stats rise from 24px below their resting position (longer than
+     .reveal's 16px) and ease in over 700ms — a slightly heavier, more
+     deliberate entrance than surrounding prose, which suits punchy
+     numerical data. No scale: emphasis comes from distance + timing. */
+  .reveal-ready .reveal-stat {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 700ms var(--ease-out);
+  }
+  .reveal-ready .reveal-stat.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal-ready .reveal-quote {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+  .reveal-ready .reveal-quote.is-visible {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .reveal-stagger > *:nth-child(2) {
+    transition-delay: 80ms;
+  }
+  .reveal-stagger > *:nth-child(3) {
+    transition-delay: 160ms;
+  }
+  .reveal-stagger > *:nth-child(4) {
+    transition-delay: 240ms;
+  }
+
+  /* No @supports (animation-timeline) upgrade path here. An earlier
+     attempt to drive the reveal animations from view-timeline silently
+     broke them: the `animation:` shorthand resets `animation-timeline`
+     to `auto` and `animation-duration` to `0s`, so every reveal element
+     would jump instantly to its final state via fill-mode:both, dead-
+     ending the IntersectionObserver path. The transition-based reveal
+     works in every browser today; the scroll-driven variant needs a
+     careful longhand-only rewrite if we ever want it back. */
+
+  /* stylelint-disable declaration-no-important -- reduced-motion a11y reset */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-ready :is(.reveal, .reveal-stat, .reveal-quote) {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: none !important;
+      transition: none !important;
+    }
+    hr.rule-thick,
+    hr.rule-thin,
+    .reveal-stripe {
+      transition: none !important;
+    }
+  }
+  /* stylelint-enable declaration-no-important */
+
+  /* Newsletter input focus polish: a 4px primary strip rides the bottom of
+     the input when :focus-visible, layered as inset box-shadow so no DOM
+     wrapper is needed. The global :focus-visible outline still applies
+     on top — these compose rather than replace each other. */
+  [data-newsletter-form] input[type='email'] {
+    transition:
+      box-shadow 180ms var(--ease-out),
+      border-color 180ms var(--ease-out);
+  }
+  [data-newsletter-form] input[type='email']:focus-visible {
+    box-shadow: inset 0 -4px 0 var(--color-primary);
+  }
+
+  /* Status message slides + fades in once content arrives. Empty state
+     keeps it visually hidden so the layout doesn't shift before the
+     submit fires. */
+  [data-form-status] {
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 240ms var(--ease-out),
+      transform 240ms var(--ease-out);
+  }
+  [data-form-status]:not(:empty) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Ember glow (dark only) ───────────────────────────────────────────────
+   "A light in the dark." MD3 dark expresses elevation tonally, not with drop
+   shadows — so this glow is a deliberate BRAND flourish, reserved for primary
+   (Ember) CTAs and applied only in dark. It is a static box-shadow (no
+   keyframe pulsing); the .press box-shadow transition is already capped to
+   0.01ms under prefers-reduced-motion, so the hover intensification degrades
+   to an instant change. Kept sparing: primary CTAs only — never large
+   surfaces. Unlayered so it composes over utilities. */
+@media (prefers-color-scheme: dark) {
+  .press.bg-primary {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent),
+      0 6px 26px -8px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  }
+  .press.bg-primary:hover,
+  .press.bg-primary:focus-visible {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent),
+      0 10px 34px -8px color-mix(in srgb, var(--color-primary) 60%, transparent);
+  }
+}

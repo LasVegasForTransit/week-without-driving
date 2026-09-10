@@ -1,5 +1,5 @@
 {
-  "name": "@lvbt/site",
+  "name": "@lvbt/lvwwd-site",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,12 +14,16 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "catalog:",
+    "@iconify-json/mdi": "catalog:",
+    "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "astro": "catalog:",
+    "astro-icon": "catalog:",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@astrojs/check": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
     "@lvbt/eslint-config": "github:LasVegasForTransit/repository-tooling#v0.2.7&path:/packages/eslint-config",
     "@lvbt/playwright-config": "github:LasVegasForTransit/repository-tooling#v0.2.7&path:/packages/playwright-config",
     "@lvbt/typescript-config": "github:LasVegasForTransit/repository-tooling#v0.2.7&path:/packages/typescript-config",

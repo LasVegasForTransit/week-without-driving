@@ -1,0 +1,144 @@
+---
+import '../styles/global.css';
+// Must import after global.css: print.css's non-!important declarations win
+// same-specificity screen rules by source order (see its header comment).
+import '../styles/print.css';
+import { lvbt, site } from '../lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description = site.description, ogImage = '/og-wwd.png' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.url).toString();
+---
+
+<!doctype html>
+{
+  /* `reveal-ready` is rendered server-side so the `.reveal-ready .reveal`
+    cascade in global.css applies before any reveal element paints. The
+    <noscript> override restores graceful degradation for visitors without
+    JS: reveals snap to visible instead of getting stuck hidden. */
+}
+<html lang="en" class="reveal-ready">
+  <head>
+    <meta charset="UTF-8" />
+    <noscript>
+      <style>
+        .reveal-ready .reveal,
+        .reveal-ready .reveal-stat,
+        .reveal-ready .reveal-quote {
+          opacity: 1 !important;
+          transform: none !important;
+          clip-path: none !important;
+          transition: none !important;
+        }
+      </style>
+    </noscript>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      rel="preload"
+      href="/fonts/public-sans-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage, site.url).toString()} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <slot name="head" />
+  </head>
+  <body class="min-h-screen flex flex-col" data-canvas="paper">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <div class="min-h-dvh flex flex-col">
+      <header
+        class="container-page flex flex-wrap items-center justify-between gap-x-8 gap-y-2 py-5"
+      >
+        <a href="/" class="text-title-sm font-bold text-on-surface no-underline">
+          Week Without Driving <span class="text-on-surface-variant">· Las&nbsp;Vegas</span>
+        </a>
+        <a
+          href={lvbt.url}
+          data-print-url={lvbt.url}
+          class="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant no-underline hover:text-primary-ink focus-visible:text-primary-ink"
+        >
+          <img src="/brand/lvbt-logo-128.png" alt="" width="24" height="24" class="size-6" />
+          An initiative by {lvbt.name}
+        </a>
+      </header>
+      <main id="main" class="flex-1">
+        <slot />
+      </main>
+    </div>
+    <footer class="container-page border-t border-outline-variant/15 py-10">
+      <div class="flex flex-wrap items-start justify-between gap-x-12 gap-y-6">
+        <p class="max-w-md text-sm leading-relaxed text-on-surface-variant">
+          An initiative by{' '}
+          <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-semibold"
+            >{lvbt.name}</a
+          >, a 501(c)(3) nonprofit. The national campaign is organized by{' '}
+          <a
+            href="https://weekwithoutdriving.org/"
+            data-print-url="https://weekwithoutdriving.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="body-link">America Walks</a
+          >.
+        </p>
+        <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+          <li>
+            <a
+              href={lvbt.instagramUrl}
+              data-print-url={lvbt.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="body-link"
+            >
+              Instagram
+            </a>
+          </li>
+          <li>
+            <a
+              href={`mailto:${lvbt.email.general}`}
+              data-print-url={lvbt.email.general}
+              class="body-link">Email us</a
+            >
+          </li>
+          <li>
+            <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl} class="body-link">Join LVBT</a>
+          </li>
+          <li>
+            <a
+              href="https://weekwithoutdriving.org/"
+              data-print-url="https://weekwithoutdriving.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="body-link"
+            >
+              weekwithoutdriving.org
+            </a>
+          </li>
+        </ul>
+      </div>
+    </footer>
+    {
+      /* Behaviour lives under public/scripts so it satisfies the CSP
+        `script-src 'self'` in public/_headers; an inline block would be
+        rejected in production and leave every reveal element hidden. */
+    }
+    <script is:inline src="/scripts/reveal-on-scroll.js" defer></script>
+    <script is:inline src="/scripts/copy-anchor.js" defer></script>
+    <script is:inline src="/scripts/print-links.js" defer></script>
+  </body>
+</html>

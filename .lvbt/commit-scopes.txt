@@ -1,5 +1,5 @@
-# One scope per durable boundary in this repository. Replace these with the
-# boundaries of your repository; omit a scope when a change crosses them.
+# One scope per durable boundary in this repository; omit a scope when a
+# change crosses them.
 site
 docs
 ci
