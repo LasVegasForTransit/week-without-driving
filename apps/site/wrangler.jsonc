@@ -1,12 +1,21 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // The Worker name. Rename it before the first deploy.
-  "name": "lvbt-site",
+  "name": "lvwwd",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
+  // The site is static; the Worker exists only to send www to the apex and
+  // hand everything else to the assets.
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
   },
+  // Custom domains: wrangler creates the DNS records on deploy when the zone
+  // is on the same account.
+  "routes": [
+    { "pattern": "lvwwd.org", "custom_domain": true },
+    { "pattern": "www.lvwwd.org", "custom_domain": true },
+  ],
   "observability": {
     "enabled": true,
   },
