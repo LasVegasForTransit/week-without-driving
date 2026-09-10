@@ -26,6 +26,8 @@ overrides:
 # Renovate keeps it current.
 catalog:
   '@axe-core/playwright': 4.13.0
+  '@iconify-json/mdi': 1.2.3
+  '@tailwindcss/typography': 0.5.20
   '@astrojs/check': 0.9.10
   '@astrojs/sitemap': 3.7.4
   '@cloudflare/vitest-pool-workers': 0.22.0
@@ -39,6 +41,7 @@ catalog:
   '@types/react-dom': 19.2.5
   '@vitejs/plugin-react': 6.1.1
   astro: 7.2.10
+  astro-icon: 1.2.0
   eslint: 10.9.1
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1

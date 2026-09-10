@@ -1,10 +1,14 @@
 ---
-import Base from '../layouts/Base.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<Base page="Not found">
-  <main>
-    <h1 class="text-3xl font-bold">Page not found</h1>
-    <p class="mt-4"><a class="underline" href="/">Back to the home page</a></p>
-  </main>
-</Base>
+<BaseLayout title="Page not found · Week Without Driving Las Vegas">
+  <section class="container-page py-16 md:py-24">
+    <h1 class="text-headline-lg">Page not found.</h1>
+    <p class="lede mt-4">
+      This site is one page. <a href="/" class="body-link font-semibold"
+        >Back to the challenge &#8594;</a
+      >
+    </p>
+  </section>
+</BaseLayout>
