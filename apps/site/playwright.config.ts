@@ -1,5 +1,3 @@
-import process from 'node:process';
-
 import { defineConfig } from '@playwright/test';
 
 import { sharedConfig } from '@lvbt/playwright-config';
