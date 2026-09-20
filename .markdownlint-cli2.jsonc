@@ -10,6 +10,8 @@
   },
   "globs": ["**/*.md"],
   "ignores": [
+    // The vendored standard is integrity-checked as an exact upstream snapshot.
+    ".lvbt/web-platform",
     // Playwright output.
     "**/test-results",
     "**/playwright-report",
