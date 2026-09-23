@@ -6,7 +6,8 @@ import { wwd } from '../lib/wwd';
 // Anyone can take part without giving us anything; signing up is only for
 // LVBT's giveaway, at /sign-up, and asks for a first name, an email address
 // or phone number, a ZIP code, an age group and (optionally) an Instagram
-// handle. Entries come from logging trips without driving on /my-week.
+// handle. Entries come from sharing trips without driving on /my-week, or
+// by mail.
 // "Finalize the Privacy policy wording"
 // replaces this draft later — the whole block between the two DRAFT NOTICE
 // comments below is what to delete once that happens.
@@ -83,12 +84,10 @@ const contactMailto = `mailto:${contactEmail}`;
         </li>
         <li>Whether you'd like LVBT's newsletter (a box we never check for you)</li>
         <li>
-          The trips you log, October 1 to 8: the day, how you got around, and anything you tell us
-          was hard
+          The trips you share, October 1 to 8: the day, how you got around, the link to your post or
+          a screenshot of it, and anything you tell us was hard
         </li>
-        <li>
-          A photo of the day, if you choose to add one on My week, and whether you let LVBT share it
-        </li>
+        <li>Any entry you mail us, as you wrote it</li>
         <li>Your reply, if you win the giveaway and we contact you</li>
       </ul>
       <p>
@@ -101,16 +100,17 @@ const contactMailto = `mailto:${contactEmail}`;
         newsletter. See "LVBT's newsletter" below.
       </p>
       <p>
-        Your trips. Each day you log a trip without driving on My week, we record the day and how
-        you got around as an entry, up to {wwd.maxEntries} entries for October 1 to 8. If you tell us
-        what was hard, we keep that too, and LVBT uses it, without your name, to push for better stops,
-        sidewalks and service. If you gave an Instagram handle and post a trip that tags @lasvegasfortransit
-        on a day you haven't logged one, a volunteer logs it for you.
+        Your trips. Each day you share a trip without driving, we record the day, how you got
+        around, and the link to your post or the screenshot you upload, as an entry, up to{' '}
+        {wwd.maxEntries} entries for October 1 to 8. Volunteers look at each post or screenshot to check
+        it before the draw. If you tell us what was hard, we keep that too, and LVBT uses it, without
+        your name, to push for better stops, sidewalks and service. If you gave an Instagram handle and
+        post a trip that tags @lasvegasfortransit, a volunteer records it for you. If you enter by mail,
+        we keep what you write on the card until November 30, 2026.
       </p>
       <p>
-        Your photo, if you add one. "Add a photo of today" on My week is optional and never gives
-        you an extra entry. We never publish it unless you separately check the box that lets LVBT
-        share it.
+        Your post or screenshot. We look at it only to check your entry. We never repost or publish
+        it unless you check the box that lets LVBT share it.
       </p>
       <p>
         If you win. We keep a record of the draw with the way you entered — your email address,
@@ -189,10 +189,10 @@ const contactMailto = `mailto:${contactEmail}`;
       <h2>When we delete it</h2>
       <p>
         On November 30, 2026, we delete every first name, email address, phone number, ZIP code,
-        Instagram handle, photo, trip log and draw record we hold for this campaign. After that we
-        keep only anonymous totals: how many people signed up, how many trips were logged each day
-        and how, and what people told us was hard, with nothing that identifies them, and the
-        anonymous counts of page visits and actions.
+        Instagram handle, post link, screenshot, mailed entry and draw record we hold for this
+        campaign. After that we keep only anonymous totals: how many people signed up, how many
+        trips were shared each day and how, and what people told us was hard, with nothing that
+        identifies them, and the anonymous counts of page visits and actions.
       </p>
 
       <h2>See, change or delete your information</h2>

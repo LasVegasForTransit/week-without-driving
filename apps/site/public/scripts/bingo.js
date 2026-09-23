@@ -186,7 +186,7 @@
   function celebrationSuggestion() {
     return isBeforeWeek
       ? 'Share your card with friends.'
-      : 'Share your card with friends. And log today’s trip on My week for a giveaway entry.';
+      : 'Share your card with friends. And share today’s trip on My week for a giveaway entry.';
   }
 
   // --- progress + lines --------------------------------------------------

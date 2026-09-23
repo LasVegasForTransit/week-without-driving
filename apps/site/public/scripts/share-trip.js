@@ -1,11 +1,11 @@
 /**
  * Share a trip: draws a picture of today's car-free trip and offers it to
- * the phone's share sheet, with a caption to paste. Used by My week after
- * someone logs a trip. Sharing never adds an entry; it spreads the week.
+ * the phone's share sheet, with a caption to paste, so posting the trip
+ * (which is how people enter the giveaway) takes a few taps.
  *
  * Exposes window.lvwwdShareTrip.setUp(root, trip), where root is the
  * element holding the [data-share-*] parts and trip is
- * { day, dayCount, modes: ['bus' | 'walk' | 'bike' | 'ride'] }.
+ * { day, modes: ['bus' | 'walk' | 'bike' | 'ride'] }.
  */
 (() => {
   const WIDTH = 1080;
@@ -146,6 +146,30 @@
     setStatus(root, 'Picture saved to your downloads.');
   }
 
+  // The picture and caption each share area currently offers, so its
+  // buttons are wired once and always share the latest picture.
+  const current = new WeakMap();
+
+  function bind(root) {
+    root.querySelector('[data-share-image]')?.addEventListener('click', () => {
+      const { file, text } = current.get(root) ?? {};
+      if (file) share(root, file, text);
+    });
+    root.querySelector('[data-save-image]')?.addEventListener('click', () => {
+      const { file } = current.get(root) ?? {};
+      if (file) save(root, file);
+    });
+    root.querySelector('[data-copy-caption]')?.addEventListener('click', async () => {
+      const { text } = current.get(root) ?? {};
+      try {
+        await navigator.clipboard.writeText(text ?? '');
+        setStatus(root, 'Caption copied.');
+      } catch {
+        setStatus(root, 'Press and hold the caption to copy it.');
+      }
+    });
+  }
+
   async function setUp(root, trip) {
     const text = caption(trip);
     const captionEl = root.querySelector('[data-share-caption]');
@@ -162,19 +186,8 @@
       preview.alt = `A picture that says: Day ${trip.day} of 8. I skipped the car today. I got around ${modesPhrase(trip.modes)}.`;
       preview.hidden = false;
     }
-
-    root
-      .querySelector('[data-share-image]')
-      ?.addEventListener('click', () => share(root, file, text));
-    root.querySelector('[data-save-image]')?.addEventListener('click', () => save(root, file));
-    root.querySelector('[data-copy-caption]')?.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(text);
-        setStatus(root, 'Caption copied.');
-      } catch {
-        setStatus(root, 'Press and hold the caption to copy it.');
-      }
-    });
+    if (!current.has(root)) bind(root);
+    current.set(root, { file, text });
   }
 
   window.lvwwdShareTrip = { setUp };
