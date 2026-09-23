@@ -1,31 +1,110 @@
 ---
-// A clearly marked place for a real photo that LVBT has not supplied yet.
-// It renders as a warm, patterned panel with a "Photo to come" tag and a
-// description of the photo it is waiting for, so nobody mistakes it for
-// the finished image. Replace each slot with a real <img> (with alt text)
-// before the site is shared outside LVBT.
+import type { Photo } from '../lib/photos';
+
+// A photo, or a clearly marked place for one that LVBT has not supplied
+// yet. With `photo`, it renders the image at the right size for the screen
+// plus the credit its license asks for. Without it, it renders a warm,
+// patterned panel with a "Photo to come" tag and a description of the
+// photo it is waiting for, so nobody mistakes it for the finished image.
 interface Props {
   /** What the finished photo should show, in plain words. */
   shows: string;
+  photo?: Photo | undefined;
   class?: string;
   /** Hide the caption when text is laid over the slot (the hero). */
   quiet?: boolean;
+  /** Load right away (the hero) instead of when scrolled near. */
+  eager?: boolean;
+  /** How wide the photo is drawn, for choosing a file size. */
+  sizes?: string;
 }
-const { shows, class: className, quiet = false } = Astro.props;
+const {
+  shows,
+  photo,
+  class: className,
+  quiet = false,
+  eager = false,
+  sizes = '100vw',
+} = Astro.props;
+const srcset = photo?.widths.map((w) => `/photos/${photo.name}-${w}.webp ${w}w`).join(', ');
+const largest = photo ? `/photos/${photo.name}-${photo.widths.at(-1)}.webp` : undefined;
 ---
 
-<div class:list={['photo-slot', className]} role="img" aria-label={`Photo to come: ${shows}`}>
-  <span class="photo-slot__tag" aria-hidden="true">Photo to come</span>
-  {
-    !quiet && (
-      <span class="photo-slot__shows" aria-hidden="true">
-        {shows}
+{
+  photo ? (
+    <figure class:list={['photo', className]}>
+      <img
+        src={largest}
+        srcset={srcset}
+        sizes={sizes}
+        width={photo.width}
+        height={photo.height}
+        alt={photo.alt}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
+        decoding="async"
+      />
+      <figcaption class="photo__credit">
+        <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">
+          Photo: {photo.credit}
+        </a>
+        {photo.licenseUrl ? (
+          <>
+            {', '}
+            <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">
+              {photo.license}
+            </a>
+          </>
+        ) : (
+          `, ${photo.license}`
+        )}
+      </figcaption>
+    </figure>
+  ) : (
+    <div class:list={['photo-slot', className]} role="img" aria-label={`Photo to come: ${shows}`}>
+      <span class="photo-slot__tag" aria-hidden="true">
+        Photo to come
       </span>
-    )
-  }
-</div>
+      {!quiet && (
+        <span class="photo-slot__shows" aria-hidden="true">
+          {shows}
+        </span>
+      )}
+    </div>
+  )
+}
 
 <style>
+  .photo {
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    background: var(--color-surface-container);
+  }
+  .photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* Above any shade a page lays over the photo, so it stays readable. */
+  .photo__credit {
+    position: absolute;
+    z-index: 2;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: #fff;
+    background: rgb(0 0 0 / 0.55);
+    border-radius: 999px;
+  }
+  .photo__credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
   .photo-slot {
     position: relative;
     overflow: hidden;
