@@ -61,7 +61,7 @@
   async function draw(trip) {
     await Promise.all([
       document.fonts.load('600 110px Fraunces'),
-      document.fonts.load('800 44px "Atkinson Hyperlegible Next"'),
+      document.fonts.load('700 44px "Atkinson Hyperlegible Next"'),
     ]).catch(() => undefined);
 
     const canvas = document.createElement('canvas');
@@ -75,13 +75,13 @@
 
     const pad = 90;
     c.fillStyle = COLORS.mist;
-    c.font = '800 34px "Atkinson Hyperlegible Next", sans-serif';
+    c.font = '700 34px "Atkinson Hyperlegible Next", sans-serif';
     c.fillText('WEEK WITHOUT DRIVING · LAS VEGAS', pad, 150);
 
     c.fillStyle = COLORS.coral;
     pill(c, { x: pad, y: 210, w: 330, h: 84 });
     c.fillStyle = COLORS.onCoral;
-    c.font = '800 40px "Atkinson Hyperlegible Next", sans-serif';
+    c.font = '700 40px "Atkinson Hyperlegible Next", sans-serif';
     c.fillText(`DAY ${trip.day} OF 8`, pad + 42, 267);
 
     c.fillStyle = COLORS.sand;
@@ -109,7 +109,7 @@
     c.fillStyle = COLORS.coral;
     c.fillRect(pad, HEIGHT - 300, 120, 10);
     c.fillStyle = COLORS.sand;
-    c.font = '800 50px "Atkinson Hyperlegible Next", sans-serif';
+    c.font = '700 50px "Atkinson Hyperlegible Next", sans-serif';
     c.fillText('Try it Oct 1–8 · lvwwd.org', pad, HEIGHT - 205);
     c.fillStyle = COLORS.mist;
     c.font = '700 38px "Atkinson Hyperlegible Next", sans-serif';
