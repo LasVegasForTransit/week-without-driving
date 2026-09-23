@@ -1,0 +1,125 @@
+---
+// A bird's-eye diagram of a north-south street for the heat guide's
+// "Stay on the shady side" step. The physics: the sun casts a building's
+// shadow away from itself, onto the sidewalk that sits on that same,
+// away-from-the-sun side of the building. So the east sidewalk (which
+// runs along the west face of the east-side buildings) is in those
+// buildings' own shadow in the morning, when the sun is in the east.
+// Likewise the west sidewalk is shaded in the afternoon, when the sun is
+// in the west. Confirmed correct per build-brief.md before drawing this;
+// do not "fix" it to the more common but wrong assumption that the far
+// sidewalk is the shaded one.
+// The SVG is decorative (aria-hidden): the caption under each panel is
+// the real, screen-reader-visible statement of the fact.
+interface Panel {
+  label: string;
+  caption: string;
+  sunSide: 'left' | 'right';
+  shadeSide: 'left' | 'right';
+}
+
+const panels: Panel[] = [
+  {
+    label: 'Morning',
+    caption: 'Morning: the east sidewalk is shaded.',
+    sunSide: 'right',
+    shadeSide: 'right',
+  },
+  {
+    label: 'Afternoon',
+    caption: 'Afternoon: the west sidewalk is shaded.',
+    sunSide: 'left',
+    shadeSide: 'left',
+  },
+];
+---
+
+<div class="shade-diagram">
+  {
+    panels.map((panel) => (
+      <figure class="shade-panel">
+        <svg viewBox="0 0 160 180" aria-hidden="true" focusable="false" class="shade-panel-svg">
+          {/* Compass */}
+          <text x="80" y="14" text-anchor="middle" class="shade-compass">
+            N
+          </text>
+          {/* Buildings, west row */}
+          <rect x="8" y="24" width="26" height="140" class="shade-building" />
+          {/* Buildings, east row */}
+          <rect x="126" y="24" width="26" height="140" class="shade-building" />
+          {/* West sidewalk */}
+          <rect x="34" y="24" width="14" height="140" class="shade-sidewalk" />
+          {/* Street */}
+          <rect x="48" y="24" width="64" height="140" class="shade-street" />
+          {/* East sidewalk */}
+          <rect x="112" y="24" width="14" height="140" class="shade-sidewalk" />
+          {/* Shaded sidewalk overlay */}
+          <rect
+            x={panel.shadeSide === 'left' ? 34 : 112}
+            y="24"
+            width="14"
+            height="140"
+            class="shade-overlay"
+          />
+          {/* Sun */}
+          <g transform={`translate(${panel.sunSide === 'left' ? 20 : 140}, 20)`}>
+            <circle r="9" class="shade-sun" />
+          </g>
+        </svg>
+        <figcaption class="shade-panel-caption">
+          <span class="shade-panel-label">{panel.label}</span> {panel.caption}
+        </figcaption>
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .shade-diagram {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .shade-panel {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .shade-panel-svg {
+    width: 100%;
+    max-width: 9rem;
+    height: auto;
+  }
+  .shade-building {
+    fill: color-mix(in srgb, var(--color-on-surface) 55%, transparent);
+  }
+  .shade-sidewalk {
+    fill: color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+  }
+  .shade-street {
+    fill: color-mix(in srgb, var(--color-on-surface) 25%, transparent);
+  }
+  .shade-overlay {
+    fill: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  }
+  .shade-sun {
+    fill: var(--color-primary);
+  }
+  .shade-compass {
+    font-size: 10px;
+    font-weight: 700;
+    fill: var(--color-on-surface-variant);
+  }
+  .shade-panel-caption {
+    text-align: center;
+    font-size: var(--text-body-sm);
+    line-height: var(--text-body-sm--line-height);
+    color: var(--color-on-surface-variant);
+  }
+  .shade-panel-label {
+    font-weight: 700;
+    color: var(--color-on-surface);
+  }
+</style>
