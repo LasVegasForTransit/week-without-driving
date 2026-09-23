@@ -1,41 +1,26 @@
 /**
- * Sign up to win: checks the form and signs this phone in.
+ * Sign up to win: checks the form, then sends it to the Worker
+ * (POST /api/signup, through /scripts/participant-api.js).
  *
- * This is a front-end demo. There is no backend yet, so nothing leaves the
- * phone: the details are kept in this browser's localStorage under
- * `lvwwd_me`, and the readable `lvwwd_signed_in` flag switches the header
- * button to "My week". The real version posts the form to the Worker,
- * which stores the sign-up, sets the HttpOnly session cookie next to the
- * same flag, and sends the "Open my week" link. Add ?edit=1 to change the
- * details of the person signed in on this phone.
+ * A new sign-up is signed in on this phone by the Worker's cookies and
+ * goes to My week. A phone number or email that already has a sign-up is
+ * not signed in here; the Worker sends that person their link instead,
+ * and the page says so. Add ?edit=1 to change the details of the person
+ * signed in on this phone (PATCH /api/me); the contact can't be changed.
  */
 (() => {
-  const STORE = 'lvwwd_me';
-  const FLAG = 'lvwwd_signed_in';
-  // Personal details are deleted on November 30, 2026, so the sign-in ends then too.
-  const SIGNED_IN_UNTIL = new Date('2026-12-01T08:00:00Z');
-
+  const api = window.lvwwdApi;
   const form = document.querySelector('[data-signup-form]');
   const already = document.querySelector('[data-signup-already]');
-  if (!(form instanceof HTMLFormElement) || !already) return;
+  if (!api || !(form instanceof HTMLFormElement) || !already) return;
 
-  function readMe() {
-    try {
-      const raw = window.localStorage.getItem(STORE);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function saveMe(me) {
-    try {
-      window.localStorage.setItem(STORE, JSON.stringify(me));
-    } catch {
-      // Private browsing can refuse storage; the flag cookie still signs the phone in.
-    }
-    document.cookie = `${FLAG}=1; path=/; expires=${SIGNED_IN_UNTIL.toUTCString()}; samesite=lax`;
-  }
+  const FIELDS = ['firstName', 'contact', 'zip', 'instagram', 'age'];
+  const PREVIEW_KEY = 'lvwwd_preview_link';
+  const statusLine = form.querySelector('[data-signup-status]');
+  const submit = form.querySelector('[data-signup-submit]');
+  const submitLabel = submit?.textContent ?? 'Sign up';
+  let editing = false;
+  let bot = null;
 
   // Returns { type, value } for a US phone number or an email address, or null.
   function parseContact(raw) {
@@ -74,117 +59,169 @@
     }
   }
 
-  // Each check returns an error message, or '' when the answer is fine.
-  function checkContact(raw) {
-    if (!raw.trim()) return 'Enter a phone number or an email address.';
-    if (!parseContact(raw)) {
-      return 'Enter a phone number, like 702-555-0123, or an email, like name@example.com.';
-    }
-    return '';
+  // An error is red; a note (like "we sent your link") is not.
+  function setStatus(message, isError = true) {
+    if (!statusLine) return;
+    statusLine.textContent = message ?? '';
+    statusLine.classList.toggle('form-error', isError);
+    statusLine.classList.toggle('signup__note', !isError);
   }
 
-  function checkZip(zip) {
-    if (!/^\d{5}$/.test(zip)) return 'Enter a 5-digit ZIP code.';
-    if (!/^89[01]\d\d$/.test(zip)) {
-      return 'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.';
-    }
-    return '';
+  function setBusy(busy, label) {
+    if (!(submit instanceof HTMLButtonElement)) return;
+    submit.disabled = busy;
+    submit.textContent = busy ? label : submitLabel;
   }
 
-  function checkInstagram(handle) {
-    if (handle && !/^[a-z0-9._]{1,30}$/.test(handle)) {
-      return 'Instagram names use only letters, numbers, periods and underscores.';
-    }
-    return '';
+  // Shows each message next to its field and focuses the first. True if any.
+  function showErrors(errors) {
+    FIELDS.forEach((name) => setError(name, errors[name] ?? ''));
+    const first = FIELDS.find((name) => errors[name]);
+    if (!first) return false;
+    const target = first === 'age' ? form.querySelector('input[name="age"]') : field(first);
+    if (target instanceof HTMLElement) target.focus();
+    return true;
   }
 
   function readForm() {
-    const ageInput = form.querySelector('input[name="age"]:checked');
+    const age = form.querySelector('input[name="age"]:checked');
     return {
       firstName: field('firstName').value.trim(),
       contact: field('contact').value.trim(),
       zip: field('zip').value.trim(),
       instagram: cleanHandle(field('instagram').value),
-      age: ageInput instanceof HTMLInputElement ? ageInput.value : '',
+      age: age instanceof HTMLInputElement ? age.value : '',
       newsletter: field('newsletter').checked,
     };
   }
 
-  // Shows every error at once and returns the first field with one, or null.
-  function validate(values) {
-    const errors = {
-      firstName: values.firstName ? '' : 'Enter your first name.',
-      contact: checkContact(values.contact),
-      zip: checkZip(values.zip),
-      instagram: checkInstagram(values.instagram),
-      age: values.age ? '' : 'Pick one. You need to be 13 or older to sign up.',
-    };
-    Object.entries(errors).forEach(([name, message]) => setError(name, message));
-    return Object.keys(errors).find((name) => errors[name]) ?? null;
+  // The same rules and words as the Worker (worker/validate.ts).
+  function check(details) {
+    const errors = {};
+    if (!details.firstName) errors.firstName = 'Enter your first name.';
+    if (!editing && !details.contact) {
+      errors.contact = 'Enter a phone number or an email address.';
+    } else if (!editing && !parseContact(details.contact)) {
+      errors.contact =
+        'Enter a phone number, like 702-555-0123, or an email, like name@example.com.';
+    }
+    if (!/^\d{5}$/.test(details.zip)) {
+      errors.zip = 'Enter a 5-digit ZIP code.';
+    } else if (!/^89[01]\d\d$/.test(details.zip)) {
+      errors.zip =
+        'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.';
+    }
+    if (details.instagram && !/^[a-z0-9._]{1,30}$/.test(details.instagram)) {
+      errors.instagram = 'Instagram names use only letters, numbers, periods and underscores.';
+    }
+    if (!details.age) errors.age = 'Pick one. You need to be 13 or older to sign up.';
+    return errors;
   }
 
-  function focusField(name) {
-    const target = name === 'age' ? form.querySelector('input[name="age"]') : field(name);
-    if (target instanceof HTMLElement) target.focus();
+  // The preview Worker returns the link; My week shows it once.
+  function rememberPreviewLink(link) {
+    if (!link) return;
+    try {
+      window.sessionStorage.setItem(PREVIEW_KEY, link);
+    } catch {
+      // Storage refused: the preview box is a convenience, not a need.
+    }
   }
 
-  function showAlreadySignedIn(me) {
-    form.hidden = true;
-    already.hidden = false;
-    const nameLine = already.querySelector('[data-signup-already-name]');
-    if (nameLine) nameLine.textContent = `You signed up as ${me.firstName}.`;
+  // Resolves to true when the page is moving on to My week.
+  async function signUp(details) {
+    let turnstileToken;
+    try {
+      turnstileToken = await bot.token();
+    } catch (error) {
+      setStatus(error.message);
+      return false;
+    }
+    const { ok, status, data } = await api.call('POST', '/api/signup', {
+      ...details,
+      turnstileToken,
+    });
+    bot.reset();
+    if (status === 201) {
+      rememberPreviewLink(data.previewLink);
+      window.location.href = data.redirect ?? '/my-week?welcome=1';
+      return true;
+    }
+    if (data.errors) showErrors(data.errors);
+    setStatus(data.message, !ok);
+    if (ok) api.showPreviewLink(document.querySelector('[data-preview-link]'), data.previewLink);
+    return false;
   }
 
-  function prefill(me) {
+  async function saveDetails(details) {
+    const { firstName, zip, instagram, age, newsletter } = details;
+    const { ok, data } = await api.call('PATCH', '/api/me', {
+      firstName,
+      zip,
+      instagram,
+      age,
+      newsletter,
+    });
+    if (ok) {
+      window.location.href = '/my-week?saved=1';
+      return true;
+    }
+    if (data.errors) showErrors(data.errors);
+    setStatus(data.message);
+    return false;
+  }
+
+  function startSignUp() {
+    bot = api.botCheck(form.querySelector('[data-turnstile]'), 'signup');
+    form.hidden = false;
+  }
+
+  function startEditing(me) {
+    editing = true;
     field('firstName').value = me.firstName ?? '';
-    field('contact').value = me.contact ?? '';
+    const contact = field('contact');
+    contact.value = me.contactMasked ?? '';
+    contact.disabled = true;
+    const help = form.querySelector('[data-contact-help]');
+    if (help) help.textContent = 'To change it, email wwd@lasvegasfortransit.org.';
     field('zip').value = me.zip ?? '';
     field('instagram').value = me.instagram ?? '';
     const age = form.querySelector(`input[name="age"][value="${me.age}"]`);
     if (age instanceof HTMLInputElement) age.checked = true;
     field('newsletter').checked = Boolean(me.newsletter);
-    const submit = form.querySelector('[data-signup-submit]');
     if (submit) submit.textContent = 'Save my details';
+    form.hidden = false;
   }
 
-  function submit(event) {
+  function showAlready(me) {
+    const nameLine = already.querySelector('[data-signup-already-name]');
+    if (nameLine) nameLine.textContent = `You signed up as ${me.firstName}.`;
+    already.hidden = false;
+  }
+
+  // Someone signed in on this phone sees who they are, or edits with ?edit=1.
+  async function start() {
+    if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) return startSignUp();
+    form.hidden = true;
+    const { ok, status, data } = await api.call('GET', '/api/me');
+    if (!ok) {
+      startSignUp();
+      if (status !== 401) setStatus(data.message);
+      return undefined;
+    }
+    if (new URLSearchParams(window.location.search).get('edit') === '1') return startEditing(data);
+    return showAlready(data);
+  }
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const values = readForm();
-    const firstBad = validate(values);
-    if (firstBad) {
-      focusField(firstBad);
-      return;
-    }
+    setStatus('');
+    const details = readForm();
+    if (showErrors(check(details))) return;
+    setBusy(true, editing ? 'Saving…' : 'Signing up…');
+    const leaving = editing ? await saveDetails(details) : await signUp(details);
+    if (!leaving) setBusy(false);
+  });
 
-    const button = form.querySelector('[data-signup-submit]');
-    if (button instanceof HTMLButtonElement) {
-      button.disabled = true;
-      button.textContent = 'Signing up…';
-    }
-
-    const previous = readMe();
-    saveMe({
-      ...values,
-      contactType: parseContact(values.contact).type,
-      checkins: previous?.checkins ?? [],
-      photos: previous?.photos ?? [],
-      reminders: previous?.reminders ?? {},
-    });
-
-    // Demo only: a short pause stands in for the request to the Worker.
-    window.setTimeout(() => {
-      window.location.href = previous ? '/my-week?saved=1' : '/my-week?welcome=1';
-    }, 450);
-  }
-
-  const editing = new URLSearchParams(window.location.search).get('edit') === '1';
-  const me = readMe();
-  const signedIn = document.cookie.split('; ').includes(`${FLAG}=1`);
-
-  if (signedIn && me && !editing) {
-    showAlreadySignedIn(me);
-    return;
-  }
-  if (signedIn && me) prefill(me);
-  form.addEventListener('submit', submit);
+  void start();
 })();

@@ -1,321 +1,273 @@
 /**
- * My week: fills in the page for the person signed in on this phone.
+ * My week: fills in the page for the person signed in on this phone, from
+ * the Worker (GET /api/me, through /scripts/participant-api.js), and sends
+ * logged trips, photos, reminder choices and sign-out back to it. After a
+ * trip is logged, /scripts/share-trip.js makes the picture to share.
  *
- * This is a front-end demo. There is no backend yet, so shared trips and
- * reminder choices are kept in this browser's localStorage
- * under `lvwwd_me` (written by /scripts/sign-up.js) and nothing is sent.
- * The real version reads and writes the same things through the Worker.
- *
- * Before October 1, 2026 sharing trips waits for the week. Add
- * ?preview=during to see the page as it looks on Day 3, with trips already
- * shared on Days 1 and 2, for screenshots.
+ * The Worker decides which day it is, in Las Vegas time, so a phone with
+ * the wrong clock can't log a trip early. The preview Worker pins the day
+ * (CHECKIN_PREVIEW_DAY) so the week can be tried before October.
  */
 (() => {
-  const STORE = 'lvwwd_me';
-  const FLAG = 'lvwwd_signed_in';
-  const MAX_ENTRIES = 8;
-  // Midnight at the start of October 1, 2026, Las Vegas time.
-  const WEEK_START = Date.parse('2026-10-01T07:00:00Z');
-  const DAY = 86_400_000;
-  const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
-
+  const api = window.lvwwdApi;
   const out = document.querySelector('[data-me-out]');
   const inside = document.querySelector('[data-me-in]');
-  if (!out || !inside) return;
+  const offline = document.querySelector('[data-me-offline]');
+  if (!api || !out || !inside) return;
 
-  function readMe() {
-    try {
-      const raw = window.localStorage.getItem(STORE);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function saveMe(me) {
-    try {
-      window.localStorage.setItem(STORE, JSON.stringify(me));
-    } catch {
-      // Storage refused (private browsing): the page still works until reload.
-    }
-  }
-
-  const me = readMe();
-  const signedIn = document.cookie.split('; ').includes(`${FLAG}=1`);
-  if (!signedIn || !me) {
-    out.hidden = false;
-    return;
-  }
-  inside.hidden = false;
-
+  const MAX_ENTRIES = 8;
+  const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+  const PREVIEW_KEY = 'lvwwd_preview_link';
   const params = new URLSearchParams(window.location.search);
-  const preview = params.get('preview') === 'during';
-
-  // Which day of the week it is: 0 before October 1, 1–8 during, 9 after.
-  function todayNumber() {
-    if (preview) return 3;
-    const now = Date.now();
-    if (now < WEEK_START) return 0;
-    return Math.min(Math.floor((now - WEEK_START) / DAY) + 1, 9);
-  }
-
-  // Shared trips, one per day: { day, modes, hard, link, screenshot }.
-  function trips() {
-    const logged = me.trips ?? (me.checkins ?? []).map((day) => ({ day, modes: ['walk'] }));
-    if (preview && !logged.some((t) => t.day === 1)) {
-      return [{ day: 1, modes: ['bus'] }, { day: 2, modes: ['walk'] }, ...logged];
-    }
-    return logged;
-  }
-
-  function mask(contact, type) {
-    if (!contact) return '';
-    if (type === 'phone') {
-      const digits = contact.replace(/\D/g, '');
-      return `(•••) •••-${digits.slice(-4)}`;
-    }
-    const [name, domain] = contact.split('@');
-    return `${name.slice(0, 1)}•••@${domain}`;
-  }
+  let me = null;
 
   function setText(selector, text) {
     const el = document.querySelector(selector);
     if (el) el.textContent = text;
   }
 
-  function initGreetingAndDetails() {
-    // Greeting and one-off banners.
-    setText('[data-me-name]', me.firstName);
-    const welcome = document.querySelector('[data-me-welcome]');
-    if (welcome && (params.get('welcome') === '1' || params.get('saved') === '1')) {
-      welcome.hidden = false;
-      setText(
-        '[data-me-welcome-text]',
-        params.get('saved') === '1' ? 'Your details are saved.' : 'You’re signed up to win.',
-      );
-    }
+  function showSignedOut() {
+    inside.hidden = true;
+    out.hidden = false;
+  }
 
-    // Details.
-    setText('[data-me-field="firstName"]', me.firstName);
-    setText('[data-me-field="contact"]', mask(me.contact, me.contactType));
-    setText('[data-me-field="zip"]', me.zip);
-    setText('[data-me-field="instagram"]', me.instagram ? `@${me.instagram}` : 'Not added');
-    setText(
-      '[data-me-link-line]',
-      `We sent your link to ${mask(me.contact, me.contactType)}. Open it on any phone to come back here.`,
-    );
+  function dayState(n, today, done) {
+    if (done.has(n)) return 'done';
+    if (n === today) return 'today';
+    return n < today ? 'missed' : 'future';
   }
 
   const DAY_STATUS = {
-    done: 'Trip shared',
-    today: 'Today, no trip shared yet',
-    missed: 'No trip shared',
+    done: 'Trip logged',
+    today: 'Today, no trip logged yet',
+    missed: 'No trip logged',
     future: 'Coming up',
   };
 
-  // Where a shared trip's link can come from: public posts on these apps.
-  const POST_HOSTS = [
-    'instagram.com',
-    'facebook.com',
-    'fb.com',
-    'tiktok.com',
-    'threads.net',
-    'threads.com',
-    'x.com',
-    'twitter.com',
-    'bsky.app',
-  ];
+  let shareShownFor = 0;
 
-  function isPostLink(text) {
-    try {
-      const url = new URL(text);
-      const host = url.hostname.replace(/^www\./, '');
-      return (
-        url.protocol === 'https:' &&
-        POST_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`))
-      );
-    } catch {
-      return false;
+  function showShare(trip, count) {
+    const done = document.querySelector('[data-log-done]');
+    if (!done) return;
+    done.hidden = false;
+    setText(
+      '[data-log-done-title]',
+      `Day ${trip.day} logged. That’s entry ${count} of ${MAX_ENTRIES}.`,
+    );
+    if (shareShownFor !== trip.day) {
+      shareShownFor = trip.day;
+      window.lvwwdShareTrip?.setUp(done, { ...trip, dayCount: count });
     }
   }
 
-  function renderDays(today, sharedDays) {
-    setText('[data-me-count]', String(Math.min(sharedDays.size, MAX_ENTRIES)));
+  function renderLog(today, done) {
+    const form = document.querySelector('[data-log-form]');
+    const closed = document.querySelector('[data-log-closed]');
+    if (form) form.hidden = true;
+    if (closed) closed.hidden = true;
+    if (today === 0 || today > 8) {
+      const text =
+        today === 0
+          ? 'Logging trips opens October 1. Turn on a reminder so you don’t miss it.'
+          : 'The week is over. We’ll draw the winner by October 15, 2026.';
+      setText('[data-me-phase]', text);
+      if (closed) {
+        closed.hidden = false;
+        closed.textContent = text;
+      }
+      return;
+    }
+    const todays = (me.trips ?? []).find((t) => t.day === today);
+    if (todays || done.has(today)) {
+      setText(
+        '[data-me-phase]',
+        `Day ${today} of 8. Nice work. Come back tomorrow for another entry.`,
+      );
+      showShare(todays ?? { day: today, modes: [] }, Math.min(done.size, MAX_ENTRIES));
+    } else {
+      setText('[data-me-phase]', `Day ${today} of 8. Skip the car today for one more entry.`);
+      if (form) form.hidden = false;
+    }
+  }
+
+  function renderEntries() {
+    const done = new Set(me.days);
+    setText('[data-me-count]', String(Math.min(done.size, MAX_ENTRIES)));
     document.querySelectorAll('[data-day]').forEach((box) => {
-      const n = Number(box.getAttribute('data-day'));
-      let state = 'future';
-      if (sharedDays.has(n)) state = 'done';
-      else if (n === today) state = 'today';
-      else if (n < today) state = 'missed';
+      const state = dayState(Number(box.getAttribute('data-day')), me.today, done);
       box.setAttribute('data-state', state);
       const sr = box.querySelector('[data-day-status]');
       if (sr) sr.textContent = DAY_STATUS[state];
       if (state === 'today') box.setAttribute('aria-current', 'date');
       else box.removeAttribute('aria-current');
     });
+    renderLog(me.today, done);
   }
 
-  function showClosed(today) {
-    const text =
-      today === 0
-        ? 'Sharing trips opens October 1. Turn on a reminder so you don’t miss it.'
-        : 'The week is over. We’ll draw the winner by October 15, 2026.';
-    setText('[data-me-phase]', text);
-    const closed = document.querySelector('[data-log-closed]');
-    if (closed) {
-      closed.hidden = false;
-      closed.textContent = text;
-    }
+  function renderDetails() {
+    setText('[data-me-name]', me.firstName);
+    setText('[data-me-field="firstName"]', me.firstName);
+    setText('[data-me-field="contact"]', me.contactMasked);
+    setText('[data-me-field="zip"]', me.zip);
+    setText('[data-me-field="instagram"]', me.instagram ? `@${me.instagram}` : 'Not added');
+    setText(
+      '[data-me-link-line]',
+      `We sent your link to ${me.contactMasked}. Open it on any phone to come back here.`,
+    );
   }
 
-  function renderEntries() {
-    const today = todayNumber();
-    const shared = trips();
-    const sharedDays = new Set(shared.map((t) => t.day));
-    renderDays(today, sharedDays);
-
-    const form = document.querySelector('[data-trip-form]');
-    const done = document.querySelector('[data-trip-done]');
-    const closed = document.querySelector('[data-log-closed]');
-    [form, done, closed].forEach((el) => {
-      if (el) el.hidden = true;
-    });
-    if (today === 0 || today > 8) return showClosed(today);
-
-    if (sharedDays.has(today)) {
-      setText('[data-me-phase]', `Day ${today} of 8. Nice work.`);
+  function renderBanners() {
+    const welcome = document.querySelector('[data-me-welcome]');
+    const saved = params.get('saved') === '1';
+    if (welcome && (params.get('welcome') === '1' || saved)) {
+      welcome.hidden = false;
       setText(
-        '[data-trip-done-title]',
-        `Day ${today} entered. That’s entry ${Math.min(sharedDays.size, MAX_ENTRIES)} of ${MAX_ENTRIES}.`,
+        '[data-me-welcome-text]',
+        saved ? 'Your details are saved.' : 'You’re signed up to win.',
       );
-      if (done) done.hidden = false;
-    } else {
-      setText('[data-me-phase]', `Day ${today} of 8. Share a trip without the car today to enter.`);
-      if (form) form.hidden = false;
     }
-    return undefined;
-  }
-
-  function chosenModes(form) {
-    return [...form.querySelectorAll('input[name="mode"]:checked')].map((box) => box.value);
-  }
-
-  function initPicture(form) {
-    const step = form.querySelector('[data-share-step]');
-    const kit = form.querySelector('[data-share-kit]');
-    form.querySelector('[data-make-picture]')?.addEventListener('click', async () => {
-      const modes = chosenModes(form);
-      if (modes.length === 0) {
-        setText('[data-trip-error]', 'First pick how you got around, in step 1.');
-        return;
-      }
-      setText('[data-trip-error]', '');
-      await window.lvwwdShareTrip?.setUp(step, { day: todayNumber(), modes });
-      if (kit) kit.hidden = false;
-    });
-  }
-
-  function initScreenshot(form) {
-    const input = form.querySelector('[data-screenshot-input]');
-    input?.addEventListener('change', () => {
-      const file = input instanceof HTMLInputElement ? input.files?.[0] : undefined;
-      if (!file) return;
-      if (file.size > MAX_PHOTO_BYTES) {
-        setText('[data-trip-error]', 'That screenshot is over 10 MB. Try a smaller one.');
-        input.value = '';
-        return;
-      }
-      setText('[data-trip-error]', '');
-      setText('[data-screenshot-label]', `Screenshot added: ${file.name}`);
-    });
-  }
-
-  // Returns the trip to save, or an error message.
-  function readTrip(form) {
-    const modes = chosenModes(form);
-    if (modes.length === 0) return 'Pick how you got around, in step 1.';
-    const linkField = form.elements.namedItem('link');
-    const link = linkField instanceof HTMLInputElement ? linkField.value.trim() : '';
-    const shot = form.querySelector('[data-screenshot-input]');
-    const hasShot = shot instanceof HTMLInputElement && Boolean(shot.files?.length);
-    if (!link && !hasShot) return 'Paste the link to your post, or add a screenshot of it.';
-    if (link && !isPostLink(link)) {
-      return 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.';
+    // The preview Worker hands back the link it would have sent; show it once.
+    try {
+      const link = window.sessionStorage.getItem(PREVIEW_KEY);
+      window.sessionStorage.removeItem(PREVIEW_KEY);
+      api.showPreviewLink(document.querySelector('[data-preview-link]'), link);
+    } catch {
+      // No storage, no preview box.
     }
-    const hard = form.elements.namedItem('hard');
-    const share = form.elements.namedItem('share');
-    return {
-      day: todayNumber(),
-      modes,
-      hard: hard instanceof HTMLTextAreaElement ? hard.value.trim() : '',
-      link,
-      screenshot: hasShot,
-      share: share instanceof HTMLInputElement && share.checked,
-    };
   }
 
-  function initEntries() {
-    renderEntries();
-    const form = document.querySelector('[data-trip-form]');
+  function bindLog() {
+    const form = document.querySelector('[data-log-form]');
     if (!(form instanceof HTMLFormElement)) return;
-    const tagNote = form.querySelector('[data-tag-note]');
-    if (tagNote && me.instagram) tagNote.hidden = false;
-    initPicture(form);
-    initScreenshot(form);
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const trip = readTrip(form);
-      if (typeof trip === 'string') {
-        setText('[data-trip-error]', trip);
-        return;
+      const modes = [...form.querySelectorAll('input[name="mode"]:checked')].map(
+        (box) => box.value,
+      );
+      if (modes.length === 0) {
+        setText('[data-log-error]', 'Pick how you got around. Pick more than one if you like.');
+        return undefined;
       }
-      setText('[data-trip-error]', '');
-      me.trips = [...trips().filter((t) => t.day !== trip.day), trip].sort((x, y) => x.day - y.day);
-      saveMe(me);
+      setText('[data-log-error]', '');
+      const hardField = form.elements.namedItem('hard');
+      const hard = hardField instanceof HTMLTextAreaElement ? hardField.value.trim() : '';
+      const button = form.querySelector('[data-log-submit]');
+      if (button instanceof HTMLButtonElement) button.disabled = true;
+      const { ok, status, data } = await api.call('POST', '/api/checkin', { modes, hard });
+      if (button instanceof HTMLButtonElement) button.disabled = false;
+      if (status === 401) return showSignedOut();
+      if (!ok) {
+        setText('[data-log-error]', data.message);
+        return undefined;
+      }
+      me.days = data.days;
+      me.trips = data.trips;
       renderEntries();
+      return undefined;
     });
   }
 
-  function initReminders() {
-    // Reminders: the text and email options match how this person signed up.
-    const reminders = me.reminders ?? {};
-    const remindStatus = document.querySelector('[data-remind-status]');
-    const contactRow = document.querySelector(
+  function bindPhoto() {
+    const photoForm = document.querySelector('[data-photo-form]');
+    const input = document.querySelector('[data-photo-input]');
+    const preview = document.querySelector('[data-photo-preview]');
+    const submit = document.querySelector('[data-photo-submit]');
+    if (!(photoForm instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) return;
+    const canSend = (yes) => {
+      if (submit instanceof HTMLButtonElement) submit.disabled = !yes;
+    };
+
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setText('[data-photo-status]', '');
+      if (file.size > MAX_PHOTO_BYTES) {
+        setText('[data-photo-status]', 'That photo is over 10 MB. Try a screenshot instead.');
+        return canSend(false);
+      }
+      if (preview instanceof HTMLImageElement) {
+        preview.src = URL.createObjectURL(file);
+        preview.alt = 'The photo you chose';
+        preview.hidden = false;
+      }
+      setText('[data-photo-pick-label]', 'Choose a different photo');
+      return canSend(true);
+    });
+
+    photoForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const file = input.files?.[0];
+      if (!file) return;
+      const body = new FormData();
+      body.set('photo', file);
+      body.set('share', photoForm.elements.namedItem('share')?.checked ? '1' : '0');
+      canSend(false);
+      setText('[data-photo-status]', 'Adding your photo…');
+      const { ok, data } = await api.call('POST', '/api/photo', body);
+      setText('[data-photo-status]', ok ? 'Photo added. Thank you!' : data.message);
+      if (!ok) canSend(true);
+    });
+  }
+
+  function bindReminders() {
+    const row = document.querySelector(
       `[data-remind-row="${me.contactType === 'phone' ? 'text' : 'email'}"]`,
     );
-    if (contactRow) contactRow.hidden = false;
+    if (row) row.hidden = false;
     document.querySelectorAll('[data-remind]').forEach((box) => {
       if (!(box instanceof HTMLInputElement)) return;
       const kind = box.getAttribute('data-remind');
-      box.checked = Boolean(reminders[kind]);
-      box.addEventListener('change', () => {
-        reminders[kind] = box.checked;
-        me.reminders = reminders;
-        saveMe(me);
-        if (remindStatus) {
-          remindStatus.textContent = Object.values(reminders).some(Boolean)
-            ? 'Reminders are on. The first one comes October 1.'
-            : 'Reminders are off.';
+      box.checked = Boolean(me.reminders?.[kind]);
+      box.addEventListener('change', async () => {
+        const { ok, data } = await api.call('POST', '/api/reminders', { [kind]: box.checked });
+        if (!ok) {
+          box.checked = !box.checked;
+          setText('[data-remind-status]', data.message);
+          return;
         }
+        me.reminders = data.reminders;
+        setText(
+          '[data-remind-status]',
+          Object.values(data.reminders).some(Boolean)
+            ? 'Reminders are on. The first one comes October 1.'
+            : 'Reminders are off.',
+        );
       });
     });
   }
 
-  function initSignOut() {
-    // Sign out of this phone only.
-    document.querySelector('[data-signout]')?.addEventListener('click', () => {
-      try {
-        window.localStorage.removeItem(STORE);
-      } catch {
-        // Nothing stored.
-      }
-      document.cookie = `${FLAG}=; path=/; max-age=0; samesite=lax`;
-      window.location.href = '/';
+  // Signs out this phone only; other phones stay signed in.
+  function bindSignOut() {
+    document.querySelector('[data-signout]')?.addEventListener('click', async () => {
+      const { ok, status, data } = await api.call('POST', '/api/signout', {});
+      if (ok || status === 401) window.location.href = '/';
+      else setText('[data-signout-status]', data.message);
     });
   }
 
-  initGreetingAndDetails();
-  initEntries();
-  initReminders();
-  initSignOut();
+  async function start() {
+    // Without the flag cookie this phone isn't signed in; don't ask.
+    if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) return showSignedOut();
+    const { ok, status, data } = await api.call('GET', '/api/me');
+    if (status === 401) return showSignedOut();
+    if (!ok) {
+      if (offline) {
+        offline.textContent = data.message;
+        offline.hidden = false;
+      }
+      return undefined;
+    }
+    me = data;
+    renderDetails();
+    renderBanners();
+    renderEntries();
+    inside.hidden = false;
+    bindLog();
+    bindPhoto();
+    bindReminders();
+    bindSignOut();
+    return undefined;
+  }
+
+  void start();
 })();

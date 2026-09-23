@@ -4,7 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 // Get my link: sends the "Open my week" link again to the phone number or
 // email someone signed up with. The confirmation is the same whether or
 // not the contact matches a sign-up, so the page never reveals who signed
-// up. The behaviour is in /scripts/my-week-link.js.
+// up. The behaviour is in /scripts/my-week-link.js. A link that has
+// expired or doesn't work lands here with ?expired=1.
 ---
 
 <BaseLayout
@@ -14,6 +15,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 >
   <section class="container-page getlink narrow">
     <h1 class="page-title">Get my link</h1>
+    <p data-link-expired hidden class="getlink__expired" role="alert">
+      That link has expired or doesn’t work. Get a new one below.
+    </p>
     <p class="page-lede">
       Type the phone number or email you signed up with. We’ll send a link that opens My week on
       this phone.
@@ -34,9 +38,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         />
         <p id="gl-contact-error" class="form-error" data-link-error aria-live="polite"></p>
       </div>
+      {/* Turnstile, the bot check. The Worker writes the site key into data-sitekey. */}
+      <div class="bot-check" data-turnstile data-sitekey=""></div>
       <button type="submit" class="btn btn--primary btn--big btn--block mt-6" data-link-submit>
         Send my link
       </button>
+      <p class="form-error mt-3 text-center" data-link-status aria-live="polite"></p>
     </form>
 
     <div data-link-sent hidden class="getlink__card" role="status">
@@ -50,6 +57,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <a href="mailto:wwd@lasvegasfortransit.org" class="body-link">wwd@lasvegasfortransit.org</a
         >.
       </p>
+      <div class="preview-link" data-preview-link hidden></div>
     </div>
 
     <p class="getlink__alt">
@@ -57,12 +65,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </p>
   </section>
 
+  <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/my-week-link.js" defer></script>
 </BaseLayout>
 
 <style>
   .getlink {
     padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+  }
+  .getlink__expired {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    font-weight: 800;
+    border: 2px solid var(--color-error);
+    border-radius: 0.75rem;
   }
   .getlink__card {
     margin-top: 1.75rem;
