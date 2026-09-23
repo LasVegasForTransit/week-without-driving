@@ -3,36 +3,79 @@ import { MESSAGES, json, problem, readJsonObject } from '../http';
 import { todayNumber } from '../time';
 
 /**
- * What a signed-in person does during the week: check in, choose
- * reminders, and keep their bingo card.
+ * What a signed-in person does during the week: log a trip they took
+ * without driving, choose reminders, and keep their bingo card.
  */
 
 const MAX_BINGO_BYTES = 4096;
 
+/** The ways to get around without driving that count as a trip. */
+export const TRIP_MODES = ['bus', 'walk', 'bike', 'ride'] as const;
+const MAX_NOTE_LENGTH = 280;
+
 export const WEEK_REPLIES = {
-  notYet: 'Check-ins open October 1.',
-  over: 'Check-ins are closed. The week is over.',
+  notYet: 'Logging trips opens October 1.',
+  over: 'Logging trips is closed. The week is over.',
+  noModes: 'Pick how you got around. Pick more than one if you like.',
+  noteTooLong: `Keep the note under ${MAX_NOTE_LENGTH} characters.`,
   bingoTooBig: 'That bingo card is too big to save.',
   remindersNotTrueFalse: 'Reminders can only be turned on or off.',
 } as const;
 
+interface TripInput {
+  modes: string;
+  hard: string | null;
+}
+
+/** Reads { modes: string[], hard?: string } from a trip log, or returns a problem. */
+function readTrip(body: Record<string, unknown>): TripInput | string {
+  const raw = Array.isArray(body.modes) ? body.modes : [];
+  const modes = TRIP_MODES.filter((mode) => raw.includes(mode));
+  // Every item must be a known mode, listed once.
+  if (modes.length === 0 || modes.length !== raw.length) return WEEK_REPLIES.noModes;
+  const hard = typeof body.hard === 'string' ? body.hard.trim() : '';
+  if (hard.length > MAX_NOTE_LENGTH) return WEEK_REPLIES.noteTooLong;
+  return { modes: modes.join(','), hard: hard || null };
+}
+
+/** The person's logged trips, oldest first, as { day, modes }. */
+export async function listTrips(
+  c: ApiContext,
+  me: Participant,
+): Promise<Array<{ day: number; modes: string[] }>> {
+  const rows = await c.env.DB.prepare(
+    'SELECT day, modes FROM checkins WHERE participant_id = ?1 ORDER BY day',
+  )
+    .bind(me.id)
+    .all<{ day: number; modes: string }>();
+  return rows.results.map((row) => ({
+    day: row.day,
+    modes: row.modes ? row.modes.split(',') : [],
+  }));
+}
+
 /**
- * Checks in for today, where "today" is the server's Las Vegas date, never
- * the phone's. A second check-in on the same day changes nothing.
+ * Logs a trip without driving for today, where "today" is the server's Las
+ * Vegas date, never the phone's. Logging again on the same day replaces how
+ * they got around and the note; it is still one entry for that day.
  */
 export async function checkIn(c: ApiContext, me: Participant): Promise<Response> {
   const today = todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now);
   if (today < 1 || today > 8) {
     return problem(409, today === 0 ? WEEK_REPLIES.notYet : WEEK_REPLIES.over);
   }
-  const [, days] = await c.env.DB.batch<{ day: number }>([
-    c.env.DB.prepare(
-      'INSERT OR IGNORE INTO checkins (participant_id, day, created_at) VALUES (?1, ?2, ?3)',
-    ).bind(me.id, today, c.now.toISOString()),
-    c.env.DB.prepare('SELECT day FROM checkins WHERE participant_id = ?1 ORDER BY day').bind(me.id),
-  ]);
-  const checked = (days?.results ?? []).map((row) => row.day);
-  return json({ count: checked.length, days: checked });
+  const body = await readJsonObject(c.request);
+  if (!body) return problem(400, MESSAGES.badRequest);
+  const trip = readTrip(body);
+  if (typeof trip === 'string') return problem(400, trip);
+  await c.env.DB.prepare(
+    `INSERT INTO checkins (participant_id, day, created_at, modes, hard) VALUES (?1, ?2, ?3, ?4, ?5)
+     ON CONFLICT (participant_id, day) DO UPDATE SET modes = ?4, hard = ?5`,
+  )
+    .bind(me.id, today, c.now.toISOString(), trip.modes, trip.hard)
+    .run();
+  const trips = await listTrips(c, me);
+  return json({ count: trips.length, days: trips.map((t) => t.day), trips });
 }
 
 function onOff(value: unknown): number | null | undefined {

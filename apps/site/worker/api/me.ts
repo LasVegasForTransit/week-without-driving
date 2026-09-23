@@ -5,6 +5,7 @@ import { sessionHash } from '../session';
 import { todayNumber } from '../time';
 import { checkDetails, maskContact } from '../validate';
 import { REPLIES } from './sign-up';
+import { listTrips } from './week';
 
 /**
  * My week's own data: GET and PATCH /api/me, and POST /api/signout. The
@@ -15,8 +16,7 @@ const CONTACT_IS_FIXED =
   'You can’t change your phone number or email here. Email wwd@lasvegasfortransit.org and we’ll change it for you.';
 
 export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
-  const [days, reminders, photos] = await c.env.DB.batch<Record<string, number>>([
-    c.env.DB.prepare('SELECT day FROM checkins WHERE participant_id = ?1 ORDER BY day').bind(me.id),
+  const [reminders, photos] = await c.env.DB.batch<Record<string, number>>([
     c.env.DB.prepare('SELECT push, text, email FROM reminders WHERE participant_id = ?1').bind(
       me.id,
     ),
@@ -24,6 +24,7 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
       'SELECT day, share FROM photos WHERE participant_id = ?1 ORDER BY created_at',
     ).bind(me.id),
   ]);
+  const trips = await listTrips(c, me);
   const chosen = reminders?.results[0];
   return json({
     firstName: me.firstName,
@@ -33,7 +34,8 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     instagram: me.instagram,
     age: me.age,
     newsletter: me.newsletter,
-    days: (days?.results ?? []).map((row) => row.day),
+    days: trips.map((trip) => trip.day),
+    trips,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
     reminders: {
       push: chosen?.push === 1,
