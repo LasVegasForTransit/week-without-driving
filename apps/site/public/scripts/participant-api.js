@@ -76,7 +76,10 @@
       waiting = [];
     };
 
-    if (sitekey) {
+    let started = false;
+    const start = () => {
+      if (started || !sitekey) return;
+      started = true;
       loadTurnstile()
         .then((turnstile) => {
           widget = turnstile.render(container, {
@@ -96,12 +99,23 @@
           failure = OFFLINE;
           settle(OFFLINE);
         });
+    };
+    // Turnstile is the biggest download on these pages, so it loads when
+    // someone starts on the form rather than with the page. Filling in the
+    // form gives it the few seconds it needs.
+    const form = container?.closest('form');
+    if (form) {
+      form.addEventListener('focusin', start, { once: true });
+      form.addEventListener('pointerdown', start, { once: true });
+    } else {
+      start();
     }
 
     return {
       token() {
         // No site key (a Worker without Turnstile set up): let the Worker answer.
         if (!sitekey || current) return Promise.resolve(current);
+        start();
         if (failure) return Promise.reject(new Error(failure));
         return new Promise((resolve, reject) => {
           waiting.push({ resolve, reject });
