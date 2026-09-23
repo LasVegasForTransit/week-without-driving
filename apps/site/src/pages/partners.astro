@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
-import { wwd } from '../lib/wwd';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
+import { site, lvbt } from '../lib/site';
+import { handleFromUrl } from '../lib/social';
 import { partners, contactEmail, joinMailto } from '../lib/partners';
 
 // Partners page: the roster (from "Show the organizations taking part on
@@ -22,6 +24,45 @@ const hasRoster = roster.length > 0;
 // The week ends 2026-10-09T07:00:00Z (12:00 am October 9, Las Vegas time);
 // `wwd.end` already carries that instant.
 const campaignOver = Date.now() > wwd.end.getTime();
+
+// Groups taking part: a logo wall, not the detailed writeup below it. Real
+// partner tiles (once there are any) render first, then enough dashed
+// "Your group here" placeholder tiles to keep the wall at a full row of 6 —
+// so the empty roster still shows visitors exactly where a logo goes.
+const dashedTileCount = Math.max(0, 6 - roster.length);
+
+const siteHost = site.url.replace(/^https?:\/\//, '');
+const igHandle = handleFromUrl(lvbt.instagramUrl) ?? '@lasvegasfortransit';
+const dateRangeWithYear = `${WWD_DATE_RANGE}, ${wwd.year}`;
+
+// Partner toolkit — sample social posts, ready to copy. Each includes the
+// hashtag, the Instagram handle, and the site so a partner can post it
+// as-is. Copy behavior reuses public/scripts/partners.js's existing
+// data-copy-target handling.
+const samplePosts = [
+  `We're taking part in Week Without Driving, ${dateRangeWithYear}. Get around by bus, walking or rolling, biking, or getting a ride, and pledge at ${siteHost}. Tag ${igHandle} and use ${wwd.hashtag}.`,
+  `How would you get around Las Vegas without a car? Find out with us during Week Without Driving, ${dateRangeWithYear}. Pledge at ${siteHost}. ${wwd.hashtag} ${igHandle}`,
+  `One trip, one day or the whole week: Week Without Driving is ${dateRangeWithYear} in Las Vegas. Join us and pledge at ${siteHost}. ${wwd.hashtag} ${igHandle}`,
+];
+
+const staffEmailSubject = `Join us for Week Without Driving, ${dateRangeWithYear}`;
+const staffEmailBody = [
+  'Hi everyone,',
+  '',
+  `Our group is taking part in Week Without Driving, ${dateRangeWithYear}. For one trip, one day or the whole week, try getting around without driving: by bus, walking or rolling, biking, or getting a ride.`,
+  '',
+  `Pledge at ${siteHost}. Every pledge counts the same.`,
+  '',
+  'Thanks,',
+  '[Your name]',
+].join('\n');
+const staffEmailTemplate = `Subject: ${staffEmailSubject}\n\n${staffEmailBody}`;
+
+const logoMailto = `mailto:${contactEmail}?subject=${encodeURIComponent(
+  'Partner logo: [your group]',
+)}&body=${encodeURIComponent(
+  ['Group name:', 'Website:', 'Logo attached as PNG or SVG? (yes/no):'].join('\n'),
+)}`;
 
 const weWantToHear = [
   'Disability and senior advocates',
@@ -72,17 +113,83 @@ const embedSnippet = `<a href="https://lvwwd.org/">
   <section class="container-page py-16 md:py-24">
     <h1 class="text-display-sm">Partners</h1>
 
-    {
-      hasRoster && (
-        <div class="reveal mt-10">
-          <p class="lede max-w-2xl">
-            Groups across the Las Vegas Valley are bringing Week Without Driving to their members,
-            neighbors, students and staff.
-          </p>
-          <h2 class="text-headline-lg mt-10">
-            {campaignOver ? 'Took part in 2026' : 'Taking part in 2026'}
-          </h2>
-          <ul class="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+    <div class="reveal mt-10">
+      <p class="lede max-w-2xl">
+        {
+          hasRoster
+            ? 'Groups across the Las Vegas Valley are bringing Week Without Driving to their members, neighbors, students and staff.'
+            : 'Workplaces, schools, churches, clubs and neighborhood groups can bring the week to their people. Join, and your logo goes on this wall.'
+        }
+      </p>
+      <h2 class="text-headline-lg mt-10">
+        {
+          hasRoster
+            ? campaignOver
+              ? 'Took part in 2026'
+              : 'Taking part in 2026'
+            : 'Groups taking part'
+        }
+      </h2>
+      <ul class="reveal-stagger mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+        {
+          roster.map((partner) =>
+            partner.url ? (
+              <li>
+                <a
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-outline bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
+                >
+                  {partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      class="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <span class="text-sm leading-snug">{partner.name}</span>
+                  )}
+                </a>
+              </li>
+            ) : (
+              <li>
+                <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-outline bg-surface-container p-3 text-center font-bold">
+                  {partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      class="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <span class="text-sm leading-snug">{partner.name}</span>
+                  )}
+                </div>
+              </li>
+            ),
+          )
+        }
+        {
+          Array.from({ length: dashedTileCount }).map((_) => (
+            <li>
+              <a
+                href={joinMailto}
+                data-print-url={contactEmail}
+                class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-dashed border-outline-variant/40 p-3 text-center text-sm font-semibold text-on-surface-variant no-underline transition-colors hover:border-primary hover:text-primary-ink focus-visible:border-primary focus-visible:text-primary-ink"
+              >
+                <Icon name="mdi:image-plus-outline" class="size-6" aria-hidden="true" />
+                <span>
+                  Your group here<span class="sr-only">. Email us to join.</span>
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        hasRoster && (
+          <ul class="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
             {roster.map((partner) => (
               <li>
                 <p class="text-title-md">
@@ -99,9 +206,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
               </li>
             ))}
           </ul>
-        </div>
-      )
-    }
+        )
+      }
+    </div>
 
     {
       campaignOver ? (
@@ -120,12 +227,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
           </p>
         </div>
       ) : (
-        <div
-          class:list={[
-            'reveal border-outline-variant/15 pt-10',
-            hasRoster ? 'mt-16 border-t md:mt-24' : 'mt-10',
-          ]}
-        >
+        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
           <h2 class="text-headline-lg">Bring your organization</h2>
           <p class="lede mt-4 max-w-2xl">
             Week Without Driving is for everyone who gets around Las Vegas without driving, and for
@@ -195,6 +297,103 @@ const embedSnippet = `<a href="https://lvwwd.org/">
               </div>
             </div>
             <p id="join-copy-status" class="mt-2 text-sm text-on-surface-variant" role="status" />
+          </div>
+        </div>
+      )
+    }
+
+    {
+      !campaignOver && (
+        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
+          <h2 class="text-headline-lg">Partner toolkit</h2>
+          <p class="lede mt-4 max-w-2xl">
+            Ready-to-use posts, an email for your staff or members, and how to send us your logo.
+          </p>
+
+          <div class="mt-10">
+            <h3 class="text-title-lg">Sample posts</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-pretty">
+              Copy one and post it on Instagram or Facebook, as is or in your own words.
+            </p>
+            <ul class="mt-6 grid gap-6 md:grid-cols-3">
+              {samplePosts.map((post, index) => (
+                <li class="flex flex-col border border-outline bg-surface-container p-6">
+                  <p id={`sample-post-${index + 1}`} class="flex-1 leading-relaxed text-pretty">
+                    {post}
+                  </p>
+                  <div class="mt-4 flex flex-wrap items-center gap-4">
+                    <button
+                      type="button"
+                      class="press inline-flex min-h-11 items-center gap-2 border border-outline px-4 py-2 text-sm font-semibold"
+                      data-copy-target={`#sample-post-${index + 1}`}
+                      aria-describedby={`sample-post-${index + 1}-status`}
+                      hidden
+                    >
+                      <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
+                      Copy
+                    </button>
+                  </div>
+                  <p
+                    id={`sample-post-${index + 1}-status`}
+                    class="mt-2 text-sm text-on-surface-variant"
+                    role="status"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-title-lg">Email to your staff or members</h3>
+            <p class="mt-3 max-w-2xl leading-relaxed text-pretty">
+              Copy this and paste it into an email, or edit it first.
+            </p>
+            <div class="mt-6 border border-outline bg-surface-container p-6 md:max-w-2xl">
+              <p id="staff-email-template" class="whitespace-pre-line leading-relaxed text-pretty">
+                {staffEmailTemplate}
+              </p>
+              <div class="mt-4 flex flex-wrap items-center gap-4">
+                <button
+                  type="button"
+                  class="press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-3 font-semibold"
+                  data-copy-target="#staff-email-template"
+                  aria-describedby="staff-email-status"
+                  hidden
+                >
+                  <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
+                  Copy email
+                </button>
+              </div>
+              <p
+                id="staff-email-status"
+                class="mt-2 text-sm text-on-surface-variant"
+                role="status"
+              />
+            </div>
+          </div>
+
+          <div class="mt-12">
+            <h3 class="text-title-lg">Send us your logo</h3>
+            <div class="mt-6 max-w-2xl border border-outline bg-surface-container p-6">
+              <p class="leading-relaxed text-pretty">
+                Partner groups appear on lvwwd.org with their logo. For now, email us your group's
+                name, website, and your logo attached as a PNG or SVG, and we'll add it.
+              </p>
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <a
+                  href={logoMailto}
+                  data-print-url={contactEmail}
+                  class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+                >
+                  <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
+                  Email us your logo
+                </a>
+                <span class="inline-flex items-center rounded-full bg-surface px-3 py-1 text-label-sm font-extrabold uppercase text-on-surface-variant">
+                  To come
+                </span>
+                <span class="text-sm text-on-surface-variant">A logo upload form</span>
+              </div>
+            </div>
           </div>
         </div>
       )
