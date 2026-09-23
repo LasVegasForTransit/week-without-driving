@@ -7,10 +7,10 @@
 // layout below (5x5, free square at index 12) must stay in sync with that
 // file if the card ever changes.
 //
-// TODO: this is a front-end demo. Marks are
-// saved only in this browser's localStorage; there is no account and
-// nothing is sent to a server, matching the Feature "Let participants mark
-// a Digital Transit Bingo card on their phone".
+// Marks are saved in this browser's localStorage. For someone signed in,
+// /scripts/bingo-sync.js also keeps the card on their sign-up, so it
+// follows them to another phone; it talks to this file through
+// window.lvwwdBingo and the lvwwd:bingo-saved event.
 (() => {
   const STORAGE_KEY = 'lvwwd_bingo_2026';
   const VIEW_KEY = 'lvwwd_bingo_view';
@@ -101,6 +101,7 @@
   }
 
   function saveState(s) {
+    document.dispatchEvent(new CustomEvent('lvwwd:bingo-saved', { detail: s }));
     if (!storageAvailable) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
@@ -376,6 +377,27 @@
     if (clearedNoticeEl) clearedNoticeEl.hidden = false;
     hideClearDialog();
   }
+
+  // For bingo-sync.js: read the card, or show a card loaded from the sign-up.
+  window.lvwwdBingo = {
+    state: () => state.slice(),
+    apply(next) {
+      state = next.map(Boolean);
+      state[FREE_INDEX] = true;
+      inputs.forEach((input) => {
+        input.checked = state[Number(input.dataset.index)];
+      });
+      updateProgress(state);
+      updateLineBorders(state);
+      if (storageAvailable) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          // The card still shows; it just isn't kept on this phone.
+        }
+      }
+    },
+  };
 
   clearBtn?.addEventListener('click', showClearDialog);
   clearCancelBtn?.addEventListener('click', hideClearDialog);

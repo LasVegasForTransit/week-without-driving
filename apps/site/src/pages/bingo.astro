@@ -273,9 +273,9 @@ const description =
     </section>
 
     <p class="mt-8 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
-      Your card is saved on this phone or computer, in this browser, and nothing is sent to us. If
-      you clear your browsing data or switch to another phone or browser, you'll start a new card.
-      In a private window, your card is gone when you close it.
+      Your card is saved on this phone or computer, in this browser. If you've signed up to win,
+      it's also saved to your sign-up, so it follows you to another phone. Otherwise, clearing your
+      browsing data or switching phones starts a new card.
     </p>
 
     <button
@@ -323,7 +323,9 @@ const description =
     </style>
   </noscript>
 
+  <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/bingo.js" defer></script>
+  <script is:inline src="/scripts/bingo-sync.js" defer></script>
   <WinBand />
 </BaseLayout>
 
