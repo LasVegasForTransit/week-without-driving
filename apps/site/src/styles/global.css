@@ -1309,3 +1309,35 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
       0 10px 34px -8px color-mix(in srgb, var(--color-primary) 60%, transparent);
   }
 }
+
+/* Site header: the campaign's own navigation, sticky on every page. */
+@layer components {
+  .site-header {
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    backdrop-filter: var(--chrome-blur);
+  }
+  .pledge-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 1.1rem;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .pledge-button:hover,
+  .pledge-button:focus-visible {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+  .menu-button {
+    min-height: 44px;
+    padding-inline: 1rem;
+    border: 1px solid var(--color-outline-variant);
+    font-weight: 700;
+  }
+  .mobile-menu {
+    border-top: 1px solid var(--chrome-hairline);
+  }
+}

@@ -4,14 +4,22 @@ import '../styles/global.css';
 // same-specificity screen rules by source order (see its header comment).
 import '../styles/print.css';
 import { lvbt, site } from '../lib/site';
+import { footerLinks, isCurrent, nav } from '../lib/nav';
 
 interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description = site.description, ogImage = '/og-wwd.png' } = Astro.props;
+const {
+  title,
+  description = site.description,
+  ogImage = '/og-wwd.png',
+  noindex = false,
+} = Astro.props;
+const path = Astro.url.pathname;
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 ---
 
@@ -49,6 +57,7 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
     <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="canonical" href={canonical} />
     <title>{title}</title>
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -63,19 +72,60 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
     <a href="#main" class="skip-link">Skip to content</a>
     <div class="min-h-dvh flex flex-col">
       <header
-        class="container-page flex flex-wrap items-center justify-between gap-x-8 gap-y-2 py-5"
+        data-site-header
+        class="site-header sticky top-0 z-(--z-header) border-b border-outline-variant/15"
       >
-        <a href="/" class="text-title-sm font-bold text-on-surface no-underline">
-          Week Without Driving <span class="text-on-surface-variant">· Las&nbsp;Vegas</span>
-        </a>
-        <a
-          href={lvbt.url}
-          data-print-url={lvbt.url}
-          class="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant no-underline hover:text-primary-ink focus-visible:text-primary-ink"
-        >
-          <img src="/brand/lvbt-logo-128.png" alt="" width="24" height="24" class="size-6" />
-          An initiative by {lvbt.name}
-        </a>
+        <div class="container-page flex items-center justify-between gap-4 py-3">
+          <a href="/" class="text-title-sm font-bold text-on-surface no-underline">
+            Week Without Driving <span class="text-on-surface-variant">· Las&nbsp;Vegas</span>
+          </a>
+          <nav aria-label="Main" class="hidden lg:block">
+            <ul class="flex items-center gap-5 text-sm font-semibold">
+              {
+                nav.map((item) => (
+                  <li>
+                    <a
+                      href={item.href}
+                      aria-current={isCurrent(item.href, path) ? 'page' : undefined}
+                      class="nav-link"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+          <div class="flex items-center gap-2">
+            <a href="/take-part" class="pledge-button">Pledge</a>
+            <button
+              type="button"
+              class="menu-button lg:hidden"
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+              data-menu-toggle
+            >
+              Menu
+            </button>
+          </div>
+        </div>
+        <nav id="mobile-menu" aria-label="Main" class="mobile-menu lg:hidden" hidden>
+          <ul class="container-page flex flex-col py-2 text-body-lg font-semibold">
+            {
+              nav.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    aria-current={isCurrent(item.href, path) ? 'page' : undefined}
+                    class="nav-link inline-block my-3"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
       </header>
       <main id="main" class="flex-1">
         <slot />
@@ -109,12 +159,17 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
             </a>
           </li>
           <li>
-            <a
-              href={`mailto:${lvbt.email.general}`}
-              data-print-url={lvbt.email.general}
-              class="body-link">Email us</a
-            >
+            <a href="mailto:wwd@lasvegasfortransit.org" class="body-link">Email us</a>
           </li>
+          {
+            footerLinks.map((link) => (
+              <li>
+                <a href={link.href} class="body-link">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
           <li>
             <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl} class="body-link">Join LVBT</a>
           </li>
@@ -138,6 +193,7 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
         rejected in production and leave every reveal element hidden. */
     }
     <script is:inline src="/scripts/reveal-on-scroll.js" defer></script>
+    <script is:inline src="/scripts/site-nav.js" defer></script>
     <script is:inline src="/scripts/copy-anchor.js" defer></script>
     <script is:inline src="/scripts/print-links.js" defer></script>
   </body>
