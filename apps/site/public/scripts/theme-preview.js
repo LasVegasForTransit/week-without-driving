@@ -1,4 +1,5 @@
-// Identity preview: ?theme=neon|desert|pop sets the site theme for this tab;
+// Identity preview: the site defaults to Desert Daylight; ?theme=neon|desert|pop
+// sets another theme for this tab;
 // ?theme=lvbt returns to the inherited LVBT look. Remove once a theme is chosen.
 (() => {
   const allowed = ['neon', 'desert', 'pop'];
@@ -12,4 +13,7 @@
     theme = new URLSearchParams(location.search).get('theme');
   }
   if (allowed.includes(theme)) document.documentElement.dataset.wwdTheme = theme;
+  if (new URLSearchParams(location.search).get('theme') === 'lvbt') {
+    delete document.documentElement.dataset.wwdTheme;
+  }
 })();

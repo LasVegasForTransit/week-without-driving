@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { Icon } from 'astro-icon/components';
+import PhotoSlot from '../components/PhotoSlot.astro';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
 
@@ -55,59 +56,73 @@ const eventSchema = {
   mainEntityOfPage: canonical,
 };
 
-// The hero's three sourced facts. Copy fixed by features/site/f-welcome.md.
-// `source` is for maintainers and is not rendered.
-const facts: Array<{ value: string; label: string; source: string; accent?: boolean }> = [
+// How to take part, after the national campaign's four ways to join.
+const ways = [
   {
-    value: '1 in 3',
-    label: 'people in the U.S. don’t drive',
-    source: 'America Walks, weekwithoutdriving.org',
+    title: 'Take the bus, walk, roll or bike.',
+    body: 'Try another way to get where you need to go, for one trip or the whole week.',
+    photo: 'A rider boarding an RTC bus in East Las Vegas',
   },
   {
-    value: '57.9M',
-    label: 'bus trips a year on RTC',
-    source: 'RTC ridership reports (key-facts.md)',
+    title: 'Ask for a ride.',
+    body: 'Ride with a friend, a neighbor or a coworker. Notice what it’s like to count on someone else.',
+    photo: 'Two neighbors sharing a ride to the grocery store',
   },
   {
-    value: '42%',
-    label: 'of RTC bus service faces cuts by 2028',
-    source: 'RTC letter to the Nevada Legislature, March 2026 (key-facts.md)',
-    accent: true,
+    title: 'Notice what’s hard.',
+    body: 'A stop with no shade. A sidewalk that ends. A bus that comes every hour. Tell us about it.',
+    photo: 'A bus stop with no shade on a hot afternoon',
   },
-];
+  {
+    title: 'If you have to drive, you haven’t failed.',
+    body: 'Some trips need a car. Think about what someone who can’t drive would do instead.',
+    photo: 'A parent with a stroller crossing a wide Las Vegas street',
+  },
+] as const;
 
-// "Explore the week" cards, in the fixed order from f-welcome.md. Card text
-// is copied exactly from the Feature's Copy table.
-const exploreCards = [
+// Leaders who took the challenge elsewhere, quoted from the national campaign.
+const voices = [
   {
-    href: '/take-part',
-    icon: 'mdi:hand-heart-outline',
-    title: 'Take Part',
-    body: 'Pick One Trip, One Day or One Week, and see how the week works.',
+    quote:
+      'This week was a reminder that mobility is a human right. And it’s also a reminder that so many people in our region are excluded from this right, simply because driving for them is not an option.',
+    who: 'Girmay Zahilay',
+    role: 'King County Executive, Washington',
   },
   {
-    href: '/guides',
-    icon: 'mdi:book-open-variant-outline',
-    title: 'Guides',
-    body: 'How to pay your fare, ride with a wheelchair or stroller, stay cool, and more.',
+    quote: 'I’m learning so much about how to better represent my constituents who don’t drive.',
+    who: 'Analise Ortiz',
+    role: 'Arizona State Senator',
   },
   {
-    href: '/go',
-    icon: 'mdi:map-marker-path',
-    title: 'Go',
-    body: 'Places to go across the valley, and the bus stops nearest you.',
+    quote:
+      'Traveling to Southeast DC on Day 4 required multiple connections across various modes and still took an hour. I’m leaving the challenge with an even deeper appreciation for the transit options available to me, and a renewed sense of commitment to expanding District residents’ access to transit.',
+    who: 'Charles Allen',
+    role: 'Councilmember, Washington, DC',
+  },
+] as const;
+
+// Participate your way: one door for each kind of participant.
+const audiences = [
+  {
+    icon: 'mdi:account-heart-outline',
+    title: 'Las Vegans',
+    body: 'Pledge one trip, one day or the whole week. Get guides, a bingo card and a daily reminder.',
+    cta: 'Take the pledge',
+    href: '/take-part#pledge',
   },
   {
-    href: '/bingo',
-    icon: 'mdi:grid',
-    title: 'Bingo',
-    body: 'Small things to try all week, some without leaving home.',
+    icon: 'mdi:office-building-outline',
+    title: 'Workplaces, schools and groups',
+    body: 'Invite your coworkers, classmates or members. We’ll send a kit with flyers and a link that counts your group’s pledges.',
+    cta: 'Bring your organization',
+    href: '/partners',
   },
   {
-    href: '/giveaway',
-    icon: 'mdi:gift-outline',
-    title: 'Giveaway',
-    body: 'Enter once a day on Instagram, or with your email address or phone number, for a chance to win a one-month RTC bus pass. No purchase or post necessary.',
+    icon: 'mdi:bank-outline',
+    title: 'Elected leaders and agencies',
+    body: 'Take the challenge with your staff and see your district the way your constituents who don’t drive see it. We’ll help you plan the week.',
+    cta: 'Plan your week with us',
+    href: 'mailto:wwd@lasvegasfortransit.org?subject=Week%20Without%20Driving%3A%20elected%20leaders%20and%20agencies',
   },
 ] as const;
 ---
@@ -115,496 +130,476 @@ const exploreCards = [
 <BaseLayout title={`${site.name} · ${dateRange}`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
 
-  {/* HERO: the campaign as a Las Vegas marquee, then one line and one action. */}
-  <section class="hero pb-12 md:pb-16" aria-labelledby="hero-heading">
-    <div class="container-page pt-6 md:pt-10">
-      <div class="marquee" aria-hidden="true">
-        <p class="marquee__small">Las Vegas</p>
-        <p class="marquee__big">Week Without Driving</p>
-        <p class="marquee__dates">Oct 1–8 · 2026</p>
+  {/* HERO: a real photo of Las Vegans, and a question to sit with. */}
+  <section class="home-hero" aria-labelledby="hero-heading">
+    <PhotoSlot
+      class="home-hero__photo"
+      shows="Las Vegans of all ages waiting together at a bus stop"
+      quiet
+    />
+    <div class="home-hero__shade" aria-hidden="true"></div>
+    <div class="container-page home-hero__content">
+      <p class="home-hero__eyebrow">
+        <span>Week Without Driving Las Vegas</span>
+        <span>October 1 to 8, {wwd.year}</span>
+      </p>
+      <h1 id="hero-heading" class="home-hero__title">
+        What would your week look like without a car?
+      </h1>
+      <div class="home-hero__actions">
+        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
+        <a href="#why" class="btn btn--ghost">Learn more</a>
       </div>
+    </div>
+  </section>
 
-      <div class="hero__grid">
-        <div>
-          <h1 id="hero-heading" class="hero__headline">
-            However you get around Las&nbsp;Vegas, this week is for you.
-          </h1>
-          <p class="hero__line">
-            Take the bus, walk, roll, bike, or get a ride. Every trip counts.
-          </p>
-
-          <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
-            <a href="/take-part#pledge" class="hero__cta press">
-              Pick your pledge
-              <Icon name="mdi:arrow-right" class="size-5" aria-hidden="true" />
-            </a>
-            <a href="/take-part#how-it-works" class="body-link font-semibold">How it works</a>
-          </div>
-        </div>
-        <div class="hero__facts">
-          <dl class="wwd-route">
-            {
-              facts.map((f) => (
-                <div class="wwd-stop">
-                  <dt
-                    class:list={[
-                      'text-display-sm font-extrabold leading-none tnum',
-                      f.accent && 'text-primary',
-                    ]}
-                  >
-                    {f.value}
-                  </dt>
-                  <dd class="mt-2 max-w-[22rem] text-body-md leading-snug text-on-surface-variant text-pretty">
-                    {f.label}
-                  </dd>
-                </div>
-              ))
-            }
-          </dl>
-        </div>
+  {/* VISION: who doesn't drive, and the Las Vegas we're working toward. */}
+  <section id="why" class="home-vision scroll-mt-20" aria-labelledby="vision-heading">
+    <div class="container-page home-vision__grid">
+      <h2 id="vision-heading" class="home-vision__lead">
+        One in three people in the U.S. don’t drive.
+      </h2>
+      <div class="home-vision__body">
+        <p>
+          In Las Vegas, they’re our kids, our grandparents, and neighbors working the late shift.
+          Every day they cross a valley built for cars, by bus, on foot, in a wheelchair, on a bike,
+          or with a ride from someone who can.
+        </p>
+        <p>
+          Las Vegans for Better Transit is working toward a valley where everyone can get where they
+          need to go. Week Without Driving is how we see it together, for eight days in October.
+        </p>
+        <a href={`${lvbt.url}/about`} class="home-link">About Las Vegans for Better Transit</a>
       </div>
+    </div>
+  </section>
 
-      <ol
-        class="week-route"
-        aria-label="The week runs eight days, Thursday October 1 to Thursday October 8"
-      >
-        <li class="week-route__stop week-route__stop--end">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Thu</span>
-          <span class="week-route__num">1</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Fri</span>
-          <span class="week-route__num">2</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Sat</span>
-          <span class="week-route__num">3</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Sun</span>
-          <span class="week-route__num">4</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Mon</span>
-          <span class="week-route__num">5</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Tue</span>
-          <span class="week-route__num">6</span>
-        </li>
-        <li class="week-route__stop">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Wed</span>
-          <span class="week-route__num">7</span>
-        </li>
-        <li class="week-route__stop week-route__stop--end">
-          <span class="week-route__dot"></span>
-          <span class="week-route__day">Thu</span>
-          <span class="week-route__num">8</span>
-        </li>
-      </ol>
-      <p class="mt-3 text-sm text-on-surface-variant">
-        Part of the national{' '}
-        <a
-          href={wwd.nationalUrl}
-          data-print-url={wwd.nationalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="body-link">Week Without Driving</a
+  {/* HOW TO TAKE PART */}
+  <section class="home-section" aria-labelledby="ways-heading">
+    <div class="container-page">
+      <h2 id="ways-heading" class="home-h2">How to take part</h2>
+      <ul class="home-ways">
+        {
+          ways.map((w) => (
+            <li class="home-way">
+              <PhotoSlot class="home-way__photo" shows={w.photo} />
+              <h3 class="home-way__title">{w.title}</h3>
+              <p class="home-way__body">{w.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="home-actions">
+        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
+        <a href="/guides" class="btn btn--outline">Read the rider guides</a>
+      </div>
+    </div>
+  </section>
+
+  {/* VOICES */}
+  <section class="home-voices" aria-labelledby="voices-heading">
+    <div class="container-page">
+      <h2 id="voices-heading" class="home-h2">What leaders learned</h2>
+      <p class="home-intro">
+        Elected leaders across the country have taken the challenge. Here’s what they said.
+      </p>
+      <ul class="home-quotes">
+        {
+          voices.map((v) => (
+            <li class="home-quote">
+              <blockquote>
+                <p>“{v.quote}”</p>
+              </blockquote>
+              <p class="home-quote__who">
+                <strong>{v.who}</strong>
+                <span>{v.role}</span>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="home-source">
+        Quotes from the national{' '}
+        <a href={wwd.nationalUrl} target="_blank" rel="noopener noreferrer" class="body-link"
+          >Week Without Driving</a
         >.
       </p>
     </div>
   </section>
 
-  {/* WHY — who this week is for */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-16 md:py-24"
-    aria-labelledby="why"
-  >
-    <div class="grid gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
-      <div class="reveal">
-        <h2 id="why" class="text-headline-lg">
-          For many Las Vegans, getting around without a car is everyday life.
-        </h2>
-        <div class="mt-6 max-w-2xl space-y-4 leading-relaxed text-pretty">
-          <p>
-            Kids too young to drive. Neighbors who can’t afford a car. People whose disability means
-            they don’t drive. Older adults who gave up the keys. People who choose not to. Every
-            day, they cross a city built for cars by bus, walking or rolling, biking, or getting a
-            ride.
-          </p>
-          <p>
-            If that’s you, you already know what this week is about. Pledge so your everyday trips
-            count, and tell us what makes them hard.
-          </p>
-          <p>
-            If you usually drive, try it for one trip, one day or the whole week. It isn’t about
-            suffering or proving a point. It’s about noticing what getting around asks of the people
-            who do it every day: a bus that pulls away a minute before you reach the stop, a
-            sidewalk that ends at a wall, a stop with no shade.
-          </p>
-          <p>
-            If you have to drive, you haven’t failed. Notice what made driving necessary: that’s
-            what this week is about.
-          </p>
-        </div>
-      </div>
-      <aside
-        class="reveal border-t-2 border-outline pt-6 md:border-t-0 md:border-l md:border-outline-variant/20 md:pl-10 md:pt-0"
-      >
-        <p class="text-title-sm text-on-surface-variant">When</p>
-        <p class="mt-2 text-lg font-semibold">{dateRange}</p>
-        <p class="mt-6 text-title-sm text-on-surface-variant">Where</p>
-        <p class="mt-2 text-lg font-semibold">
-          Anywhere in the Las&nbsp;Vegas Valley, from North Las&nbsp;Vegas to Henderson and from
-          Summerlin to East Las&nbsp;Vegas
-        </p>
-        <p class="mt-6 text-title-sm text-on-surface-variant">Who</p>
-        <p class="mt-2 text-lg font-semibold">
-          Everyone, whether you drive every day or haven’t driven in years
-        </p>
-        <p class="mt-6 text-title-sm text-on-surface-variant">Cost</p>
-        <p class="mt-2 text-lg font-semibold">Free. No account needed.</p>
-        <p class="mt-6 text-title-sm text-on-surface-variant">National organizer</p>
-        <p class="mt-2 text-lg font-semibold">
-          <a
-            href={wwd.nationalUrl}
-            data-print-url={wwd.nationalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="body-link"
-          >
-            {wwd.nationalOrganizer}
-          </a>
-        </p>
-      </aside>
+  {/* PARTICIPATE YOUR WAY */}
+  <section class="home-section" aria-labelledby="audiences-heading">
+    <div class="container-page">
+      <h2 id="audiences-heading" class="home-h2">Take part your way</h2>
+      <ul class="home-audiences">
+        {
+          audiences.map((a) => (
+            <li class="home-audience">
+              <Icon name={a.icon} class="home-audience__icon" aria-hidden="true" />
+              <h3 class="home-audience__title">{a.title}</h3>
+              <p class="home-audience__body">{a.body}</p>
+              <a href={a.href} class="home-link">
+                {a.cta}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
-  {/* EXPLORE THE WEEK */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-16 md:py-24"
-    aria-labelledby="explore-heading"
-  >
-    <h2 id="explore-heading" class="reveal text-headline-lg">Explore the week</h2>
-    <ul class="reveal-stagger mt-10 grid gap-4 md:grid-cols-2">
-      {
-        exploreCards.map((card) => (
-          <li class="reveal flex flex-col gap-2">
-            <a
-              href={card.href}
-              class="group flex h-full flex-col gap-3 border border-outline bg-surface-container p-6 no-underline transition-colors hover:border-primary focus-visible:border-primary"
-            >
-              <Icon name={card.icon} class="size-8 text-primary-ink" aria-hidden="true" />
-              <span class="text-title-lg text-on-surface group-hover:text-primary-ink group-focus-visible:text-primary-ink">
-                {card.title}
-              </span>
-              <span class="text-body-sm leading-relaxed text-on-surface-variant text-pretty">
-                {card.body}
-              </span>
-            </a>
-            {card.href === '/giveaway' && (
-              <a href="/giveaway/rules" class="body-link self-start text-sm font-semibold">
-                See the Official Rules
-              </a>
-            )}
-          </li>
-        ))
-      }
-    </ul>
+  {/* PARTNERS */}
+  <section class="home-partners" aria-labelledby="partners-heading">
+    <div class="container-page home-partners__grid">
+      <div>
+        <h2 id="partners-heading" class="home-h2">Part of a national movement</h2>
+        <p class="home-intro">
+          Week Without Driving runs in hundreds of towns and cities every October. The national
+          campaign is led by America Walks and the Nondrivers Alliance.
+        </p>
+      </div>
+      <ul class="home-partners__list" aria-label="National partners">
+        <li>America Walks</li>
+        <li>Nondrivers Alliance</li>
+        <li class="home-partners__you"><a href="/partners">Your organization here</a></li>
+      </ul>
+    </div>
   </section>
 
-  {/* THE CLOSE */}
-  <section data-print-callout class="bg-slab text-on-slab">
-    <div class="container-page py-16 md:py-24">
-      <div class="reveal max-w-2xl">
-        <h2 class="text-display-sm">Take part, October 1 to 8.</h2>
-        <p class="mt-6 text-body-lg leading-relaxed text-on-slab/85 text-pretty">
-          Pick One Trip, One Day or One Week. Every pledge counts the same.
+  {/* STAY INVOLVED */}
+  <section class="home-stay" aria-labelledby="stay-heading">
+    <div class="container-page home-stay__grid">
+      <div>
+        <h2 id="stay-heading" class="home-h2">Keep going after the week</h2>
+        <p class="home-intro">
+          Get transit news and easy ways to help in Las Vegas from Las Vegans for Better Transit.
         </p>
-        <div class="mt-8">
-          <a
-            href="/take-part#pledge"
-            class="press inline-flex items-center gap-2 bg-primary px-7 py-4 font-bold text-on-primary no-underline hover:bg-surface hover:text-on-surface focus-visible:bg-surface focus-visible:text-on-surface"
-          >
-            Pick your pledge
-            <Icon name="mdi:arrow-right" class="size-4" aria-hidden="true" />
-          </a>
-        </div>
-        <ul class="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold">
-          <li>
-            <a href="mailto:wwd@lasvegasfortransit.org" class="body-link"
-              >Questions? Email wwd@lasvegasfortransit.org</a
-            >
-          </li>
-          <li>
-            <a
-              href={lvbt.instagramUrl}
-              data-print-url={lvbt.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="body-link">Follow @lasvegasfortransit on Instagram</a
-            >
-          </li>
-          <li>
-            <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl} class="body-link"
-              >Join Las Vegans for Better Transit</a
-            >
-          </li>
-        </ul>
       </div>
-      <blockquote
-        class="reveal-quote mt-12 max-w-2xl border-l-[6px] border-primary py-2 pl-6 text-headline-md font-medium leading-snug text-balance md:pl-10"
-      >
-        The bus that comes every half hour is not an inconvenience for a week. For the people who
-        ride it every day, it is the schedule.
-      </blockquote>
+      <div class="home-stay__actions">
+        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
+        <a href={lvbt.joinUrl} class="btn btn--outline">Join LVBT</a>
+        <a href={lvbt.instagramUrl} target="_blank" rel="noopener noreferrer" class="home-link"
+          >Follow @lasvegasfortransit</a
+        >
+      </div>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  /* The hero's route strip. Desktop: one Ember line across the width with a
-     stop dot at each number. Narrow screens: the line runs down the left
-     and the dots sit beside each number, so it still reads as one route. */
-  .wwd-route {
-    --stop: 1.5rem;
-    --line: 0.3125rem;
-    position: relative;
-    display: grid;
-    gap: 2rem;
-  }
-  .wwd-stop {
-    position: relative;
-  }
-  .wwd-stop::before {
-    content: '';
-    position: absolute;
-    width: var(--stop);
-    height: var(--stop);
-    box-sizing: border-box;
-    border-radius: 9999px;
-    background: var(--color-surface);
-    border: var(--line) solid var(--color-primary);
-  }
-  .wwd-stop:last-child::before {
-    background: var(--color-primary);
-  }
-
-  @media (max-width: 47.99rem) {
-    .wwd-route {
-      padding-left: calc(var(--stop) + 1rem);
-    }
-    .wwd-route::before {
-      content: '';
-      position: absolute;
-      left: calc(var(--stop) / 2 - var(--line) / 2);
-      top: 0;
-      bottom: 0;
-      width: var(--line);
-      background: var(--color-primary);
-    }
-    .wwd-stop::before {
-      left: calc(-1 * (var(--stop) + 1rem));
-      top: 0.35rem;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .wwd-route {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2.5rem;
-      padding-top: calc(var(--stop) + 1.25rem);
-    }
-    .wwd-route::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(var(--stop) / 2 - var(--line) / 2);
-      height: var(--line);
-      background: var(--color-primary);
-    }
-    .wwd-stop::before {
-      left: 0;
-      top: calc(-1 * (var(--stop) + 1.25rem));
-    }
-  }
-
-  /* ---- Hero: a Las Vegas marquee sign, one headline, one action. ---- */
-  .marquee {
-    position: relative;
-    padding: 1.4rem 1rem 1.2rem;
-    text-align: center;
-    color: #fff4d6;
-    background: radial-gradient(90% 120% at 50% 0%, #2a1a14 0%, transparent 70%), #120d0b;
-    border-radius: 1.25rem;
-    box-shadow: 0 24px 50px -24px rgb(18 13 11 / 0.7);
-    overflow: hidden;
-  }
-  .marquee::before {
-    content: '';
-    position: absolute;
-    inset: 0.5rem;
-    border: 5px dotted #ffd98a;
-    border-radius: 0.9rem;
-    filter: drop-shadow(0 0 3px #ffc658) drop-shadow(0 0 8px rgb(255 198 88 / 0.6));
-    animation: marquee-chase 1.6s steps(2) infinite;
-  }
-  @keyframes marquee-chase {
-    50% {
-      border-color: #fff1c9;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .marquee::before {
-      animation: none;
-    }
-  }
-  .marquee__small,
-  .marquee__big,
-  .marquee__dates {
-    position: relative;
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    text-transform: uppercase;
-  }
-  .marquee__small {
-    font-size: clamp(0.8rem, 3.4vw, 1.1rem);
-    letter-spacing: 0.3em;
-    color: var(--color-primary-ink);
-    text-shadow: 0 0 10px color-mix(in srgb, var(--color-primary) 70%, transparent);
-  }
-  .marquee__big {
-    margin-top: 0.35rem;
-    font-size: clamp(2.2rem, 11.5vw, 5.6rem);
-    line-height: 0.95;
-    color: #fff4d6;
-    text-shadow:
-      0 3px 0 var(--color-primary),
-      0 6px 0 color-mix(in srgb, var(--color-primary) 55%, #000),
-      0 0 22px rgb(255 190 110 / 0.35);
-    text-wrap: balance;
-  }
-  .marquee__dates {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.35rem 0.9rem;
-    font-size: clamp(0.95rem, 4.2vw, 1.35rem);
-    color: #120d0b;
-    background: #ffd98a;
-    border-radius: 999px;
-    box-shadow: 0 0 16px rgb(255 217 138 / 0.55);
-  }
-
-  .hero__grid {
-    display: grid;
-    gap: 2.5rem;
-    margin-top: 1.75rem;
-  }
-  @media (min-width: 64rem) {
-    .hero__grid {
-      grid-template-columns: 1.35fr 1fr;
-      align-items: end;
-      margin-top: 2.5rem;
-    }
-  }
-  .hero__facts {
-    order: 2;
-  }
-  .hero__headline {
-    margin-top: 0;
-    max-width: 20ch;
-    font-size: clamp(2rem, 7.5vw, 3.6rem);
-    font-weight: 900;
-    line-height: 1.02;
-    letter-spacing: -0.025em;
-    text-wrap: balance;
-  }
-  .hero__line {
-    margin-top: 0.9rem;
-    max-width: 34ch;
-    font-size: clamp(1.15rem, 4.4vw, 1.4rem);
-    line-height: 1.4;
-    color: var(--color-on-surface-variant);
-    text-wrap: pretty;
-  }
-  .hero__cta {
+  .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    min-height: 56px;
-    padding: 0 1.6rem;
-    font-size: 1.15rem;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 1.5rem;
     font-weight: 800;
-    color: var(--color-on-primary);
-    background: var(--color-primary);
+    font-size: 1.05rem;
     border-radius: 999px;
     text-decoration: none;
-    box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--color-primary) 75%, transparent);
   }
-  .hero__cta:hover,
-  .hero__cta:focus-visible {
+  .btn--primary {
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+  }
+  .btn--primary:hover,
+  .btn--primary:focus-visible {
     background: var(--color-on-surface);
     color: var(--color-surface);
   }
+  .btn--ghost {
+    color: #fff;
+    border: 2px solid rgb(255 255 255 / 0.85);
+  }
+  .btn--ghost:hover,
+  .btn--ghost:focus-visible {
+    background: #fff;
+    color: #111;
+  }
+  .btn--outline {
+    color: var(--color-on-surface);
+    border: 2px solid var(--color-on-surface);
+  }
+  .btn--outline:hover,
+  .btn--outline:focus-visible {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+  .home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1rem;
+    font-weight: 800;
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .home-link::after {
+    content: '→';
+  }
 
-  /* The week as a bus line: eight stops, Thursday to Thursday. */
-  .week-route {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    margin-top: 2.6rem;
-    padding: 0;
-    list-style: none;
-  }
-  .week-route::before {
-    content: '';
-    position: absolute;
-    left: calc(100% / 16);
-    right: calc(100% / 16);
-    top: 0.55rem;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--color-primary);
-  }
-  .week-route__stop {
+  /* Hero */
+  .home-hero {
     position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
+    align-items: flex-end;
+    min-height: min(78svh, 44rem);
+    color: #fff;
   }
-  .week-route__dot {
-    width: 1.1rem;
-    height: 1.1rem;
-    border-radius: 50%;
-    background: var(--color-surface);
-    border: 4px solid var(--color-primary);
+  .home-hero :global(.home-hero__photo) {
+    position: absolute;
+    inset: 0;
   }
-  .week-route__stop--end .week-route__dot {
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-top: -0.2rem;
-    background: var(--color-primary);
-    border-color: var(--color-on-surface);
+  .home-hero__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgb(10 12 14 / 0.88) 0%,
+      rgb(10 12 14 / 0.55) 45%,
+      rgb(10 12 14 / 0.05) 80%
+    );
   }
-  .week-route__day {
-    margin-top: 0.3rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .home-hero__content {
+    position: relative;
+    width: 100%;
+    padding-block: 2.5rem 2.75rem;
+  }
+  .home-hero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .home-hero__title {
+    margin-top: 0.75rem;
+    max-width: 16ch;
+    font-size: clamp(2.35rem, 9vw, 4.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  /* Vision */
+  .home-vision {
+    padding-block: clamp(3.5rem, 9vw, 6.5rem);
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+  }
+  .home-vision__grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .home-vision__lead {
+    max-width: 18ch;
+    font-size: clamp(1.9rem, 6.5vw, 3.25rem);
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .home-vision__body {
+    max-width: 38rem;
+    font-size: clamp(1.1rem, 3.8vw, 1.3rem);
+    line-height: 1.55;
+  }
+  .home-vision__body p + p {
+    margin-top: 1rem;
+  }
+  .home-vision .home-link {
+    color: var(--color-on-slab);
+  }
+
+  /* Shared section rhythm */
+  .home-section {
+    padding-block: clamp(3.5rem, 9vw, 6rem);
+  }
+  .home-h2 {
+    font-size: clamp(1.8rem, 6vw, 2.75rem);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .home-intro {
+    margin-top: 0.75rem;
+    max-width: 36rem;
+    font-size: 1.15rem;
+    line-height: 1.5;
     color: var(--color-on-surface-variant);
   }
-  .week-route__num {
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    font-size: clamp(1.1rem, 5vw, 1.6rem);
-    line-height: 1;
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  /* Ways to take part */
+  .home-ways {
+    display: grid;
+    gap: 1.75rem;
+    margin-top: 2rem;
+  }
+  .home-way :global(.home-way__photo) {
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+  }
+  .home-way__title {
+    margin-top: 0.9rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .home-way__body {
+    margin-top: 0.4rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+
+  /* Voices */
+  .home-voices {
+    padding-block: clamp(3.5rem, 9vw, 6rem);
+    background: var(--color-surface-container);
+  }
+  .home-quotes {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+  .home-quote {
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border-radius: 0.75rem;
+    border-top: 4px solid var(--color-primary);
+  }
+  .home-quote blockquote p {
+    font-size: 1.15rem;
+    line-height: 1.5;
+  }
+  .home-quote__who {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+  .home-quote__who span {
+    color: var(--color-on-surface-variant);
+  }
+  .home-source {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--color-on-surface-variant);
+  }
+
+  /* Audiences */
+  .home-audiences {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .home-audience {
+    padding: 1.5rem;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 15%, transparent);
+    border-radius: 0.75rem;
+  }
+  .home-audience__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--color-primary);
+  }
+  .home-audience__title {
+    margin-top: 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+  .home-audience__body {
+    margin-top: 0.4rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+
+  /* Partners */
+  .home-partners {
+    padding-block: clamp(3rem, 8vw, 5rem);
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+  }
+  .home-partners__grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .home-partners__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 0.75rem;
+  }
+  .home-partners__list li {
+    display: grid;
+    place-items: center;
+    min-height: 5rem;
+    padding: 1rem;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-align: center;
+    background: var(--color-surface-container);
+    border-radius: 0.75rem;
+  }
+  .home-partners__you {
+    background: transparent !important;
+    border: 2px dashed color-mix(in srgb, var(--color-on-surface) 30%, transparent);
+  }
+  .home-partners__you a {
+    color: var(--color-link);
+  }
+
+  /* Stay involved */
+  .home-stay {
+    padding-block: clamp(3.5rem, 9vw, 6rem);
+    background: var(--color-primary-soft);
+  }
+  .home-stay__grid {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .home-stay__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+  .home-stay__actions .home-link {
+    margin-top: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .home-ways {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .home-audiences,
+    .home-quotes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .home-ways {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .home-vision__grid,
+    .home-partners__grid,
+    .home-stay__grid {
+      grid-template-columns: 1fr 1.2fr;
+      column-gap: 4rem;
+    }
+    .home-hero {
+      min-height: 40rem;
+    }
   }
 </style>
