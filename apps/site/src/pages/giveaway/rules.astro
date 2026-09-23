@@ -1,9 +1,179 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// The Official Rules, /giveaway/rules. This is the DRAFT wording from the
+// Copy table of the Docket task "Publish the giveaway's Official Rules"
+// (01M35FNJABCJH88PZB39QD3XDQ), word for word. Per that task and "Build
+// the Official Rules page" (01M35FNJN1RYWEPGJGGYZ4V442), this wording must
+// be reviewed by a lawyer licensed in Nevada and approved before October 1,
+// 2026 — see "Finalize the Official Rules wording" (01M35FNJRF1A0VKEB3NET813VV).
+// The visible banner below marks this as a draft; delete the <div
+// data-draft-banner> block (and its <style>) once the approved wording
+// replaces this file's text and "Last updated" is set to the approval date.
+//
+// The page uses no script and calls no API, matching the task's
+// specification, so it works with JavaScript off and needs no offline
+// handling of its own.
+const title = 'Official Rules · Week Without Driving Las Vegas';
+const description =
+  'The Official Rules for the Week Without Driving Las Vegas Giveaway, October 1 to 8, 2026.';
+const lastUpdated = 'September 22, 2026';
 ---
 
-<BaseLayout title="Official Rules · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
+<BaseLayout {title} {description}>
+  <section class="container-page container-prose py-12 md:py-16">
+    <div data-draft-banner class="draft-banner">
+      <strong>Draft: final wording pending review.</strong> This page shows draft rules that have not
+      yet been reviewed by a lawyer licensed in Nevada or approved. Do not rely on this wording for an
+      actual entry until it is finalized.
+    </div>
+
     <h1 class="text-display-sm">Official Rules</h1>
+    <p class="lede mt-2">Week Without Driving Las Vegas Giveaway, October 1 to 8, 2026</p>
+    <p class="mt-2 text-sm text-on-surface-variant">Last updated {lastUpdated}</p>
+
+    <div class="prose-doc mt-10">
+      <h2>1. Who runs the giveaway</h2>
+      <p>
+        The Week Without Driving Las Vegas Giveaway (the giveaway) is run by Las Vegans for Better
+        Transit (LVBT), a volunteer transit advocacy group in Las Vegas, Nevada.
+      </p>
+
+      <h2>2. No purchase or post necessary</h2>
+      <p>
+        No purchase or post necessary. Buying something or posting on social media does not improve
+        your chances of winning. The free entry in section 5 has the same chance as every other
+        entry. Joining LVBT's newsletter does not affect your chances of winning.
+      </p>
+
+      <h2>3. Who can enter</h2>
+      <p>
+        You can enter if you live in Southern Nevada (Clark, Esmeralda, Lincoln or Nye County,
+        Nevada) and are 13 or older when you enter. If you are 13 to 17, your parent or guardian
+        must agree to these rules before you enter. People who can sign in to the giveaway's
+        volunteer pages, and anyone else who helps run the giveaway, cannot win. The giveaway is
+        void where the law does not allow it.
+      </p>
+
+      <h2>4. When</h2>
+      <p>
+        The giveaway runs from 12:00 am on October 1, 2026 to 11:59 pm on October 8, 2026, Las Vegas
+        time (Pacific Daylight Time). Each day runs from midnight to midnight, Las Vegas time.
+      </p>
+
+      <h2>5. How to enter</h2>
+      <p>There are three ways to enter. Each gives the same one entry for the day.</p>
+      <p>
+        Upload: on lvwwd.org/giveaway, type your Instagram handle, answer the age question, and
+        upload a screenshot or photo of something you did without driving that day.
+      </p>
+      <p>
+        Instagram tag: post a photo, reel or story about something you did without driving that day
+        and tag @lasvegasfortransit. If your account is private, also send the post or story to
+        @lasvegasfortransit by direct message the same day. Volunteers count tags by hand, and a tag
+        counts for the day it was posted.
+      </p>
+      <p>
+        Free entry: on lvwwd.org/giveaway, type your email address or US phone number and answer the
+        age question. You do not need to upload, post or buy anything. If you can't use the form,
+        email wwd@lasvegasfortransit.org with the subject Giveaway entry, and a volunteer enters
+        your email address for the day your email arrives.
+      </p>
+      <p>
+        If you are 13 to 17, tick the box saying your parent or guardian agrees to these rules on
+        the upload or free entry form. For Instagram tags, send @lasvegasfortransit a direct message
+        that says: I'm 13 to 17 and my parent or guardian agrees to the Official Rules.
+      </p>
+
+      <h2>6. Limits</h2>
+      <p>
+        You can get one entry a day and at most 8 entries in total. Entering more than one way on
+        the same day still counts as one entry. Use one way to identify yourself for the whole
+        giveaway: one Instagram handle, one email address, or one phone number. Entries from a
+        person who uses more than one to get more than one entry a day, and entries made by
+        automated means, are removed from the draw.
+      </p>
+
+      <h2>7. Prize</h2>
+      <p>
+        There is one prize: a one-month (30-day) RTC bus pass and an LVBT sticker pack. RTC is the
+        Regional Transportation Commission of Southern Nevada. The approximate retail value is $75:
+        $65 for the pass and $10 for the sticker pack. The winner chooses the pass in the rideRTC
+        app or as a pass that doesn't need a phone. The prize cannot be exchanged for cash. Because
+        the prize is worth less than $600, LVBT does not collect a tax form from the winner.
+      </p>
+
+      <h2>8. How the winner is chosen</h2>
+      <p>
+        LVBT draws one winner at random from all eligible entries by October 15, 2026. Each entry is
+        one chance, so your odds depend on how many entries you have and how many entries there are
+        in total.
+      </p>
+
+      <h2>9. How the winner is contacted</h2>
+      <p>
+        LVBT contacts the winner the way they entered: by Instagram direct message from
+        @lasvegasfortransit, by email from wwd@lasvegasfortransit.org, or by text message from
+        LVBT's Week Without Driving number. The winner has 7 days from that message to reply. If the
+        winner does not reply within 7 days, or cannot accept the prize under these rules, LVBT
+        draws a new winner the same way. LVBT never asks for money, passwords or bank details.
+      </p>
+
+      <h2>10. Winners under 18</h2>
+      <p>
+        If the winner is 13 to 17, the prize is awarded in the name of their parent or guardian, who
+        signs the winner release in section 11 before the prize is handed over or mailed.
+      </p>
+
+      <h2>11. Winner release</h2>
+      <p>
+        Before receiving the prize, the winner signs this release. If the winner is under 18, their
+        parent or guardian signs it. It can be signed on paper when the prize is handed over, or by
+        replying to LVBT's message with the words I agree to the winner release, followed by the
+        signer's full name.
+      </p>
+      <blockquote>
+        <p>
+          I confirm that the winner lives in Southern Nevada, was 13 or older when they entered, and
+          does not help run the giveaway. I accept the prize under the Official Rules. If the winner
+          is under 18, I am their parent or guardian, and I accept the prize in my name for them. I
+          agree, or I do not agree, that LVBT may share the winner's first name and neighborhood on
+          its website and social media.
+        </p>
+      </blockquote>
+
+      <h2>12. Privacy</h2>
+      <p>
+        LVBT uses Instagram handles, email addresses, phone numbers and screenshots only to run the
+        giveaway, and deletes them on November 30, 2026. Read our <a href="/privacy">Privacy page</a
+        >.
+      </p>
+
+      <h2>13. Instagram</h2>
+      <p>
+        This promotion is not sponsored, endorsed, administered by, or associated with Instagram. By
+        entering, you agree that Instagram is not responsible for the giveaway in any way, and you
+        release Instagram from any claim about it.
+      </p>
+
+      <h2>14. Questions</h2>
+      <p>Email wwd@lasvegasfortransit.org.</p>
+    </div>
+
+    <p class="mt-10">
+      <a href="/giveaway" class="body-link font-semibold">&#8592; Back to the giveaway</a>
+    </p>
   </section>
 </BaseLayout>
+
+<style>
+  .draft-banner {
+    margin-bottom: 2rem;
+    border: 2px solid var(--color-primary);
+    background: var(--color-primary-container, var(--color-surface-container));
+    color: var(--color-primary-ink);
+    padding: 1rem 1.25rem;
+    line-height: 1.5;
+    font-size: var(--text-body-sm);
+  }
+</style>

@@ -1,0 +1,185 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { BINGO_SQUARES } from '../../lib/bingo';
+
+// A print-friendly view of the fixed Digital Transit Bingo card, linked
+// from "Print a card" on /bingo. Simplified from the full Feature "Let
+// anyone print a paper bingo card" (features/bingo/print-bingo-card.md):
+// this build ships the blank, one-page, black-and-white card every visitor
+// can print or save as a PDF. The large-print two-page list and the
+// "Include my marks" option (which need to read the phone's saved marks)
+// are follow-up work — see the TODO below.
+//
+// TODO(01M357CVSHYXZ76YFKR8PNR9VS): add the "Large print (2 pages)" and
+// "Include my marks" checkboxes described in print-bingo-card.md, and a
+// real QR code (the box below is a placeholder).
+const title = 'Print a bingo card · Week Without Driving Las Vegas';
+const description =
+  'Print a blank, black-and-white Digital Transit Bingo card for Week Without Driving Las Vegas, October 1 to 8, 2026.';
+---
+
+<BaseLayout {title} {description}>
+  <section class="container-page max-w-3xl py-12">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4" data-print-hide>
+      <p class="text-sm text-on-surface-variant">
+        <a href="/bingo" class="body-link font-semibold">&#8592; Back to Bingo</a>
+      </p>
+      <button
+        type="button"
+        class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+        data-bingo-print-button
+      >
+        Print this card
+      </button>
+    </div>
+
+    <div class="print-card">
+      <div class="print-card__head">
+        <div>
+          <h1 class="text-headline-md">Digital Transit Bingo</h1>
+          <p class="mt-1 text-sm font-semibold">
+            Week Without Driving Las Vegas · October 1 to 8, 2026
+          </p>
+        </div>
+        <p class="print-card__name">Name: <span></span></p>
+      </div>
+
+      <div class="print-card__how">
+        <h2 class="text-title-md font-bold">How to play</h2>
+        <p class="mt-1 text-sm leading-relaxed">
+          Mark a square with a pen when you've done it. Five in a row, down a column, or corner to
+          corner is a bingo. The middle square is free. Every way of getting around counts: by bus,
+          walking or rolling, biking, or getting a ride. If you still have to drive, you haven't
+          failed.
+        </p>
+      </div>
+
+      <div class="print-card__grid">
+        {
+          BINGO_SQUARES.map((sq) =>
+            sq.free ? (
+              <div class="print-card__cell print-card__cell--free">
+                <span>&#9733;</span>
+                <p>WEEK WITHOUT DRIVING</p>
+                <p class="print-card__free-note">Free square</p>
+              </div>
+            ) : (
+              <div class="print-card__cell">
+                <p>{sq.fullText}</p>
+              </div>
+            ),
+          )
+        }
+      </div>
+
+      <div class="print-card__footer">
+        <div class="print-card__qr" aria-hidden="true">QR code</div>
+        <div class="print-card__footer-text">
+          <p class="text-xs text-on-surface-variant">Scan to play on a phone: lvwwd.org/bingo</p>
+          <p class="mt-2 text-xs leading-relaxed">
+            Share your card, find bus stops near you, and read our guides at lvwwd.org.
+          </p>
+          <p class="mt-2 text-xs leading-relaxed">
+            Giveaway: from October 1 to 8, a photo of your card uploaded at lvwwd.org/giveaway
+            counts as that day's entry. You need an Instagram account to enter, or enter free with
+            an email address or phone number. No Instagram? Every square counts, prize or not.
+          </p>
+          <p class="mt-2 text-xs leading-relaxed">
+            Week Without Driving Las Vegas is run by Las Vegans for Better Transit. Questions:
+            wwd@lasvegasfortransit.org
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline src="/scripts/bingo-print.js" defer></script>
+</BaseLayout>
+
+<style>
+  .print-card {
+    border: 2px solid var(--color-outline);
+    padding: 1.5rem;
+  }
+  .print-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    border-bottom: 2px solid var(--color-outline);
+    padding-bottom: 1rem;
+  }
+  .print-card__name span {
+    display: inline-block;
+    width: 10rem;
+    border-bottom: 1px solid var(--color-outline);
+  }
+  .print-card__how {
+    margin-top: 1rem;
+  }
+  .print-card__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 1.25rem;
+    background: var(--color-outline);
+    border: 2px solid var(--color-outline);
+  }
+  .print-card__cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    min-height: 5rem;
+    background: var(--color-surface);
+    padding: 0.35rem;
+    text-align: center;
+    font-size: 0.625rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 30rem) {
+    .print-card__cell {
+      font-size: 0.75rem;
+      padding: 0.5rem;
+    }
+  }
+  .print-card__cell--free {
+    flex-direction: column;
+    gap: 0.15rem;
+    font-weight: 800;
+  }
+  .print-card__free-note {
+    font-weight: 500;
+    font-size: 0.6em;
+  }
+  .print-card__footer {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--color-outline);
+  }
+  .print-card__qr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    border: 1px solid var(--color-outline);
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--color-on-surface-variant);
+  }
+
+  @media print {
+    [data-print-hide] {
+      display: none !important;
+    }
+    .print-card {
+      border: 1px solid black;
+    }
+  }
+</style>
