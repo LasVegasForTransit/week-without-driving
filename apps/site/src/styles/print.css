@@ -623,7 +623,7 @@
   .print-link-sheet__contact-list dt {
     color: var(--slab-muted-light) !important;
     font-size: 7.5pt;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0;
     line-height: 1;
   }
@@ -632,7 +632,7 @@
     margin: 0;
     color: var(--paper) !important;
     font-size: 15pt;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.15;
   }
 
@@ -699,7 +699,7 @@
 
   .print-link-sheet__label {
     color: var(--ink) !important;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.15;
   }
 

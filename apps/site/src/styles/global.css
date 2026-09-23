@@ -259,22 +259,22 @@
   --text-display-md: clamp(2.25rem, 4vw + 1rem, 4.5rem);
   --text-display-md--line-height: 0.95;
   --text-display-md--letter-spacing: -0.03em;
-  --text-display-md--font-weight: 800;
+  --text-display-md--font-weight: 700;
 
   --text-display-sm: clamp(1.875rem, 2vw + 1rem, 3rem);
   --text-display-sm--line-height: 1;
   --text-display-sm--letter-spacing: -0.025em;
-  --text-display-sm--font-weight: 800;
+  --text-display-sm--font-weight: 700;
 
   --text-headline-lg: clamp(1.75rem, 1.5vw + 1rem, 2.75rem);
   --text-headline-lg--line-height: 1.05;
   --text-headline-lg--letter-spacing: -0.02em;
-  --text-headline-lg--font-weight: 800;
+  --text-headline-lg--font-weight: 700;
 
   --text-headline-md: 1.75rem;
   --text-headline-md--line-height: 1.1;
   --text-headline-md--letter-spacing: -0.02em;
-  --text-headline-md--font-weight: 800;
+  --text-headline-md--font-weight: 700;
 
   --text-headline-sm: 1.5rem;
   --text-headline-sm--line-height: 1.15;
@@ -581,7 +581,7 @@ html:active-view-transition-type(from-qr)::view-transition-old(root) {
   h2,
   h3,
   h4 {
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.05;
     text-wrap: balance;
@@ -1320,17 +1320,11 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
   font-weight: 700;
   font-display: swap;
 }
-@font-face {
-  font-family: 'Atkinson Hyperlegible Next';
-  src: url('/fonts/atkinson-next-800.woff2') format('woff2');
-  font-weight: 800;
-  font-display: swap;
-}
 body {
   font-family: var(--font-sans);
 }
 :is(h1, h2, h3) {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* ---- Navigation: a wordmark, the sign-up button, and a ☰ menu on phones. ---- */
@@ -1362,13 +1356,13 @@ body {
   .wordmark__name {
     font-family: 'Fraunces', Georgia, serif;
     font-size: clamp(1.05rem, 0.9rem + 0.8vw, 1.3rem);
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: -0.01em;
     white-space: nowrap;
   }
   .wordmark__meta {
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-primary-ink);
@@ -1412,7 +1406,7 @@ body {
     align-items: center;
     min-height: 44px;
     padding-inline: 1rem;
-    font-weight: 800;
+    font-weight: 700;
     white-space: nowrap;
     color: var(--color-on-primary);
     background: var(--color-primary);
@@ -1521,7 +1515,7 @@ body {
     min-height: 3.5rem;
     padding-inline: 1.25rem;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-on-primary);
     background: var(--color-primary);
     border-radius: 999px;
@@ -1551,7 +1545,7 @@ body {
   .site-menu__label {
     display: block;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
   }
   .site-menu__help {
     display: block;
@@ -1593,12 +1587,6 @@ body {
   font-weight: 600;
   font-display: swap;
 }
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/fraunces-800.woff2') format('woff2');
-  font-weight: 800;
-  font-display: swap;
-}
 :is(h1, h2) {
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
@@ -1616,7 +1604,7 @@ body {
     gap: 0.5rem;
     min-height: 52px;
     padding: 0 1.5rem;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 1.05rem;
     border-radius: 999px;
     text-decoration: none;
@@ -1655,7 +1643,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-link);
     text-decoration: underline;
     text-underline-offset: 0.2em;
@@ -1674,7 +1662,7 @@ body {
   .form-label {
     display: block;
     font-size: 1.1rem;
-    font-weight: 800;
+    font-weight: 700;
   }
   .form-optional {
     font-weight: 400;
@@ -1734,7 +1722,7 @@ body {
   }
   .form-choices legend {
     font-size: 1.1rem;
-    font-weight: 800;
+    font-weight: 700;
   }
   .form-choice,
   .check-row {
@@ -1781,7 +1769,7 @@ body {
   }
   .preview-link__title {
     font-size: 0.85rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -1816,7 +1804,7 @@ body {
     align-items: center;
     gap: 0.4rem;
     margin-bottom: 0.9rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-primary-ink);
   }
   .page-title {
@@ -1940,7 +1928,7 @@ body {
   .install-sheet__title {
     padding-top: 0.5rem;
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.2;
     text-wrap: balance;
   }
@@ -2001,7 +1989,7 @@ body {
   .update-bar__button {
     min-height: 44px;
     padding: 0 1.25rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--color-slab);
     background: var(--color-on-slab);
     border-radius: 999px;
