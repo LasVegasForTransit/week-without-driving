@@ -3,12 +3,15 @@
   "name": "lvwwd",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
-  // The site is static; the Worker exists only to send www to the apex and
-  // hand everything else to the assets.
+  // The site is static. The Worker sends www to the apex, runs the
+  // participant API under /api/, opens "Open my week" links, and writes
+  // the Turnstile site key into the sign-up and link pages.
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
+    // The Worker has to see these before the assets answer them.
+    "run_worker_first": ["/api/*", "/my-week*", "/sign-up*"],
   },
   // Custom domains: wrangler creates the DNS records on deploy when the zone
   // is on the same account.
@@ -16,7 +19,26 @@
     { "pattern": "lvwwd.org", "custom_domain": true },
     { "pattern": "www.lvwwd.org", "custom_domain": true },
   ],
+  // Rate-limit housekeeping every day, and the deletion of all participant
+  // data from November 30, 2026 (worker/cleanup.ts).
+  "triggers": { "crons": ["0 13 * * *"] },
   "observability": {
     "enabled": true,
   },
+  // TODO(participant-api): production is not wired to a database yet.
+  // lvwwd.org's zone is not on the LVBT Cloudflare account that wrangler
+  // deploys from, so the production D1 database, R2 bucket and Turnstile
+  // widget have to be created on the account that owns the zone. Until
+  // then the API answers 503 "Sign-up isn't open yet" and the pages work.
+  // Once they exist, add:
+  //
+  //   "d1_databases": [
+  //     { "binding": "DB", "database_name": "lvwwd", "database_id": "<from wrangler d1 create lvwwd>", "migrations_dir": "migrations" },
+  //   ],
+  //   "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-photos" }],
+  //   "vars": { "TURNSTILE_SITE_KEY": "<the lvwwd.org widget's site key>" },
+  //
+  // then run `wrangler d1 migrations apply lvwwd --remote` and set the
+  // secrets with `wrangler secret put TURNSTILE_SECRET` and
+  // `wrangler secret put RESEND_API_KEY`.
 }
