@@ -1,0 +1,18 @@
+---
+// "Do a sidewalk audit" (build-brief.md section 5.4). Content lives in
+// src/content/guides/sidewalk-audit.md; this file only wires it into the
+// shared GuideLayout. No RTC facts to verify here: the process is LVBT's
+// own, not RTC's.
+import { getEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getNextGuide, getSortedGuides } from '../../lib/guides';
+
+const guide = await getEntry('guides', 'sidewalk-audit');
+if (!guide) {
+  throw new Error('Guide "sidewalk-audit" is missing from src/content/guides.');
+}
+const guides = await getSortedGuides();
+const nextGuide = getNextGuide(guides, guide.id);
+---
+
+<GuideLayout guide={guide} nextGuide={nextGuide} />

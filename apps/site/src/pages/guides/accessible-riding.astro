@@ -1,0 +1,26 @@
+---
+// "Ride with a wheelchair, walker or stroller" (build-brief.md section
+// 5.4). Content lives in src/content/guides/accessible-riding.md; this
+// file only wires it into the shared GuideLayout.
+//
+// Unverified RTC facts: the ramp/lift's size and weight limit, RTC's
+// stroller rules, exactly how stops are announced, and RTC Paratransit's
+// booking window and fare are not stated as fact here, because nobody has
+// checked them against RTC's current pages for this rewrite. Both
+// "RTC accessibility" and "RTC Paratransit" links currently point at
+// rtcsnv.com's homepage; find the exact pages before launch. Before
+// launch this guide must also be reviewed by a rider who uses a
+// wheelchair or other mobility aid.
+import { getEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getNextGuide, getSortedGuides } from '../../lib/guides';
+
+const guide = await getEntry('guides', 'accessible-riding');
+if (!guide) {
+  throw new Error('Guide "accessible-riding" is missing from src/content/guides.');
+}
+const guides = await getSortedGuides();
+const nextGuide = getNextGuide(guides, guide.id);
+---
+
+<GuideLayout guide={guide} nextGuide={nextGuide} />

@@ -1,9 +1,50 @@
 ---
+// The Guides index (build-brief.md section 5.4): a heading, one sentence
+// of introduction, the five guide cards in a fixed order, and a link out
+// to "Places to go" on the Go page. Card order and text come from each
+// guide's own file under src/content/guides, so this page never needs to
+// change when a guide's copy does.
+import { Icon } from 'astro-icon/components';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSortedGuides } from '../../lib/guides';
+
+const guides = await getSortedGuides();
+const description =
+  'New to getting around Las Vegas without a car, or trying something new? These short guides answer what riders ask about most.';
 ---
 
-<BaseLayout title="Guides · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
-    <h1 class="text-display-sm">Guides</h1>
+<BaseLayout title="Guides · Week Without Driving Las Vegas" description={description}>
+  <section class="container-page py-16 md:py-24" aria-labelledby="guides-heading">
+    <div class="reveal max-w-3xl">
+      <h1 id="guides-heading" class="text-display-sm">Guides</h1>
+      <p class="lede mt-5">{description}</p>
+    </div>
+
+    <ul class="reveal-stagger mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {
+        guides.map((guide) => (
+          <li class="reveal">
+            <a
+              href={`/guides/${guide.id}`}
+              class="group flex h-full flex-col gap-3 border border-outline bg-surface-container p-6 no-underline transition-colors hover:border-primary focus-visible:border-primary"
+            >
+              <Icon name={guide.data.icon} class="size-8 text-primary-ink" aria-hidden="true" />
+              <h2 class="text-title-lg text-on-surface group-hover:text-primary-ink group-focus-visible:text-primary-ink">
+                {guide.data.title}
+              </h2>
+              <p class="text-body-sm leading-relaxed text-on-surface-variant text-pretty">
+                {guide.data.cardSummary}
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="reveal mt-12 border-t border-outline-variant/15 pt-8">
+      <a href="/go#places-to-go" class="body-link font-semibold">
+        Where to go: step-by-step trips to seven places &#8594;
+      </a>
+    </p>
   </section>
 </BaseLayout>

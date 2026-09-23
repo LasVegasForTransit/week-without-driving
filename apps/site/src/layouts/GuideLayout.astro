@@ -1,0 +1,121 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from './BaseLayout.astro';
+import ShadeDiagram from '../components/guides/ShadeDiagram.astro';
+import { parseInlineLinks } from '../lib/guides';
+import type { Guide } from '../lib/guides';
+
+// The one layout all five /guides/<slug> pages share (build-brief.md
+// section 5.4): a heading, an intro, three numbered steps each with a
+// heading, its text and a simple SVG accent (never a photo placeholder,
+// since there are no photos yet), then "Next guide" and "All guides".
+// A guide's content lives entirely in its Markdown file under
+// src/content/guides, so a copy change never touches this file.
+interface Props {
+  guide: Guide;
+  nextGuide: Guide;
+}
+
+const { guide, nextGuide } = Astro.props;
+const { title, intro, cardSummary, steps } = guide.data;
+---
+
+<BaseLayout title={`${title} · Week Without Driving Las Vegas`} description={cardSummary}>
+  <article class="container-page py-16 md:py-24">
+    <p class="reveal text-title-sm font-bold text-primary-ink">
+      <a href="/guides" class="body-link">Guides</a>
+    </p>
+    <h1 class="reveal text-display-sm mt-3 max-w-[24ch] text-balance">{title}</h1>
+    <p class="lede reveal mt-5 max-w-2xl">{intro}</p>
+
+    <ol class="reveal-stagger mt-12 space-y-10 md:space-y-14">
+      {
+        steps.map((step, index) => (
+          <li class="reveal border-t-2 border-outline pt-6 md:pt-8">
+            <div class="flex items-start gap-4">
+              <span
+                class="flex size-10 shrink-0 items-center justify-center bg-primary font-black text-on-primary tnum"
+                aria-hidden="true"
+              >
+                {index + 1}
+              </span>
+              {step.icon !== 'shade-diagram' && (
+                <Icon
+                  name={step.icon}
+                  class="mt-1.5 size-7 shrink-0 text-primary-ink"
+                  aria-hidden="true"
+                />
+              )}
+              <h2 class="text-title-lg mt-1.5">
+                <span class="sr-only">Step {index + 1}: </span>
+                {step.heading}
+              </h2>
+            </div>
+            <div class="mt-4 max-w-2xl space-y-3 leading-relaxed text-pretty">
+              {step.body.map((paragraph) => (
+                <p>
+                  {parseInlineLinks(paragraph).map((segment) =>
+                    segment.href ? (
+                      <a
+                        href={segment.href}
+                        class="body-link font-semibold"
+                        data-print-url={segment.href}
+                        target={segment.href.startsWith('mailto:') ? undefined : '_blank'}
+                        rel={segment.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                      >
+                        {segment.text}
+                      </a>
+                    ) : (
+                      segment.text
+                    ),
+                  )}
+                </p>
+              ))}
+            </div>
+            {step.icon === 'shade-diagram' && (
+              <div class="mt-6 max-w-md">
+                <ShadeDiagram />
+              </div>
+            )}
+            {(step.note || step.links) && (
+              <div class="mt-5 max-w-2xl border-l-4 border-primary bg-surface-container py-3 pl-4 pr-4 text-body-sm">
+                {step.note && <p class="text-on-surface-variant">{step.note}</p>}
+                {step.links && (
+                  <ul class="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+                    {step.links.map((link) => (
+                      <li>
+                        <a
+                          href={link.href}
+                          class="body-link font-semibold"
+                          data-print-url={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+
+    <nav
+      aria-label="Guide"
+      class="reveal mt-14 flex flex-col gap-4 border-t border-outline-variant/15 pt-8 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <a
+        href={`/guides/${nextGuide.id}`}
+        class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+      >
+        Next guide: {nextGuide.data.title}
+        <Icon name="mdi:arrow-right" class="size-4" aria-hidden="true" />
+      </a>
+      <a href="/guides" class="body-link font-semibold">All guides</a>
+    </nav>
+  </article>
+</BaseLayout>

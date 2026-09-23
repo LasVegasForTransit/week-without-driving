@@ -1,0 +1,24 @@
+---
+// "Walk or roll in the heat" (build-brief.md section 5.4). Content lives
+// in src/content/guides/heat.md; this file only wires it into the shared
+// GuideLayout.
+//
+// The shade guidance (which sidewalk is shaded when, on a north-south
+// street) is verified physics, not an RTC fact: the sun casts a
+// building's shadow onto the sidewalk on that building's own, away-from-
+// the-sun side, so the east sidewalk shades in the morning and the west
+// sidewalk shades in the afternoon. See the comment in
+// src/components/guides/ShadeDiagram.astro before changing it.
+import { getEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getNextGuide, getSortedGuides } from '../../lib/guides';
+
+const guide = await getEntry('guides', 'heat');
+if (!guide) {
+  throw new Error('Guide "heat" is missing from src/content/guides.');
+}
+const guides = await getSortedGuides();
+const nextGuide = getNextGuide(guides, guide.id);
+---
+
+<GuideLayout guide={guide} nextGuide={nextGuide} />
