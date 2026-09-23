@@ -1,0 +1,434 @@
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { type Build, injectBuild } from '../src/integrations/service-worker';
+
+/**
+ * Runs the real public/sw.js in a sandbox with an in-memory Cache API and a
+ * fake network, then sends it the events a browser would.
+ */
+
+const ORIGIN = 'https://lvwwd.test';
+const SOURCE = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
+
+type Handler = (event: unknown) => void;
+
+function pathOf(input: string | { url: string }): string {
+  const url = new URL(typeof input === 'string' ? input : input.url, ORIGIN);
+  return url.pathname + url.search;
+}
+
+class MemoryCache {
+  readonly entries = new Map<string, Response>();
+
+  match(input: string | { url: string }, options?: { ignoreSearch?: boolean }) {
+    const key = pathOf(input);
+    const hit =
+      this.entries.get(key) ??
+      (options?.ignoreSearch
+        ? [...this.entries].find(([stored]) => stored.split('?')[0] === key.split('?')[0])?.[1]
+        : undefined);
+    return Promise.resolve(hit?.clone());
+  }
+
+  put(input: string | { url: string }, response: Response) {
+    this.entries.set(pathOf(input), response.clone());
+    return Promise.resolve();
+  }
+
+  keys() {
+    return Promise.resolve([...this.entries.keys()].map((key) => new Request(ORIGIN + key)));
+  }
+
+  delete(input: string | { url: string }) {
+    return Promise.resolve(this.entries.delete(pathOf(input)));
+  }
+}
+
+class MemoryCaches {
+  readonly stores = new Map<string, MemoryCache>();
+
+  open(name: string) {
+    const store = this.stores.get(name) ?? new MemoryCache();
+    this.stores.set(name, store);
+    return Promise.resolve(store);
+  }
+
+  keys() {
+    return Promise.resolve([...this.stores.keys()]);
+  }
+
+  delete(name: string) {
+    return Promise.resolve(this.stores.delete(name));
+  }
+
+  async match(input: string | { url: string }, options?: { ignoreSearch?: boolean }) {
+    for (const store of this.stores.values()) {
+      const hit = await store.match(input, options);
+      if (hit) return hit;
+    }
+    return undefined;
+  }
+
+  /** Every stored key in every cache, as "cache name: path". */
+  everything(): string[] {
+    return [...this.stores].flatMap(([name, store]) =>
+      [...store.entries.keys()].map((key) => `${name}: ${key}`),
+    );
+  }
+}
+
+const page = (body: string, headers: Record<string, string> = {}) =>
+  new Response(body, { headers: { 'Content-Type': 'text/html', ...headers } });
+
+const BUILD: Build = {
+  precache: [
+    { url: '/offline', revision: 'off1', bytes: 10, core: true },
+    { url: '/_astro/site.css', revision: 'css1', bytes: 10, core: true },
+    { url: '/guides', revision: 'gui1', bytes: 10, core: false },
+    { url: '/fonts/body.woff2', revision: 'fon1', bytes: 10, core: false },
+  ],
+  files: {
+    '/_astro/site.css': 'css1',
+    '/fonts/body.woff2': 'fon1',
+    '/scripts/app.js': 'app1',
+    '/photos/bus.webp': 'pho1',
+  },
+};
+
+/** What the fake network answers: a response per path, or offline for everything. */
+function network(routes: Record<string, () => Response | Promise<Response>>) {
+  const state = { offline: false, calls: [] as string[] };
+  const fetch = vi.fn(async (input: string | { url: string }) => {
+    const path = pathOf(input);
+    state.calls.push(path);
+    if (state.offline) throw new TypeError('Failed to fetch');
+    const route = routes[path] ?? routes[path.split('?')[0] ?? path];
+    return route ? route() : new Response('Not found', { status: 404 });
+  });
+  return { state, fetch };
+}
+
+const SITE: Record<string, () => Response | Promise<Response>> = {
+  '/offline': () => page('<h1>You’re offline</h1>'),
+  '/_astro/site.css': () => new Response('body{}'),
+  '/guides': () => page('<h1>Rider guides</h1>'),
+  '/fonts/body.woff2': () => new Response('font'),
+  '/data/stops.json': () => new Response('{"stops":[]}'),
+  '/data/routes.json': () => new Response('{"routes":[]}'),
+};
+
+function load(
+  build: Build | null,
+  options: {
+    routes?: Record<string, () => Response | Promise<Response>>;
+    saveData?: boolean;
+    /** The phone's caches, to install a new version over an earlier one. */
+    caches?: MemoryCaches;
+    /** True when an earlier version is already running. */
+    running?: boolean;
+  } = {},
+) {
+  const listeners: Record<string, Handler> = {};
+  const caches = options.caches ?? new MemoryCaches();
+  const net = network({ ...SITE, ...options.routes });
+  const self = {
+    addEventListener: (type: string, handler: Handler) => (listeners[type] = handler),
+    location: { origin: ORIGIN },
+    navigator: { connection: { saveData: options.saveData ?? false } },
+    registration: { active: options.running ? {} : null },
+    skipWaiting: vi.fn(() => Promise.resolve()),
+    clients: { claim: vi.fn(() => Promise.resolve()) },
+  };
+  const context = vm.createContext({
+    self,
+    caches,
+    fetch: net.fetch,
+    Response,
+    Request,
+    Headers,
+    URL,
+    setTimeout: (callback: () => void, ms: number, ...rest: unknown[]) =>
+      setTimeout(callback, ms, ...rest),
+    clearTimeout: (id: ReturnType<typeof setTimeout>) => clearTimeout(id),
+  });
+  vm.runInContext(build ? injectBuild(SOURCE, build) : SOURCE, context);
+
+  /** Sends an extendable event and waits for everything it waits on. */
+  const extendable = async (type: string, extra: object = {}) => {
+    const waits: Promise<unknown>[] = [];
+    listeners[type]?.({ ...extra, waitUntil: (promise: Promise<unknown>) => waits.push(promise) });
+    await Promise.all(waits);
+  };
+
+  /**
+   * Sends a fetch event. `handled` is false when the worker let the request
+   * pass to the network; `settled()` waits for the response and for
+   * everything the worker stores after it.
+   */
+  const request = (url: string, init: { mode?: string; method?: string } = {}) => {
+    let responded: Promise<Response> | undefined;
+    const waits: Promise<unknown>[] = [];
+    listeners.fetch?.({
+      request: {
+        url: new URL(url, ORIGIN).href,
+        method: init.method ?? 'GET',
+        mode: init.mode ?? 'cors',
+      },
+      respondWith: (promise: Promise<Response>) => (responded = promise),
+      waitUntil: (promise: Promise<unknown>) => waits.push(promise),
+    });
+    const settled = async () => {
+      const response = await responded;
+      for (let seen = -1; seen !== waits.length;) {
+        seen = waits.length;
+        await Promise.all(waits);
+      }
+      return response;
+    };
+    return { handled: responded !== undefined, response: responded, settled };
+  };
+
+  return { context, caches, net, self, extendable, request };
+}
+
+const navigate = { mode: 'navigate' } as const;
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('routeFor', () => {
+  const { context } = load(null);
+  const routeFor = context.routeFor as (
+    request: { url: string; method: string; mode: string },
+    origin: string,
+    files: Record<string, string>,
+  ) => string;
+  const route = (path: string, init: { mode?: string; method?: string; origin?: string } = {}) =>
+    routeFor(
+      {
+        url: (init.origin ?? ORIGIN) + path,
+        method: init.method ?? 'GET',
+        mode: init.mode ?? 'cors',
+      },
+      ORIGIN,
+      BUILD.files,
+    );
+
+  it('never handles the API, the admin views, other sites or anything but GET', () => {
+    expect(route('/api/me')).toBe('network');
+    expect(route('/api/admin/entries')).toBe('network');
+    expect(route('/admin', navigate)).toBe('network');
+    expect(route('/admin/entries', navigate)).toBe('network');
+    expect(route('/sw.js')).toBe('network');
+    expect(route('/guides', { ...navigate, method: 'POST' })).toBe('network');
+    expect(route('/', { ...navigate, origin: 'https://example.com' })).toBe('network');
+  });
+
+  it('keeps My week, Get my link and Sign up out of every cache', () => {
+    expect(route('/my-week', navigate)).toBe('private-page');
+    expect(route('/my-week?t=secret', navigate)).toBe('private-page');
+    expect(route('/my-week/link', navigate)).toBe('private-page');
+    expect(route('/sign-up/', navigate)).toBe('private-page');
+  });
+
+  it('answers other pages network first, the stop data from the phone, and built files from the cache', () => {
+    expect(route('/guides', navigate)).toBe('page');
+    expect(route('/giveaway?ref=partner', navigate)).toBe('page');
+    expect(route('/data/stops.json')).toBe('data');
+    expect(route('/scripts/app.js')).toBe('static');
+    expect(route('/scripts/not-built.js')).toBe('network');
+  });
+
+  it('stores a page under its path without a trailing slash', () => {
+    const pageKey = context.pageKey as (path: string) => string;
+    expect(pageKey('/guides/')).toBe('/guides');
+    expect(pageKey('/')).toBe('/');
+  });
+});
+
+describe('the service worker without a build', () => {
+  it('does nothing, so the dev server never serves stale files', () => {
+    const { request } = load(null);
+    expect(request('/guides', navigate).handled).toBe(false);
+  });
+});
+
+describe('installing', () => {
+  it('saves every precache entry under its revision and the stop data, then takes over', async () => {
+    const { caches, extendable, self } = load(BUILD);
+    await extendable('install');
+    expect(caches.everything().sort()).toEqual([
+      'wwd-data-v1: /data/routes.json',
+      'wwd-data-v1: /data/stops.json',
+      'wwd-precache-v1: /_astro/site.css?__rev=css1',
+      'wwd-precache-v1: /fonts/body.woff2?__rev=fon1',
+      'wwd-precache-v1: /guides?__rev=gui1',
+      'wwd-precache-v1: /offline?__rev=off1',
+    ]);
+    expect(self.skipWaiting).toHaveBeenCalledOnce();
+  });
+
+  it('downloads only what changed, and waits for Refresh when a version is already running', async () => {
+    const first = load(BUILD);
+    await first.extendable('install');
+
+    const changed: Build = {
+      ...BUILD,
+      precache: BUILD.precache.map((entry) =>
+        entry.url === '/guides' ? { ...entry, revision: 'gui2' } : entry,
+      ),
+    };
+    const next = load(changed, { caches: first.caches, running: true });
+    await next.extendable('install');
+    expect(next.net.state.calls).toEqual(['/guides']);
+    expect(next.self.skipWaiting).not.toHaveBeenCalled();
+  });
+
+  it('saves only the offline page and its own files when the phone asks to save data', async () => {
+    const { caches, extendable } = load(BUILD, { saveData: true });
+    await extendable('install');
+    expect(caches.everything().sort()).toEqual([
+      'wwd-precache-v1: /_astro/site.css?__rev=css1',
+      'wwd-precache-v1: /offline?__rev=off1',
+    ]);
+  });
+
+  it('fails when a download fails, so the browser tries again on the next visit', async () => {
+    const { extendable } = load(BUILD, {
+      routes: { '/guides': () => new Response('Server error', { status: 500 }) },
+    });
+    await expect(extendable('install')).rejects.toThrow(/Couldn’t save \/guides/);
+  });
+});
+
+describe('activating', () => {
+  it('deletes old wwd- caches and entries the build no longer has, and leaves other caches', async () => {
+    const { caches, extendable, self } = load(BUILD);
+    await extendable('install');
+    await (await caches.open('wwd-precache-v1')).put('/guides?__rev=old', page('old'));
+    await (await caches.open('wwd-static-v1')).put('/scripts/app.js?__rev=old', new Response(''));
+    await (await caches.open('wwd-static-v1')).put('/scripts/gone.js?__rev=x', new Response(''));
+    await (await caches.open('wwd-static-v1')).put('/scripts/app.js?__rev=app1', new Response(''));
+    await caches.open('wwd-precache');
+    await caches.open('someone-else');
+
+    await extendable('activate');
+
+    const kept = caches.everything();
+    expect(kept).not.toContain('wwd-precache-v1: /guides?__rev=old');
+    expect(kept).not.toContain('wwd-static-v1: /scripts/app.js?__rev=old');
+    expect(kept).not.toContain('wwd-static-v1: /scripts/gone.js?__rev=x');
+    expect(kept).toContain('wwd-static-v1: /scripts/app.js?__rev=app1');
+    expect(await caches.keys()).not.toContain('wwd-precache');
+    expect(await caches.keys()).toContain('someone-else');
+    expect(self.clients.claim).toHaveBeenCalledOnce();
+  });
+
+  it('switches to a waiting version when the page says Refresh was tapped', async () => {
+    const { extendable, self } = load(BUILD, { running: true });
+    await extendable('message', { data: { type: 'SKIP_WAITING' } });
+    expect(self.skipWaiting).toHaveBeenCalledOnce();
+  });
+});
+
+describe('answering pages', () => {
+  it('shows the network copy and stores it without the query string', async () => {
+    const { caches, request } = load(BUILD, {
+      routes: { '/giveaway': () => page('<h1>Win prizes</h1>') },
+    });
+    const response = await request('/giveaway?ref=partner', navigate).settled();
+    expect(await response?.text()).toBe('<h1>Win prizes</h1>');
+    expect(caches.everything()).toEqual(['wwd-pages-v1: /giveaway']);
+  });
+
+  it('shows the saved copy offline, and the offline page for a page never saved', async () => {
+    const { extendable, net, request } = load(BUILD);
+    await extendable('install');
+    net.state.offline = true;
+
+    const guides = await request('/guides/', navigate).settled();
+    expect(await guides?.text()).toBe('<h1>Rider guides</h1>');
+
+    const partners = await request('/partners', navigate).settled();
+    expect(await partners?.text()).toBe('<h1>You’re offline</h1>');
+  });
+
+  it('never stores My week, even when a link signs a phone in', async () => {
+    const { caches, extendable, net, request } = load(BUILD, {
+      routes: { '/my-week': () => page('<h1>Hi, Ana</h1>') },
+    });
+    await extendable('install');
+    const online = await request('/my-week?t=secret-token', navigate).settled();
+    expect(await online?.text()).toBe('<h1>Hi, Ana</h1>');
+    expect(caches.everything().join('\n')).not.toMatch(/my-week|secret-token/);
+
+    net.state.offline = true;
+    const offline = await request('/my-week', navigate).settled();
+    expect(await offline?.text()).toBe('<h1>You’re offline</h1>');
+  });
+
+  it('shows the saved copy when the network takes more than 4 seconds', async () => {
+    let hang = false;
+    const { extendable, request } = load(BUILD, {
+      routes: {
+        '/guides': () =>
+          hang ? new Promise<Response>(() => undefined) : page('<h1>Rider guides</h1>'),
+      },
+    });
+    await extendable('install');
+    hang = true;
+    vi.useFakeTimers();
+
+    let answered = false;
+    const pending = request('/guides', navigate).response?.then((response) => {
+      answered = true;
+      return response;
+    });
+    await vi.advanceTimersByTimeAsync(3900);
+    expect(answered).toBe(false);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(await (await pending)?.text()).toBe('<h1>Rider guides</h1>');
+  });
+
+  it('lets the API and the admin views go straight to the network', () => {
+    const { request } = load(BUILD);
+    expect(request('/api/me').handled).toBe(false);
+    expect(request('/admin', navigate).handled).toBe(false);
+  });
+});
+
+describe('answering files', () => {
+  it('serves a built file from the phone after the first fetch', async () => {
+    const { net, request } = load(BUILD, {
+      routes: { '/scripts/app.js': () => new Response('app') },
+    });
+    expect(await (await request('/scripts/app.js').settled())?.text()).toBe('app');
+    net.state.offline = true;
+    expect(await (await request('/scripts/app.js').settled())?.text()).toBe('app');
+  });
+
+  it('does not store a response that forbids it', async () => {
+    const { caches, request } = load(BUILD, {
+      routes: {
+        '/photos/bus.webp': () => new Response('x', { headers: { 'Cache-Control': 'no-store' } }),
+      },
+    });
+    await request('/photos/bus.webp').settled();
+    expect(caches.everything()).toEqual([]);
+  });
+
+  it('serves the saved stop data at once and refreshes it for next time', async () => {
+    let version = 1;
+    const { request } = load(BUILD, {
+      routes: { '/data/stops.json': () => new Response(`{"v":${version}}`) },
+    });
+    expect(await (await request('/data/stops.json').settled())?.text()).toBe('{"v":1}');
+    version = 2;
+    expect(await (await request('/data/stops.json').settled())?.text()).toBe('{"v":1}');
+    expect(await (await request('/data/stops.json').settled())?.text()).toBe('{"v":2}');
+  });
+});
