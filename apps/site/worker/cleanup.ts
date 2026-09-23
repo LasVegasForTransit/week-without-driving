@@ -5,11 +5,11 @@ import { DELETE_FROM } from './time';
 /**
  * The daily job (cron "0 13 * * *", early morning in Las Vegas). Every day
  * it drops rate-limit counters older than a day. From November 30, 2026 it
- * deletes every participant's data and photos, as the Privacy page
+ * deletes every participant's data and screenshots, as the Privacy page
  * promises. LVBT's newsletter list lives elsewhere and is not touched.
  */
 
-// Photos are deleted a page at a time; the Free plan allows 50 outgoing
+// Screenshots are deleted a page at a time; the Free plan allows 50 outgoing
 // calls per run. Anything left is picked up the next day.
 const PHOTO_PAGES_PER_RUN = 20;
 
@@ -39,8 +39,8 @@ export async function dailyCleanup(env: Env, now: Date): Promise<void> {
   if (env.PHOTOS) await deleteAllPhotos(env.PHOTOS);
   // Children first, then the people, in one transaction.
   await db.batch(
-    ['photos', 'checkins', 'reminders', 'bingo', 'link_tokens', 'sessions', 'participants'].map(
-      (table) => db.prepare(`DELETE FROM ${table}`),
+    ['checkins', 'reminders', 'bingo', 'link_tokens', 'sessions', 'participants'].map((table) =>
+      db.prepare(`DELETE FROM ${table}`),
     ),
   );
   console.log('Deleted all participant data, as scheduled for November 30, 2026.');
