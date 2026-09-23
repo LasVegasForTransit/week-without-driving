@@ -1,11 +1,16 @@
 # Secret scanning. Extends gitleaks' upstream ruleset; everything below is an
-# exemption for paths that carry no secrets but trip generic entropy rules.
+# exemption for values that carry no secrets but trip generic entropy rules.
 [extend]
 useDefault = true
 
 [allowlist]
-description = "Paths that carry no secrets but trip generic entropy rules."
+description = "Values that carry no secrets but trip generic entropy rules."
 paths = [
   '''pnpm-lock\.yaml''',
   '''docs/superpowers/.*\.md''',
+]
+# The site's own browser storage key names, such as lvwwd_bingo_2026, which
+# generic-api-key reads as keys because the constant is named STORAGE_KEY.
+regexes = [
+  '''^lvwwd_[a-z0-9_]+$''',
 ]
