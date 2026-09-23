@@ -49,7 +49,12 @@ const steps = [
       {
         prizes.map((prize) => (
           <li class="giveaway-prize border border-outline-variant/20 bg-surface-container">
-            <PhotoSlot class="giveaway-prize__photo" shows={prize.photo} />
+            <PhotoSlot
+              class="giveaway-prize__photo"
+              shows={prize.photo}
+              photo={prize.image}
+              sizes="(min-width: 48rem) 50vw, 100vw"
+            />
             <div class="p-5">
               <h3 class="text-title-lg">{prize.name}</h3>
               <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{prize.body}</p>
