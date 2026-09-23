@@ -1,9 +1,113 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { lvbt } from '../lib/site';
+import { wwdResources } from '../lib/wwd';
+
+// Resources: the national campaign's own material plus Las Vegas
+// specifics, followed by "After the week" (features/site/f-welcome.md).
+// The link lists are sourced entirely from src/lib/wwd.ts so a new
+// resource is a data change there, not a copy-edit here.
+
+const title = 'Resources · Week Without Driving Las Vegas';
+const description = 'Maps, fares, apps, and help for getting around Las Vegas without a car.';
+
+const afterTheWeek = [
+  {
+    title: 'Your story can be part of the recap',
+    body: 'We’re putting together a short video and a written recap of the week. Tag @lasvegasfortransit on Instagram or email your story to wwd@lasvegasfortransit.org. We only share a post or story with your permission.',
+  },
+  {
+    title: 'We publish what the week showed',
+    body: 'A written recap of what people noticed, what surprised them, and what it says about getting around the valley.',
+  },
+  {
+    title: 'The record stays public',
+    body: 'The recap and the highlights from the week stay on the LVBT project page after the week ends.',
+  },
+];
 ---
 
-<BaseLayout title="Resources · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
-    <h1 class="text-display-sm">Resources</h1>
+<BaseLayout title={title} description={description}>
+  {/* RESOURCES — the national campaign's material and local tools */}
+  <section class="container-page py-16 md:py-24" aria-labelledby="resources-heading">
+    <div class="reveal max-w-3xl">
+      <h1 id="resources-heading" class="text-display-sm">Resources</h1>
+      <p class="lede mt-4">
+        Week Without Driving is a national campaign, and most of what you need already exists. Start
+        with the campaign’s own material. The Las&nbsp;Vegas specifics are on this page.
+      </p>
+    </div>
+    <div class="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
+      {
+        (
+          [
+            ['participants', 'For participants'],
+            ['organizations', 'For organizations'],
+          ] as const
+        ).map(([audience, heading]) => (
+          <div class="reveal">
+            <h2 class="border-b-2 border-outline pb-3 text-title-lg">{heading}</h2>
+            <ul class="divide-y divide-outline-variant/15">
+              {wwdResources
+                .filter((r) => r.audience === audience)
+                .map((r) => (
+                  <li>
+                    <a
+                      href={r.url}
+                      data-print-url={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group block py-5 no-underline"
+                    >
+                      <span class="block font-semibold transition-colors group-hover:text-primary-ink group-focus-visible:text-primary-ink">
+                        {r.title}
+                      </span>
+                      <span class="mt-1 block text-body-sm leading-relaxed text-on-surface-variant text-pretty">
+                        {r.blurb}
+                      </span>
+                      <span class="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary-ink">
+                        {r.linkLabel}
+                        <Icon name="mdi:open-in-new" class="size-3.5" aria-hidden="true" />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* AFTER THE WEEK */}
+  <section
+    class="container-page border-t border-outline-variant/15 py-16 md:py-24"
+    aria-labelledby="after"
+  >
+    <div class="reveal max-w-3xl">
+      <h2 id="after" class="text-headline-lg">After the week</h2>
+      <p class="lede mt-4">What you noticed outlasts the week.</p>
+    </div>
+    <div class="reveal-stagger mt-10 grid gap-8 md:grid-cols-3">
+      {
+        afterTheWeek.map((item) => (
+          <div class="reveal border-t-2 border-outline pt-5">
+            <h3 class="text-title-lg">{item.title}</h3>
+            <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{item.body}</p>
+          </div>
+        ))
+      }
+    </div>
+    <p class="reveal mt-10 leading-relaxed">
+      Want the longer version of why we are doing this?{' '}
+      <a
+        href={lvbt.projectPageUrl}
+        data-print-url={lvbt.projectPageUrl}
+        class="body-link font-semibold"
+      >
+        Read the project page &#8594;
+      </a>
+    </p>
   </section>
 </BaseLayout>
