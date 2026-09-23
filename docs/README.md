@@ -9,6 +9,10 @@ for), and `security`. Every document is listed here so it can be found.
 
 - [Start here](development/tutorials/start-here.md)
 
+## How-to guides
+
+- [Set up lvwwd.org's production](operations/how-to/set-up-production.md)
+
 ## Reference
 
 - [Glossary](development/reference/glossary.md)

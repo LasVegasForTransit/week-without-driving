@@ -1,0 +1,159 @@
+{
+  "$schema": "../../node_modules/@lasvegasfortransit/cli/platform.schema.json",
+  "version": 1,
+  "name": "lvwwd.org",
+  "cloudflare": {
+    "accountId": "2557b5c2e166292ded0f8425b73075e9",
+    "zone": { "name": "lvwwd.org", "id": "751ddce97e99d625448ddcf0a325d032" },
+    "worker": "lvwwd",
+    "wranglerConfig": "wrangler.jsonc"
+  },
+  "d1": [{ "binding": "DB", "name": "lvwwd", "migrations": "migrations" }],
+  "r2": [{ "binding": "PHOTOS", "name": "lvwwd-photos" }],
+  "turnstile": [
+    {
+      "name": "lvwwd.org",
+      "domains": ["lvwwd.org"],
+      "mode": "managed",
+      "siteKeyVar": "TURNSTILE_SITE_KEY",
+      "secret": "TURNSTILE_SECRET"
+    }
+  ],
+  "access": [
+    {
+      "name": "lvwwd.org volunteer admin",
+      "destinations": ["lvwwd.org/admin", "lvwwd.org/admin/*", "lvwwd.org/api/admin/*"],
+      "sessionDuration": "24h",
+      "identityProvider": "google-apps",
+      "allow": { "googleGroup": "wwd-admin@lasvegasfortransit.org" },
+      "teamDomainSecret": "ACCESS_TEAM_DOMAIN",
+      "audienceSecret": "ACCESS_AUD"
+    }
+  ],
+  "email": [
+    {
+      "domain": "lvwwd.org",
+      "provider": "resend",
+      "region": "us-east-1",
+      "apiKeySecret": "RESEND_API_KEY"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "RESEND_API_KEY",
+      "purpose": "Sends each participant's \"Open my week\" link by email from hello@lvwwd.org.",
+      "use": "live",
+      "neededFor": "emailing \"Open my week\" links",
+      "url": "https://resend.com/api-keys",
+      "steps": [
+        "Sign in to Resend with the LVBT account. Ask a maintainer to invite you if you have no access.",
+        "Check that lvwwd.org says \"Verified\" on https://resend.com/domains. If it does not, finish the Email items of this setup first, because a key for an unverified domain cannot send.",
+        "On the API Keys page, click \"Create API Key\".",
+        "Name it \"lvwwd.org Worker\", set Permission to \"Sending access\", set Domain to lvwwd.org, and click \"Add\".",
+        "Copy the key. It starts with re_, and Resend shows it only once."
+      ],
+      "pattern": "^re_[A-Za-z0-9_]+$",
+      "patternHint": "A Resend API key starts with re_ and has no spaces."
+    },
+    {
+      "name": "TURNSTILE_SECRET",
+      "purpose": "Lets the Worker ask Turnstile whether a sign-up or a \"Get my link\" request came from a person.",
+      "use": "live",
+      "neededFor": "the bot check on Sign up to win and Get my link",
+      "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/turnstile",
+      "steps": [
+        "Open Turnstile in the Cloudflare dashboard with your LVBT account.",
+        "Click the widget named lvwwd.org. If there is none, click \"Add widget\", name it lvwwd.org, add the hostname lvwwd.org, keep the mode \"Managed\", and click \"Create\".",
+        "Copy the Secret Key. The Site Key is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc instead."
+      ],
+      "pattern": "^0x[A-Za-z0-9_-]+$",
+      "patternHint": "A Turnstile secret key starts with 0x."
+    },
+    {
+      "name": "ACCESS_TEAM_DOMAIN",
+      "purpose": "Names the Cloudflare Access team whose signed sign-in tokens the Worker accepts for the admin views.",
+      "use": "live",
+      "neededFor": "the volunteer admin views at lvwwd.org/admin",
+      "url": "https://one.dash.cloudflare.com/",
+      "steps": [
+        "Open Cloudflare Zero Trust and choose the LVBT account.",
+        "Go to Settings and find \"Team name and domain\".",
+        "Copy the team domain. It looks like lasvegasfortransit.cloudflareaccess.com."
+      ],
+      "pattern": "^[a-z0-9-]+\\.cloudflareaccess\\.com$",
+      "patternHint": "A team domain looks like <team>.cloudflareaccess.com, without https://."
+    },
+    {
+      "name": "ACCESS_AUD",
+      "purpose": "The audience tag of the lvwwd.org volunteer admin application, so the Worker accepts only tokens Access issued for it.",
+      "use": "live",
+      "neededFor": "the volunteer admin views at lvwwd.org/admin",
+      "url": "https://one.dash.cloudflare.com/",
+      "steps": [
+        "Open Cloudflare Zero Trust and choose the LVBT account.",
+        "Go to Access controls → Applications and click \"lvwwd.org volunteer admin\".",
+        "On the Overview tab, copy \"Application Audience (AUD) Tag\". It is 64 letters and digits."
+      ],
+      "pattern": "^[a-f0-9]{64}$",
+      "patternHint": "An AUD tag is 64 lowercase letters and digits."
+    },
+    {
+      "name": "CLOUDFLARE_API_TOKEN",
+      "purpose": "Lets the Deploy workflow publish the Worker on every merge to main.",
+      "use": "live",
+      "neededFor": "deploying lvwwd.org from GitHub",
+      "targets": ["github:production"],
+      "url": "https://dash.cloudflare.com/profile/api-tokens",
+      "steps": [
+        "Sign in to Cloudflare with your LVBT account and click \"Create Token\".",
+        "Next to \"Edit Cloudflare Workers\", click \"Use template\".",
+        "Under \"Account Resources\", choose Include and the LVBT account (Las Vegas for Better Transit).",
+        "Under \"Zone Resources\", choose Include, then Specific zone, then lvwwd.org.",
+        "Rename the token to \"lvwwd.org deploy (GitHub Actions)\", click \"Continue to summary\", then \"Create Token\".",
+        "Copy the token. Cloudflare shows it only once."
+      ],
+      "pattern": "^\\S{40,}$",
+      "patternHint": "A Cloudflare API token is at least 40 characters with no spaces."
+    },
+    {
+      "name": "CLOUDFLARE_ACCOUNT_ID",
+      "purpose": "Tells the Deploy workflow which Cloudflare account owns the Worker.",
+      "use": "live",
+      "neededFor": "deploying lvwwd.org from GitHub",
+      "targets": ["github:production"],
+      "from": "cloudflare.accountId"
+    }
+  ],
+  "vars": [
+    {
+      "name": "TURNSTILE_SITE_KEY",
+      "purpose": "The public Turnstile site key the Worker writes into the Sign up and Get my link pages.",
+      "use": "live",
+      "neededFor": "the bot check on Sign up to win and Get my link"
+    }
+  ],
+  "github": { "repository": "LasVegasForTransit/week-without-driving" },
+  "forbidden": [
+    {
+      "name": "PREVIEW_ADMIN_KEY",
+      "reason": "It lets anyone who holds the key into the volunteer admin views without Cloudflare Access, so it belongs only on the workers.dev preview."
+    },
+    {
+      "name": "PREVIEW_DRAW_ANYTIME",
+      "reason": "It lets the prize draw run before October 14, so it belongs only on the workers.dev preview."
+    },
+    {
+      "name": "PREVIEW_SHOW_LINKS",
+      "reason": "It puts each participant's private \"Open my week\" link into API responses, so it belongs only on the workers.dev preview."
+    },
+    {
+      "name": "CHECKIN_PREVIEW_DAY",
+      "reason": "It makes the Worker treat another day as today for check-ins, so it belongs only on the workers.dev preview."
+    },
+    {
+      "name": "BOT_CHECK",
+      "severity": "warning",
+      "reason": "BOT_CHECK=off turns off the Turnstile bot check on Sign up to win and Get my link. Remove it from vars once the widget, TURNSTILE_SITE_KEY, and TURNSTILE_SECRET are in place."
+    }
+  ]
+}
