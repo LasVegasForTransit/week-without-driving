@@ -1926,3 +1926,42 @@ body {
     max-width: 46rem;
   }
 }
+
+/* The bar that offers a new version of the site, filled by /scripts/app.js
+   once the service worker has one ready. It rises from the bottom. */
+@layer components {
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  .update-bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: var(--z-mobile-nav);
+  }
+  .update-bar:not(:empty) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+    animation: sheet-up 200ms var(--ease-out);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .update-bar:not(:empty) {
+      animation: none;
+    }
+  }
+  .update-bar__button {
+    min-height: 44px;
+    padding: 0 1.25rem;
+    font-weight: 800;
+    color: var(--color-slab);
+    background: var(--color-on-slab);
+    border-radius: 999px;
+  }
+}
