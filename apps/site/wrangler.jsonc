@@ -4,14 +4,15 @@
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
   // The site is static. The Worker sends www to the apex, runs the
-  // participant API under /api/, opens "Open my week" links, and writes
-  // the Turnstile site key into the sign-up and link pages.
+  // participant API under /api/ and the volunteer admin views under /admin
+  // and /api/admin/, opens "Open my week" links, and writes the Turnstile
+  // site key into the sign-up and link pages.
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     // The Worker has to see these before the assets answer them.
-    "run_worker_first": ["/api/*", "/my-week*", "/sign-up*"],
+    "run_worker_first": ["/api/*", "/admin*", "/my-week*", "/sign-up*"],
   },
   // Custom domains: wrangler creates the DNS records on deploy when the zone
   // is on the same account.
@@ -41,4 +42,18 @@
   // then run `wrangler d1 migrations apply lvwwd --remote` and set the
   // secrets with `wrangler secret put TURNSTILE_SECRET` and
   // `wrangler secret put RESEND_API_KEY`.
+  //
+  // TODO(admin-access): the admin views refuse every request until
+  // Cloudflare Access is in front of them ("Set up admin sign-in
+  // through the wwd-admin Google Group"). Create a self-hosted Access
+  // application with three destinations, lvwwd.org/admin, lvwwd.org/admin/*
+  // and lvwwd.org/api/admin/* (a path doesn't cover the paths under it, and
+  // a wildcard doesn't cover its parent), allowing only the Google
+  // Workspace group wwd-admin@lasvegasfortransit.org. Then set two secrets:
+  // `wrangler secret put ACCESS_TEAM_DOMAIN` (the team domain, such as
+  // lasvegasfortransit.cloudflareaccess.com) and
+  // `wrangler secret put ACCESS_AUD` (the application's AUD tag).
+  // Never set PREVIEW_ADMIN_KEY or PREVIEW_DRAW_ANYTIME here: they are for
+  // the workers.dev preview only, and the first opens the admin views to
+  // anyone holding the key.
 }
