@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import PhotoSlot from '../components/PhotoSlot.astro';
+import Steps from '../components/Steps.astro';
+import WinBand from '../components/WinBand.astro';
+import { winSteps } from '../lib/campaign';
 import { photos } from '../lib/photos';
 
 // How it works. Anyone can take part in Week Without Driving without
@@ -35,23 +39,6 @@ const ways = [
   },
 ] as const;
 
-// Same three steps as the Win prizes page (/giveaway): keep the copy in
-// sync if either one changes.
-const steps = [
-  {
-    title: 'Sign up.',
-    body: 'It takes a minute: your first name, a phone number or email, and your ZIP code.',
-  },
-  {
-    title: 'Check in each day.',
-    body: 'From October 1 to 8, tap Check in for today on My week. Each day is one entry, up to 8.',
-  },
-  {
-    title: 'Win.',
-    body: 'We draw a winner by October 15, 2026 and contact them the way they signed up. No purchase or post necessary.',
-  },
-] as const;
-
 const fields = [
   {
     field: 'First name',
@@ -81,34 +68,28 @@ const fields = [
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="container-page pt-12 pb-8 md:pt-16">
-    <h1 class="text-display-sm">How it works</h1>
-    <p class="lede mt-4 max-w-2xl">
-      Anyone can take part in Week Without Driving, October 1–8. You don’t need to sign up. Sign up
-      with us to win prizes.
-    </p>
-  </section>
+  <PageHeader
+    title="How it works"
+    lede="Anyone can take part in Week Without Driving, October 1–8. You don’t need to sign up. Sign up with us to win prizes."
+  />
 
   {/* TAKE PART YOUR WAY */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-12 md:py-16"
-    aria-labelledby="ways-heading"
-  >
-    <h2 id="ways-heading" class="text-headline-lg">Take part your way</h2>
-    <p class="lede mt-3 max-w-2xl">However you get around, it counts. Pick what fits your trip.</p>
-    <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+  <section class="container-page section" aria-labelledby="ways-heading">
+    <h2 id="ways-heading" class="section-title">Take part your way</h2>
+    <p class="section-intro">However you get around, it counts. Pick what fits your trip.</p>
+    <ul class="section-body grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {
         ways.map((way) => (
-          <li class="take-part-way border border-outline-variant/20 bg-surface-container">
+          <li class="take-part-way">
             <PhotoSlot
               class="take-part-way__photo"
               shows={way.photo}
               photo={'image' in way ? way.image : undefined}
-              sizes="(min-width: 64rem) 25vw, (min-width: 48rem) 50vw, 100vw"
+              sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
             />
-            <div class="p-5">
-              <h3 class="text-title-lg">{way.title}</h3>
-              <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{way.body}</p>
+            <div class="take-part-way__text">
+              <h3 class="take-part-way__title">{way.title}</h3>
+              <p class="take-part-way__body">{way.body}</p>
             </div>
           </li>
         ))
@@ -116,61 +97,30 @@ const fields = [
     </ul>
   </section>
 
-  {/* WIN PRIZES: three steps to sign up and win. */}
+  {/* WIN PRIZES: the same three steps as the Win prizes page. */}
   <section
     id="how-it-works"
-    class="container-page scroll-mt-24 border-t border-outline-variant/15 py-12 md:py-16"
+    class="container-page section scroll-mt-24"
     aria-labelledby="win-heading"
   >
-    <h2 id="win-heading" class="text-headline-lg">Win prizes</h2>
-    <p class="lede mt-3 max-w-2xl">
-      Taking part is free, and so is signing up. Do these three things for a chance to win a
-      one-month RTC bus pass and an LVBT sticker pack.
+    <h2 id="win-heading" class="section-title">Win prizes</h2>
+    <p class="section-intro">
+      Signing up is free. Do these three things for a chance to win a one-month RTC bus pass and an
+      LVBT sticker pack.
     </p>
-    <ol class="mt-8 grid gap-5 md:grid-cols-3">
-      {
-        steps.map((step, index) => (
-          <li class="relative flex gap-5 overflow-hidden border border-outline-variant/20 bg-surface-container p-6 pl-8 md:flex-col md:gap-3">
-            <span
-              class="absolute inset-y-0 left-0 w-2 bg-primary md:inset-x-0 md:inset-y-auto md:h-2 md:w-auto"
-              aria-hidden="true"
-            />
-            <span
-              class="flex size-9 shrink-0 items-center justify-center bg-primary font-black text-on-primary tnum"
-              aria-hidden="true"
-            >
-              {index + 1}
-            </span>
-            <div>
-              <h3 class="text-title-lg">
-                <span class="sr-only">Step {index + 1}: </span>
-                {step.title}
-              </h3>
-              <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{step.body}</p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
-    <div class="mt-8">
-      <a
-        href="/sign-up"
-        data-signup-link
-        class="press inline-flex items-center gap-2 bg-primary px-8 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-      >
-        <span data-signup-label>Sign up to win</span>
-      </a>
-    </div>
+    <Steps steps={winSteps} class="section-body" />
   </section>
 
   {/* WHAT WE ASK FOR, AND WHY */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-12 md:py-16"
-    aria-labelledby="ask-heading"
-  >
-    <h2 id="ask-heading" class="text-headline-lg">What we ask for, and why</h2>
-    <p class="lede mt-3 max-w-2xl">Signing up means agreeing to the Official Rules.</p>
-    <dl class="ask-list mt-8 max-w-3xl">
+  <section class="container-page section" aria-labelledby="ask-heading">
+    <h2 id="ask-heading" class="section-title">What we ask for, and why</h2>
+    <p class="section-intro">
+      We delete all of it on November 30, 2026. Signing up means agreeing to the <a
+        href="/giveaway/rules"
+        class="body-link">Official Rules</a
+      >. Read our <a href="/privacy" class="body-link">Privacy page</a>.
+    </p>
+    <dl class="ask-list section-body">
       {
         fields.map((row) => (
           <div class="ask-list__row">
@@ -180,21 +130,12 @@ const fields = [
         ))
       }
     </dl>
-    <p class="prose-doc mt-6 max-w-2xl">
-      We delete this information on November 30, 2026. The newsletter belongs to LVBT and isn’t
-      deleted then. Read our <a href="/privacy" class="body-link">Privacy page</a>.
-    </p>
   </section>
 
   {/* FAQ */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-12 md:py-16"
-    aria-labelledby="faq-heading"
-  >
-    <h2 id="faq-heading" class="text-headline-lg">Questions</h2>
-    <div
-      class="mt-8 max-w-2xl divide-y divide-outline-variant/20 border-y border-outline-variant/20"
-    >
+  <section class="container-page section" aria-labelledby="faq-heading">
+    <h2 id="faq-heading" class="section-title">Questions</h2>
+    <div class="faq section-body">
       <details class="faq-item">
         <summary class="faq-item__summary">Do I have to sign up to take part?</summary>
         <p class="faq-item__body">
@@ -212,7 +153,7 @@ const fields = [
       <details class="faq-item">
         <summary class="faq-item__summary">What if I have to drive?</summary>
         <p class="faq-item__body">
-          Some trips need a car. You haven’t failed — notice what made driving necessary, and try
+          Some trips need a car. You haven’t failed. Notice what made driving necessary, and try
           another way for your next trip.
         </p>
       </details>
@@ -226,43 +167,78 @@ const fields = [
       <details class="faq-item">
         <summary class="faq-item__summary">How do I get back to My week on another phone?</summary>
         <p class="faq-item__body">
-          Use the link we sent you, or go to <a href="/my-week/link" class="body-link"
-            >/my-week/link</a
-          > and we’ll send it again.
+          Use the link we sent you, or <a href="/my-week/link" class="body-link">ask for it again</a
+          >.
         </p>
       </details>
     </div>
   </section>
 
-  <section class="container-page border-t border-outline-variant/15 py-12 md:py-16 text-center">
-    <a
-      href="/sign-up"
-      data-signup-link
-      class="press inline-flex items-center gap-2 bg-primary px-8 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-    >
-      <span data-signup-label>Sign up to win</span>
-    </a>
-  </section>
+  <WinBand />
 </BaseLayout>
 
 <style>
   .take-part-way {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
   }
   .take-part-way :global(.take-part-way__photo) {
     aspect-ratio: 4 / 3;
   }
+  .take-part-way__text {
+    padding: 1.1rem 1.25rem 1.35rem;
+  }
+  .take-part-way__title {
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+  .take-part-way__body {
+    margin-top: 0.4rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  /* On phones each way is a compact row, photo beside the words, so the
+     four of them don't make a long scroll. */
+  @media (max-width: 39.99rem) {
+    .take-part-way {
+      flex-direction: row;
+    }
+    .take-part-way :global(.take-part-way__photo) {
+      flex: none;
+      width: 7.5rem;
+      aspect-ratio: auto;
+    }
+    .take-part-way :global(.photo-slot__shows),
+    .take-part-way :global(.photo__credit) {
+      display: none;
+    }
+    .take-part-way :global(.photo-slot__tag) {
+      top: 0.5rem;
+      left: 0.5rem;
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+    .take-part-way__text {
+      padding: 0.9rem 1rem 1rem;
+    }
+    .take-part-way__title {
+      font-size: 1.1rem;
+    }
+  }
 
   /* Stacked on phones, two columns on wider screens, never scrolling sideways. */
   .ask-list {
-    border-top: 1px solid var(--color-outline-variant);
+    max-width: 48rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
   }
   .ask-list__row {
     display: grid;
     gap: 0.25rem 2rem;
     padding-block: 0.9rem;
-    border-bottom: 1px solid var(--color-outline-variant);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
   }
   .ask-list dt {
     font-weight: 800;
@@ -277,14 +253,19 @@ const fields = [
     }
   }
 
+  .faq {
+    max-width: 44rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
   .faq-item {
-    padding-block: 1rem;
+    padding-block: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
   }
   .faq-item__summary {
     cursor: pointer;
     padding-block: 0.25rem;
-    font-weight: 700;
-    font-size: var(--text-title-md);
+    font-weight: 800;
+    font-size: 1.1rem;
     min-height: 44px;
     display: flex;
     align-items: center;

@@ -7,9 +7,9 @@ import { mainNav } from '../lib/nav';
 ---
 
 <BaseLayout title="Page not found · Week Without Driving Las Vegas" noindex>
-  <section class="container-page notfound">
-    <h1 class="notfound__title">We can’t find that page.</h1>
-    <p class="notfound__lede">It may have moved. Try one of these instead.</p>
+  <section class="container-page notfound narrow">
+    <h1 class="page-title">We can’t find that page.</h1>
+    <p class="page-lede">It may have moved. Try one of these instead.</p>
     <div class="notfound__actions">
       <a href="/" class="btn btn--primary">Go to the home page</a>
       <a href="/sign-up" class="btn btn--outline" data-signup-link>
@@ -33,17 +33,7 @@ import { mainNav } from '../lib/nav';
 
 <style>
   .notfound {
-    max-width: 44rem;
-    padding-block: clamp(3rem, 8vw, 5rem);
-  }
-  .notfound__title {
-    font-size: clamp(2.2rem, 8vw, 3.25rem);
-    line-height: 1.05;
-  }
-  .notfound__lede {
-    margin-top: 0.75rem;
-    font-size: 1.2rem;
-    color: var(--color-on-surface-variant);
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
   }
   .notfound__actions {
     display: flex;

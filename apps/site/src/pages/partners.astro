@@ -110,18 +110,18 @@ const embedSnippet = `<a href="https://lvwwd.org/">
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="container-page py-16 md:py-24">
-    <h1 class="text-display-sm">Partners</h1>
+  <section class="container-page page-header pb-0">
+    <h1 class="page-title">Partners</h1>
 
-    <div class="reveal mt-10">
-      <p class="lede max-w-2xl">
+    <div>
+      <p class="page-lede">
         {
           hasRoster
             ? 'Groups across the Las Vegas Valley are bringing Week Without Driving to their members, neighbors, students and staff.'
             : 'Workplaces, schools, churches, clubs and neighborhood groups can bring the week to their people. Join, and your logo goes on this wall.'
         }
       </p>
-      <h2 class="text-headline-lg mt-10">
+      <h2 class="section-title mt-10">
         {
           hasRoster
             ? campaignOver
@@ -130,7 +130,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
             : 'Groups taking part'
         }
       </h2>
-      <ul class="reveal-stagger mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+      <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
         {
           roster.map((partner) =>
             partner.url ? (
@@ -139,7 +139,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
                   href={partner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-outline bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
+                  class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
                 >
                   {partner.logoUrl ? (
                     <img
@@ -154,7 +154,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
               </li>
             ) : (
               <li>
-                <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-outline bg-surface-container p-3 text-center font-bold">
+                <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold">
                   {partner.logoUrl ? (
                     <img
                       src={partner.logoUrl}
@@ -175,7 +175,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
               <a
                 href={joinMailto}
                 data-print-url={contactEmail}
-                class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 border-2 border-dashed border-outline-variant/40 p-3 text-center text-sm font-semibold text-on-surface-variant no-underline transition-colors hover:border-primary hover:text-primary-ink focus-visible:border-primary focus-visible:text-primary-ink"
+                class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant/40 p-3 text-center text-sm font-semibold text-on-surface-variant no-underline transition-colors hover:border-primary hover:text-primary-ink focus-visible:border-primary focus-visible:text-primary-ink"
               >
                 <Icon name="mdi:image-plus-outline" class="size-6" aria-hidden="true" />
                 <span>
@@ -212,9 +212,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
 
     {
       campaignOver ? (
-        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-          <h2 class="text-headline-lg">Bring your organization</h2>
-          <p class="lede mt-4 max-w-2xl">
+        <div class="section mt-12">
+          <h2 class="section-title">Bring your organization</h2>
+          <p class="section-intro">
             Week Without Driving 2026 has ended. Want to take part next year? Email{' '}
             <a
               href={`mailto:${contactEmail}`}
@@ -227,9 +227,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
           </p>
         </div>
       ) : (
-        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-          <h2 class="text-headline-lg">Bring your organization</h2>
-          <p class="lede mt-4 max-w-2xl">
+        <div class="section mt-12">
+          <h2 class="section-title">Bring your organization</h2>
+          <p class="section-intro">
             Week Without Driving is for everyone who gets around Las Vegas without driving, and for
             the groups that stand with them. Partnering is free, and any size of group can join,
             from a block club to a big employer.
@@ -262,8 +262,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
             link.
           </p>
 
-          <div class="reveal relative mt-10 overflow-hidden border border-outline bg-surface-container p-6 pl-8 md:max-w-2xl md:p-8 md:pl-10">
-            <span class="absolute inset-y-0 left-0 w-2 bg-primary" aria-hidden="true" />
+          <div class="mt-10 max-w-2xl overflow-hidden rounded-2xl bg-surface-container p-6 md:p-8">
             <h3 class="text-title-lg">How to join</h3>
             <p class="mt-3 leading-relaxed text-pretty">
               Email {contactEmail} with your group's name, a link to your website or social media
@@ -279,7 +278,7 @@ const embedSnippet = `<a href="https://lvwwd.org/">
                 <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
                 Email us to join
               </a>
-              <div class="flex items-center gap-2 text-sm">
+              <div class="flex flex-wrap items-center gap-2 text-sm">
                 <span class="font-semibold">{contactEmail}</span>
                 {/* Progressive enhancement: hidden until public/scripts/partners.js
                     confirms the clipboard API can run; the address above always
@@ -304,9 +303,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
 
     {
       !campaignOver && (
-        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-          <h2 class="text-headline-lg">Partner toolkit</h2>
-          <p class="lede mt-4 max-w-2xl">
+        <div class="section mt-12">
+          <h2 class="section-title">Partner toolkit</h2>
+          <p class="section-intro">
             Ready-to-use posts, an email for your staff or members, and how to send us your logo.
           </p>
 
@@ -401,9 +400,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
 
     {
       !campaignOver && (
-        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-          <h2 class="text-headline-lg">Banners and embed</h2>
-          <p class="lede mt-4 max-w-2xl">
+        <div class="section mt-12">
+          <h2 class="section-title">Banners and embed</h2>
+          <p class="section-intro">
             These are LVBT's general materials, for now. These don't credit any organization — once
             your group joins as a partner, we'll set you up with your own link, QR code and banners
             that credit it instead.
@@ -472,9 +471,9 @@ const embedSnippet = `<a href="https://lvwwd.org/">
 
     {
       !campaignOver && (
-        <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-          <h2 class="text-headline-lg">Flyers</h2>
-          <p class="lede mt-4 max-w-2xl">
+        <div class="section mt-12">
+          <h2 class="section-title">Flyers</h2>
+          <p class="section-intro">
             Print these for tables, meetings and noticeboards. They work in black and white, and
             they carry a QR code and link so anyone without a smartphone can still get to lvwwd.org.
           </p>

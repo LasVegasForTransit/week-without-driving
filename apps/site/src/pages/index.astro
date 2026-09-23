@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { Icon } from 'astro-icon/components';
 import PhotoSlot from '../components/PhotoSlot.astro';
+import Steps from '../components/Steps.astro';
 import { photos } from '../lib/photos';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
@@ -131,25 +132,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   <section id="how" class="home-section scroll-mt-20" aria-labelledby="how-heading">
     <div class="container-page">
       <h2 id="how-heading" class="home-h2">How it works</h2>
-      <ol class="route">
-        {
-          steps.map((s, i) => (
-            <li class="route__stop">
-              <span class="route__dot" aria-hidden="true">
-                <Icon name={s.icon} class="route__icon" />
-              </span>
-              <div class="route__text">
-                <p class="route__num">Step {i + 1}</p>
-                <h3 class="route__title">{s.title}</h3>
-                <p class="route__body">{s.body}</p>
-                <a href={s.href} class="home-link">
-                  {s.cta}
-                </a>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+      <Steps steps={steps} class="section-body" />
     </div>
   </section>
 
@@ -462,68 +445,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     gap: 1.25rem;
   }
 
-  /* How it works: three stops on a route line. */
-  .route {
-    --dot: 4rem;
-    position: relative;
-    display: grid;
-    gap: 2rem;
-    margin-top: 2.25rem;
-  }
-  .route::before {
-    content: '';
-    position: absolute;
-    top: calc(var(--dot) / 2);
-    bottom: calc(var(--dot) / 2);
-    left: calc(var(--dot) / 2 - 3px);
-    width: 6px;
-    background: var(--color-primary);
-    border-radius: 3px;
-  }
-  .route__stop {
-    position: relative;
-    display: grid;
-    grid-template-columns: var(--dot) 1fr;
-    gap: 1.25rem;
-    align-items: start;
-  }
-  .route__dot {
-    display: grid;
-    place-items: center;
-    width: var(--dot);
-    height: var(--dot);
-    color: var(--color-primary-ink);
-    background: var(--color-surface);
-    border: 6px solid var(--color-primary);
-    border-radius: 50%;
-  }
-  .route__dot :global(.route__icon) {
-    width: 1.9rem;
-    height: 1.9rem;
-  }
-  .route__num {
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-primary-ink);
-  }
-  .route__title {
-    margin-top: 0.15rem;
-    font-size: 1.5rem;
-    font-weight: 800;
-    line-height: 1.15;
-  }
-  .route__body {
-    margin-top: 0.35rem;
-    font-size: 1.1rem;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
-  }
-  .route__text .home-link {
-    margin-top: 0.6rem;
-  }
-
   /* Why */
   .home-why {
     padding-block: clamp(3.5rem, 9vw, 6rem);
@@ -764,22 +685,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
 
   @media (min-width: 48rem) {
-    .route {
-      --dot: 4.5rem;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2rem;
-    }
-    .route::before {
-      top: calc(var(--dot) / 2 - 3px);
-      bottom: auto;
-      left: calc(var(--dot) / 2);
-      right: calc((100% - 4rem) / 3 - var(--dot) / 2);
-      width: auto;
-      height: 6px;
-    }
-    .route__stop {
-      grid-template-columns: 1fr;
-    }
     .logo-wall {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }

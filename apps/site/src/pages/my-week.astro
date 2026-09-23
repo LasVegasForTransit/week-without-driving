@@ -20,10 +20,10 @@ const shortcuts = [
 ---
 
 <BaseLayout title={title} description="Your check-ins, entries and details." noindex>
-  <div class="container-page myweek">
+  <div class="container-page myweek narrow">
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
-      <h1 id="out-heading" class="myweek__title">My week</h1>
+      <h1 id="out-heading" class="page-title">My week</h1>
       <p class="myweek__lede">This phone isn’t signed in.</p>
       <div class="myweek__actions">
         <a href="/my-week/link" class="btn btn--primary btn--big">Get my link</a>
@@ -41,7 +41,7 @@ const shortcuts = [
           <Icon name="mdi:check-circle" class="size-6" aria-hidden="true" />
           <span data-me-welcome-text>You’re signed up.</span>
         </p>
-        <h1 id="hello-heading" class="myweek__title">
+        <h1 id="hello-heading" class="page-title">
           Hi, <span data-me-name>there</span>.
         </h1>
         <p class="myweek__lede" data-me-phase>Check in each day, October 1 to 8.</p>
@@ -201,16 +201,10 @@ const shortcuts = [
 
 <style>
   .myweek {
-    max-width: 44rem;
-    padding-block: clamp(2rem, 6vw, 4rem);
-  }
-  .myweek__title {
-    font-size: clamp(2.3rem, 8vw, 3.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
   }
   .myweek__lede {
-    margin-top: 0.6rem;
+    margin-top: 0.9rem;
     font-size: 1.2rem;
     line-height: 1.5;
     color: var(--color-on-surface-variant);
