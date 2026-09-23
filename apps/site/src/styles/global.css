@@ -1638,3 +1638,23 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     }
   }
 }
+
+/* Headline face: Fraunces (SIL Open Font License 1.1), a warm serif that
+   gives the campaign a voice of its own, apart from LVBT's Public Sans. */
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/fraunces-600.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/fraunces-800.woff2') format('woff2');
+  font-weight: 800;
+  font-display: swap;
+}
+html[data-wwd-theme] :is(h1, h2) {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
