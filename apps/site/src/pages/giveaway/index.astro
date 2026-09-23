@@ -41,6 +41,7 @@ const description =
               class="giveaway-prize__photo"
               shows={prize.photo}
               photo={prize.image}
+              icon={prize.icon}
               sizes="(min-width: 48rem) 36rem, 100vw"
             />
             <div class="giveaway-prize__text">
@@ -81,7 +82,11 @@ const description =
     <div class="giveaway-address">
       <p class="font-bold">Mail it to</p>
       <p>Las Vegans for Better Transit, Week Without Driving Giveaway</p>
-      <p class="to-come mt-2">Mailing address to come</p>
+      <p class="mt-2">
+        Email <a href="mailto:wwd@lasvegasfortransit.org" class="body-link"
+          >wwd@lasvegasfortransit.org</a
+        > for the mailing address.
+      </p>
     </div>
   </section>
 

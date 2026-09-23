@@ -26,16 +26,19 @@ const ways = [
     title: 'Ask for a ride.',
     body: 'Ride with a friend, a neighbor or a coworker. Notice what it’s like to count on someone else.',
     photo: 'Two neighbors sharing a ride to the grocery store',
+    icon: 'mdi:account-multiple-outline',
   },
   {
     title: 'Notice what’s hard.',
     body: 'A stop with no shade. A sidewalk that ends. A bus that comes every hour. Tell us about it.',
     photo: 'A bus stop with no shade on a hot afternoon',
+    icon: 'mdi:weather-sunny-alert',
   },
   {
     title: 'If you have to drive, you haven’t failed.',
     body: 'Some trips need a car. Think about what someone who can’t drive would do instead.',
     photo: 'A parent with a stroller crossing a wide Las Vegas street',
+    icon: 'mdi:car-outline',
   },
 ] as const;
 
@@ -89,6 +92,7 @@ const fields = [
               class="take-part-way__photo"
               shows={way.photo}
               photo={'image' in way ? way.image : undefined}
+              icon={'icon' in way ? way.icon : 'mdi:bus'}
               sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
             />
             <div class="take-part-way__text">

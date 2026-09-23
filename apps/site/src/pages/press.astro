@@ -23,24 +23,6 @@ const mediaMailto = `mailto:${contactEmail}?subject=${encodeURIComponent(
 
 const mediaAdvisory = wwdResources.find((r) => r.title === '2026 media advisory');
 
-const downloads = [
-  {
-    name: 'Logo pack',
-    icon: 'mdi:image-outline',
-    body: 'LVBT and Week Without Driving logos, in PNG and SVG.',
-  },
-  {
-    name: 'Photos from the week',
-    icon: 'mdi:image-multiple-outline',
-    body: 'Real photos from Las Vegas, added as the week happens.',
-  },
-  {
-    name: 'Campaign graphics',
-    icon: 'mdi:palette-outline',
-    body: "Social graphics and the campaign's colors.",
-  },
-];
-
 const storyAngles = [
   "Las Vegans who don't drive, in their own words.",
   'Local leaders taking the challenge for a day or the whole week.',
@@ -63,10 +45,6 @@ const storyAngles = [
         </a>
       </p>
       <p class="mt-1 text-on-surface-variant">We answer within one business day.</p>
-      <p class="mt-3 flex flex-wrap items-center gap-2">
-        <span class="font-bold">Name and phone number:</span>
-        <span class="to-come">To come</span>
-      </p>
       <a href={mediaMailto} data-print-url={contactEmail} class="btn btn--primary mt-5">
         <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
         Email the media contact
@@ -77,10 +55,9 @@ const storyAngles = [
   {/* PRESS RELEASE */}
   <section class="container-page section mt-12" aria-labelledby="release-heading">
     <h2 id="release-heading" class="section-title">Press release</h2>
-    <div class="press-card section-body">
-      <span class="to-come">To come</span>
-      <p class="mt-2">Our press release will be posted here before October 1.</p>
-    </div>
+    <p class="section-intro">
+      Our press release comes out before October 1. Email the media contact to get it first.
+    </p>
     {
       mediaAdvisory && (
         <p class="section-intro">
@@ -155,24 +132,6 @@ const storyAngles = [
         <dd>{wwd.hashtag}</dd>
       </div>
     </dl>
-  </section>
-
-  {/* PHOTOS AND LOGOS */}
-  <section class="container-page section" aria-labelledby="downloads-heading">
-    <h2 id="downloads-heading" class="section-title">Photos and logos</h2>
-    <p class="section-intro">Downloads are on the way. Check back closer to October 1.</p>
-    <ul class="section-body grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {
-        downloads.map((item) => (
-          <li class="press-card flex flex-col gap-2">
-            <Icon name={item.icon} class="size-8 text-primary-ink" aria-hidden="true" />
-            <p class="press-card__title">{item.name}</p>
-            <p class="text-on-surface-variant">{item.body}</p>
-            <span class="to-come mt-1 w-fit">To come</span>
-          </li>
-        ))
-      }
-    </ul>
   </section>
 
   {/* STORIES */}

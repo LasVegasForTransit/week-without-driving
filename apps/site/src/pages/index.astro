@@ -12,10 +12,9 @@ import { partners } from '../lib/partners';
 
 // The Home page, for someone who has five seconds: what the week is, when
 // it is, and one button. Below that, the three steps, why it matters, the
-// prizes, the daily Instagram hosts, the partner wall and the local
-// proclamations. Slots for content LVBT hasn't confirmed yet (photos,
-// hosts, partners, proclamations) are marked "to come" and fill from
-// src/lib/campaign.ts and src/lib/partners.ts.
+// prizes, the daily Instagram hosts, the partners and the local leaders.
+// Hosts, partners and proclamations fill in from src/lib/campaign.ts and
+// src/lib/partners.ts as LVBT confirms them.
 
 const dateRange = `October 1 to 8, ${wwd.year}`;
 const canonical = `${site.url}/`;
@@ -86,10 +85,10 @@ const steps = [
   },
 ] as const;
 
-// The partner wall shows every confirmed partner, then open tiles up to a
-// full row of eight, so there is always a visible place to join.
-const WALL_SIZE = 8;
-const openTiles = Math.max(WALL_SIZE - partners.length, 2);
+// Sections for content LVBT confirms over time (daily hosts, partners,
+// proclamations) show only once there is something real to show.
+const hasHosts = days.some((d) => d.host !== null);
+const issued = proclamations.filter((p) => p.url !== null);
 
 const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURIComponent(
   'Week Without Driving: elected leaders and agencies',
@@ -180,6 +179,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
                 class="home-prize__photo"
                 shows={p.photo}
                 photo={p.image}
+                icon={p.icon}
                 sizes="(min-width: 64rem) 25vw, 50vw"
               />
               <h3 class="home-prize__name">{p.name}</h3>
@@ -191,32 +191,36 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     </div>
   </section>
 
-  {/* EVERY DAY: who hosts our Instagram each day of the week. */}
-  <section class="home-days" aria-labelledby="days-heading">
-    <div class="container-page">
-      <h2 id="days-heading" class="home-h2">Follow along every day</h2>
-      <p class="home-intro">
-        Each day, a different Las Vegan takes over our Instagram and shows how they got around.
-      </p>
-      <ol class="home-days__list">
-        {
-          days.map((d) => (
-            <li class="home-day">
-              <p class="home-day__num">Day {d.number}</p>
-              <p class="home-day__date">
-                <span>{d.weekday}</span>
-                {d.monthDay}
-              </p>
-              <p class="home-day__host">{d.host ?? <span class="to-come">Host to come</span>}</p>
-            </li>
-          ))
-        }
-      </ol>
-      <a href={lvbt.instagramUrl} target="_blank" rel="noopener noreferrer" class="home-link">
-        Follow @lasvegasfortransit
-      </a>
-    </div>
-  </section>
+  {/* EVERY DAY: who hosts our Instagram each day, once hosts are confirmed. */}
+  {
+    hasHosts && (
+      <section class="home-days" aria-labelledby="days-heading">
+        <div class="container-page">
+          <h2 id="days-heading" class="home-h2">
+            Follow along every day
+          </h2>
+          <p class="home-intro">
+            Each day, a different Las Vegan takes over our Instagram and shows how they got around.
+          </p>
+          <ol class="home-days__list">
+            {days.map((d) => (
+              <li class="home-day">
+                <p class="home-day__num">Day {d.number}</p>
+                <p class="home-day__date">
+                  <span>{d.weekday}</span>
+                  {d.monthDay}
+                </p>
+                <p class="home-day__host">{d.host ?? <span class="to-come">Host to come</span>}</p>
+              </li>
+            ))}
+          </ol>
+          <a href={lvbt.instagramUrl} target="_blank" rel="noopener noreferrer" class="home-link">
+            Follow @lasvegasfortransit
+          </a>
+        </div>
+      </section>
+    )
+  }
 
   {/* PARTNERS: the groups bringing the week to their people. */}
   <section class="home-section" aria-labelledby="partners-heading">
@@ -231,31 +235,23 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
         </div>
         <a href="/partners" class="btn btn--primary self-start">Bring your group</a>
       </div>
-      <ul class="logo-wall" aria-label="Partner organizations">
-        {
-          partners.map((p) => (
-            <li class="logo-wall__tile">
-              {p.url ? (
-                <a href={p.url} target="_blank" rel="noopener noreferrer">
-                  {p.name}
-                </a>
-              ) : (
-                p.name
-              )}
-            </li>
-          ))
-        }
-        {
-          Array.from({ length: openTiles }, () => (
-            <li class="logo-wall__tile logo-wall__tile--open">
-              <a href="/partners">
-                <Icon name="mdi:plus" class="size-6" aria-hidden="true" />
-                Your group here
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {
+        partners.length > 0 && (
+          <ul class="logo-wall" aria-label="Partner organizations">
+            {partners.map((p) => (
+              <li class="logo-wall__tile">
+                {p.url ? (
+                  <a href={p.url} target="_blank" rel="noopener noreferrer">
+                    {p.name}
+                  </a>
+                ) : (
+                  p.name
+                )}
+              </li>
+            ))}
+          </ul>
+        )
+      }
       <p class="home-national">
         Part of the national{' '}
         <a href={wwd.nationalUrl} target="_blank" rel="noopener noreferrer" class="body-link"
@@ -268,29 +264,33 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   {/* LEADERS: proclamations from our cities and the county. */}
   <section class="home-leaders" aria-labelledby="leaders-heading">
     <div class="container-page">
-      <h2 id="leaders-heading" class="home-h2">Local leaders</h2>
+      <h2 id="leaders-heading" class="home-h2">
+        {issued.length > 0 ? 'Local leaders' : 'Leaders take the challenge too'}
+      </h2>
       <p class="home-intro">
-        Cities and the county recognizing October 1–8 as Week Without Driving.
-      </p>
-      <ul class="home-seals">
         {
-          proclamations.map((p) => (
-            <li class="home-seal">
-              <span class="home-seal__mark" aria-hidden="true">
-                <Icon name="mdi:bank-outline" class="size-7" />
-              </span>
-              <p class="home-seal__gov">{p.government}</p>
-              {p.url ? (
-                <a href={p.url} class="home-link">
+          issued.length > 0
+            ? 'Cities and the county recognizing October 1–8 as Week Without Driving.'
+            : 'Elected leaders across the country spend the week without driving to see their city the way their constituents do.'
+        }
+      </p>
+      {
+        issued.length > 0 && (
+          <ul class="home-seals">
+            {issued.map((p) => (
+              <li class="home-seal">
+                <span class="home-seal__mark" aria-hidden="true">
+                  <Icon name="mdi:bank-outline" class="size-7" />
+                </span>
+                <p class="home-seal__gov">{p.government}</p>
+                <a href={p.url ?? '#'} class="home-link">
                   Read the proclamation
                 </a>
-              ) : (
-                <p class="to-come">To come</p>
-              )}
-            </li>
-          ))
-        }
-      </ul>
+              </li>
+            ))}
+          </ul>
+        )
+      }
       <div class="home-leader-ask">
         <blockquote>
           <p>
