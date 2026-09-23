@@ -6,7 +6,12 @@
   "name": "lvwwd-preview",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
-  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash",
+  },
   "workers_dev": true,
   "preview_urls": false,
   "observability": { "enabled": true },

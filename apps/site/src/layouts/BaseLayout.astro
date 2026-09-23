@@ -21,7 +21,8 @@ const {
   noindex = false,
 } = Astro.props;
 const path = Astro.url.pathname;
-const canonical = new URL(Astro.url.pathname, site.url).toString();
+// Built pages report /guides/; the site answers and links at /guides.
+const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
 ---
 
 <!doctype html>
