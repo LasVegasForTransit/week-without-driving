@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { Icon } from 'astro-icon/components';
 import PhotoSlot from '../components/PhotoSlot.astro';
+import { photos } from '../lib/photos';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
 import { days, prizes, proclamations } from '../lib/campaign';
@@ -102,7 +103,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     <PhotoSlot
       class="home-hero__photo"
       shows="Las Vegans of all ages waiting together at a bus stop"
+      photo={photos.deuceView}
       quiet
+      eager
     />
     <div class="home-hero__shade" aria-hidden="true"></div>
     <div class="container-page home-hero__content">
@@ -190,7 +193,12 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
         {
           prizes.map((p) => (
             <li class="home-prize">
-              <PhotoSlot class="home-prize__photo" shows={p.photo} />
+              <PhotoSlot
+                class="home-prize__photo"
+                shows={p.photo}
+                photo={p.image}
+                sizes="(min-width: 64rem) 25vw, 50vw"
+              />
               <h3 class="home-prize__name">{p.name}</h3>
               <p class="home-prize__body">{p.body}</p>
             </li>
@@ -372,6 +380,11 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .home-hero :global(.home-hero__photo) {
     position: absolute;
     inset: 0;
+  }
+  /* The photo is taken from the Deuce's top deck: show the Strip ahead,
+     not the bus's ceiling. */
+  .home-hero :global(.home-hero__photo img) {
+    object-position: center 60%;
   }
   .home-hero__shade {
     position: absolute;

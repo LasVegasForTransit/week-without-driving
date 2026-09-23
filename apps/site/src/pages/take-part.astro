@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PhotoSlot from '../components/PhotoSlot.astro';
+import { photos } from '../lib/photos';
 
 // How it works. Anyone can take part in Week Without Driving without
 // signing up; signing up is only for LVBT's Las Vegas giveaway. The "Take
@@ -15,6 +16,7 @@ const ways = [
     title: 'Take the bus, walk, roll or bike.',
     body: 'Try another way to get where you need to go, for one trip or the whole week.',
     photo: 'A rider boarding an RTC bus in East Las Vegas',
+    image: photos.rtcBusStreet,
   },
   {
     title: 'Ask for a ride.',
@@ -98,7 +100,12 @@ const fields = [
       {
         ways.map((way) => (
           <li class="take-part-way border border-outline-variant/20 bg-surface-container">
-            <PhotoSlot class="take-part-way__photo" shows={way.photo} />
+            <PhotoSlot
+              class="take-part-way__photo"
+              shows={way.photo}
+              photo={'image' in way ? way.image : undefined}
+              sizes="(min-width: 64rem) 25vw, (min-width: 48rem) 50vw, 100vw"
+            />
             <div class="p-5">
               <h3 class="text-title-lg">{way.title}</h3>
               <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{way.body}</p>
