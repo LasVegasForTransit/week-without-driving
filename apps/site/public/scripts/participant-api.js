@@ -1,6 +1,6 @@
 /**
- * The participant API, from the browser. Sign up, My week and Get my link
- * load this before their own script and use window.lvwwdApi:
+ * The participant API, from the browser. Sign up, My week, Get my link and
+ * Bingo load this before their own script and use window.lvwwdApi:
  *
  * - call(method, path, body) talks to the Worker and always resolves, to
  *   { ok, status, data }. data.message is a plain sentence to show when
