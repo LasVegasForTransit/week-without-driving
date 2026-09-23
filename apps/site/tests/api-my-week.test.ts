@@ -109,6 +109,17 @@ describe('my week', () => {
     expect(await (await checkIn('4')).json()).toMatchObject({ count: 2, days: [3, 4] });
   });
 
+  it('keeps today’s entry as it is once a volunteer has checked it', async () => {
+    await logTrip('3', { modes: ['bus'], link: POST });
+    await platform.env.DB.prepare(
+      "UPDATE checkins SET checked_at = '2026-10-03T20:00:00.000Z', checked_by = 'sam@lvbt.test'",
+    ).run();
+    const again = await logTrip('3', { modes: ['bike'], link: POST });
+    expect(again.status).toBe(409);
+    expect((await again.json<{ message: string }>()).message).toBeTruthy();
+    expect((await me()).trips).toEqual([{ day: 3, modes: ['bus'] }]);
+  });
+
   it('keeps how the person got around, and lets them change it that day', async () => {
     await logTrip('3', { modes: ['bus', 'walk'], hard: 'No shade at the stop.', link: POST });
     expect((await me()).trips).toEqual([{ day: 3, modes: ['bus', 'walk'] }]);
