@@ -182,9 +182,10 @@ const destinations: Destination[] = [
       </noscript>
 
       {
-        /* Hidden until nearest-routes.js confirms the stop data loaded; see
-        that script's `init()`. Keeps the controls off the page entirely
-        with JavaScript off, matching the noscript message above. */
+        /* Shown by nearest-routes.js, which loads the stop data the first
+        time someone asks for stops (see its `ensureData()`). Keeps the
+        controls off the page entirely with JavaScript off, matching the
+        noscript message above. */
       }
       <div data-finder-app hidden>
         <div class="flex flex-wrap items-center gap-4">
