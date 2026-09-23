@@ -5,7 +5,7 @@ import '../styles/global.css';
 import '../styles/print.css';
 import { lvbt, site } from '../lib/site';
 import { Icon } from 'astro-icon/components';
-import { footerLinks, isCurrent, moreNav, tabNav, topNav } from '../lib/nav';
+import { footerLinks, isCurrent, mainNav } from '../lib/nav';
 
 interface Props {
   title: string;
@@ -75,22 +75,19 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
     <div class="min-h-dvh flex flex-col">
       <header data-site-header class="site-header">
         <div class="container-page site-header__row">
-          <a href="/" class="site-logo" aria-label="Week Without Driving Las Vegas, home">
-            <span class="site-logo__badge" aria-hidden="true">WWD</span>
-            <span class="site-logo__text" aria-hidden="true">
-              <span class="site-logo__place">Las Vegas</span>
-              <span class="site-logo__dates">Oct 1–8, 2026</span>
-            </span>
+          <a href="/" class="wordmark" aria-label="Week Without Driving Las Vegas, home">
+            <span class="wordmark__name" aria-hidden="true">Week Without Driving</span>
+            <span class="wordmark__meta" aria-hidden="true">Las Vegas · Oct 1–8, 2026</span>
           </a>
           <nav aria-label="Main" class="site-topnav">
             <ul>
               {
-                topNav.map((item) => (
+                mainNav.map((item) => (
                   <li>
                     <a
                       href={item.href}
                       aria-current={isCurrent(item.href, path) ? 'page' : undefined}
-                      class="nav-link"
+                      class="site-topnav__link"
                     >
                       {item.label}
                     </a>
@@ -99,64 +96,61 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
               }
             </ul>
           </nav>
-          <a href="/take-part#pledge" class="site-pledge" data-pledge-link>
-            <span data-pledge-label>Pledge</span>
-          </a>
+          <div class="site-header__actions">
+            <a href="/take-part#pledge" class="site-pledge" data-pledge-link>
+              <span class="site-pledge__long" data-pledge-label>Take the pledge</span>
+              <span class="site-pledge__short" data-pledge-label>Pledge</span>
+            </a>
+            <a
+              href="#site-menu"
+              class="site-menu-button"
+              data-menu-open
+              aria-haspopup="dialog"
+              aria-label="Open the menu"
+            >
+              <Icon name="mdi:menu" class="size-7" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </header>
       <main id="main" class="flex-1">
         <slot />
       </main>
     </div>
-    <nav aria-label="Main" class="tabbar">
-      <ul>
+    <dialog id="site-menu" class="site-menu" aria-label="Menu" data-menu>
+      <div class="site-menu__head">
+        <span class="wordmark" aria-hidden="true">
+          <span class="wordmark__name">Week Without Driving</span>
+          <span class="wordmark__meta">Las Vegas · Oct 1–8, 2026</span>
+        </span>
+        <button type="button" class="site-menu__close" data-menu-close aria-label="Close the menu">
+          <Icon name="mdi:close" class="size-7" aria-hidden="true" />
+        </button>
+      </div>
+      <a href="/take-part#pledge" class="site-menu__pledge" data-pledge-link>
+        <span data-pledge-label>Take the pledge</span>
+        <Icon name="mdi:arrow-right" class="size-6" aria-hidden="true" />
+      </a>
+      <ul class="site-menu__list">
         {
-          tabNav.map((item) => (
+          mainNav.map((item) => (
             <li>
               <a
                 href={item.href}
-                aria-current={isCurrent(item.match, path) ? 'page' : undefined}
-                class="tabbar__link"
-                {...(item.pledge ? { 'data-pledge-link': '' } : {})}
+                class="site-menu__link"
+                aria-current={isCurrent(item.href, path) ? 'page' : undefined}
               >
-                <Icon name={item.icon} class="tabbar__icon" aria-hidden="true" />
-                <span {...(item.pledge ? { 'data-pledge-label': '' } : {})}>{item.label}</span>
-              </a>
-            </li>
-          ))
-        }
-        <li>
-          <a href="#more" class="tabbar__link" data-more-open aria-haspopup="dialog">
-            <Icon
-              name="mdi:dots-horizontal-circle-outline"
-              class="tabbar__icon"
-              aria-hidden="true"
-            />
-            <span>More</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    <dialog id="more" class="more-sheet" aria-labelledby="more-heading" data-more-sheet>
-      <div class="more-sheet__head">
-        <h2 id="more-heading" class="more-sheet__title">More</h2>
-        <button type="button" class="more-sheet__close" data-more-close aria-label="Close">
-          <Icon name="mdi:close" class="size-6" aria-hidden="true" />
-        </button>
-      </div>
-      <ul class="more-sheet__list">
-        {
-          moreNav.map((item) => (
-            <li>
-              <a href={item.href} class="more-sheet__link">
-                <Icon name={item.icon} class="size-6" aria-hidden="true" />
-                {item.label}
+                <Icon name={item.icon} class="site-menu__icon" aria-hidden="true" />
+                <span>
+                  <span class="site-menu__label">{item.label}</span>
+                  <span class="site-menu__help">{item.help}</span>
+                </span>
               </a>
             </li>
           ))
         }
       </ul>
-      <p class="more-sheet__credit">
+      <p class="site-menu__credit">
         An initiative by <a href={lvbt.url} class="body-link">{lvbt.name}</a>
       </p>
     </dialog>
