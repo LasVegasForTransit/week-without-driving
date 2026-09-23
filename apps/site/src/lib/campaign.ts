@@ -32,17 +32,25 @@ export const proclamations: Array<{ government: string; url: string | null }> = 
 ];
 
 /** The giveaway prizes, as the Giveaway page describes them. */
-export const prizes: Array<{ name: string; body: string; photo: string; image?: Photo }> = [
+export const prizes: Array<{
+  name: string;
+  body: string;
+  photo: string;
+  image?: Photo;
+  icon: string;
+}> = [
   {
     name: 'A one-month RTC bus pass',
     body: 'Ride any RTC bus as much as you want for a month.',
     photo: 'An RTC 30-day pass in someone’s hand at a bus stop',
     image: photos.rtcBusMlk,
+    icon: 'mdi:card-account-details-outline',
   },
   {
     name: 'An LVBT sticker pack',
     body: 'Stickers for your water bottle, laptop or bike.',
     photo: 'LVBT stickers spread out on a table',
+    icon: 'mdi:sticker-emoji',
   },
 ];
 
