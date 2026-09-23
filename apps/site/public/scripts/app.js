@@ -1,10 +1,21 @@
 /**
- * The offline service worker, from the page. On every page this registers
- * /sw.js once the page has loaded, which keeps the guides, Find a bus and
- * Bingo working offline, and shows the update bar when a new version is
- * waiting, switching to it when the visitor taps Refresh.
+ * lvwwd.org on the phone like an app. On every page this:
+ *
+ * - registers the service worker (/sw.js) once the page has loaded, which
+ *   keeps the guides, Find a bus and Bingo working offline;
+ * - shows the update bar when a new version is waiting, and switches to it
+ *   when the visitor taps Refresh;
+ * - runs the footer's "Add to home screen" button and its instruction
+ *   sheet: the browser's own install box where there is one (Chrome,
+ *   Edge), the iPhone steps in Safari on an iPhone or iPad, and general
+ *   steps in other phone browsers. The iPhone sheet also opens by itself
+ *   on My week after signing up, until it has been closed once.
+ *
+ * Without JavaScript the button stays hidden and every page still works.
  */
 (() => {
+  const DISMISSED = 'wwd-ios-install-dismissed';
+
   function offerUpdate(worker, state) {
     const bar = document.querySelector('[data-update-bar]');
     if (!bar || bar.childElementCount) return;
@@ -51,5 +62,111 @@
     else window.addEventListener('load', register, { once: true });
   }
 
+  /** What this browser can do about installing the site. */
+  function browser() {
+    const ua = navigator.userAgent;
+    const apple =
+      /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    return {
+      standalone:
+        window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+      // Safari itself: not Chrome, Firefox, Edge, Google or an app's own browser.
+      iosSafari:
+        apple &&
+        /Safari\//.test(ua) &&
+        !/CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|Instagram|FBAN|FBAV/.test(ua),
+      phone: navigator.userAgentData?.mobile === true || apple || /Android|Mobi/.test(ua),
+    };
+  }
+
+  function dismissed() {
+    try {
+      return Boolean(localStorage.getItem(DISMISSED));
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberDismissal() {
+    try {
+      localStorage.setItem(DISMISSED, new Date().toISOString());
+    } catch {
+      // Private browsing: the sheet may open by itself once more.
+    }
+  }
+
+  /** The instruction sheet: open(which, byItself) shows the iPhone or general steps. */
+  function installSheet(sheet) {
+    const shown = { kind: 'general', auto: false, opener: null };
+    sheet.addEventListener('click', (event) => {
+      const target = event.target;
+      // The backdrop, or a close button.
+      if (
+        target === sheet ||
+        (target instanceof Element && target.closest('[data-install-close]'))
+      ) {
+        sheet.close();
+      }
+    });
+    sheet.addEventListener('close', () => {
+      if (shown.kind === 'ios') rememberDismissal();
+      // After opening by itself, focus goes to the page's heading.
+      const back = shown.auto ? document.querySelector('main h1') : shown.opener;
+      if (shown.auto) back?.setAttribute('tabindex', '-1');
+      if (back instanceof HTMLElement) back.focus();
+    });
+    return (which, byItself) => {
+      if (sheet.open) return;
+      Object.assign(shown, { kind: which, auto: byItself, opener: document.activeElement });
+      sheet.querySelectorAll('[data-install-ios]').forEach((el) => (el.hidden = which !== 'ios'));
+      sheet
+        .querySelectorAll('[data-install-general]')
+        .forEach((el) => (el.hidden = which === 'ios'));
+      sheet.setAttribute('aria-labelledby', `install-${which}-title`);
+      sheet.showModal();
+      sheet.querySelector('h2:not([hidden])')?.focus();
+    };
+  }
+
+  function setUpInstall() {
+    const button = document.querySelector('[data-install-button]');
+    const sheet = document.querySelector('[data-install-sheet]');
+    if (!button || !(sheet instanceof HTMLDialogElement) || !sheet.showModal) return;
+    const { standalone, iosSafari, phone } = browser();
+    // Analytics: the `install` event, method "ios-standalone", is sent here
+    // once LVBT's analytics allow lvwwd.org's events. They don't yet.
+    if (standalone) return;
+
+    const open = installSheet(sheet);
+    let offer = null;
+    if (iosSafari || phone) button.hidden = false;
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      offer = event;
+      button.hidden = false;
+    });
+    window.addEventListener('appinstalled', () => {
+      offer = null;
+      button.hidden = true;
+      // Analytics: the `install` event, method "prompt", is sent here.
+    });
+    button.addEventListener('click', () => {
+      // The browser's install box can be shown once per offer.
+      if (offer) offer.prompt();
+      else open(iosSafari ? 'ios' : 'general', false);
+      offer = null;
+    });
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('[data-open-install-sheet]')) {
+        open('ios', false);
+      }
+    });
+
+    const signedIn = /(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie);
+    const myWeek = /^\/my-week\/?$/.test(window.location.pathname);
+    if (iosSafari && signedIn && myWeek && !dismissed()) open('ios', true);
+  }
+
   registerServiceWorker();
+  setUpInstall();
 })();

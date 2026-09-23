@@ -59,7 +59,10 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
       crossorigin
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+    {/* Installing the site: the manifest names it and its icons. */}
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-title" content="WWD Las Vegas" />
     <link rel="canonical" href={canonical} />
     <title>{title}</title>
     {noindex && <meta name="robots" content="noindex" />}
@@ -176,6 +179,13 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
           >.
         </p>
         <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
+          {/* Shown by /scripts/app.js where installing is possible. */}
+          <li>
+            <button type="button" class="install-button body-link" data-install-button hidden>
+              <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />
+              Add to home screen
+            </button>
+          </li>
           <li>
             <a
               href={lvbt.instagramUrl}
@@ -216,6 +226,60 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
         </ul>
       </div>
     </footer>
+    {
+      /* The instructions for adding the site to the home screen. /scripts/app.js
+      opens it with the iPhone steps (data-install-ios) or the steps for
+      other phone browsers (data-install-general). */
+    }
+    <dialog class="install-sheet" data-install-sheet aria-labelledby="install-ios-title">
+      <div class="install-sheet__body">
+        <div class="install-sheet__head">
+          <h2 id="install-ios-title" class="install-sheet__title" tabindex="-1" data-install-ios>
+            Add WWD Las Vegas to your Home Screen
+          </h2>
+          <h2
+            id="install-general-title"
+            class="install-sheet__title"
+            tabindex="-1"
+            data-install-general
+          >
+            Add WWD Las Vegas to your home screen
+          </h2>
+          <button type="button" class="install-sheet__close" data-install-close aria-label="Close">
+            <Icon name="mdi:close" class="size-7" aria-hidden="true" />
+          </button>
+        </div>
+        <p class="install-sheet__line">
+          Open the guides, Bingo and My week with one tap. The guides and Bingo work even with no
+          signal.
+        </p>
+        <ol class="install-sheet__steps" data-install-ios>
+          <li>
+            Tap the Share button. It’s a square with an arrow pointing up. If you don’t see it, tap
+            ··· first.
+          </li>
+          <li>Scroll down and tap Add to Home Screen.</li>
+          <li>Tap Add. The WWD Las Vegas icon appears on your Home Screen.</li>
+        </ol>
+        <ol class="install-sheet__steps" data-install-general>
+          <li>
+            Open your browser’s menu or Share button. The menu is usually three dots or three lines.
+          </li>
+          <li>
+            Tap Add to Home Screen or Install app. In Samsung Internet, tap Add page to, then Home
+            screen.
+          </li>
+          <li>Tap Add or Install. The WWD Las Vegas icon appears on your home screen.</li>
+        </ol>
+        <p class="install-sheet__note" data-install-general>
+          Opened this page from Instagram, Facebook or another app? First open the app’s menu and
+          choose to open the page in your browser. Then follow these steps.
+        </p>
+        <button type="button" class="btn btn--primary install-sheet__done" data-install-close>
+          Got it
+        </button>
+      </div>
+    </dialog>
     {/* The update bar: /scripts/app.js fills it when a new version is ready. */}
     <div class="update-bar" role="status" aria-live="polite" data-update-bar></div>
     {

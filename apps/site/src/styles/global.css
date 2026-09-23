@@ -1927,14 +1927,105 @@ body {
   }
 }
 
-/* The bar that offers a new version of the site, filled by /scripts/app.js
-   once the service worker has one ready. It rises from the bottom. */
+/* Installing the site and the offline service worker: the footer's "Add to
+   home screen" button, its instruction sheet, and the bar that offers a
+   new version (all run by /scripts/app.js). */
 @layer components {
+  .install-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 44px;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .install-button[hidden] {
+    display: none;
+  }
+
+  /* A sheet that rises from the bottom; its own content scrolls when the
+     text is taller than the screen. */
+  .install-sheet {
+    width: 100%;
+    max-width: 34rem;
+    max-height: min(88dvh, 40rem);
+    margin: auto auto 0;
+    padding: 0;
+    color: var(--color-on-surface);
+    background: var(--color-surface);
+    border: none;
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+  .install-sheet::backdrop {
+    background: rgb(10 8 20 / 0.5);
+  }
+  .install-sheet[open] {
+    animation: sheet-up 200ms var(--ease-out);
+  }
   @keyframes sheet-up {
     from {
       transform: translateY(100%);
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .install-sheet[open] {
+      animation: none;
+    }
+  }
+  .install-sheet__body {
+    padding: 1rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+  }
+  .install-sheet__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .install-sheet__title {
+    padding-top: 0.5rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .install-sheet__title:focus {
+    outline: none;
+  }
+  .install-sheet__close {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+  }
+  .install-sheet__line,
+  .install-sheet__note {
+    margin-top: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .install-sheet__steps {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    padding-left: 1.4rem;
+    line-height: 1.45;
+    list-style: decimal;
+  }
+  .install-sheet__done {
+    width: 100%;
+    margin-top: 1.25rem;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+  }
+
+  /* The update bar sits at the bottom of the screen once it has text. */
   .update-bar {
     position: fixed;
     inset: auto 0 0;
