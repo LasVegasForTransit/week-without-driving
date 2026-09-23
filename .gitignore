@@ -10,3 +10,7 @@ coverage/
 .dev.vars.*
 .DS_Store
 .astro/
+test-results/
+playwright-report/
+blob-report/
+**/playwright/.cache/

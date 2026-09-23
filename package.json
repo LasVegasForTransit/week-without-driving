@@ -25,8 +25,8 @@
     "*": "prettier --write --ignore-unknown"
   },
   "devDependencies": {
-    "@lvbt/cli": "file:.lvbt/web-platform/packages/cli",
-    "@lvbt/prettier-config": "file:.lvbt/web-platform/packages/prettier-config",
+    "@lasvegasfortransit/cli": "file:.lvbt/web-platform/packages/cli",
+    "@lasvegasfortransit/prettier-config": "file:.lvbt/web-platform/packages/prettier-config",
     "lint-staged": "catalog:",
     "markdownlint-cli2": "catalog:",
     "markdownlint-rule-relative-links": "catalog:",

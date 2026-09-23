@@ -145,6 +145,85 @@ export async function applyPreset(root: string, bundle: WebPreset, dryRun = fals
       .sort()
       .filter((name) => !(name in bundle.files)),
   };
+  const consumerChanged = [
+    ...new Set([
+      ...(await migrateLegacyPackageScope(root, dryRun)),
+      ...(await ignorePlaywrightOutput(root, dryRun)),
+    ]),
+  ].sort();
   if (!dryRun) await install(root, bundle);
-  return plan;
+  return { ...plan, consumerChanged };
+}
+
+// Playwright writes these beside each app's configuration, such as apps/site/test-results/.
+// Every example's .gitignore carries the same rules. A slash inside a pattern anchors it to the
+// .gitignore's own directory, so the cache rule needs its leading **/ to reach every app.
+export const PLAYWRIGHT_OUTPUT_IGNORES = [
+  'test-results/',
+  'playwright-report/',
+  'blob-report/',
+  '**/playwright/.cache/',
+];
+
+/** Appends the rules a consumer's root .gitignore lacks, leaving its own lines untouched. */
+async function ignorePlaywrightOutput(root: string, dryRun: boolean): Promise<string[]> {
+  const file = path.join(root, '.gitignore');
+  const source = await readFile(file, 'utf8').catch(() => null);
+  if (source === null) return [];
+  const present = new Set(source.split(/\r?\n/).map((line) => line.trim()));
+  const missing = PLAYWRIGHT_OUTPUT_IGNORES.filter((rule) => !present.has(rule));
+  if (missing.length === 0) return [];
+  const separator = source === '' || source.endsWith('\n') ? '' : '\n';
+  if (!dryRun) await writeFile(file, `${source}${separator}${missing.join('\n')}\n`);
+  return ['.gitignore'];
+}
+
+const SKIPPED_DIRECTORIES = new Set([
+  '.git',
+  'node_modules',
+  'dist',
+  '.turbo',
+  'test-results',
+  'playwright-report',
+  'blob-report',
+]);
+const LEGACY_PLATFORM_PACKAGES = [
+  'cli',
+  'eslint-config',
+  'playwright-config',
+  'prettier-config',
+  'typescript-config',
+  'vitest-config',
+  'web-platform',
+] as const;
+
+async function consumerFiles(root: string, relative = ''): Promise<string[]> {
+  const directory = path.join(root, relative);
+  const files: string[] = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.name === '.lvbt' && relative === '') continue;
+    if (entry.isDirectory()) {
+      if (!SKIPPED_DIRECTORIES.has(entry.name))
+        files.push(...(await consumerFiles(root, path.join(relative, entry.name))));
+      continue;
+    }
+    if (entry.isFile()) files.push(path.join(relative, entry.name));
+  }
+  return files;
+}
+
+async function migrateLegacyPackageScope(root: string, dryRun: boolean): Promise<string[]> {
+  const changed: string[] = [];
+  for (const relative of await consumerFiles(root)) {
+    const file = path.join(root, relative);
+    const source = await readFile(file, 'utf8').catch(() => null);
+    if (source === null || source.includes('\0')) continue;
+    let next = source;
+    for (const name of LEGACY_PLATFORM_PACKAGES)
+      next = next.replaceAll(`@lvbt/${name}`, `@lasvegasfortransit/${name}`);
+    if (next === source) continue;
+    changed.push(relative.split(path.sep).join('/'));
+    if (!dryRun) await writeFile(file, next);
+  }
+  return changed.sort();
 }

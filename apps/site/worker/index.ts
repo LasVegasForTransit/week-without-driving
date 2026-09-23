@@ -1,5 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
-
 import { redirectFor } from './redirect';
 
 interface Env {
