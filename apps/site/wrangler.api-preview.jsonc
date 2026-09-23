@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // The participant API's preview: the same Worker and pages as lvwwd.org,
+  // on workers.dev, with its own database and photo bucket. It shows each
+  // "Open my week" link on the page instead of only sending it, and treats
+  // every day as Day 3 of the week so check-ins can be tested before
+  // October. Deploy with:
+  //   pnpm build && pnpm exec wrangler deploy -c wrangler.api-preview.jsonc
+  // TURNSTILE_SECRET is a secret (`wrangler secret put -c ...`); the preview
+  // uses Cloudflare's always-pass test keys.
+  "name": "lvwwd-api-preview",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-08-31",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*", "/my-week*", "/sign-up*"],
+  },
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lvwwd-api-preview",
+      "database_id": "cb80dc98-8f84-4122-984a-7d2e60683986",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-api-preview-photos" }],
+  "vars": {
+    "PREVIEW_SHOW_LINKS": "true",
+    "CHECKIN_PREVIEW_DAY": "3",
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+  },
+  "triggers": { "crons": ["0 13 * * *"] },
+  "observability": {
+    "enabled": true,
+  },
+}
