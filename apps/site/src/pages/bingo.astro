@@ -30,6 +30,10 @@ const dayLine = isBeforeWeek
     : `The week is on: day ${Math.min(Math.max(dayIndex, 1), 8)} of 8.`;
 const showGiveawayLink = !isBeforeWeek && !isAfterWeek;
 
+// Printed bingo numbers, like a real card: B 1-15, I 16-30, N 31-45,
+// G 46-60, O 61-75. (7 * row) mod 15 is distinct for rows 1-5.
+const bingoNumber = (row: number, col: number) => (col - 1) * 15 + ((row * 7 + col * 3) % 15) + 1;
+
 const title = 'Digital Transit Bingo · Week Without Driving Las Vegas';
 const description =
   'Mark a 5-by-5 card of small challenges about getting around Las Vegas without driving, October 1 to 8, 2026. No account, no sign-up.';
@@ -78,6 +82,18 @@ const description =
 
     {/* Interactive board — hidden with JavaScript off in favor of the plain list below */}
     <div data-bingo-interactive>
+      <svg class="bingo-ink-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="bingo-ink" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="7"
+          ></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="6"></feDisplacementMap>
+        </filter>
+        <filter id="bingo-stamp" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="3"
+          ></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="1.6"></feDisplacementMap>
+        </filter>
+      </svg>
       <div class="bingo-ticket mt-5">
         <div class="bingo-ticket__head" aria-hidden="true">
           <p class="bingo-ticket__issuer">Week Without Driving · Las Vegas</p>
@@ -113,6 +129,9 @@ const description =
                         data-bingo-input
                         data-index={i}
                       />
+                      <span class="bingo-cell__num" aria-hidden="true">
+                        {bingoNumber(sq.row, sq.col)}
+                      </span>
                       <span class="bingo-cell__dab" aria-hidden="true" />
                       <span class="bingo-cell__check" aria-hidden="true">
                         <Icon name="mdi:check-bold" />
@@ -135,6 +154,10 @@ const description =
             No squares marked yet. The middle square is free.
           </p>
           <p class="bingo-ticket__valid">Valid Oct 1–8, 2026 · Honor system</p>
+          <p class="bingo-ticket__serial" aria-hidden="true">
+            <span class="bingo-ticket__barcode"></span>
+            <span>Nº 2026 · 1008 · LV</span>
+          </p>
         </div>
       </div>
 
@@ -697,5 +720,150 @@ const description =
     .bingo-confetti {
       display: none;
     }
+  }
+
+  /* ---- Personality pass: Las Vegas marquee meets bus ticket. ---- */
+  @font-face {
+    font-family: 'Bungee Subset';
+    /* Bungee by David Jonathan Ross, SIL Open Font License 1.1. Subset to the
+       letters and digits this card prints. */
+    src: url('/fonts/bungee-subset.woff2') format('woff2');
+    font-display: swap;
+  }
+  .bingo-ink-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  @media (min-width: 48rem) {
+    .bingo-ticket {
+      transform: rotate(-1.1deg);
+    }
+  }
+  .bingo-ticket__head {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.55rem 1.05rem 0.4rem;
+    background:
+      radial-gradient(120% 90% at 50% 0%, #f25a2a 0%, transparent 70%), var(--color-primary);
+  }
+  /* A frame of marquee bulbs, like the Welcome to Las Vegas sign. */
+  .bingo-ticket__head::before {
+    content: '';
+    position: absolute;
+    inset: 0.35rem 0.35rem 0.2rem;
+    border: 4px dotted #ffe7a3;
+    border-radius: 0.8rem 0.8rem 0.3rem 0.3rem;
+    filter: drop-shadow(0 0 2px #ffd166) drop-shadow(0 0 5px rgb(255 209 102 / 0.55));
+    pointer-events: none;
+  }
+  .bingo-ticket__issuer {
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+  }
+  .bingo-ticket__letters {
+    margin-top: 0.1rem;
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.9rem, 10vw, 2.7rem);
+    color: #fff4d6;
+    text-shadow:
+      0 2px 0 #b8350c,
+      0 4px 0 #8f2708,
+      0 0 14px rgb(255 214 140 / 0.45);
+  }
+
+  .bingo-cell__num {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.3rem;
+    z-index: 1;
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: 0.5625rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--color-on-surface) 38%, transparent);
+  }
+  @media (min-width: 30rem) {
+    .bingo-cell__num {
+      font-size: 0.6875rem;
+      top: 0.35rem;
+      left: 0.45rem;
+    }
+  }
+
+  /* Dauber ink: rough edge, darker rim where the ink pools, one splatter. */
+  .bingo-cell__dab {
+    inset: 12%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 46% 44%,
+      color-mix(in srgb, var(--dauber) 46%, transparent) 0 52%,
+      color-mix(in srgb, var(--dauber) 58%, transparent) 64%,
+      color-mix(in srgb, var(--dauber) 78%, transparent) 70%,
+      transparent 72%
+    );
+    background-size: 100% 100%;
+    filter: url(#bingo-ink);
+  }
+  .bingo-cell__dab::after {
+    content: '';
+    position: absolute;
+    right: -4%;
+    top: 6%;
+    width: 11%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--dauber) 70%, transparent);
+  }
+  .bingo-cell--in-line .bingo-cell__dab {
+    background: radial-gradient(
+      circle at 46% 44%,
+      color-mix(in srgb, var(--dauber) 60%, transparent) 0 52%,
+      color-mix(in srgb, var(--dauber) 70%, transparent) 64%,
+      color-mix(in srgb, var(--dauber) 88%, transparent) 70%,
+      transparent 72%
+    );
+  }
+
+  /* The free space: a rubber stamp, slightly uneven. */
+  .bingo-seal {
+    filter: url(#bingo-stamp);
+  }
+  .bingo-seal__word {
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+
+  /* Stub: serial number and a printed barcode. */
+  .bingo-ticket__stub {
+    padding-bottom: 1.1rem;
+  }
+  .bingo-ticket__serial {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--color-on-surface) 60%, transparent);
+  }
+  .bingo-ticket__barcode {
+    width: 5.5rem;
+    height: 1rem;
+    background: repeating-linear-gradient(
+      90deg,
+      currentColor 0 1px,
+      transparent 1px 3px,
+      currentColor 3px 5px,
+      transparent 5px 6px,
+      currentColor 6px 7px,
+      transparent 7px 10px
+    );
   }
 </style>
