@@ -321,11 +321,14 @@ const description =
     gap: 0.125rem;
     border: 1.5px solid var(--color-outline-variant);
     background: var(--color-surface);
-    padding: 0.35rem;
+    padding: 0.2rem;
     text-align: center;
-    font-size: 0.6875rem;
+    font-size: clamp(0.5625rem, 2.8vw, 0.6875rem);
     line-height: 1.15;
     font-weight: 600;
+    hyphens: manual;
+    overflow-wrap: normal;
+    word-break: normal;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
