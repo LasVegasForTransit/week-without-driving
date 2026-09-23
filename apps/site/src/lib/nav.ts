@@ -1,38 +1,48 @@
-// The site's navigation. Phones get a bottom tab bar (tabNav) plus a More
-// sheet (moreNav); wide screens get one top row (topNav). The logo is the
-// way home on wide screens, so Home is not repeated there.
-export const topNav = [
-  { href: '/take-part', label: 'Take Part' },
-  { href: '/guides', label: 'Guides' },
-  { href: '/go', label: 'Go' },
-  { href: '/bingo', label: 'Bingo' },
-  { href: '/giveaway', label: 'Giveaway' },
-  { href: '/partners', label: 'Partners' },
-] as const;
-
-export const tabNav = [
-  { href: '/', match: '/', label: 'Home', icon: 'mdi:home-variant-outline', pledge: false },
+// The site's navigation. Wide screens show mainNav in the header; phones
+// and tablets show the same list, with a line of help under each link, in
+// the menu that the ☰ button opens. Labels say what a visitor will do
+// there, in plain words, rather than naming the page.
+export const mainNav = [
   {
-    href: '/take-part#pledge',
-    match: '/take-part',
-    label: 'Pledge',
+    href: '/take-part',
+    label: 'How it works',
+    help: 'Pick one trip, one day or the whole week.',
     icon: 'mdi:hand-heart-outline',
-    pledge: true,
   },
-  { href: '/go', match: '/go', label: 'Go', icon: 'mdi:bus', pledge: false },
-  { href: '/bingo', match: '/bingo', label: 'Bingo', icon: 'mdi:grid', pledge: false },
-] as const;
-
-export const moreNav = [
-  { href: '/guides', label: 'Guides', icon: 'mdi:book-open-variant-outline' },
-  { href: '/giveaway', label: 'Giveaway', icon: 'mdi:gift-outline' },
-  { href: '/partners', label: 'Partners', icon: 'mdi:account-group-outline' },
-  { href: '/resources', label: 'Resources', icon: 'mdi:link-variant' },
-  { href: '/privacy', label: 'Privacy', icon: 'mdi:shield-lock-outline' },
-  { href: '/terms', label: 'Terms of Use', icon: 'mdi:file-document-outline' },
+  {
+    href: '/go',
+    label: 'Find a bus',
+    help: 'See the bus stops closest to you.',
+    icon: 'mdi:bus',
+  },
+  {
+    href: '/guides',
+    label: 'Rider guides',
+    help: 'How to pay, bring a bike and stay cool.',
+    icon: 'mdi:book-open-variant-outline',
+  },
+  {
+    href: '/bingo',
+    label: 'Bingo',
+    help: 'Play transit bingo all week.',
+    icon: 'mdi:grid',
+  },
+  {
+    href: '/giveaway',
+    label: 'Win prizes',
+    help: 'Share your trip to enter the giveaway.',
+    icon: 'mdi:gift-outline',
+  },
+  {
+    href: '/partners',
+    label: 'Partners',
+    help: 'Bring your group, school or workplace.',
+    icon: 'mdi:account-group-outline',
+  },
 ] as const;
 
 export const footerLinks = [
+  { href: '/press', label: 'Press' },
   { href: '/resources', label: 'Resources' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/terms', label: 'Terms of Use' },
@@ -40,7 +50,7 @@ export const footerLinks = [
 ] as const;
 
 // True when `path` is the nav item's page or one of its subpages, so
-// /guides/heat marks Guides as current.
+// /guides/heat marks Rider guides as current.
 export function isCurrent(href: string, path: string): boolean {
   const clean = path.replace(/\/$/, '') || '/';
   const [beforeHash = ''] = href.split('#');

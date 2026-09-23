@@ -1413,64 +1413,46 @@ html[data-wwd-theme] :is(h1, h2, h3) {
   font-weight: 800;
 }
 
-/* ---- Navigation: logo mark on top, tab bar at the thumb on phones. ---- */
+/* ---- Navigation: a wordmark, the pledge button, and a ☰ menu on phones. ---- */
 @layer components {
   .site-header {
     position: sticky;
     top: 0;
     z-index: var(--z-header);
-    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
-    backdrop-filter: var(--chrome-blur);
-    border-bottom: 1px solid var(--chrome-hairline);
+    background: var(--color-surface);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
   }
   .site-header__row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
-    min-height: 3.5rem;
-    padding-block: 0.5rem;
+    gap: 1rem;
+    min-height: 4rem;
   }
 
-  /* The logo: a small marquee badge, then the place and dates. */
-  .site-logo {
+  /* The wordmark: the campaign's full name, then where and when. */
+  .wordmark {
     display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 0.2rem;
     color: var(--color-on-surface);
     text-decoration: none;
+    line-height: 1;
   }
-  .site-logo__badge {
-    display: grid;
-    place-items: center;
-    height: 2.25rem;
-    padding-inline: 0.55rem;
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.04em;
-    color: #fff4d6;
-    background: #120d0b;
-    border-radius: 0.45rem;
-    outline: 2px dotted #ffd98a;
-    outline-offset: -5px;
-    text-shadow: 0 2px 0 var(--color-primary);
+  .wordmark__name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(1.05rem, 0.9rem + 0.8vw, 1.3rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
   }
-  .site-logo__text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.05;
-  }
-  .site-logo__place {
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
+  .wordmark__meta {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-  .site-logo__dates {
-    margin-top: 0.15rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-on-surface-variant);
+    color: var(--color-primary-ink);
+    white-space: nowrap;
   }
 
   .site-topnav {
@@ -1478,16 +1460,40 @@ html[data-wwd-theme] :is(h1, h2, h3) {
   }
   .site-topnav ul {
     display: flex;
-    gap: 1.6rem;
-    font-weight: 700;
-    font-size: 0.95rem;
+    gap: 0.25rem;
   }
-  .site-pledge {
-    display: none;
+  .site-topnav__link {
+    display: inline-flex;
     align-items: center;
     min-height: 44px;
-    padding-inline: 1.3rem;
+    padding-inline: 0.7rem;
+    font-weight: 700;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    border-radius: 999px;
+  }
+  .site-topnav__link:hover {
+    background: var(--color-surface-container);
+  }
+  .site-topnav__link[aria-current='page'] {
+    color: var(--color-primary-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.45em;
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .site-pledge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 1rem;
     font-weight: 800;
+    white-space: nowrap;
     color: var(--color-on-primary);
     background: var(--color-primary);
     border-radius: 999px;
@@ -1495,146 +1501,166 @@ html[data-wwd-theme] :is(h1, h2, h3) {
   }
   .site-pledge:hover,
   .site-pledge:focus-visible {
-    background: var(--color-on-surface);
-    color: var(--color-surface);
+    background: var(--color-primary-ink);
   }
-
-  /* Bottom tab bar on phones and tablets. */
-  .tabbar {
-    position: fixed;
-    inset: auto 0 0;
-    z-index: var(--z-mobile-nav);
-    background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-    backdrop-filter: var(--chrome-blur);
-    border-top: 1px solid var(--chrome-hairline);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .tabbar ul {
+  .site-menu-button {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    max-width: 36rem;
-    margin-inline: auto;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    color: var(--color-on-surface);
+    border-radius: 999px;
   }
-  .tabbar__link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.15rem;
-    min-height: 3.6rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--color-on-surface-variant);
-    text-decoration: none;
-  }
-  .tabbar__icon {
-    width: 1.55rem;
-    height: 1.55rem;
-  }
-  .tabbar__link[aria-current='page'] {
-    color: var(--color-primary-ink);
-  }
-  .tabbar__link[aria-current='page'] .tabbar__icon {
-    color: var(--color-primary);
-  }
-  .tabbar__link[data-pledge-link] .tabbar__icon {
-    padding: 0.2rem;
-    width: 2.1rem;
-    height: 2.1rem;
-    margin-top: -0.55rem;
-    color: var(--color-on-primary);
-    background: var(--color-primary);
-    border-radius: 50%;
-    box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--color-primary) 80%, transparent);
-  }
-  body {
-    padding-bottom: calc(3.6rem + env(safe-area-inset-bottom));
+  .site-menu-button:hover {
+    background: var(--color-surface-container);
   }
 
-  /* The More sheet: slides up from the tab bar. */
-  .more-sheet {
+  /* On phones the pledge button says only "Pledge"; on the narrowest
+     phones it moves into the menu, where it is the first thing. */
+  .site-pledge__short {
+    display: none;
+  }
+  @media (max-width: 29.99rem) {
+    .site-header__row {
+      gap: 0.5rem;
+      padding-inline: 1rem 0.5rem;
+    }
+    .site-pledge__long {
+      display: none;
+    }
+    .site-pledge__short {
+      display: inline;
+    }
+    .site-header .site-pledge {
+      padding-inline: 1rem;
+    }
+    .site-menu-button {
+      width: 44px;
+    }
+  }
+  @media (max-width: 24rem) {
+    .wordmark__name {
+      font-size: 1rem;
+    }
+  }
+  @media (max-width: 21.5rem) {
+    .site-header .site-pledge {
+      display: none;
+    }
+  }
+
+  /* The menu: a full-height sheet with one big row per page. */
+  .site-menu {
     width: 100%;
-    max-width: 36rem;
-    margin: auto auto 0;
-    padding: 0.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    max-width: 30rem;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 0 0 auto;
+    padding: 0.75rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
     color: var(--color-on-surface);
     background: var(--color-surface);
     border: none;
-    border-radius: 1.25rem 1.25rem 0 0;
-    box-shadow: 0 -20px 60px -20px rgb(0 0 0 / 0.45);
   }
-  .more-sheet::backdrop {
+  .site-menu::backdrop {
     background: rgb(10 8 20 / 0.5);
   }
-  .more-sheet[open] {
-    animation: sheet-up 220ms var(--ease-out);
+  .site-menu[open] {
+    display: flex;
+    flex-direction: column;
+    animation: menu-in 200ms var(--ease-out);
   }
-  @keyframes sheet-up {
+  @keyframes menu-in {
     from {
-      transform: translateY(40%);
+      transform: translateX(12%);
       opacity: 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .more-sheet[open] {
+    .site-menu[open] {
       animation: none;
     }
   }
-  .more-sheet__head {
+  .site-menu__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 3.25rem;
   }
-  .more-sheet__title {
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .more-sheet__close {
+  .site-menu__close {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
   }
-  .more-sheet__list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-  .more-sheet__link {
+  .site-menu__pledge {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    min-height: 3.25rem;
-    padding: 0.5rem 0.8rem;
-    font-weight: 700;
-    color: var(--color-on-surface);
-    background: var(--color-surface-container);
-    border-radius: 0.8rem;
+    justify-content: space-between;
+    margin-top: 1rem;
+    min-height: 3.5rem;
+    padding-inline: 1.25rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: 999px;
     text-decoration: none;
   }
-  .more-sheet__credit {
-    margin-top: 1rem;
-    font-size: 0.85rem;
+  .site-menu__list {
+    margin-top: 0.75rem;
+  }
+  .site-menu__link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0.25rem;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+  }
+  .site-menu__icon {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.55rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 999px;
+  }
+  .site-menu__label {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+  .site-menu__help {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.95rem;
+    color: var(--color-on-surface-variant);
+  }
+  .site-menu__link[aria-current='page'] .site-menu__label {
+    color: var(--color-primary-ink);
+  }
+  .site-menu__credit {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    font-size: 0.9rem;
     color: var(--color-on-surface-variant);
   }
 
-  @media (min-width: 64rem) {
-    .site-topnav,
-    .site-pledge {
-      display: flex;
+  @media (min-width: 72rem) {
+    .site-topnav {
+      display: block;
     }
-    .site-header__row {
-      min-height: 4rem;
-    }
-    .tabbar {
+    .site-menu-button {
       display: none;
     }
-    body {
-      padding-bottom: 0;
+    .site-header__row {
+      min-height: 4.75rem;
+    }
+    .site-pledge {
+      padding-inline: 1.4rem;
     }
   }
 }

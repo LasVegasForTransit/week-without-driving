@@ -5,13 +5,15 @@ import { Icon } from 'astro-icon/components';
 import PhotoSlot from '../components/PhotoSlot.astro';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
+import { days, prizes, proclamations } from '../lib/campaign';
+import { partners } from '../lib/partners';
 
-// The Home page: a short, warm welcome that speaks first to people who
-// already get around without a car, then to people trying it for the
-// first time. Full experience and copy: features/site/f-welcome.md.
-// Everything the old one-page site explained at length now lives on the
-// page that owns it (Take Part, Guides, Go, Bingo, Giveaway, Resources,
-// Partners); Home only welcomes, orients, and points onward.
+// The Home page, for someone who has five seconds: what the week is, when
+// it is, and one button. Below that, the three steps, why it matters, the
+// prizes, the daily Instagram hosts, the partner wall and the local
+// proclamations. Slots for content LVBT hasn't confirmed yet (photos,
+// hosts, partners, proclamations) are marked "to come" and fill from
+// src/lib/campaign.ts and src/lib/partners.ts.
 
 const dateRange = `October 1 to 8, ${wwd.year}`;
 const canonical = `${site.url}/`;
@@ -56,81 +58,46 @@ const eventSchema = {
   mainEntityOfPage: canonical,
 };
 
-// How to take part, after the national campaign's four ways to join.
-const ways = [
+// The three steps, drawn as stops on a bus line because they happen in
+// this order.
+const steps = [
   {
-    title: 'Take the bus, walk, roll or bike.',
-    body: 'Try another way to get where you need to go, for one trip or the whole week.',
-    photo: 'A rider boarding an RTC bus in East Las Vegas',
-  },
-  {
-    title: 'Ask for a ride.',
-    body: 'Ride with a friend, a neighbor or a coworker. Notice what it’s like to count on someone else.',
-    photo: 'Two neighbors sharing a ride to the grocery store',
-  },
-  {
-    title: 'Notice what’s hard.',
-    body: 'A stop with no shade. A sidewalk that ends. A bus that comes every hour. Tell us about it.',
-    photo: 'A bus stop with no shade on a hot afternoon',
-  },
-  {
-    title: 'If you have to drive, you haven’t failed.',
-    body: 'Some trips need a car. Think about what someone who can’t drive would do instead.',
-    photo: 'A parent with a stroller crossing a wide Las Vegas street',
-  },
-] as const;
-
-// Leaders who took the challenge elsewhere, quoted from the national campaign.
-const voices = [
-  {
-    quote:
-      'This week was a reminder that mobility is a human right. And it’s also a reminder that so many people in our region are excluded from this right, simply because driving for them is not an option.',
-    who: 'Girmay Zahilay',
-    role: 'King County Executive, Washington',
-  },
-  {
-    quote: 'I’m learning so much about how to better represent my constituents who don’t drive.',
-    who: 'Analise Ortiz',
-    role: 'Arizona State Senator',
-  },
-  {
-    quote:
-      'Traveling to Southeast DC on Day 4 required multiple connections across various modes and still took an hour. I’m leaving the challenge with an even deeper appreciation for the transit options available to me, and a renewed sense of commitment to expanding District residents’ access to transit.',
-    who: 'Charles Allen',
-    role: 'Councilmember, Washington, DC',
-  },
-] as const;
-
-// Participate your way: one door for each kind of participant.
-const audiences = [
-  {
-    icon: 'mdi:account-heart-outline',
-    title: 'Las Vegans',
-    body: 'Pledge one trip, one day or the whole week. Get guides, a bingo card and a daily reminder.',
+    icon: 'mdi:hand-heart-outline',
+    title: 'Pick your pledge',
+    body: 'One trip, one day or the whole week. It takes 15 seconds.',
     cta: 'Take the pledge',
     href: '/take-part#pledge',
   },
   {
-    icon: 'mdi:office-building-outline',
-    title: 'Workplaces, schools and groups',
-    body: 'Invite your coworkers, classmates or members. We’ll send a kit with flyers and a link that counts your group’s pledges.',
-    cta: 'Bring your organization',
-    href: '/partners',
+    icon: 'mdi:bus',
+    title: 'Make the trip',
+    body: 'Take the bus, walk, roll, bike or get a ride. We’ll help you plan it.',
+    cta: 'Find a bus near you',
+    href: '/go',
   },
   {
-    icon: 'mdi:bank-outline',
-    title: 'Elected leaders and agencies',
-    body: 'Take the challenge with your staff and see your district the way your constituents who don’t drive see it. We’ll help you plan the week.',
-    cta: 'Plan your week with us',
-    href: 'mailto:wwd@lasvegasfortransit.org?subject=Week%20Without%20Driving%3A%20elected%20leaders%20and%20agencies',
+    icon: 'mdi:camera-outline',
+    title: 'Share it',
+    body: `Post a photo and tag @lasvegasfortransit. Every post is a giveaway entry.`,
+    cta: 'See the prizes',
+    href: '/giveaway',
   },
 ] as const;
+
+// The partner wall shows every confirmed partner, then open tiles up to a
+// full row of eight, so there is always a visible place to join.
+const WALL_SIZE = 8;
+const openTiles = Math.max(WALL_SIZE - partners.length, 2);
+
+const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURIComponent(
+  'Week Without Driving: elected leaders and agencies',
+)}`;
 ---
 
 <BaseLayout title={`${site.name} · ${dateRange}`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
 
-  {/* HERO: a real photo of Las Vegans, and a question to sit with. */}
+  {/* HERO: what it is, when, and one button. */}
   <section class="home-hero" aria-labelledby="hero-heading">
     <PhotoSlot
       class="home-hero__photo"
@@ -139,149 +106,217 @@ const audiences = [
     />
     <div class="home-hero__shade" aria-hidden="true"></div>
     <div class="container-page home-hero__content">
-      <p class="home-hero__eyebrow">
-        <span>Week Without Driving Las Vegas</span>
-        <span>October 1 to 8, {wwd.year}</span>
+      <p class="home-hero__when">
+        <Icon name="mdi:calendar-blank" class="size-5" aria-hidden="true" />
+        October 1–8, {wwd.year} · Las Vegas
       </p>
-      <h1 id="hero-heading" class="home-hero__title">
-        What would your week look like without a car?
-      </h1>
+      <h1 id="hero-heading" class="home-hero__title">Try a week without driving.</h1>
+      <p class="home-hero__sub">
+        Take the bus, walk, bike or get a ride. Do it for one trip, one day or all week. It’s free,
+        and anyone can join.
+      </p>
       <div class="home-hero__actions">
-        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
-        <a href="#why" class="btn btn--ghost">Learn more</a>
+        <a href="/take-part#pledge" class="btn btn--primary btn--big" data-pledge-link>
+          <span data-pledge-label>Take the pledge</span>
+        </a>
+        <a href="#how" class="btn btn--ghost">How it works</a>
       </div>
     </div>
   </section>
 
-  {/* VISION: who doesn't drive, and the Las Vegas we're working toward. */}
-  <section id="why" class="home-vision scroll-mt-20" aria-labelledby="vision-heading">
-    <div class="container-page home-vision__grid">
-      <h2 id="vision-heading" class="home-vision__lead">
-        One in three people in the U.S. don’t drive.
+  {/* HOW IT WORKS: three stops on one line. */}
+  <section id="how" class="home-section scroll-mt-20" aria-labelledby="how-heading">
+    <div class="container-page">
+      <h2 id="how-heading" class="home-h2">How it works</h2>
+      <ol class="route">
+        {
+          steps.map((s, i) => (
+            <li class="route__stop">
+              <span class="route__dot" aria-hidden="true">
+                <Icon name={s.icon} class="route__icon" />
+              </span>
+              <div class="route__text">
+                <p class="route__num">Step {i + 1}</p>
+                <h3 class="route__title">{s.title}</h3>
+                <p class="route__body">{s.body}</p>
+                <a href={s.href} class="home-link" {...(i === 0 ? { 'data-pledge-link': '' } : {})}>
+                  {s.cta}
+                </a>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* WHY: one number, then who it stands for. */}
+  <section class="home-why" aria-labelledby="why-heading">
+    <div class="container-page home-why__grid">
+      <h2 id="why-heading" class="home-why__stat">
+        <span class="home-why__big">1 in 3</span>
+        <span class="home-why__label">people in the U.S. don’t drive.</span>
       </h2>
-      <div class="home-vision__body">
+      <div class="home-why__body">
         <p>
-          In Las Vegas, they’re our kids, our grandparents, and neighbors working the late shift.
-          Every day they cross a valley built for cars, by bus, on foot, in a wheelchair, on a bike,
-          or with a ride from someone who can.
+          They’re kids and grandparents. They’re people with disabilities, and neighbors who can’t
+          afford a car.
         </p>
-        <p>
-          Las Vegans for Better Transit is working toward a valley where everyone can get where they
-          need to go. Week Without Driving is how we see it together, for eight days in October.
-        </p>
-        <a href={`${lvbt.url}/about`} class="home-link">About Las Vegans for Better Transit</a>
+        <p><strong>For one week, get around Las Vegas the way they do.</strong></p>
+        <a href={`${lvbt.url}/about`} class="home-link">Why we do this</a>
       </div>
     </div>
   </section>
 
-  {/* HOW TO TAKE PART */}
-  <section class="home-section" aria-labelledby="ways-heading">
-    <div class="container-page">
-      <h2 id="ways-heading" class="home-h2">How to take part</h2>
-      <ul class="home-ways">
+  {/* PRIZES */}
+  <section class="home-section" aria-labelledby="prizes-heading">
+    <div class="container-page home-prizes">
+      <div>
+        <h2 id="prizes-heading" class="home-h2">Share your trip. Win prizes.</h2>
+        <p class="home-intro">
+          Post a photo of your trip and tag us. Each post is one entry, up to {wwd.maxEntries}.
+        </p>
+        <a href="/giveaway" class="btn btn--outline mt-6">How to enter</a>
+      </div>
+      <ul class="home-prizes__list">
         {
-          ways.map((w) => (
-            <li class="home-way">
-              <PhotoSlot class="home-way__photo" shows={w.photo} />
-              <h3 class="home-way__title">{w.title}</h3>
-              <p class="home-way__body">{w.body}</p>
+          prizes.map((p) => (
+            <li class="home-prize">
+              <PhotoSlot class="home-prize__photo" shows={p.photo} />
+              <h3 class="home-prize__name">{p.name}</h3>
+              <p class="home-prize__body">{p.body}</p>
             </li>
           ))
         }
       </ul>
-      <div class="home-actions">
-        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
-        <a href="/guides" class="btn btn--outline">Read the rider guides</a>
-      </div>
     </div>
   </section>
 
-  {/* VOICES */}
-  <section class="home-voices" aria-labelledby="voices-heading">
+  {/* EVERY DAY: who hosts our Instagram each day of the week. */}
+  <section class="home-days" aria-labelledby="days-heading">
     <div class="container-page">
-      <h2 id="voices-heading" class="home-h2">What leaders learned</h2>
+      <h2 id="days-heading" class="home-h2">Follow along every day</h2>
       <p class="home-intro">
-        Elected leaders across the country have taken the challenge. Here’s what they said.
+        Each day, a different Las Vegan takes over our Instagram and shows how they got around.
       </p>
-      <ul class="home-quotes">
+      <ol class="home-days__list">
         {
-          voices.map((v) => (
-            <li class="home-quote">
-              <blockquote>
-                <p>“{v.quote}”</p>
-              </blockquote>
-              <p class="home-quote__who">
-                <strong>{v.who}</strong>
-                <span>{v.role}</span>
+          days.map((d) => (
+            <li class="home-day">
+              <p class="home-day__num">Day {d.number}</p>
+              <p class="home-day__date">
+                <span>{d.weekday}</span>
+                {d.monthDay}
               </p>
+              <p class="home-day__host">{d.host ?? <span class="to-come">Host to come</span>}</p>
             </li>
           ))
         }
-      </ul>
-      <p class="home-source">
-        Quotes from the national{' '}
-        <a href={wwd.nationalUrl} target="_blank" rel="noopener noreferrer" class="body-link"
-          >Week Without Driving</a
-        >.
-      </p>
+      </ol>
+      <a href={lvbt.instagramUrl} target="_blank" rel="noopener noreferrer" class="home-link">
+        Follow @lasvegasfortransit
+      </a>
     </div>
   </section>
 
-  {/* PARTICIPATE YOUR WAY */}
-  <section class="home-section" aria-labelledby="audiences-heading">
+  {/* PARTNERS: the groups bringing the week to their people. */}
+  <section class="home-section" aria-labelledby="partners-heading">
     <div class="container-page">
-      <h2 id="audiences-heading" class="home-h2">Take part your way</h2>
-      <ul class="home-audiences">
+      <div class="home-split">
+        <div>
+          <h2 id="partners-heading" class="home-h2">Groups taking part</h2>
+          <p class="home-intro">
+            Workplaces, schools, churches, clubs and neighborhood groups are bringing the week to
+            their people. We give you flyers, posts and a link for your members.
+          </p>
+        </div>
+        <a href="/partners" class="btn btn--primary self-start">Bring your group</a>
+      </div>
+      <ul class="logo-wall" aria-label="Partner organizations">
         {
-          audiences.map((a) => (
-            <li class="home-audience">
-              <Icon name={a.icon} class="home-audience__icon" aria-hidden="true" />
-              <h3 class="home-audience__title">{a.title}</h3>
-              <p class="home-audience__body">{a.body}</p>
-              <a href={a.href} class="home-link">
-                {a.cta}
+          partners.map((p) => (
+            <li class="logo-wall__tile">
+              {p.url ? (
+                <a href={p.url} target="_blank" rel="noopener noreferrer">
+                  {p.name}
+                </a>
+              ) : (
+                p.name
+              )}
+            </li>
+          ))
+        }
+        {
+          Array.from({ length: openTiles }, () => (
+            <li class="logo-wall__tile logo-wall__tile--open">
+              <a href="/partners">
+                <Icon name="mdi:plus" class="size-6" aria-hidden="true" />
+                Your group here
               </a>
             </li>
           ))
         }
       </ul>
+      <p class="home-national">
+        Part of the national{' '}
+        <a href={wwd.nationalUrl} target="_blank" rel="noopener noreferrer" class="body-link"
+          >Week Without Driving</a
+        >, led by America Walks and the Nondrivers Alliance.
+      </p>
     </div>
   </section>
 
-  {/* PARTNERS */}
-  <section class="home-partners" aria-labelledby="partners-heading">
-    <div class="container-page home-partners__grid">
-      <div>
-        <h2 id="partners-heading" class="home-h2">Part of a national movement</h2>
-        <p class="home-intro">
-          Week Without Driving runs in hundreds of towns and cities every October. The national
-          campaign is led by America Walks and the Nondrivers Alliance.
-        </p>
-      </div>
-      <ul class="home-partners__list" aria-label="National partners">
-        <li>America Walks</li>
-        <li>Nondrivers Alliance</li>
-        <li class="home-partners__you"><a href="/partners">Your organization here</a></li>
+  {/* LEADERS: proclamations from our cities and the county. */}
+  <section class="home-leaders" aria-labelledby="leaders-heading">
+    <div class="container-page">
+      <h2 id="leaders-heading" class="home-h2">Local leaders</h2>
+      <p class="home-intro">
+        Cities and the county recognizing October 1–8 as Week Without Driving.
+      </p>
+      <ul class="home-seals">
+        {
+          proclamations.map((p) => (
+            <li class="home-seal">
+              <span class="home-seal__mark" aria-hidden="true">
+                <Icon name="mdi:bank-outline" class="size-7" />
+              </span>
+              <p class="home-seal__gov">{p.government}</p>
+              {p.url ? (
+                <a href={p.url} class="home-link">
+                  Read the proclamation
+                </a>
+              ) : (
+                <p class="to-come">To come</p>
+              )}
+            </li>
+          ))
+        }
       </ul>
+      <div class="home-leader-ask">
+        <blockquote>
+          <p>
+            “I’m learning so much about how to better represent my constituents who don’t drive.”
+          </p>
+          <footer>Analise Ortiz, Arizona State Senator, on her Week Without Driving</footer>
+        </blockquote>
+        <div>
+          <p class="home-leader-ask__q">Are you an elected leader or a public agency?</p>
+          <a href={leaderMailto} class="home-link">Take the challenge with your staff</a>
+        </div>
+      </div>
     </div>
   </section>
 
-  {/* STAY INVOLVED */}
-  <section class="home-stay" aria-labelledby="stay-heading">
-    <div class="container-page home-stay__grid">
-      <div>
-        <h2 id="stay-heading" class="home-h2">Keep going after the week</h2>
-        <p class="home-intro">
-          Get transit news and easy ways to help in Las Vegas from Las Vegans for Better Transit.
-        </p>
-      </div>
-      <div class="home-stay__actions">
-        <a href="/take-part#pledge" class="btn btn--primary">Take the pledge</a>
-        <a href={lvbt.joinUrl} class="btn btn--outline">Join LVBT</a>
-        <a href={lvbt.instagramUrl} target="_blank" rel="noopener noreferrer" class="home-link"
-          >Follow @lasvegasfortransit</a
-        >
-      </div>
+  {/* LAST CALL */}
+  <section class="home-final" aria-labelledby="final-heading">
+    <div class="container-page home-final__inner">
+      <h2 id="final-heading" class="home-final__title">Ready to try it?</h2>
+      <a href="/take-part#pledge" class="btn btn--light btn--big" data-pledge-link>
+        <span data-pledge-label>Take the pledge</span>
+      </a>
+      <p class="home-final__help">
+        Questions? Email <a href="mailto:wwd@lasvegasfortransit.org">wwd@lasvegasfortransit.org</a>
+      </p>
     </div>
   </section>
 </BaseLayout>
@@ -298,14 +333,18 @@ const audiences = [
     border-radius: 999px;
     text-decoration: none;
   }
+  .btn--big {
+    min-height: 60px;
+    padding: 0 2rem;
+    font-size: 1.2rem;
+  }
   .btn--primary {
     color: var(--color-on-primary);
     background: var(--color-primary);
   }
   .btn--primary:hover,
   .btn--primary:focus-visible {
-    background: var(--color-on-surface);
-    color: var(--color-surface);
+    background: var(--color-primary-ink);
   }
   .btn--ghost {
     color: #fff;
@@ -325,6 +364,14 @@ const audiences = [
     background: var(--color-on-surface);
     color: var(--color-surface);
   }
+  .btn--light {
+    color: var(--color-primary-ink);
+    background: #fff;
+  }
+  .btn--light:hover,
+  .btn--light:focus-visible {
+    background: var(--color-surface-container);
+  }
   .home-link {
     display: inline-flex;
     align-items: center;
@@ -338,13 +385,26 @@ const audiences = [
   .home-link::after {
     content: '→';
   }
+  /* A slot for content LVBT hasn't confirmed yet. */
+  .to-come {
+    display: inline-block;
+    white-space: nowrap;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant);
+    border: 1.5px dashed color-mix(in srgb, var(--color-on-surface) 35%, transparent);
+    border-radius: 999px;
+  }
 
   /* Hero */
   .home-hero {
     position: relative;
     display: flex;
     align-items: flex-end;
-    min-height: min(78svh, 44rem);
+    min-height: min(80svh, 42rem);
     color: #fff;
   }
   .home-hero :global(.home-hero__photo) {
@@ -356,31 +416,39 @@ const audiences = [
     inset: 0;
     background: linear-gradient(
       to top,
-      rgb(10 12 14 / 0.88) 0%,
-      rgb(10 12 14 / 0.55) 45%,
-      rgb(10 12 14 / 0.05) 80%
+      rgb(10 12 14 / 0.9) 0%,
+      rgb(10 12 14 / 0.6) 50%,
+      rgb(10 12 14 / 0.1) 85%
     );
   }
   .home-hero__content {
     position: relative;
     width: 100%;
-    padding-block: 2.5rem 2.75rem;
+    padding-block: 2.5rem 3rem;
   }
-  .home-hero__eyebrow {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: 0.75rem;
-    font-size: 0.95rem;
+  .home-hero__when {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    color: #111;
+    background: var(--color-primary-warm);
+    border-radius: 999px;
   }
   .home-hero__title {
-    margin-top: 0.75rem;
-    max-width: 16ch;
-    font-size: clamp(2.35rem, 9vw, 4.75rem);
-    line-height: 1.02;
+    margin-top: 1rem;
+    max-width: 14ch;
+    font-size: clamp(2.6rem, 10vw, 5rem);
+    line-height: 1;
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+  .home-hero__sub {
+    margin-top: 1rem;
+    max-width: 34rem;
+    font-size: clamp(1.1rem, 3.8vw, 1.3rem);
+    line-height: 1.45;
   }
   .home-hero__actions {
     display: flex;
@@ -389,40 +457,12 @@ const audiences = [
     margin-top: 1.75rem;
   }
 
-  /* Vision */
-  .home-vision {
-    padding-block: clamp(3.5rem, 9vw, 6.5rem);
-    color: var(--color-on-slab);
-    background: var(--color-slab);
-  }
-  .home-vision__grid {
-    display: grid;
-    gap: 1.5rem;
-  }
-  .home-vision__lead {
-    max-width: 18ch;
-    font-size: clamp(1.9rem, 6.5vw, 3.25rem);
-    line-height: 1.08;
-    text-wrap: balance;
-  }
-  .home-vision__body {
-    max-width: 38rem;
-    font-size: clamp(1.1rem, 3.8vw, 1.3rem);
-    line-height: 1.55;
-  }
-  .home-vision__body p + p {
-    margin-top: 1rem;
-  }
-  .home-vision .home-link {
-    color: var(--color-on-slab);
-  }
-
   /* Shared section rhythm */
   .home-section {
     padding-block: clamp(3.5rem, 9vw, 6rem);
   }
   .home-h2 {
-    font-size: clamp(1.8rem, 6vw, 2.75rem);
+    font-size: clamp(1.9rem, 6vw, 2.75rem);
     line-height: 1.1;
     text-wrap: balance;
   }
@@ -433,173 +473,361 @@ const audiences = [
     line-height: 1.5;
     color: var(--color-on-surface-variant);
   }
-  .home-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 2rem;
+  .home-split {
+    display: grid;
+    gap: 1.25rem;
   }
 
-  /* Ways to take part */
-  .home-ways {
+  /* How it works: three stops on a route line. */
+  .route {
+    --dot: 4rem;
+    position: relative;
     display: grid;
-    gap: 1.75rem;
-    margin-top: 2rem;
+    gap: 2rem;
+    margin-top: 2.25rem;
   }
-  .home-way :global(.home-way__photo) {
-    aspect-ratio: 4 / 3;
+  .route::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--dot) / 2);
+    bottom: calc(var(--dot) / 2);
+    left: calc(var(--dot) / 2 - 3px);
+    width: 6px;
+    background: var(--color-primary);
+    border-radius: 3px;
+  }
+  .route__stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--dot) 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .route__dot {
+    display: grid;
+    place-items: center;
+    width: var(--dot);
+    height: var(--dot);
+    color: var(--color-primary-ink);
+    background: var(--color-surface);
+    border: 6px solid var(--color-primary);
+    border-radius: 50%;
+  }
+  .route__dot :global(.route__icon) {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+  .route__num {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary-ink);
+  }
+  .route__title {
+    margin-top: 0.15rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  .route__body {
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .route__text .home-link {
+    margin-top: 0.6rem;
+  }
+
+  /* Why */
+  .home-why {
+    padding-block: clamp(3.5rem, 9vw, 6rem);
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+  }
+  .home-why__grid {
+    display: grid;
+    gap: 1.5rem;
+    align-items: end;
+  }
+  .home-why__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .home-why__big {
+    font-size: clamp(5rem, 22vw, 10rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--color-primary-warm);
+  }
+  .home-why__label {
+    font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+    line-height: 1.1;
+  }
+  .home-why__body {
+    max-width: 32rem;
+    font-size: clamp(1.1rem, 3.8vw, 1.3rem);
+    line-height: 1.55;
+  }
+  .home-why__body p + p {
+    margin-top: 1rem;
+  }
+  .home-why .home-link {
+    color: var(--color-on-slab);
+  }
+
+  /* Prizes */
+  .home-prizes {
+    display: grid;
+    gap: 2rem;
+  }
+  .home-prizes__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .home-prize :global(.home-prize__photo) {
+    aspect-ratio: 1;
     border-radius: 0.75rem;
   }
-  .home-way__title {
-    margin-top: 0.9rem;
-    font-size: 1.3rem;
+  .home-prize__name {
+    margin-top: 0.75rem;
+    font-size: 1.2rem;
     font-weight: 800;
     line-height: 1.2;
   }
-  .home-way__body {
-    margin-top: 0.4rem;
-    font-size: 1.05rem;
-    line-height: 1.5;
+  .home-prize__body {
+    margin-top: 0.25rem;
     color: var(--color-on-surface-variant);
   }
 
-  /* Voices */
-  .home-voices {
+  /* Every day */
+  .home-days {
     padding-block: clamp(3.5rem, 9vw, 6rem);
     background: var(--color-surface-container);
   }
-  .home-quotes {
+  .home-days__list {
     display: grid;
-    gap: 1.25rem;
-    margin-top: 2rem;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(10.5rem, 1fr);
+    gap: 0.75rem;
+    margin-block: 2rem 0.5rem;
+    padding-bottom: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
   }
-  .home-quote {
-    padding: 1.5rem;
+  .home-day {
+    scroll-snap-align: start;
+    padding: 1rem;
     background: var(--color-surface);
     border-radius: 0.75rem;
-    border-top: 4px solid var(--color-primary);
+    border-top: 5px solid var(--color-primary);
   }
-  .home-quote blockquote p {
-    font-size: 1.15rem;
-    line-height: 1.5;
+  .home-day__num {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary-ink);
   }
-  .home-quote__who {
+  .home-day__date {
     display: flex;
     flex-direction: column;
-    margin-top: 1rem;
+    margin-top: 0.25rem;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+  .home-day__date span {
+    font-family: var(--font-sans);
     font-size: 0.95rem;
-  }
-  .home-quote__who span {
     color: var(--color-on-surface-variant);
   }
-  .home-source {
-    margin-top: 1.25rem;
-    font-size: 0.9rem;
-    color: var(--color-on-surface-variant);
+  .home-day__host {
+    margin-top: 0.75rem;
+    font-weight: 700;
   }
 
-  /* Audiences */
-  .home-audiences {
+  /* Partner wall */
+  .logo-wall {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     margin-top: 2rem;
   }
-  .home-audience {
-    padding: 1.5rem;
-    border: 2px solid color-mix(in srgb, var(--color-on-surface) 15%, transparent);
-    border-radius: 0.75rem;
-  }
-  .home-audience__icon {
-    width: 2.25rem;
-    height: 2.25rem;
-    color: var(--color-primary);
-  }
-  .home-audience__title {
-    margin-top: 0.75rem;
-    font-size: 1.3rem;
+  .logo-wall__tile {
+    display: grid;
+    min-height: 6.5rem;
     font-weight: 800;
-  }
-  .home-audience__body {
-    margin-top: 0.4rem;
-    font-size: 1.05rem;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
-  }
-
-  /* Partners */
-  .home-partners {
-    padding-block: clamp(3rem, 8vw, 5rem);
-    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
-  }
-  .home-partners__grid {
-    display: grid;
-    gap: 1.5rem;
-  }
-  .home-partners__list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-    gap: 0.75rem;
-  }
-  .home-partners__list li {
-    display: grid;
-    place-items: center;
-    min-height: 5rem;
-    padding: 1rem;
-    font-weight: 800;
-    font-size: 1.05rem;
     text-align: center;
     background: var(--color-surface-container);
     border-radius: 0.75rem;
   }
-  .home-partners__you {
-    background: transparent !important;
+  .logo-wall__tile > a,
+  .logo-wall__tile:not(:has(a)) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .logo-wall__tile--open {
+    color: var(--color-on-surface-variant);
+    background: transparent;
     border: 2px dashed color-mix(in srgb, var(--color-on-surface) 30%, transparent);
   }
-  .home-partners__you a {
-    color: var(--color-link);
+  .logo-wall__tile--open:hover {
+    color: var(--color-primary-ink);
+    border-color: var(--color-primary);
+  }
+  /* Phones get one short column of open tiles, not a wall of them. */
+  @media (max-width: 47.99rem) {
+    .logo-wall__tile--open:nth-child(n + 5) {
+      display: none;
+    }
+  }
+  .home-national {
+    margin-top: 1.5rem;
+    color: var(--color-on-surface-variant);
   }
 
-  /* Stay involved */
-  .home-stay {
+  /* Leaders */
+  .home-leaders {
     padding-block: clamp(3.5rem, 9vw, 6rem);
-    background: var(--color-primary-soft);
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
   }
-  .home-stay__grid {
+  .home-seals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .home-seal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.1rem;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+    border-radius: 0.75rem;
+  }
+  .home-seal__mark {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 50%;
+  }
+  .home-seal__gov {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .home-seal .home-link {
+    margin-top: 0;
+  }
+  .home-leader-ask {
     display: grid;
     gap: 1.5rem;
-    align-items: center;
+    margin-top: 2.5rem;
   }
-  .home-stay__actions {
+  .home-leader-ask blockquote p {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+    line-height: 1.3;
+  }
+  .home-leader-ask footer {
+    margin-top: 0.6rem;
+    color: var(--color-on-surface-variant);
+  }
+  .home-leader-ask__q {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+  .home-leader-ask .home-link {
+    margin-top: 0.4rem;
+  }
+
+  /* Last call */
+  .home-final {
+    padding-block: clamp(3.5rem, 9vw, 5.5rem);
+    color: #fff;
+    background: var(--color-primary);
+  }
+  .home-final__inner {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem 1.25rem;
+    gap: 1.25rem;
+    text-align: center;
   }
-  .home-stay__actions .home-link {
-    margin-top: 0;
+  .home-final__title {
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
+    line-height: 1.05;
+  }
+  .home-final__help a {
+    font-weight: 800;
+    color: inherit;
+    text-decoration: underline;
   }
 
   @media (min-width: 48rem) {
-    .home-ways {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .home-audiences,
-    .home-quotes {
+    .route {
+      --dot: 4.5rem;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+    }
+    .route::before {
+      top: calc(var(--dot) / 2 - 3px);
+      bottom: auto;
+      left: calc(var(--dot) / 2);
+      right: calc((100% - 4rem) / 3 - var(--dot) / 2);
+      width: auto;
+      height: 6px;
+    }
+    .route__stop {
+      grid-template-columns: 1fr;
+    }
+    .logo-wall {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .home-seals {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .home-leader-ask {
+      grid-template-columns: 1.4fr 1fr;
+      align-items: center;
+      column-gap: 3rem;
     }
   }
   @media (min-width: 64rem) {
-    .home-ways {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    .home-vision__grid,
-    .home-partners__grid,
-    .home-stay__grid {
-      grid-template-columns: 1fr 1.2fr;
-      column-gap: 4rem;
-    }
     .home-hero {
       min-height: 40rem;
+    }
+    .home-why__grid,
+    .home-prizes {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4rem;
+    }
+    .home-prizes {
+      align-items: center;
+    }
+    .home-split {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+    .home-days__list {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      grid-auto-flow: row;
+      overflow: visible;
     }
   }
 </style>
