@@ -28,7 +28,7 @@ const shortcuts = [
 ] as const;
 ---
 
-<BaseLayout title={title} description="Your trips, entries and details." noindex>
+<BaseLayout title={title} description="Your shared trips, entries and details." noindex>
   <div class="container-page myweek narrow">
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
@@ -53,7 +53,7 @@ const shortcuts = [
         <h1 id="hello-heading" class="page-title">
           Hi, <span data-me-name>there</span>.
         </h1>
-        <p class="myweek__lede" data-me-phase>Log each day you skip the car, October 1 to 8.</p>
+        <p class="myweek__lede" data-me-phase>Share each day you skip the car, October 1 to 8.</p>
       </section>
 
       {/* ENTRIES: the eight days, today's trip, and sharing it. */}
@@ -81,107 +81,135 @@ const shortcuts = [
           }
         </ol>
 
-        {/* Today's trip: shown on each day of the week until it is logged. */}
-        <form data-log-form hidden class="log" novalidate>
-          <fieldset class="log__modes" aria-describedby="log-error">
-            <legend class="log__q">How did you get around today without driving?</legend>
-            {
-              modes.map((m) => (
-                <label class="log__mode">
-                  <input type="checkbox" name="mode" value={m.value} />
-                  <Icon name={m.icon} class="log__icon" aria-hidden="true" />
-                  <span>{m.label}</span>
-                </label>
-              ))
-            }
+        {/* Today's trip, in three steps: how, the post, and sending it in. */}
+        <form data-trip-form hidden class="trip" novalidate>
+          <fieldset class="trip__step" aria-describedby="trip-error">
+            <legend class="trip__q"
+              ><span class="trip__n" aria-hidden="true">1</span> How did you get around today without
+              driving?</legend
+            >
+            <div class="log__modes">
+              {
+                modes.map((m) => (
+                  <label class="log__mode">
+                    <input type="checkbox" name="mode" value={m.value} />
+                    <Icon name={m.icon} class="log__icon" aria-hidden="true" />
+                    <span>{m.label}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <label for="trip-hard" class="log__hard-label">
+              Was anything hard? <span class="log__optional">(optional)</span>
+            </label>
+            <textarea
+              id="trip-hard"
+              name="hard"
+              rows="2"
+              maxlength="280"
+              class="log__hard"
+              placeholder="A stop with no shade, a sidewalk that ends, a long wait…"></textarea>
           </fieldset>
-          <label for="log-hard" class="log__hard-label">
-            Was anything hard? <span class="log__optional">(optional)</span>
-          </label>
-          <textarea
-            id="log-hard"
-            name="hard"
-            rows="2"
-            maxlength="280"
-            class="log__hard"
-            placeholder="A stop with no shade, a sidewalk that ends, a long wait…"></textarea>
-          <button type="submit" class="btn btn--primary btn--big btn--block" data-log-submit>
-            Log today’s trip
+
+          <div class="trip__step" data-share-step>
+            <p class="trip__q">
+              <span class="trip__n" aria-hidden="true">2</span> Post a photo of your trip.
+            </p>
+            <p class="trip__help">
+              Tag @lasvegasfortransit on Instagram, or post anywhere public with
+              #WeekWithoutDriving. Use your own photo, or ours:
+            </p>
+            <button type="button" class="btn shared__save mt-3" data-make-picture>
+              <Icon name="mdi:image-outline" class="size-5" aria-hidden="true" />
+              Make my picture
+            </button>
+            <div data-share-kit hidden>
+              <img
+                data-share-preview
+                alt=""
+                hidden
+                class="shared__preview"
+                width="1080"
+                height="1350"
+              />
+              <div class="shared__actions">
+                <button type="button" class="btn shared__share" data-share-image>
+                  <Icon name="mdi:share-variant" class="size-5" aria-hidden="true" />
+                  Share
+                </button>
+                <button type="button" class="btn shared__save" data-save-image>
+                  <Icon name="mdi:download" class="size-5" aria-hidden="true" />
+                  Save
+                </button>
+              </div>
+              <p class="shared__caption-label">Caption to paste</p>
+              <p class="shared__caption" data-share-caption></p>
+              <button type="button" class="shared__copy" data-copy-caption>Copy the caption</button>
+              <p class="shared__status" data-share-status aria-live="polite"></p>
+            </div>
+          </div>
+
+          <fieldset class="trip__step">
+            <legend class="trip__q"
+              ><span class="trip__n" aria-hidden="true">3</span> Send us your post.</legend
+            >
+            <label for="trip-link" class="log__hard-label">Link to your post</label>
+            <input
+              id="trip-link"
+              name="link"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              class="trip__link"
+              placeholder="https://www.instagram.com/p/…"
+            />
+            <label class="trip__screenshot">
+              <input
+                type="file"
+                name="screenshot"
+                accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+                class="sr-only"
+                data-screenshot-input
+              />
+              <Icon name="mdi:cellphone-screenshot" class="size-6" aria-hidden="true" />
+              <span data-screenshot-label
+                >Private account? Add a screenshot of your post instead.</span
+              >
+            </label>
+            <label class="trip__consent">
+              <input type="checkbox" name="share" />
+              <span>LVBT may share my post on Instagram and lvwwd.org.</span>
+            </label>
+            <p class="trip__help" data-tag-note hidden>
+              Tagged @lasvegasfortransit from your Instagram? We count it for you, so you can skip
+              this step.
+            </p>
+          </fieldset>
+
+          <button type="submit" class="btn btn--primary btn--big btn--block" data-trip-submit>
+            Enter today’s trip
           </button>
-          <p id="log-error" class="log__error" data-log-error aria-live="polite"></p>
+          <p id="trip-error" class="log__error" data-trip-error aria-live="polite"></p>
           <p class="log__drove">
             Had to drive today? You haven’t failed. Try one trip without the car tomorrow.
           </p>
         </form>
 
-        {/* After logging: the entry, then a picture to share. */}
-        <div data-log-done hidden class="shared">
-          <p class="shared__title" data-log-done-title aria-live="polite"></p>
-          <p class="shared__ask">Share it, so your friends try it too.</p>
-          <img
-            data-share-preview
-            alt=""
-            hidden
-            class="shared__preview"
-            width="1080"
-            height="1350"
-          />
-          <div class="shared__actions">
-            <button type="button" class="btn shared__share" data-share-image>
-              <Icon name="mdi:share-variant" class="size-5" aria-hidden="true" />
-              Share it
-            </button>
-            <button type="button" class="btn shared__save" data-save-image>
-              <Icon name="mdi:download" class="size-5" aria-hidden="true" />
-              Save the picture
-            </button>
-          </div>
-          <p class="shared__caption-label">Caption to paste</p>
-          <p class="shared__caption" data-share-caption></p>
-          <button type="button" class="shared__copy" data-copy-caption>Copy the caption</button>
-          <p class="shared__status" data-share-status aria-live="polite"></p>
+        {/* After entering: the day's entry, confirmed. */}
+        <div data-trip-done hidden class="shared">
+          <p class="shared__title" data-trip-done-title aria-live="polite"></p>
+          <p class="shared__ask">
+            We check every post before the draw. Come back tomorrow for another entry.
+          </p>
         </div>
 
         <p class="entries__status" data-log-closed hidden></p>
         <p class="entries__fine">
-          One entry for each day you take a trip without driving, up to 8. Walking counts. It’s on
-          the honor system. No purchase or post necessary. See the{' '}
-          <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+          One entry for each day you share a trip without driving, up to 8. We check every post
+          before the draw. No social media? <a href="/giveaway#by-mail" class="body-link"
+            >Enter by mail</a
+          >. See the <a href="/giveaway/rules" class="body-link">Official Rules</a>.
         </p>
-      </section>
-
-      {/* PHOTO: optional, never an extra entry. */}
-      <section class="myweek__card" aria-labelledby="photo-heading">
-        <h2 id="photo-heading" class="myweek__h2">Send us a photo</h2>
-        <p class="myweek__p">
-          Show us how you got around: the bus, your walk, your bike, the stop. It’s optional, and it
-          doesn’t add entries.
-        </p>
-        <form data-photo-form class="mt-4" novalidate>
-          <label class="photo-pick">
-            <input
-              type="file"
-              name="photo"
-              accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
-              class="sr-only"
-              data-photo-input
-            />
-            <Icon name="mdi:camera-plus-outline" class="size-8" aria-hidden="true" />
-            <span data-photo-pick-label>Choose a photo</span>
-          </label>
-          <img data-photo-preview alt="" hidden class="photo-preview" />
-          <label class="check-row">
-            <input type="checkbox" name="share" />
-            <span>LVBT may share my photo on Instagram and lvwwd.org.</span>
-          </label>
-          <p class="form-help">
-            Don’t include other people’s faces, and crop out your home address.
-          </p>
-          <button type="submit" class="btn btn--outline mt-4" data-photo-submit disabled
-            >Add photo</button
-          >
-          <p class="entries__status" data-photo-status aria-live="polite"></p>
-        </form>
       </section>
 
       {/* GETTING AROUND */}
@@ -203,7 +231,7 @@ const shortcuts = [
 
       {/* REMINDERS */}
       <section class="myweek__card" aria-labelledby="remind-heading">
-        <h2 id="remind-heading" class="myweek__h2">Remind me to log my trip</h2>
+        <h2 id="remind-heading" class="myweek__h2">Remind me to share my trip</h2>
         <p class="myweek__p">One reminder a day, October 1 to 8, at about 8 am. Stop anytime.</p>
         <label class="check-row" data-remind-row="push">
           <input type="checkbox" data-remind="push" />
@@ -523,6 +551,74 @@ const shortcuts = [
     color: var(--color-on-slab-variant);
   }
 
+  /* Today's trip, in three steps */
+  .trip__step {
+    padding-block: 1.1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-slab) 22%, transparent);
+  }
+  .trip__q {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+  .trip__n {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 1rem;
+    color: var(--color-on-primary-warm);
+    background: var(--color-primary-warm);
+    border-radius: 50%;
+  }
+  .trip__help {
+    color: var(--color-on-slab-variant);
+  }
+  .trip__link {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    margin-top: 0.4rem;
+    padding: 0 0.9rem;
+    font-size: 1.05rem;
+    color: var(--color-on-surface);
+    background: var(--color-field);
+    border-radius: 0.75rem;
+  }
+  .trip__screenshot {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    font-weight: 700;
+    border: 2px dashed color-mix(in srgb, var(--color-on-slab) 45%, transparent);
+    border-radius: 0.75rem;
+    cursor: pointer;
+  }
+  .trip__screenshot:focus-within {
+    outline: 3px solid var(--color-on-slab);
+    outline-offset: 2px;
+  }
+  .trip__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+  .trip__consent input {
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+    margin-top: 0.1rem;
+    accent-color: var(--color-primary-warm);
+  }
+
   /* Share what you did */
   .shared__title {
     font-size: 1.3rem;
@@ -542,9 +638,11 @@ const shortcuts = [
   }
   .shared__actions {
     display: flex;
-    flex-wrap: wrap;
     gap: 0.6rem;
     margin-top: 1rem;
+  }
+  .shared__actions .btn {
+    white-space: nowrap;
   }
   .shared__share {
     color: var(--color-on-primary-warm);

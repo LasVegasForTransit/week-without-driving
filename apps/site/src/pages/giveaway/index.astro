@@ -6,20 +6,22 @@ import Steps from '../../components/Steps.astro';
 import { prizes, winSteps } from '../../lib/campaign';
 import { wwd } from '../../lib/wwd';
 
-// Win prizes, /giveaway. Each day a participant takes a trip without driving
-// and logs it on My week is one entry (or, for someone who gave an Instagram
-// handle, a post of the trip that tags @lasvegasfortransit). Signing up happens once, at /sign-up; this
+// Win prizes, /giveaway. Each day a participant shares a trip they took
+// without driving is one entry: a public post, submitted on My week or
+// tagging @lasvegasfortransit, or a screenshot of the post from a private
+// account. The free way to enter, for people without social media, is by
+// mail. Signing up happens once, at /sign-up; this
 // page explains the giveaway and points there.
 
 const title = 'Win prizes · Week Without Driving Las Vegas';
 const description =
-  'Each day you take a trip without driving, October 1 to 8, is a chance to win a one-month RTC bus pass and an LVBT sticker pack.';
+  'Each day you share a trip without driving, October 1 to 8, is a chance to win a one-month RTC bus pass and an LVBT sticker pack.';
 ---
 
 <BaseLayout {title} {description}>
   <PageHeader
     title="Win prizes"
-    lede={`Each day from October 1 to 8 that you take a trip without driving is one entry, up to ${wwd.maxEntries}. Walking counts. No purchase or post necessary.`}
+    lede={`Each day from October 1 to 8 that you share a trip without driving is one entry, up to ${wwd.maxEntries}. No social media? You can enter by mail.`}
   >
     <div class="giveaway-cta">
       <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
@@ -56,10 +58,31 @@ const description =
     <h2 id="enter-heading" class="section-title">How to enter</h2>
     <Steps steps={winSteps} class="section-body" />
     <p class="section-intro giveaway-note">
-      No Instagram? You don’t need it. Log your trips on My week. If you gave us your Instagram
-      name, a post of your trip that tags @lasvegasfortransit counts as that day’s log. It’s on the
-      honor system: we don’t check.
+      Post on Instagram and tag @lasvegasfortransit, and we count it for you. Posting somewhere
+      else, or from a private account? Paste the link, or a screenshot, on My week. We check every
+      post before the draw.
     </p>
+  </section>
+
+  {/* ENTER BY MAIL: the free way to enter, for people without social media. */}
+  <section id="by-mail" class="container-page section scroll-mt-24" aria-labelledby="mail-heading">
+    <h2 id="mail-heading" class="section-title">No social media? Enter by mail.</h2>
+    <p class="section-intro">
+      For each day you take a trip without driving, October 1 to 8, mail us a handwritten postcard
+      or letter. Each one is one entry for that day, the same as a shared trip.
+    </p>
+    <ol class="section-body giveaway-mail">
+      <li>Write your first name, and the phone number or email you signed up with.</li>
+      <li>Write the date of your trip, and how you got around without driving.</li>
+      <li>
+        Mail it the same day. It must be postmarked October 1 to 8 and reach us by October 13.
+      </li>
+    </ol>
+    <div class="giveaway-address">
+      <p class="font-bold">Mail it to</p>
+      <p>Las Vegans for Better Transit, Week Without Driving Giveaway</p>
+      <p class="to-come mt-2">Mailing address to come</p>
+    </div>
   </section>
 
   {/* THE SHORT VERSION OF THE RULES */}
@@ -69,12 +92,12 @@ const description =
       <li>The giveaway is open to people who live in Southern Nevada and are 13 or older.</li>
       <li>If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.</li>
       <li>
-        You get one entry for each day, October 1 to 8, that you take a trip without driving and log
-        it, for up to 8 entries.
+        You get one entry for each day, October 1 to 8, that you share a trip you took without
+        driving, for up to 8 entries.
       </li>
+      <li>No purchase is necessary. You can also enter by mail, below.</li>
       <li>We draw a winner at random by October 15, 2026. Each entry is one chance.</li>
       <li>The winner has 7 days to reply before we draw someone else.</li>
-      <li>No purchase or post necessary.</li>
     </ul>
     <a href="/giveaway/rules" class="arrow-link giveaway-rules__link">Read the Official Rules</a>
   </section>
@@ -118,6 +141,22 @@ const description =
     font-size: 1.1rem;
     line-height: 1.5;
     list-style: disc;
+  }
+  .giveaway-mail {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 40rem;
+    padding-left: 1.4rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    list-style: decimal;
+  }
+  .giveaway-address {
+    max-width: 30rem;
+    margin-top: 1.5rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
   }
   .giveaway-rules__link {
     margin-top: 1.25rem;
