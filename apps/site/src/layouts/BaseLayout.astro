@@ -50,7 +50,7 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link
       rel="preload"
-      href="/fonts/public-sans-latin.woff2"
+      href="/fonts/atkinson-next-400.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -97,9 +97,9 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
             </ul>
           </nav>
           <div class="site-header__actions">
-            <a href="/take-part#pledge" class="site-pledge" data-pledge-link>
-              <span class="site-pledge__long" data-pledge-label>Take the pledge</span>
-              <span class="site-pledge__short" data-pledge-label>Pledge</span>
+            <a href="/sign-up" class="site-cta" data-signup-link>
+              <span class="site-cta__long" data-signup-label>Sign up to win</span>
+              <span class="site-cta__short" data-signup-label>Sign up</span>
             </a>
             <a
               href="#site-menu"
@@ -127,8 +127,8 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
           <Icon name="mdi:close" class="size-7" aria-hidden="true" />
         </button>
       </div>
-      <a href="/take-part#pledge" class="site-menu__pledge" data-pledge-link>
-        <span data-pledge-label>Take the pledge</span>
+      <a href="/sign-up" class="site-menu__cta" data-signup-link>
+        <span data-signup-label>Sign up to win</span>
         <Icon name="mdi:arrow-right" class="size-6" aria-hidden="true" />
       </a>
       <ul class="site-menu__list">
