@@ -64,7 +64,7 @@ export const winSteps = [
   },
   {
     icon: 'mdi:share-variant-outline',
-    title: 'Log it and share it',
-    body: 'Tell us how you got around on My week. Each day you do is one entry, up to 8. Then share it.',
+    title: 'Share it to enter',
+    body: 'Post a photo of your trip and tag @lasvegasfortransit. Each day you share one is an entry, up to 8.',
   },
 ] as const;
