@@ -1,9 +1,479 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// The Giveaway page, /giveaway. Copy and behavior follow the plan
+// "Let participants enter the giveaway by uploading a screenshot"
+//, "Let anyone enter the giveaway with an
+// email address or phone number", and "Count
+// Instagram tags of @lasvegasfortransit as giveaway entries"
+// (features/giveaway/instagram-tag-entry.md), which are the source of
+// truth over the older local draft now that the giveaway has a free entry
+// method (decisions file, section 6.1).
+//
+// This build has no backend: there is no Worker, no database, and no
+// Turnstile bot check yet. Both forms are front-end demos that validate in
+// the browser and show the real success or next-step screen without
+// sending anything anywhere — see the TODO comments below for the plan
+// tasks that will wire them to the real API ("Build the screenshot upload
+// API and form",, and "Build the free entry
+// form and API",). No personal data is
+// collected or stored by this page.
+//
+// Before October 1, 2026, both forms show "Entries open October 1" with a
+// disabled button, matching the real behaviour once the API exists. To
+// preview the during-the-week state for a screenshot, open this page with
+// ?preview=open, which /scripts/giveaway.js reads and uses in place of the
+// visitor's clock.
+const title = 'Enter the giveaway · Week Without Driving Las Vegas';
+const description =
+  'Enter the Week Without Driving Las Vegas giveaway for a one-month RTC bus pass: tag us on Instagram, upload a screenshot, or enter free with your email or phone.';
+
+const uploadList = [
+  'A bus trip, or your bus pass or ticket',
+  "A map app's directions for a trip by bus, walking or rolling, or biking",
+  'A photo from a walk or roll',
+  'Your notes from a sidewalk audit',
+  'Your bingo card, with any square marked, even one you did from home',
+];
 ---
 
-<BaseLayout title="Giveaway · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
-    <h1 class="text-display-sm">Giveaway</h1>
+<BaseLayout {title} {description}>
+  <section class="container-page max-w-2xl py-12 md:py-16">
+    <h1 class="text-display-sm">Enter the giveaway</h1>
+    <p class="lede mt-4">
+      Win a one-month RTC bus pass and a Las Vegans for Better Transit sticker pack. Get one entry a
+      day, October 1 to 8, for up to 8 entries.
+    </p>
+
+    {/* Opening notice */}
+    <div class="giveaway-notice mt-8">
+      <p>
+        Enter with your Instagram handle: <a href="#upload-form" class="body-link font-semibold"
+          >upload a screenshot below</a
+        >, or <a href="#tag" class="body-link font-semibold">tag @lasvegasfortransit on Instagram</a
+        >.
+      </p>
+      <p class="mt-3">
+        No Instagram? <a href="#free" class="body-link font-semibold"
+          >Enter with your email address or phone number instead.</a
+        >
+      </p>
+      <p class="mt-3">
+        No purchase or post necessary. See the <a
+          href="/giveaway/rules"
+          class="body-link font-semibold">Official Rules</a
+        >.
+      </p>
+    </div>
+
+    {/* Who can enter */}
+    <section class="mt-12" aria-labelledby="who-can-enter">
+      <h2 id="who-can-enter" class="text-headline-sm">Who can enter</h2>
+      <p class="prose-doc mt-3">
+        Anyone 13 or older who lives in Southern Nevada (Clark, Esmeralda, Lincoln or Nye County).
+        If you're 13 to 17, a parent or guardian needs to agree to the Official Rules, and if you
+        win, the prize is given in their name. Volunteers who run the giveaway can't win.
+      </p>
+    </section>
+
+    {/* What to upload */}
+    <section class="mt-10" aria-labelledby="what-to-upload">
+      <h2 id="what-to-upload" class="text-headline-sm">What to upload</h2>
+      <p class="prose-doc mt-3">
+        A screenshot or photo of something you did without driving today. Any of these count:
+      </p>
+      <ul class="prose-doc mt-2 list-disc pl-6">
+        {uploadList.map((item) => <li>{item}</li>)}
+      </ul>
+      <p class="prose-doc mt-3">
+        Rides from friends or family, RTC Paratransit and working from home all count as not
+        driving. We don't check or judge what you upload. Every entry counts the same.
+      </p>
+      <p class="prose-doc mt-3">
+        Before you upload, leave out other people's faces and crop out your home address. We never
+        publish uploads.
+      </p>
+    </section>
+
+    {/* Upload today's entry */}
+    <section
+      id="upload-form"
+      class="giveaway-section mt-12 scroll-mt-24"
+      aria-labelledby="upload-heading"
+    >
+      <h2 id="upload-heading" class="text-headline-sm">Upload today's entry</h2>
+      <p class="mt-2 font-semibold" data-giveaway-day-line="upload">
+        Entries open October 1. Come back then with a screenshot of something you did without
+        driving.
+      </p>
+
+      <div data-giveaway-panel="upload-form" hidden>
+        <form data-upload-form novalidate class="mt-6 space-y-6">
+          <div>
+            <label for="upload-handle" class="giveaway-label">Your Instagram handle</label>
+            <div class="giveaway-input-wrap">
+              <span aria-hidden="true">@</span>
+              <input
+                type="text"
+                id="upload-handle"
+                name="handle"
+                class="giveaway-input"
+                autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                data-handle-input
+              />
+            </div>
+            <p class="giveaway-hint">
+              Letters, numbers, periods and underscores, up to 30 characters. Use the same handle
+              every day.
+            </p>
+            <p class="giveaway-hint">
+              We use your handle and screenshot only for the giveaway, and we delete them on
+              November 30, 2026. Read our <a href="/privacy" class="body-link">Privacy page</a>.
+            </p>
+            <p class="giveaway-error" role="alert" data-handle-error hidden></p>
+          </div>
+
+          <fieldset class="giveaway-age" data-age-group>
+            <legend class="giveaway-label">Your age</legend>
+            <label class="giveaway-radio">
+              <input type="radio" name="upload-age" value="18_plus" data-age-radio />
+              18 or older
+            </label>
+            <label class="giveaway-radio">
+              <input
+                type="radio"
+                name="upload-age"
+                value="13_to_17_guardian_agreed"
+                data-age-radio-teen
+              />
+              13 to 17
+            </label>
+            <div class="mt-2" data-guardian-wrap hidden>
+              <label class="giveaway-checkbox">
+                <input type="checkbox" data-guardian-checkbox />
+                I'm 13 to 17 and my parent or guardian agrees to the
+                <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+              </label>
+            </div>
+            <p class="giveaway-hint mt-2">
+              Under 13? You can't enter the giveaway, but you can
+              <a href="/bingo" class="body-link">play bingo</a> and
+              <a href="/take-part" class="body-link">take part all week</a>.
+            </p>
+            <p class="giveaway-error" role="alert" data-age-error hidden></p>
+          </fieldset>
+
+          <div>
+            <span class="giveaway-label" id="upload-file-label">Screenshot or photo</span>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <label class="giveaway-file-button">
+                Choose a file
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/heic,image/webp"
+                  class="sr-only"
+                  aria-labelledby="upload-file-label"
+                  data-file-input
+                />
+              </label>
+              <span data-file-chosen></span>
+              <button type="button" class="body-link font-semibold" data-file-reset hidden>
+                Choose a different file
+              </button>
+            </div>
+            <p class="giveaway-hint">
+              JPEG, PNG, HEIC or WebP, up to 10 MB. On a limited data plan, a screenshot uses less
+              data than a photo.
+            </p>
+            <p class="giveaway-error" role="alert" data-file-error hidden></p>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="press inline-flex w-full items-center justify-center gap-2 bg-primary px-6 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              data-submit-button
+            >
+              Send my entry
+            </button>
+            <p class="giveaway-hint mt-3">
+              No purchase or post necessary. See the
+              <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+            </p>
+            <p class="giveaway-error mt-2" role="alert" data-form-error hidden></p>
+          </div>
+        </form>
+
+        <div class="giveaway-success" role="status" data-success-panel hidden>
+          <h3 class="text-title-lg">You're entered!</h3>
+          <p class="mt-2" data-success-text></p>
+          <p class="mt-2">Come back tomorrow for another entry.</p>
+          <p class="mt-4 text-sm">
+            Wrong handle? Email
+            <a href="mailto:wwd@lasvegasfortransit.org" class="body-link"
+              >wwd@lasvegasfortransit.org</a
+            >
+            and we'll fix it.
+          </p>
+        </div>
+      </div>
+
+      <noscript>
+        <p class="giveaway-notice mt-4">Uploading needs JavaScript turned on in your browser.</p>
+      </noscript>
+    </section>
+
+    {/* Or tag us on Instagram */}
+    <section id="tag" class="mt-12 scroll-mt-24" aria-labelledby="tag-heading">
+      <h2 id="tag-heading" class="text-headline-sm">Or tag us on Instagram</h2>
+      <div data-giveaway-panel="tag-open">
+        <p class="prose-doc mt-3">
+          Post a photo, reel or story about something you did without driving today, and tag
+          @lasvegasfortransit. A volunteer counts it as your entry for that day. Adding
+          #WeekWithoutDriving is welcome, too.
+        </p>
+        <p class="prose-doc mt-3">
+          When we've counted it, we'll like your post or react to your story with a heart. We check
+          every evening, October 1 to 9.
+        </p>
+        <p class="prose-doc mt-3">
+          Private account? We can't always see tags from private accounts. Send your post or story
+          to @lasvegasfortransit in a direct message the same day, and we'll count it.
+        </p>
+        <p class="prose-doc mt-3">
+          Tagging us and uploading here on the same day count as one entry for that day.
+        </p>
+        <p class="mt-4">
+          <a
+            href="https://www.instagram.com/lasvegasfortransit/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="body-link font-semibold"
+          >
+            Open @lasvegasfortransit on Instagram
+          </a>
+        </p>
+      </div>
+      <p class="prose-doc mt-3" data-giveaway-panel="tag-closed" hidden>
+        The giveaway is closed. We're counting the last tags from October 8 and will draw the winner
+        by October 15, 2026.
+      </p>
+    </section>
+
+    {/* Enter with your email or phone */}
+    <section id="free" class="giveaway-section mt-12 scroll-mt-24" aria-labelledby="free-heading">
+      <h2 id="free-heading" class="text-headline-sm">Enter with your email or phone</h2>
+      <p class="prose-doc mt-3">
+        No Instagram, or rather not use it? Enter with your email address or phone number. You don't
+        need to upload or post anything, and your entry has the same chance as any other.
+      </p>
+      <p class="mt-3 font-semibold" data-giveaway-day-line="free">
+        Entries open October 1. Come back then to enter with your email address or phone number.
+      </p>
+
+      <div data-giveaway-panel="free-form" hidden>
+        <form data-free-form novalidate class="mt-6 space-y-6">
+          <div>
+            <label for="free-identifier" class="giveaway-label">Email address or phone number</label
+            >
+            <input
+              type="text"
+              inputmode="email"
+              id="free-identifier"
+              name="identifier"
+              class="giveaway-input giveaway-input--full"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              data-identifier-input
+            />
+            <p class="giveaway-hint">
+              For a phone number, use a US number with its area code, like 702-555-0123. Use the
+              same one every day.
+            </p>
+            <p class="giveaway-hint">
+              We use your email or phone number for the giveaway and delete it from lvwwd.org on
+              November 30, 2026. If you also tick the newsletter box, LVBT's newsletter keeps your
+              email until you unsubscribe. <a href="/privacy" class="body-link">Privacy</a>.
+            </p>
+            <p class="giveaway-error" role="alert" data-identifier-error hidden></p>
+          </div>
+
+          <fieldset class="giveaway-age" data-age-group>
+            <legend class="giveaway-label">Your age</legend>
+            <label class="giveaway-radio">
+              <input type="radio" name="free-age" value="18_plus" data-age-radio />
+              18 or older
+            </label>
+            <label class="giveaway-radio">
+              <input
+                type="radio"
+                name="free-age"
+                value="13_to_17_guardian_agreed"
+                data-age-radio-teen
+              />
+              13 to 17
+            </label>
+            <div class="mt-2" data-guardian-wrap hidden>
+              <label class="giveaway-checkbox">
+                <input type="checkbox" data-guardian-checkbox />
+                I'm 13 to 17 and my parent or guardian agrees to the
+                <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+              </label>
+            </div>
+            <p class="giveaway-hint mt-2">
+              Under 13? You can't enter the giveaway, but you can
+              <a href="/bingo" class="body-link">play bingo</a> and
+              <a href="/take-part" class="body-link">take part all week</a>.
+            </p>
+            <p class="giveaway-error" role="alert" data-age-error hidden></p>
+          </fieldset>
+
+          <div data-newsletter-wrap hidden>
+            <label class="giveaway-checkbox">
+              <input type="checkbox" data-newsletter-checkbox />
+              Also send me LVBT's newsletter: transit news and easy ways to help in Las Vegas
+            </label>
+            <p class="giveaway-hint mt-1">
+              The newsletter comes from LVBT, not this campaign, so your subscription isn't deleted
+              on November 30. You can unsubscribe at any time. See our
+              <a href="/privacy" class="body-link">Privacy page</a>.
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="press inline-flex w-full items-center justify-center gap-2 bg-primary px-6 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              data-submit-button
+            >
+              Enter today
+            </button>
+            <p class="giveaway-hint mt-3">
+              No purchase or post necessary. See the
+              <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+            </p>
+            <p class="giveaway-error mt-2" role="alert" data-form-error hidden></p>
+          </div>
+        </form>
+
+        <div class="giveaway-success" role="status" data-success-panel hidden>
+          <h3 class="text-title-lg">You're entered!</h3>
+          <p class="mt-2" data-success-text></p>
+          <p class="mt-2">Come back tomorrow for another entry.</p>
+          <p class="mt-4 text-sm">
+            Wrong email or number? Email
+            <a href="mailto:wwd@lasvegasfortransit.org" class="body-link"
+              >wwd@lasvegasfortransit.org</a
+            >
+            and we'll fix it.
+          </p>
+        </div>
+      </div>
+
+      <noscript>
+        <p class="giveaway-notice mt-4">
+          Entering needs JavaScript turned on in your browser. Or email wwd@lasvegasfortransit.org
+          with the subject Giveaway entry, and we'll enter you for today.
+        </p>
+      </noscript>
+    </section>
   </section>
+
+  <script is:inline src="/scripts/giveaway.js" defer></script>
 </BaseLayout>
+
+<style>
+  .giveaway-notice {
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface-container);
+    padding: 1.25rem;
+    line-height: 1.5;
+  }
+  .giveaway-label {
+    display: block;
+    font-weight: 700;
+    font-size: var(--text-title-sm);
+  }
+  .giveaway-input-wrap {
+    margin-top: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface);
+    padding-inline-start: 0.75rem;
+  }
+  .giveaway-input {
+    flex: 1;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    padding: 0.625rem 0.75rem 0.625rem 0;
+    font-size: var(--text-body-md);
+  }
+  .giveaway-input:focus-visible,
+  .giveaway-input-wrap:has(.giveaway-input:focus-visible) {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 1px;
+  }
+  .giveaway-input--full {
+    display: block;
+    width: 100%;
+    margin-top: 0.375rem;
+    border: 2px solid var(--color-outline);
+    padding: 0.625rem 0.75rem;
+  }
+  .giveaway-hint {
+    margin-top: 0.375rem;
+    font-size: var(--text-body-sm);
+    color: var(--color-on-surface-variant);
+    line-height: 1.5;
+  }
+  .giveaway-error {
+    margin-top: 0.375rem;
+    font-size: var(--text-body-sm);
+    font-weight: 700;
+    color: var(--color-error, #b3261e);
+  }
+  .giveaway-radio,
+  .giveaway-checkbox {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 0.625rem;
+    padding-block: 0.375rem;
+    font-size: var(--text-body-md);
+    line-height: 1.4;
+  }
+  .giveaway-radio input,
+  .giveaway-checkbox input {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+  }
+  .giveaway-file-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface);
+    padding: 0.625rem 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .giveaway-file-button:has(input:focus-visible) {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  .giveaway-success {
+    margin-top: 1.5rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface-container);
+    padding: 1.5rem;
+  }
+</style>
