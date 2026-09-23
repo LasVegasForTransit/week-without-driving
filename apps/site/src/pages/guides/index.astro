@@ -15,13 +15,11 @@ const description =
 ---
 
 <BaseLayout title="Rider guides · Week Without Driving Las Vegas" description={description}>
-  <section class="container-page py-16 md:py-24" aria-labelledby="guides-heading">
-    <div class="reveal max-w-3xl">
-      <h1 id="guides-heading" class="text-display-sm">Rider guides</h1>
-      <p class="lede mt-5">{description}</p>
-    </div>
+  <section class="container-page page-top" aria-labelledby="guides-heading">
+    <h1 id="guides-heading" class="page-title">Rider guides</h1>
+    <p class="page-lede">{description}</p>
 
-    <ul class="reveal-stagger mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <ul class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {
         guides.map((guide) => (
           <li class="reveal">

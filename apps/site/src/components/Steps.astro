@@ -1,0 +1,123 @@
+---
+import { Icon } from 'astro-icon/components';
+
+// Steps that happen in order, drawn as stops on one bus line: a vertical
+// line on phones, a horizontal one on wider screens. Used wherever the
+// site explains how to win, so the three steps look the same everywhere.
+export interface Step {
+  icon: string;
+  title: string;
+  body: string;
+  cta?: string | undefined;
+  href?: string | undefined;
+}
+interface Props {
+  steps: readonly Step[];
+  class?: string | undefined;
+}
+const { steps, class: className } = Astro.props;
+---
+
+<ol class:list={['route', className]} style={`--stops: ${steps.length}`}>
+  {
+    steps.map((s, i) => (
+      <li class="route__stop">
+        <span class="route__dot" aria-hidden="true">
+          <Icon name={s.icon} class="route__icon" />
+        </span>
+        <div class="route__text">
+          <p class="route__num">Step {i + 1}</p>
+          <h3 class="route__title">{s.title}</h3>
+          <p class="route__body">{s.body}</p>
+          {s.cta && s.href && (
+            <a href={s.href} class="arrow-link route__link">
+              {s.cta}
+            </a>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .route {
+    --dot: 4rem;
+    --gap: 2rem;
+    position: relative;
+    display: grid;
+    gap: var(--gap);
+  }
+  /* The line joins the first stop's center to the last one's. */
+  .route::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--dot) / 2);
+    bottom: calc(var(--dot) / 2);
+    left: calc(var(--dot) / 2 - 3px);
+    width: 6px;
+    background: var(--color-primary);
+    border-radius: 3px;
+  }
+  .route__stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--dot) 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .route__dot {
+    display: grid;
+    place-items: center;
+    width: var(--dot);
+    height: var(--dot);
+    color: var(--color-primary-ink);
+    background: var(--color-surface);
+    border: 6px solid var(--color-primary);
+    border-radius: 50%;
+  }
+  .route__dot :global(.route__icon) {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+  .route__num {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-primary-ink);
+  }
+  .route__title {
+    margin-top: 0.15rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  .route__body {
+    max-width: 30rem;
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .route__link {
+    margin-top: 0.6rem;
+  }
+  @media (min-width: 48rem) {
+    .route {
+      --dot: 4.5rem;
+      grid-template-columns: repeat(var(--stops), minmax(0, 1fr));
+    }
+    .route::before {
+      top: calc(var(--dot) / 2 - 3px);
+      bottom: auto;
+      left: calc(var(--dot) / 2);
+      right: calc((100% - (var(--stops) - 1) * var(--gap)) / var(--stops) - var(--dot) / 2);
+      width: auto;
+      height: 6px;
+    }
+    .route__stop {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

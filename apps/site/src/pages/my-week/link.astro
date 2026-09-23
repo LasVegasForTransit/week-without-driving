@@ -12,9 +12,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   description="Get the link that opens My week on this phone."
   noindex
 >
-  <section class="container-page getlink">
-    <h1 class="getlink__title">Get my link</h1>
-    <p class="getlink__lede">
+  <section class="container-page getlink narrow">
+    <h1 class="page-title">Get my link</h1>
+    <p class="page-lede">
       Type the phone number or email you signed up with. We’ll send a link that opens My week on
       this phone.
     </p>
@@ -62,18 +62,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 <style>
   .getlink {
-    max-width: 38rem;
-    padding-block: clamp(2rem, 6vw, 4rem);
-  }
-  .getlink__title {
-    font-size: clamp(2.3rem, 8vw, 3.5rem);
-    line-height: 1.05;
-  }
-  .getlink__lede {
-    margin-top: 0.75rem;
-    font-size: 1.2rem;
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
   }
   .getlink__card {
     margin-top: 1.75rem;

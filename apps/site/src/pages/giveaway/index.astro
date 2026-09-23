@@ -1,63 +1,49 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import PhotoSlot from '../../components/PhotoSlot.astro';
-import { prizes } from '../../lib/campaign';
+import Steps from '../../components/Steps.astro';
+import { prizes, winSteps } from '../../lib/campaign';
 import { wwd } from '../../lib/wwd';
 
-// Win prizes, /giveaway. There is no screenshot upload and no separate
-// Instagram-tag or free-entry forms anymore: entries come from checking in
-// on My week (or, if you gave an Instagram handle, from a tag of
-// @lasvegasfortransit on a day you haven't already checked in). Signing up
-// happens once, at /sign-up; this page explains the giveaway and points
-// there.
+// Win prizes, /giveaway. Entries come from checking in on My week (or, for
+// someone who gave an Instagram handle, a tag of @lasvegasfortransit on a
+// day they haven't checked in). Signing up happens once, at /sign-up; this
+// page explains the giveaway and points there.
 
 const title = 'Win prizes · Week Without Driving Las Vegas';
 const description =
   'Sign up and check in each day, October 1 to 8, for a chance to win a one-month RTC bus pass and an LVBT sticker pack.';
-
-// Same three steps as How it works (/take-part): keep the copy in sync if
-// either one changes.
-const steps = [
-  {
-    title: 'Sign up.',
-    body: 'It takes a minute: your first name, a phone number or email, and your ZIP code.',
-  },
-  {
-    title: 'Check in each day.',
-    body: 'From October 1 to 8, tap Check in for today on My week. Each day is one entry, up to 8.',
-  },
-  {
-    title: 'Win.',
-    body: 'We draw a winner by October 15, 2026 and contact them the way they signed up. No purchase or post necessary.',
-  },
-] as const;
 ---
 
 <BaseLayout {title} {description}>
-  <section class="container-page max-w-2xl py-12 md:py-16">
-    <h1 class="text-display-sm">Win prizes</h1>
-    <p class="lede mt-4">
-      Sign up, then check in each day, October 1 to 8, for a chance to win a one-month RTC bus pass
-      and an LVBT sticker pack. Get up to {wwd.maxEntries} entries.
-    </p>
-  </section>
+  <PageHeader
+    title="Win prizes"
+    lede={`Sign up, then check in each day, October 1 to 8. Each day is one entry, up to ${wwd.maxEntries}. No purchase or post necessary.`}
+  >
+    <div class="giveaway-cta">
+      <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
+        <span data-signup-label>Sign up to win</span>
+      </a>
+    </div>
+  </PageHeader>
 
   {/* PRIZES */}
-  <section class="container-page max-w-2xl" aria-labelledby="prizes-heading">
-    <h2 id="prizes-heading" class="text-headline-sm">The prizes</h2>
-    <ul class="mt-6 grid gap-6 sm:grid-cols-2">
+  <section class="container-page section" aria-labelledby="prizes-heading">
+    <h2 id="prizes-heading" class="section-title">The prizes</h2>
+    <ul class="section-body giveaway-prizes">
       {
         prizes.map((prize) => (
-          <li class="giveaway-prize border border-outline-variant/20 bg-surface-container">
+          <li class="giveaway-prize">
             <PhotoSlot
               class="giveaway-prize__photo"
               shows={prize.photo}
               photo={prize.image}
-              sizes="(min-width: 48rem) 50vw, 100vw"
+              sizes="(min-width: 48rem) 36rem, 100vw"
             />
-            <div class="p-5">
-              <h3 class="text-title-lg">{prize.name}</h3>
-              <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{prize.body}</p>
+            <div class="giveaway-prize__text">
+              <h3 class="giveaway-prize__name">{prize.name}</h3>
+              <p class="giveaway-prize__body">{prize.body}</p>
             </div>
           </li>
         ))
@@ -66,72 +52,76 @@ const steps = [
   </section>
 
   {/* HOW TO ENTER */}
-  <section
-    class="container-page max-w-2xl mt-12 scroll-mt-24 border-t border-outline-variant/15 pt-12 md:mt-16 md:pt-16"
-    aria-labelledby="enter-heading"
-  >
-    <h2 id="enter-heading" class="text-headline-sm">How to enter</h2>
-    <ol class="mt-6 grid gap-5">
-      {
-        steps.map((step, index) => (
-          <li class="relative flex gap-5 overflow-hidden border border-outline-variant/20 bg-surface-container p-6 pl-8">
-            <span class="absolute inset-y-0 left-0 w-2 bg-primary" aria-hidden="true" />
-            <span
-              class="flex size-9 shrink-0 items-center justify-center bg-primary font-black text-on-primary tnum"
-              aria-hidden="true"
-            >
-              {index + 1}
-            </span>
-            <div>
-              <h3 class="text-title-lg">
-                <span class="sr-only">Step {index + 1}: </span>
-                {step.title}
-              </h3>
-              <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{step.body}</p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
-    <div class="mt-8">
-      <a
-        href="/sign-up"
-        data-signup-link
-        class="press inline-flex items-center gap-2 bg-primary px-8 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-      >
-        <span data-signup-label>Sign up to win</span>
-      </a>
-    </div>
-    <p class="prose-doc mt-6">
-      No Instagram? You don’t need it — sign up with an email address or phone number instead. If
-      you do give an Instagram handle, tagging @lasvegasfortransit on a day you haven’t already
-      checked in counts as that day’s entry.
+  <section class="container-page section scroll-mt-24" aria-labelledby="enter-heading">
+    <h2 id="enter-heading" class="section-title">How to enter</h2>
+    <Steps steps={winSteps} class="section-body" />
+    <p class="section-intro giveaway-note">
+      No Instagram? You don’t need it. Sign up with an email address or phone number instead. If you
+      do give an Instagram name, tagging @lasvegasfortransit on a day you haven’t checked in counts
+      as that day’s entry.
     </p>
   </section>
 
   {/* THE SHORT VERSION OF THE RULES */}
-  <section
-    class="container-page max-w-2xl mt-12 border-t border-outline-variant/15 pt-12 md:mt-16 md:pt-16"
-    aria-labelledby="rules-heading"
-  >
-    <h2 id="rules-heading" class="text-headline-sm">The short version of the rules</h2>
-    <div class="prose-doc mt-4">
-      <p>
-        The giveaway is open to Southern Nevada residents 13 or older. If you're 13 to 17, a parent
-        or guardian agrees to the Official Rules for you when you sign up. You can get one entry a
-        day, October 1 to 8, for up to 8 entries total. LVBT draws a winner at random by October 15,
-        2026; each entry is one chance. The winner has 7 days to reply before we draw a new one.
-      </p>
-      <p>No purchase or post necessary.</p>
-    </div>
-    <p class="mt-6">
-      <a href="/giveaway/rules" class="body-link font-semibold">Read the Official Rules</a>
-    </p>
+  <section class="container-page section" aria-labelledby="rules-heading">
+    <h2 id="rules-heading" class="section-title">The short version of the rules</h2>
+    <ul class="section-body giveaway-rules">
+      <li>The giveaway is open to people who live in Southern Nevada and are 13 or older.</li>
+      <li>If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.</li>
+      <li>You get one entry a day, October 1 to 8, for up to 8 entries.</li>
+      <li>We draw a winner at random by October 15, 2026. Each entry is one chance.</li>
+      <li>The winner has 7 days to reply before we draw someone else.</li>
+      <li>No purchase or post necessary.</li>
+    </ul>
+    <a href="/giveaway/rules" class="arrow-link giveaway-rules__link">Read the Official Rules</a>
   </section>
 </BaseLayout>
 
 <style>
+  .giveaway-cta {
+    margin-top: 1.5rem;
+  }
+  .giveaway-prizes {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .giveaway-prize {
+    overflow: hidden;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
   .giveaway-prize :global(.giveaway-prize__photo) {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
+  }
+  .giveaway-prize__text {
+    padding: 1.1rem 1.25rem 1.35rem;
+  }
+  .giveaway-prize__name {
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+  .giveaway-prize__body {
+    margin-top: 0.35rem;
+    color: var(--color-on-surface-variant);
+  }
+  .giveaway-note {
+    margin-top: 2rem;
+  }
+  .giveaway-rules {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 40rem;
+    padding-left: 1.25rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    list-style: disc;
+  }
+  .giveaway-rules__link {
+    margin-top: 1.25rem;
+  }
+  @media (min-width: 48rem) {
+    .giveaway-prizes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 </style>

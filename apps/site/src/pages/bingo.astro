@@ -41,9 +41,9 @@ const description =
 ---
 
 <BaseLayout {title} {description}>
-  <section class="container-page max-w-3xl py-12 md:py-16">
-    <h1 class="text-display-sm">Digital Transit Bingo</h1>
-    <p class="lede mt-4">
+  <section class="container-page page-top narrow">
+    <h1 class="page-title">Digital Transit Bingo</h1>
+    <p class="page-lede">
       Small things to try from {WWD_DATE_RANGE}, {wwd.year}. Tap a square when you've done it. Five
       in a row is a bingo.
     </p>
@@ -333,11 +333,13 @@ const description =
      columns; perforated rules separate squares; a stub holds the tally. */
   .bingo-views {
     display: inline-flex;
+    overflow: hidden;
     border: 1.5px solid var(--color-on-surface);
+    border-radius: 999px;
   }
   .bingo-view-btn {
     min-height: 44px;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.1rem;
     font-size: var(--text-body-sm);
     font-weight: 700;
     background: transparent;

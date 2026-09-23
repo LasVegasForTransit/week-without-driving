@@ -1,0 +1,19 @@
+---
+// The top of every inner page: an optional line above the title (a link
+// back, or a date), the page's one h1, and a short lede. Keeps titles the
+// same size and the same distance from the header on every page.
+interface Props {
+  title: string;
+  lede?: string | undefined;
+  id?: string | undefined;
+  class?: string | undefined;
+}
+const { title, lede, id, class: className } = Astro.props;
+---
+
+<header class:list={['container-page page-header', className]}>
+  <slot name="eyebrow" />
+  <h1 id={id} class="page-title">{title}</h1>
+  {lede && <p class="page-lede">{lede}</p>}
+  <slot />
+</header>
