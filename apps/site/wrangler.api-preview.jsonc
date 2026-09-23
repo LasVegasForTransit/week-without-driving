@@ -8,6 +8,12 @@
   //   pnpm build && pnpm exec wrangler deploy -c wrangler.api-preview.jsonc
   // TURNSTILE_SECRET is a secret (`wrangler secret put -c ...`); the preview
   // uses Cloudflare's always-pass test keys.
+  //
+  // The admin views have no Cloudflare Access here. Instead the secret
+  // PREVIEW_ADMIN_KEY (`wrangler secret put PREVIEW_ADMIN_KEY -c ...`) lets
+  // a tester in: open /admin/preview-login?key=<the key>. PREVIEW_DRAW_ANYTIME
+  // lets the draw run before October 14. Neither may ever be set on
+  // lvwwd.org (wrangler.jsonc).
   "name": "lvwwd-api-preview",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
@@ -15,7 +21,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/my-week*", "/sign-up*"],
+    "run_worker_first": ["/api/*", "/admin*", "/my-week*", "/sign-up*"],
   },
   "workers_dev": true,
   "preview_urls": false,
@@ -31,6 +37,7 @@
   "vars": {
     "PREVIEW_SHOW_LINKS": "true",
     "CHECKIN_PREVIEW_DAY": "3",
+    "PREVIEW_DRAW_ANYTIME": "true",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
   },
   "triggers": { "crons": ["0 13 * * *"] },
