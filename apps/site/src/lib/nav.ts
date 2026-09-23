@@ -43,7 +43,8 @@ export const footerLinks = [
 // /guides/heat marks Guides as current.
 export function isCurrent(href: string, path: string): boolean {
   const clean = path.replace(/\/$/, '') || '/';
-  const target = href.split('#')[0] || '/';
+  const [beforeHash = ''] = href.split('#');
+  const target = beforeHash === '' ? '/' : beforeHash;
   if (target === '/') return clean === '/';
   return clean === target || clean.startsWith(`${target}/`);
 }
