@@ -29,7 +29,6 @@ const campaignOver = Date.now() > wwd.end.getTime();
 // partner tiles (once there are any) render first, then enough dashed
 // "Your group here" placeholder tiles to keep the wall at a full row of 6 —
 // so the empty roster still shows visitors exactly where a logo goes.
-const dashedTileCount = Math.max(0, 6 - roster.length);
 
 const siteHost = site.url.replace(/^https?:\/\//, '');
 const igHandle = handleFromUrl(lvbt.instagramUrl) ?? '@lasvegasfortransit';
@@ -121,71 +120,57 @@ const embedSnippet = `<a href="https://lvwwd.org/">
             : 'Workplaces, schools, churches, clubs and neighborhood groups can bring the week to their people. Join, and your logo goes on this wall.'
         }
       </p>
-      <h2 class="section-title mt-10">
-        {
-          hasRoster
-            ? campaignOver
-              ? 'Took part in 2026'
-              : 'Taking part in 2026'
-            : 'Groups taking part'
-        }
-      </h2>
-      <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-        {
-          roster.map((partner) =>
-            partner.url ? (
-              <li>
-                <a
-                  href={partner.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
-                >
-                  {partner.logoUrl ? (
-                    <img
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      class="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <span class="text-sm leading-snug">{partner.name}</span>
-                  )}
-                </a>
-              </li>
-            ) : (
-              <li>
-                <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold">
-                  {partner.logoUrl ? (
-                    <img
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      class="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <span class="text-sm leading-snug">{partner.name}</span>
-                  )}
-                </div>
-              </li>
-            ),
-          )
-        }
-        {
-          Array.from({ length: dashedTileCount }).map((_) => (
-            <li>
-              <a
-                href={joinMailto}
-                data-print-url={contactEmail}
-                class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant/40 p-3 text-center text-sm font-semibold text-on-surface-variant no-underline transition-colors hover:border-primary hover:text-primary-ink focus-visible:border-primary focus-visible:text-primary-ink"
-              >
-                <Icon name="mdi:image-plus-outline" class="size-6" aria-hidden="true" />
-                <span>
-                  Your group here<span class="sr-only">. Email us to join.</span>
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      {
+        hasRoster && (
+          <>
+            <h2 class="section-title mt-10">
+              {hasRoster
+                ? campaignOver
+                  ? 'Took part in 2026'
+                  : 'Taking part in 2026'
+                : 'Groups taking part'}
+            </h2>
+            <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+              {roster.map((partner) =>
+                partner.url ? (
+                  <li>
+                    <a
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
+                    >
+                      {partner.logoUrl ? (
+                        <img
+                          src={partner.logoUrl}
+                          alt={partner.name}
+                          class="max-h-full max-w-full object-contain"
+                        />
+                      ) : (
+                        <span class="text-sm leading-snug">{partner.name}</span>
+                      )}
+                    </a>
+                  </li>
+                ) : (
+                  <li>
+                    <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold">
+                      {partner.logoUrl ? (
+                        <img
+                          src={partner.logoUrl}
+                          alt={partner.name}
+                          class="max-h-full max-w-full object-contain"
+                        />
+                      ) : (
+                        <span class="text-sm leading-snug">{partner.name}</span>
+                      )}
+                    </div>
+                  </li>
+                ),
+              )}
+            </ul>
+          </>
+        )
+      }
 
       {
         hasRoster && (
@@ -387,10 +372,6 @@ const embedSnippet = `<a href="https://lvwwd.org/">
                   <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
                   Email us your logo
                 </a>
-                <span class="inline-flex items-center rounded-full bg-surface px-3 py-1 text-label-sm font-extrabold uppercase text-on-surface-variant">
-                  To come
-                </span>
-                <span class="text-sm text-on-surface-variant">A logo upload form</span>
               </div>
             </div>
           </div>
