@@ -342,10 +342,14 @@ const description =
   }
 
   .bingo-ticket {
+    /* The card is printed stock: it keeps dark ink whatever the page theme. */
+    --color-on-surface: #1a1414;
+    --color-on-surface-variant: #5a4f4a;
+    color: #1a1414;
     --stock: #fffdf7;
     --stock-edge: #e6dccb;
     --perf: #d8cdb8;
-    --dauber: #e5471a;
+    --dauber: var(--color-primary);
     --notch: 0.85rem;
     position: relative;
     max-width: 34rem;
@@ -422,7 +426,7 @@ const description =
     font-size: clamp(0.5625rem, 2.8vw, 0.6875rem);
     line-height: 1.15;
     font-weight: 600;
-    color: var(--color-on-surface);
+    color: #1a1414;
     hyphens: manual;
     overflow-wrap: normal;
     word-break: normal;
@@ -741,7 +745,12 @@ const description =
     justify-content: center;
     padding: 0.55rem 1.05rem 0.4rem;
     background:
-      radial-gradient(120% 90% at 50% 0%, #f25a2a 0%, transparent 70%), var(--color-primary);
+      radial-gradient(
+        120% 90% at 50% 0%,
+        color-mix(in srgb, var(--color-primary) 80%, #fff) 0%,
+        transparent 70%
+      ),
+      var(--color-primary);
   }
   /* A frame of marquee bulbs, like the Welcome to Las Vegas sign. */
   .bingo-ticket__head::before {
@@ -764,8 +773,8 @@ const description =
     font-size: clamp(1.9rem, 10vw, 2.7rem);
     color: #fff4d6;
     text-shadow:
-      0 2px 0 #b8350c,
-      0 4px 0 #8f2708,
+      0 2px 0 color-mix(in srgb, var(--color-primary) 75%, #000),
+      0 4px 0 color-mix(in srgb, var(--color-primary) 55%, #000),
       0 0 14px rgb(255 214 140 / 0.45);
   }
 
