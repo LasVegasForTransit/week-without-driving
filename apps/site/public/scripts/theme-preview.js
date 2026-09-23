@@ -2,7 +2,7 @@
 // ?theme=lvbt returns to the inherited LVBT look. Remove once a theme is chosen.
 (() => {
   const allowed = ['neon', 'desert', 'pop'];
-  let theme = null;
+  let theme;
   try {
     const fromUrl = new URLSearchParams(location.search).get('theme');
     if (fromUrl === 'lvbt') sessionStorage.removeItem('lvwwd_theme');
