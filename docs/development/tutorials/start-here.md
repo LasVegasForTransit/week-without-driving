@@ -76,6 +76,9 @@ template asks for a TL;DR, an overview of changes, and follow-ups. CI runs `pnpm
 
 - `pnpm dev` starts the app; `pnpm build` builds it; `pnpm run deploy` publishes it to Cloudflare
   (`.github/workflows/deploy.yml` does that on every push to `main`).
+- If you maintain lvwwd.org's production,
+  [Set up lvwwd.org's production](../../operations/how-to/set-up-production.md) shows how to check
+  and complete it with `pnpm preflight --production` and `pnpm bootstrap --production`.
 - The [glossary](../reference/glossary.md) defines every tool and acronym used here.
 - `AGENTS.md` at the repository root is the contract for coding agents; it is a good summary of the
   rules for people too.
