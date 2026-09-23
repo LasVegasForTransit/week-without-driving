@@ -1839,3 +1839,79 @@ body {
 :is(input, select, textarea)[class*='border-'] {
   border-radius: 0.75rem;
 }
+
+/* ---- Page structure: one header and one section rhythm for every page.
+   Every inner page opens with .page-header (title, then a short lede) and
+   is made of .section blocks separated by a hairline, so titles, gaps and
+   left edges line up from page to page. Layered, so a page can still
+   refine them with its own scoped styles. ---- */
+@layer components {
+  .page-header {
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.9rem;
+    font-weight: 800;
+    color: var(--color-primary-ink);
+  }
+  .page-title {
+    max-width: 22ch;
+    font-size: clamp(2.3rem, 6.5vw, 3.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .page-lede {
+    max-width: 38rem;
+    margin-top: 0.9rem;
+    font-size: clamp(1.1rem, 3.5vw, 1.25rem);
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+    text-wrap: pretty;
+  }
+  .section {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+  }
+  .section--flush {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .section-title {
+    font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .section-intro {
+    max-width: 38rem;
+    margin-top: 0.6rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+    text-wrap: pretty;
+  }
+  .section-body {
+    margin-top: clamp(1.25rem, 3vw, 2rem);
+  }
+}
+
+/* Pages whose title sits inside one long section (guides, legal pages,
+   Find a bus, Bingo) use .page-top for the same top and bottom space as
+   .page-header plus the sections after it. */
+@layer components {
+  .page-top {
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+  }
+  /* Long reading pages (Privacy, Terms, Official Rules): the same left
+     edge as every other page, with lines kept to a readable length. */
+  .reading > * {
+    max-width: 68ch;
+  }
+  /* Single-column tool pages (Bingo, My week, Get my link, 404). */
+  .narrow > * {
+    max-width: 46rem;
+  }
+}

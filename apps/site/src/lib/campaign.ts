@@ -45,3 +45,24 @@ export const prizes: Array<{ name: string; body: string; photo: string; image?: 
     photo: 'LVBT stickers spread out on a table',
   },
 ];
+
+/** The three steps to win, shown the same way on How it works and Win prizes. */
+export const winSteps = [
+  {
+    icon: 'mdi:account-plus-outline',
+    title: 'Sign up',
+    body: 'It takes a minute: your first name, a phone number or email, and your ZIP code.',
+    cta: 'Sign up to win',
+    href: '/sign-up',
+  },
+  {
+    icon: 'mdi:calendar-check-outline',
+    title: 'Check in each day',
+    body: 'From October 1 to 8, tap Check in for today on My week. Each day is one entry, up to 8.',
+  },
+  {
+    icon: 'mdi:gift-outline',
+    title: 'Win',
+    body: 'We draw a winner by October 15, 2026, and contact them the way they signed up.',
+  },
+] as const;

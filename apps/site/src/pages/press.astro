@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { Icon } from 'astro-icon/components';
 import { lvbt } from '../lib/site';
 import { wwd, wwdResources, WWD_DATE_RANGE } from '../lib/wwd';
@@ -50,171 +51,181 @@ const storyAngles = [
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="container-page py-16 md:py-24">
-    <h1 class="text-display-sm">Press</h1>
-    <p class="lede mt-4 max-w-2xl">Covering Week Without Driving in Las Vegas? Start here.</p>
+  <PageHeader title="Press" lede="Covering Week Without Driving in Las Vegas? Start here." />
 
-    {/* MEDIA CONTACT */}
-    <div
-      class="reveal relative mt-10 overflow-hidden border border-outline bg-surface-container p-6 pl-8 md:max-w-2xl md:p-8 md:pl-10"
-    >
-      <span class="absolute inset-y-0 left-0 w-2 bg-primary" aria-hidden="true"></span>
-      <h2 class="text-title-lg">Media contact</h2>
-      <p class="mt-3 leading-relaxed text-pretty">
-        <a href={mediaMailto} data-print-url={contactEmail} class="body-link font-semibold">
+  {/* MEDIA CONTACT */}
+  <section class="container-page section--flush" aria-labelledby="contact-heading">
+    <div class="press-card">
+      <h2 id="contact-heading" class="press-card__title">Media contact</h2>
+      <p class="mt-2">
+        <a href={mediaMailto} data-print-url={contactEmail} class="body-link font-bold">
           {contactEmail}
         </a>
       </p>
-      <p class="mt-2 leading-relaxed text-pretty">We answer within one business day.</p>
-      <p class="mt-4 flex flex-wrap items-center gap-2">
-        <span class="font-semibold">Name and phone number:</span>
-        <span
-          class="inline-flex items-center rounded-full bg-surface px-3 py-1 text-label-sm font-extrabold uppercase text-on-surface-variant"
-        >
-          To come
-        </span>
+      <p class="mt-1 text-on-surface-variant">We answer within one business day.</p>
+      <p class="mt-3 flex flex-wrap items-center gap-2">
+        <span class="font-bold">Name and phone number:</span>
+        <span class="to-come">To come</span>
       </p>
-      <div class="mt-6">
-        <a
-          href={mediaMailto}
-          data-print-url={contactEmail}
-          class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-        >
-          <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
-          Email the media contact
-        </a>
-      </div>
-    </div>
-
-    {/* PRESS RELEASE */}
-    <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-      <h2 class="text-headline-lg">Press release</h2>
-      <div
-        class="mt-6 flex flex-wrap items-start gap-4 border border-outline bg-surface-container p-6 md:max-w-2xl"
-      >
-        <Icon
-          name="mdi:newspaper-variant-outline"
-          class="size-8 shrink-0 text-on-surface-variant"
-          aria-hidden="true"
-        />
-        <div>
-          <span
-            class="inline-flex items-center rounded-full bg-surface px-3 py-1 text-label-sm font-extrabold uppercase text-on-surface-variant"
-          >
-            To come
-          </span>
-          <p class="mt-2 leading-relaxed text-pretty">
-            Our press release will be posted here before October 1.
-          </p>
-        </div>
-      </div>
-      {
-        mediaAdvisory && (
-          <p class="mt-6 max-w-2xl leading-relaxed text-pretty">
-            In the meantime, read the national campaign's{' '}
-            <a
-              href={mediaAdvisory.url}
-              data-print-url={mediaAdvisory.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="body-link font-semibold"
-            >
-              2026 media advisory
-            </a>
-            .
-          </p>
-        )
-      }
-    </div>
-
-    {/* QUICK FACTS */}
-    <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-      <h2 class="text-headline-lg">Quick facts</h2>
-      <dl class="mt-6 divide-y divide-outline-variant/15 border-t border-outline-variant/15">
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">What</dt>
-          <dd class="leading-relaxed text-pretty">
-            A week to get around without driving: by bus, walking or rolling, biking, or getting a
-            ride.
-          </dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">When</dt>
-          <dd class="leading-relaxed text-pretty">
-            {WWD_DATE_RANGE}, {wwd.year}
-          </dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">Where</dt>
-          <dd class="leading-relaxed text-pretty">Las Vegas Valley</dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">Who runs it locally</dt>
-          <dd class="leading-relaxed text-pretty">
-            <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-semibold">
-              {lvbt.name}
-            </a>{' '}
-            (LVBT), a 501(c)(3) nonprofit.
-          </dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">National campaign</dt>
-          <dd class="leading-relaxed text-pretty">
-            Organized by {wwd.nationalOrganizer} with the Nondrivers Alliance.{' '}
-            <a
-              href={wwd.nationalUrl}
-              data-print-url={wwd.nationalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="body-link font-semibold"
-            >
-              weekwithoutdriving.org
-            </a>
-          </dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">Take part</dt>
-          <dd class="leading-relaxed text-pretty">
-            Anyone can. Sign up to win at{' '}
-            <a href="/sign-up" class="body-link font-semibold"> lvwwd.org/sign-up </a>
-          </dd>
-        </div>
-        <div class="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-          <dt class="text-title-sm font-bold">Hashtag</dt>
-          <dd class="leading-relaxed text-pretty">{wwd.hashtag}</dd>
-        </div>
-      </dl>
-    </div>
-
-    {/* PHOTOS AND LOGOS */}
-    <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-      <h2 class="text-headline-lg">Photos and logos</h2>
-      <p class="lede mt-4 max-w-2xl">Downloads are on the way. Check back closer to October 1.</p>
-      <ul class="reveal-stagger mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          downloads.map((item) => (
-            <li class="reveal flex flex-col gap-3 border border-outline bg-surface-container p-6">
-              <Icon name={item.icon} class="size-8 text-on-surface-variant" aria-hidden="true" />
-              <p class="text-title-md font-bold">{item.name}</p>
-              <p class="leading-relaxed text-on-surface-variant text-pretty">{item.body}</p>
-              <span class="inline-flex w-fit items-center rounded-full bg-surface px-3 py-1 text-label-sm font-extrabold uppercase text-on-surface-variant">
-                To come
-              </span>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-
-    {/* STORIES */}
-    <div class="reveal mt-16 border-t border-outline-variant/15 pt-10 md:mt-24">
-      <h2 class="text-headline-lg">Stories we can connect you with</h2>
-      <p class="lede mt-4 max-w-2xl">
-        Tell us what you're working on, and we'll help find the right person or angle.
-      </p>
-      <ul class="prose-doc mt-6 list-disc pl-6">
-        {storyAngles.map((item) => <li>{item}</li>)}
-      </ul>
+      <a href={mediaMailto} data-print-url={contactEmail} class="btn btn--primary mt-5">
+        <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
+        Email the media contact
+      </a>
     </div>
   </section>
+
+  {/* PRESS RELEASE */}
+  <section class="container-page section mt-12" aria-labelledby="release-heading">
+    <h2 id="release-heading" class="section-title">Press release</h2>
+    <div class="press-card section-body">
+      <span class="to-come">To come</span>
+      <p class="mt-2">Our press release will be posted here before October 1.</p>
+    </div>
+    {
+      mediaAdvisory && (
+        <p class="section-intro">
+          In the meantime, read the national campaign's{' '}
+          <a
+            href={mediaAdvisory.url}
+            data-print-url={mediaAdvisory.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="body-link font-bold"
+          >
+            2026 media advisory
+          </a>
+          .
+        </p>
+      )
+    }
+  </section>
+
+  {/* QUICK FACTS */}
+  <section class="container-page section" aria-labelledby="facts-heading">
+    <h2 id="facts-heading" class="section-title">Quick facts</h2>
+    <dl class="facts section-body">
+      <div>
+        <dt>What</dt>
+        <dd>
+          A week to get around without driving: by bus, walking or rolling, biking, or getting a
+          ride.
+        </dd>
+      </div>
+      <div>
+        <dt>When</dt>
+        <dd>{WWD_DATE_RANGE}, {wwd.year}</dd>
+      </div>
+      <div>
+        <dt>Where</dt>
+        <dd>Las Vegas Valley</dd>
+      </div>
+      <div>
+        <dt>Who runs it locally</dt>
+        <dd>
+          <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-bold">{lvbt.name}</a>{
+            ' '
+          }(LVBT), a 501(c)(3) nonprofit.
+        </dd>
+      </div>
+      <div>
+        <dt>National campaign</dt>
+        <dd>
+          Organized by {wwd.nationalOrganizer} with the Nondrivers Alliance.{' '}
+          <a
+            href={wwd.nationalUrl}
+            data-print-url={wwd.nationalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="body-link font-bold"
+          >
+            weekwithoutdriving.org
+          </a>
+        </dd>
+      </div>
+      <div>
+        <dt>Take part</dt>
+        <dd>
+          Anyone can. Sign up to win at <a href="/sign-up" class="body-link font-bold"
+            >lvwwd.org/sign-up</a
+          >.
+        </dd>
+      </div>
+      <div>
+        <dt>Hashtag</dt>
+        <dd>{wwd.hashtag}</dd>
+      </div>
+    </dl>
+  </section>
+
+  {/* PHOTOS AND LOGOS */}
+  <section class="container-page section" aria-labelledby="downloads-heading">
+    <h2 id="downloads-heading" class="section-title">Photos and logos</h2>
+    <p class="section-intro">Downloads are on the way. Check back closer to October 1.</p>
+    <ul class="section-body grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        downloads.map((item) => (
+          <li class="press-card flex flex-col gap-2">
+            <Icon name={item.icon} class="size-8 text-primary-ink" aria-hidden="true" />
+            <p class="press-card__title">{item.name}</p>
+            <p class="text-on-surface-variant">{item.body}</p>
+            <span class="to-come mt-1 w-fit">To come</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* STORIES */}
+  <section class="container-page section" aria-labelledby="stories-heading">
+    <h2 id="stories-heading" class="section-title">Stories we can connect you with</h2>
+    <p class="section-intro">
+      Tell us what you're working on, and we'll help find the right person or angle.
+    </p>
+    <ul class="stories section-body">
+      {storyAngles.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
 </BaseLayout>
+
+<style>
+  .press-card {
+    max-width: 40rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
+  .press-card__title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .facts {
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
+  .facts > div {
+    display: grid;
+    gap: 0.25rem 2rem;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
+  .facts dt {
+    font-weight: 800;
+  }
+  .facts dd {
+    line-height: 1.5;
+  }
+  .stories {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 40rem;
+    padding-left: 1.25rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    list-style: disc;
+  }
+  @media (min-width: 40rem) {
+    .facts > div {
+      grid-template-columns: 12rem 1fr;
+    }
+  }
+</style>

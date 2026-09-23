@@ -19,7 +19,7 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
         <Icon name="mdi:gift-outline" class="size-5" aria-hidden="true" />
         Win a one-month RTC bus pass
       </p>
-      <h1 class="signup__title">Sign up to win</h1>
+      <h1 class="page-title signup__title">Sign up to win</h1>
       <p class="signup__lede">
         Sign up once. Then check in each day, {WWD_DATE_RANGE}. Each day you check in is one entry,
         up to {wwd.maxEntries}.
@@ -173,7 +173,7 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
   .signup {
     display: grid;
     gap: 2rem;
-    padding-block: clamp(2rem, 6vw, 4.5rem);
+    padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
   }
   .signup__prize {
     display: inline-flex;
@@ -187,9 +187,6 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
   }
   .signup__title {
     margin-top: 1rem;
-    font-size: clamp(2.4rem, 9vw, 4rem);
-    line-height: 1;
-    letter-spacing: -0.02em;
   }
   .signup__lede {
     margin-top: 1rem;
