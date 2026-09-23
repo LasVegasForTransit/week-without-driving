@@ -6,7 +6,7 @@ export const mainNav = [
   {
     href: '/take-part',
     label: 'How it works',
-    help: 'Pick one trip, one day or the whole week.',
+    help: 'What the week is, and how to win.',
     icon: 'mdi:hand-heart-outline',
   },
   {
@@ -30,7 +30,7 @@ export const mainNav = [
   {
     href: '/giveaway',
     label: 'Win prizes',
-    help: 'Share your trip to enter the giveaway.',
+    help: 'Check in each day to win a bus pass.',
     icon: 'mdi:gift-outline',
   },
   {
