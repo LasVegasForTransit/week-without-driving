@@ -19,8 +19,17 @@ interface Me {
   trips: { day: number; modes: string[] }[];
   today: number;
   reminders: { push: boolean; text: boolean; email: boolean };
-  photos: { day: number; share: boolean }[];
 }
+
+interface Trip {
+  modes?: string[];
+  hard?: string;
+  link?: string;
+  screenshot?: File;
+  share?: boolean;
+}
+
+const POST = 'https://www.instagram.com/p/ABC123/';
 
 // A PNG's signature and a little padding: enough for the type check.
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 73, 72]);
@@ -50,11 +59,27 @@ describe('my week', () => {
     const response = await platform.send(apiRequest('GET', '/api/me', { cookie }));
     return response.json<Me>();
   };
-  const logTrip = (previewDay?: string, body: Record<string, unknown> = { modes: ['bus'] }) =>
-    platform.send(
-      apiRequest('POST', '/api/checkin', { cookie, body }),
-      previewDay === undefined ? {} : { CHECKIN_PREVIEW_DAY: previewDay },
+  // Enters a shared trip the way My week does, as a multipart form.
+  const logTrip = (
+    previewDay?: string,
+    trip: Trip = { modes: ['bus'], link: POST },
+    env: Record<string, unknown> = {},
+  ) => {
+    const form = new FormData();
+    for (const mode of trip.modes ?? []) form.append('mode', mode);
+    if (trip.hard !== undefined) form.set('hard', trip.hard);
+    if (trip.link !== undefined) form.set('link', trip.link);
+    if (trip.screenshot) form.set('screenshot', trip.screenshot);
+    if (trip.share) form.set('share', '1');
+    return platform.send(
+      new Request(`${ORIGIN}/api/checkin`, {
+        method: 'POST',
+        headers: { Origin: ORIGIN, Cookie: cookie },
+        body: form,
+      }),
+      { ...(previewDay === undefined ? {} : { CHECKIN_PREVIEW_DAY: previewDay }), ...env },
     );
+  };
   const checkIn = (previewDay?: string) => logTrip(previewDay);
 
   it('says who is signed in, with the contact masked', async () => {
@@ -85,15 +110,20 @@ describe('my week', () => {
   });
 
   it('keeps how the person got around, and lets them change it that day', async () => {
-    await logTrip('3', { modes: ['bus', 'walk'], hard: 'No shade at the stop.' });
+    await logTrip('3', { modes: ['bus', 'walk'], hard: 'No shade at the stop.', link: POST });
     expect((await me()).trips).toEqual([{ day: 3, modes: ['bus', 'walk'] }]);
-    const again = await logTrip('3', { modes: ['bike'] });
+    const again = await logTrip('3', { modes: ['bike'], link: POST });
     expect(await again.json()).toMatchObject({ count: 1, trips: [{ day: 3, modes: ['bike'] }] });
   });
 
   it('asks how the person got around before logging a trip', async () => {
-    for (const body of [{}, { modes: [] }, { modes: ['car'] }, { modes: ['bus', 'bus'] }]) {
-      const response = await logTrip('3', body);
+    const noModes: Trip[] = [
+      { link: POST },
+      { modes: ['car'], link: POST },
+      { modes: ['bus', 'bus'], link: POST },
+    ];
+    for (const trip of noModes) {
+      const response = await logTrip('3', trip);
       expect(response.status).toBe(400);
       expect((await response.json<{ message: string }>()).message).toBeTruthy();
     }
@@ -101,7 +131,7 @@ describe('my week', () => {
   });
 
   it('turns away a note that is too long', async () => {
-    const response = await logTrip('3', { modes: ['walk'], hard: 'x'.repeat(281) });
+    const response = await logTrip('3', { modes: ['walk'], hard: 'x'.repeat(281), link: POST });
     expect(response.status).toBe(400);
     expect((await me()).days).toEqual([]);
   });
@@ -167,41 +197,55 @@ describe('my week', () => {
     expect((await put({ big: 'x'.repeat(5000) })).status).toBe(413);
   });
 
-  it('takes a photo, checking what the file really is', async () => {
-    const upload = (bytes: Uint8Array<ArrayBuffer>, name: string) => {
-      const form = new FormData();
-      form.set('photo', new File([bytes], name, { type: 'image/png' }));
-      form.set('share', '1');
-      return platform.send(
-        new Request(`${ORIGIN}/api/photo`, {
-          method: 'POST',
-          headers: { Origin: ORIGIN, Cookie: cookie },
-          body: form,
-        }),
-        { CHECKIN_PREVIEW_DAY: '3' },
-      );
-    };
-    expect((await upload(PNG, 'bus.png')).status).toBe(201);
-    expect((await me()).photos).toEqual([{ day: 3, share: true }]);
-    expect((await upload(new TextEncoder().encode('<script>'), 'fake.png')).status).toBe(415);
+  it('enters a trip only with the post that shares it', async () => {
+    const noPost = await logTrip('3', { modes: ['bus'] });
+    expect(noPost.status).toBe(400);
+    const notSocial = await logTrip('3', { modes: ['bus'], link: 'https://example.com/me' });
+    expect(notSocial.status).toBe(400);
+    expect((await me()).days).toEqual([]);
+
+    const tiktok = await logTrip('3', {
+      modes: ['bus'],
+      link: 'https://www.tiktok.com/@a/video/1',
+    });
+    expect(tiktok.status).toBe(200);
+    const row = await platform.env.DB.prepare('SELECT post_url FROM checkins').first();
+    expect(row).toEqual({ post_url: 'https://www.tiktok.com/@a/video/1' });
+  });
+
+  it('takes a screenshot from a private account, checking what the file really is', async () => {
+    const screenshot = (bytes: Uint8Array<ArrayBuffer>, name: string) =>
+      new File([bytes], name, { type: 'image/png' });
+    const good = await logTrip('3', {
+      modes: ['walk'],
+      screenshot: screenshot(PNG, 'post.png'),
+      share: true,
+    });
+    expect(good.status).toBe(200);
+    expect((await me()).days).toEqual([3]);
+    const bad = await logTrip('4', {
+      modes: ['walk'],
+      screenshot: screenshot(new TextEncoder().encode('<script>'), 'fake.png'),
+    });
+    expect(bad.status).toBe(415);
 
     const listed = await platform.env.PHOTOS.list({ prefix: 'photos/' });
     expect(listed.objects).toHaveLength(1);
     expect(listed.objects[0]?.key).toMatch(/^photos\/[\w-]+\/3-[0-9a-f]+\.png$/);
+
+    // Entering again the same day with a link drops the old screenshot.
+    await logTrip('3', { modes: ['walk'], link: POST });
+    expect((await platform.env.PHOTOS.list({ prefix: 'photos/' })).objects).toHaveLength(0);
   });
 
-  it('says photos are coming soon without a bucket', async () => {
-    const form = new FormData();
-    form.set('photo', new File([PNG], 'bus.png', { type: 'image/png' }));
-    const response = await platform.send(
-      new Request(`${ORIGIN}/api/photo`, {
-        method: 'POST',
-        headers: { Origin: ORIGIN, Cookie: cookie },
-        body: form,
-      }),
+  it('asks for a link instead of a screenshot when there is no bucket', async () => {
+    const response = await logTrip(
+      '3',
+      { modes: ['bus'], screenshot: new File([PNG], 'post.png', { type: 'image/png' }) },
       { PHOTOS: undefined },
     );
     expect(response.status).toBe(503);
+    expect((await response.json<{ message: string }>()).message).toBeTruthy();
   });
 
   it('signs this phone out and forgets its session', async () => {

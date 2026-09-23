@@ -13,7 +13,6 @@ import worker from '../../worker/index';
  */
 
 const TABLES = [
-  'photos',
   'checkins',
   'reminders',
   'bingo',

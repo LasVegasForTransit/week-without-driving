@@ -3,14 +3,14 @@ import type { ApiContext, ApiEnv, Env, Participant } from '../env';
 import { MESSAGES, isSameOriginWrite, json, problem } from '../http';
 import { signedInParticipant } from '../session';
 import { getMe, signOut, updateMe } from './me';
-import { addPhoto } from './photo';
 import { sendMyLink, signUp } from './sign-up';
 import { checkIn, getBingo, putBingo, setReminders } from './week';
 
 /**
  * The participant API under /api/. Every route says whether it needs a
  * signed-in phone, and every write is checked for our own Origin and a
- * JSON (or, for the photo, multipart) body before anything else runs.
+ * JSON (or, for a shared trip with its screenshot, multipart) body before
+ * anything else runs.
  */
 
 type Route = { method: string; path: string; multipart?: true } & (
@@ -24,9 +24,8 @@ const ROUTES: Route[] = [
   { method: 'POST', path: '/api/signout', signedIn: false, handler: signOut },
   { method: 'GET', path: '/api/me', signedIn: true, handler: getMe },
   { method: 'PATCH', path: '/api/me', signedIn: true, handler: updateMe },
-  { method: 'POST', path: '/api/checkin', signedIn: true, handler: checkIn },
+  { method: 'POST', path: '/api/checkin', signedIn: true, multipart: true, handler: checkIn },
   { method: 'POST', path: '/api/reminders', signedIn: true, handler: setReminders },
-  { method: 'POST', path: '/api/photo', signedIn: true, multipart: true, handler: addPhoto },
   { method: 'GET', path: '/api/bingo', signedIn: true, handler: getBingo },
   { method: 'PUT', path: '/api/bingo', signedIn: true, handler: putBingo },
 ];
