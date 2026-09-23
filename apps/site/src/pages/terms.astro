@@ -1,9 +1,106 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+// The Terms of Use page ("Build the Terms of Use page",
+//. Wording is the draft Copy
+// table from "Let visitors read the site's Terms of Use"
+//, word for word. "Finalize the
+// Terms of Use wording"
+// replaces it later — the whole block between the two DRAFT NOTICE comments
+// below is what to delete once that happens.
+
+const title = 'Terms of Use · Week Without Driving Las Vegas';
+const description =
+  'The terms for using lvwwd.org: who runs it, what you can send and upload, and where transit information comes from.';
+const contactEmail = 'wwd@lasvegasfortransit.org';
+const contactMailto = `mailto:${contactEmail}`;
 ---
 
-<BaseLayout title="Terms of Use · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
+<BaseLayout title={title} description={description}>
+  <section class="container-prose py-16 md:py-24">
+    {
+      /* DRAFT NOTICE — remove this block, and this comment, once
+        "Finalize the Terms of Use wording" is approved. */
+    }
+    <div
+      class="mb-10 flex items-start gap-3 border border-primary bg-primary-container px-5 py-4 text-on-primary-container"
+    >
+      <span class="mt-0.5 font-bold" aria-hidden="true">&#9888;</span>
+      <p class="text-sm font-semibold leading-relaxed">
+        Draft: final wording pending review. This page holds the wording from "Let visitors read the
+        site's Terms of Use" until "Finalize the Terms of Use wording" is approved.
+      </p>
+    </div>
+    {/* END DRAFT NOTICE */}
+
     <h1 class="text-display-sm">Terms of Use</h1>
+    <p class="mt-3 text-sm font-semibold text-on-surface-variant">
+      Last updated: September 22, 2026. If we change these terms, we change this date.
+    </p>
+
+    <article class="prose-doc mt-8">
+      <h2>Who runs this site</h2>
+      <p>
+        lvwwd.org is run by Las Vegans for Better Transit (LVBT), a volunteer nonprofit in Las
+        Vegas, for Week Without Driving Las Vegas, October 1 to 8, 2026. By using this site, you
+        agree to these terms. Questions? Email <a href={contactMailto} data-print-url={contactEmail}
+          >{contactEmail}</a
+        >.
+      </p>
+
+      <h2>Using the forms and uploads</h2>
+      <p>
+        Only give your own information. Don't enter anyone else's email address, phone number or
+        Instagram handle, and don't upload anything that shows someone else's personal information.
+        Don't upload or send anything that is against the law, abusive or hateful, or that you don't
+        have the right to share. Don't try to break the site or get around its limits. LVBT may
+        remove any pledge, sign-up or giveaway entry that breaks these terms.
+      </p>
+
+      <h2>Screenshots you upload</h2>
+      <p>
+        We never publish the screenshots or photos you upload. We use them only to run the giveaway.
+        We delete them on November 30, 2026, as our <a href="/privacy">Privacy page</a>{' '}
+        explains.
+      </p>
+
+      <h2>Instagram posts that tag us</h2>
+      <p>
+        If you tag @lasvegasfortransit in a post or story, we may ask if we can share it. We only
+        reshare a post with your permission. You never need Instagram to take part.
+      </p>
+
+      <h2>Bus routes, fares and schedules</h2>
+      <p>
+        Route, fare and schedule information on this site comes from the RTC, the Regional
+        Transportation Commission of Southern Nevada. It can change. Check with the RTC before you
+        travel, on the{' '}
+        <a
+          href="https://www.rtcsnv.com/"
+          data-print-url="https://www.rtcsnv.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          RTC website
+        </a>. LVBT provides this site as it is, without guarantees of any kind.
+      </p>
+
+      <h2>The giveaway</h2>
+      <p>
+        The giveaway has its own <a href="/giveaway/rules">Official Rules</a>. If these terms and
+        the Official Rules say different things about the giveaway, the Official Rules apply.
+      </p>
+
+      <h2>Your privacy</h2>
+      <p>
+        Our <a href="/privacy">Privacy page</a> explains what we collect, why, and when we delete it.
+        If you sign up for LVBT's newsletter, that subscription is managed by LVBT's newsletter, not by
+        this campaign, so it is not deleted with the campaign data on November 30, 2026. You can unsubscribe
+        from any newsletter email.
+      </p>
+
+      <h2>The law that applies</h2>
+      <p>These terms are governed by the laws of the State of Nevada.</p>
+    </article>
   </section>
 </BaseLayout>

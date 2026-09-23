@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { encodeQr, qrPathData } from '../../lib/qrcode';
+import { contactEmail } from '../../lib/partners';
+
+// The printable flyer's real print view (see "Give each partner a
+// printable flyer with its QR code"). This is LVBT's general-materials
+// flyer — no partner slug, so no "Shared by" line — since the roster has
+// no confirmed partners yet. It is a normal page styled to print as one
+// US Letter sheet, not a generated PDF: /partners.astro links here as its
+// "View the printable flyer" download-link placeholder. Real per-partner
+// PDF downloads (full-page and 4-per-page handout, with the partner's own
+// QR code) are built by "Publish partner banners and an embed snippet"
+//.
+
+const title = 'Printable flyer · Week Without Driving Las Vegas';
+const description = 'A printable Week Without Driving Las Vegas flyer with a QR code to lvwwd.org.';
+
+const qr = encodeQr('https://lvwwd.org/');
+const qrPath = qrPathData(qr);
+const qrQuiet = 4;
+const qrViewBox = qr.size + qrQuiet * 2;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="container-page py-16 md:py-24">
+    <h1 class="text-display-sm">Printable flyer</h1>
+    <p class="lede mt-4 max-w-2xl">
+      This is what LVBT hands out at tables, meetings and noticeboards. To print it, use your
+      browser's Print command (Ctrl+P on Windows, Cmd+P on Mac). Choose US Letter paper and 100%
+      scale, or "Fit to page" — both work, in color or black and white.
+    </p>
+    <p class="mt-4">
+      <a href="/partners" class="body-link font-semibold">&#8592; Back to Partners</a>
+    </p>
+
+    <div class="flyer mt-10 max-w-xl border border-outline bg-surface p-8 sm:p-10">
+      <p class="flyer-headline text-2xl font-extrabold uppercase tracking-tight">
+        Week Without Driving Las Vegas
+      </p>
+      <p class="mt-2 font-semibold text-on-surface-variant">October 1 to 8, 2026</p>
+
+      <p class="mt-6 leading-relaxed text-pretty">
+        Try getting where you need to go without driving: by bus, walking or rolling, biking, or
+        getting a ride. Notice what's easy and what's hard.
+      </p>
+      <p class="mt-4 leading-relaxed text-pretty">
+        Pledge One Trip, One Day or One Week. Every pledge counts the same.
+      </p>
+      <p class="mt-4 leading-relaxed text-pretty">
+        Already get around without a car? Pledge too. Your everyday trips are what this week is
+        about.
+      </p>
+      <p class="mt-4 leading-relaxed text-pretty">
+        On the site: guides for first-time riders, bus stops near you, and Digital Transit Bingo.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-6">
+        <svg
+          viewBox={`0 0 ${qrViewBox} ${qrViewBox}`}
+          class="qr-code size-32 shrink-0"
+          role="img"
+          aria-label="QR code that opens lvwwd.org"
+        >
+          <rect width={qrViewBox} height={qrViewBox} fill="white"></rect>
+          <path d={qrPath} fill="black" transform={`translate(${qrQuiet}, ${qrQuiet})`}></path>
+        </svg>
+        <div>
+          <p class="font-bold">Scan to pledge</p>
+          <p class="text-on-surface-variant">or go to lvwwd.org</p>
+        </div>
+      </div>
+
+      <p class="mt-8 leading-relaxed text-pretty">
+        No smartphone? You can still take part. Get a paper bingo card from whoever gave you this
+        flyer, or print one at <a href="/bingo" class="body-link">lvwwd.org/bingo</a>.
+      </p>
+
+      <p class="mt-8 text-sm leading-relaxed">
+        Questions? Email{' '}
+        <a href={`mailto:${contactEmail}`} data-print-url={contactEmail} class="body-link">
+          {contactEmail}
+        </a>
+      </p>
+      <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">
+        Week Without Driving is a national campaign. In Las Vegas, it's run by Las Vegans for Better
+        Transit, a volunteer group.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* On screen, the flyer reads as a card. In print, it should read as the
+     actual sheet: a bigger headline than the sitewide print rules give any
+     other <h1>/<h2>/<h3> (print.css forces those down for long-form pages),
+     no card border or background, and no page chrome around it. Selectors
+     here are scoped to `.flyer` and specific enough to outrank print.css's
+     `h1, .text-display-sm { ... !important }`-style rules without needing
+     `!important` everywhere in turn — see print.css's own header comment
+     for why page-specific print rules live here instead of there. */
+  .qr-code {
+    shape-rendering: crispEdges;
+  }
+
+  @media print {
+    .flyer {
+      max-width: none;
+      border: none;
+      padding: 0;
+      margin-top: 0.3in;
+    }
+
+    .flyer p.flyer-headline {
+      font-size: 30pt;
+      line-height: 1.05;
+    }
+
+    .flyer > p {
+      font-size: 13pt;
+      line-height: 1.4;
+    }
+
+    .qr-code {
+      width: 1.75in;
+      height: 1.75in;
+    }
+  }
+</style>
