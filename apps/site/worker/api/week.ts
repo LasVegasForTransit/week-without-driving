@@ -40,7 +40,7 @@ export function isPostLink(text: string): boolean {
     return false;
   }
 }
-const MAX_NOTE_LENGTH = 280;
+export const MAX_NOTE_LENGTH = 280;
 
 export const WEEK_REPLIES = {
   notYet: 'Logging trips opens October 1.',
@@ -48,6 +48,7 @@ export const WEEK_REPLIES = {
   noModes: 'Pick how you got around, in step 1.',
   noteTooLong: `Keep the note under ${MAX_NOTE_LENGTH} characters.`,
   noPost: 'Paste the link to your post, or add a screenshot of it.',
+  alreadyChecked: 'A volunteer already checked today’s entry, so it can’t be changed.',
   badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
   bingoTooBig: 'That bingo card is too big to save.',
   remindersNotTrueFalse: 'Reminders can only be turned on or off.',
@@ -67,12 +68,21 @@ function textField(form: FormData, name: string): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-/** Reads a shared trip from the entry form, or returns the problem with it. */
-function readTrip(form: FormData): TripInput | string {
+/**
+ * How someone got around, from a form's "mode" fields, as the stored
+ * comma-separated list in the order of TRIP_MODES; or null when there is
+ * none, or any item is unknown or listed twice.
+ */
+export function readModes(form: FormData): string | null {
   const raw = form.getAll('mode').map(String);
   const modes = TRIP_MODES.filter((mode) => raw.includes(mode));
-  // Every item must be a known mode, listed once.
-  if (modes.length === 0 || modes.length !== raw.length) return WEEK_REPLIES.noModes;
+  return modes.length === 0 || modes.length !== raw.length ? null : modes.join(',');
+}
+
+/** Reads a shared trip from the entry form, or returns the problem with it. */
+function readTrip(form: FormData): TripInput | string {
+  const modes = readModes(form);
+  if (!modes) return WEEK_REPLIES.noModes;
   const hard = textField(form, 'hard');
   if (hard.length > MAX_NOTE_LENGTH) return WEEK_REPLIES.noteTooLong;
   const link = textField(form, 'link');
@@ -81,7 +91,7 @@ function readTrip(form: FormData): TripInput | string {
   if (!link && !screenshot) return WEEK_REPLIES.noPost;
   if (link && !isPostLink(link)) return WEEK_REPLIES.badLink;
   return {
-    modes: modes.join(','),
+    modes,
     hard: hard || null,
     link: link || null,
     screenshot,
@@ -101,13 +111,17 @@ async function readForm(request: Request): Promise<FormData | null> {
   }
 }
 
-/** The person's logged trips, oldest first, as { day, modes }. */
+/**
+ * The person's entries that count, oldest first, as { day, modes }. An
+ * entry a volunteer removed doesn't count, and the person can send another
+ * post that day.
+ */
 export async function listTrips(
   c: ApiContext,
   me: Participant,
 ): Promise<Array<{ day: number; modes: string[] }>> {
   const rows = await c.env.DB.prepare(
-    'SELECT day, modes FROM checkins WHERE participant_id = ?1 ORDER BY day',
+    'SELECT day, modes FROM checkins WHERE participant_id = ?1 AND removed_at IS NULL ORDER BY day',
   )
     .bind(me.id)
     .all<{ day: number; modes: string }>();
@@ -117,51 +131,90 @@ export async function listTrips(
   }));
 }
 
-/**
- * Enters today's shared trip, where "today" is the server's Las Vegas date,
- * never the phone's. It needs how the person got around and the post: a
- * link to a public post, or a screenshot from a private account. Entering
- * again the same day replaces the trip; it is still one entry for that day.
- * Volunteers check every post before the draw.
- */
-export async function checkIn(c: ApiContext, me: Participant): Promise<Response> {
-  const today = todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now);
-  if (today < 1 || today > 8) {
-    return problem(409, today === 0 ? WEEK_REPLIES.notYet : WEEK_REPLIES.over);
-  }
-  const form = await readForm(c.request);
-  if (!form) return problem(413, SCREENSHOT_REPLIES.tooBig);
-  const trip = readTrip(form);
-  if (typeof trip === 'string') return problem(400, trip);
+interface TodayEntry {
+  screenshot_key: string | null;
+  /** 1 when a volunteer checked the entry and it still counts. */
+  locked: number;
+}
 
-  let key: string | null = null;
-  if (trip.screenshot) {
-    const stored = await storeScreenshot(c, me, today, trip.screenshot);
-    if (stored instanceof Response) return stored;
-    key = stored;
-  }
-  const previous = await c.env.DB.prepare(
-    'SELECT screenshot_key FROM checkins WHERE participant_id = ?1 AND day = ?2',
+function todaysEntry(c: ApiContext, me: Participant, day: number): Promise<TodayEntry | null> {
+  return c.env.DB.prepare(
+    `SELECT screenshot_key, (checked_at IS NOT NULL AND removed_at IS NULL) AS locked
+     FROM checkins WHERE participant_id = ?1 AND day = ?2`,
   )
-    .bind(me.id, today)
-    .first<{ screenshot_key: string | null }>();
-  await c.env.DB.prepare(
-    `INSERT INTO checkins (participant_id, day, created_at, modes, hard, post_url, screenshot_key, share)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+    .bind(me.id, day)
+    .first<TodayEntry>();
+}
+
+/**
+ * Saves the trip as the day's entry. Sending again replaces an entry no
+ * volunteer has checked yet, or one a volunteer removed, and it waits for a
+ * check again. A checked entry stays as it is, and this answers false.
+ */
+async function saveTrip(
+  c: ApiContext,
+  me: Participant,
+  day: number,
+  trip: TripInput & { key: string | null },
+): Promise<boolean> {
+  const saved = await c.env.DB.prepare(
+    `INSERT INTO checkins
+       (participant_id, day, source, created_at, modes, hard, post_url, screenshot_key, share)
+     VALUES (?1, ?2, 'post', ?3, ?4, ?5, ?6, ?7, ?8)
      ON CONFLICT (participant_id, day) DO UPDATE SET
-       modes = ?4, hard = ?5, post_url = ?6, screenshot_key = ?7, share = ?8`,
+       source = 'post', created_at = ?3, modes = ?4, hard = ?5, post_url = ?6,
+       screenshot_key = ?7, share = ?8, received_on = NULL, logged_by = NULL,
+       checked_at = NULL, checked_by = NULL,
+       removed_at = NULL, removed_by = NULL, removal_reason = NULL
+     WHERE checkins.checked_at IS NULL OR checkins.removed_at IS NOT NULL
+     RETURNING id`,
   )
     .bind(
       me.id,
-      today,
+      day,
       c.now.toISOString(),
       trip.modes,
       trip.hard,
       trip.link,
-      key,
+      trip.key,
       trip.share ? 1 : 0,
     )
-    .run();
+    .first<{ id: number }>();
+  return saved !== null;
+}
+
+/** Today's day of the week (1 to 8), or the reply when trips can't be sent today. */
+function dayOpenForTrips(c: ApiContext): number | Response {
+  const today = todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now);
+  if (today >= 1 && today <= 8) return today;
+  return problem(409, today === 0 ? WEEK_REPLIES.notYet : WEEK_REPLIES.over);
+}
+
+/**
+ * Enters today's shared trip, where "today" is the server's Las Vegas date,
+ * never the phone's. It needs how the person got around and the post: a
+ * link to a public post, or a screenshot from a private account. Entering
+ * again the same day replaces the trip until a volunteer checks it; it is
+ * still one entry for that day. Volunteers check every post before the
+ * draw.
+ */
+export async function checkIn(c: ApiContext, me: Participant): Promise<Response> {
+  const today = dayOpenForTrips(c);
+  if (today instanceof Response) return today;
+  const form = await readForm(c.request);
+  if (!form) return problem(413, SCREENSHOT_REPLIES.tooBig);
+  const trip = readTrip(form);
+  if (typeof trip === 'string') return problem(400, trip);
+  const previous = await todaysEntry(c, me, today);
+  if (previous?.locked) return problem(409, WEEK_REPLIES.alreadyChecked);
+
+  const key = trip.screenshot ? await storeScreenshot(c, me, today, trip.screenshot) : null;
+  if (key instanceof Response) return key;
+  if (!(await saveTrip(c, me, today, { ...trip, key }))) {
+    // A volunteer checked the entry a moment ago.
+    if (key) await c.env.PHOTOS?.delete(key);
+    return problem(409, WEEK_REPLIES.alreadyChecked);
+  }
   // A replaced screenshot is no longer needed.
   if (previous?.screenshot_key) await c.env.PHOTOS?.delete(previous.screenshot_key);
 
