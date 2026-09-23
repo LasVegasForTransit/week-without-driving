@@ -4,7 +4,8 @@ import '../styles/global.css';
 // same-specificity screen rules by source order (see its header comment).
 import '../styles/print.css';
 import { lvbt, site } from '../lib/site';
-import { footerLinks, isCurrent, nav } from '../lib/nav';
+import { Icon } from 'astro-icon/components';
+import { footerLinks, isCurrent, moreNav, tabNav, topNav } from '../lib/nav';
 
 interface Props {
   title: string;
@@ -72,19 +73,19 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
   <body class="min-h-screen flex flex-col" data-canvas="paper">
     <a href="#main" class="skip-link">Skip to content</a>
     <div class="min-h-dvh flex flex-col">
-      <header
-        data-site-header
-        class="site-header sticky top-0 z-(--z-header) border-b border-outline-variant/15"
-      >
-        <div class="container-page flex items-center justify-between gap-4 py-3">
-          <a href="/" class="site-mark no-underline">
-            <span class="site-mark__name">Week Without Driving</span>
-            <span class="site-mark__place">Las Vegas · Oct 1–8</span>
+      <header data-site-header class="site-header">
+        <div class="container-page site-header__row">
+          <a href="/" class="site-logo" aria-label="Week Without Driving Las Vegas, home">
+            <span class="site-logo__badge" aria-hidden="true">WWD</span>
+            <span class="site-logo__text" aria-hidden="true">
+              <span class="site-logo__place">Las Vegas</span>
+              <span class="site-logo__dates">Oct 1–8, 2026</span>
+            </span>
           </a>
-          <nav aria-label="Main" class="hidden lg:block">
-            <ul class="flex items-center gap-5 text-sm font-semibold">
+          <nav aria-label="Main" class="site-topnav">
+            <ul>
               {
-                nav.map((item) => (
+                topNav.map((item) => (
                   <li>
                     <a
                       href={item.href}
@@ -98,42 +99,71 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
               }
             </ul>
           </nav>
-          <div class="flex items-center gap-2">
-            <a href="/take-part" class="pledge-button">Pledge</a>
-            <button
-              type="button"
-              class="menu-button lg:hidden"
-              aria-expanded="false"
-              aria-controls="mobile-menu"
-              data-menu-toggle
-            >
-              Menu
-            </button>
-          </div>
+          <a href="/take-part#pledge" class="site-pledge" data-pledge-link>
+            <span data-pledge-label>Pledge</span>
+          </a>
         </div>
-        <nav id="mobile-menu" aria-label="Main" class="mobile-menu lg:hidden" hidden>
-          <ul class="container-page flex flex-col py-2 text-body-lg font-semibold">
-            {
-              nav.map((item) => (
-                <li>
-                  <a
-                    href={item.href}
-                    aria-current={isCurrent(item.href, path) ? 'page' : undefined}
-                    class="nav-link inline-block my-3"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
       </header>
       <main id="main" class="flex-1">
         <slot />
       </main>
     </div>
-    <footer class="container-page border-t border-outline-variant/15 py-10">
+    <nav aria-label="Main" class="tabbar">
+      <ul>
+        {
+          tabNav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isCurrent(item.match, path) ? 'page' : undefined}
+                class="tabbar__link"
+                {...(item.pledge ? { 'data-pledge-link': '' } : {})}
+              >
+                <Icon name={item.icon} class="tabbar__icon" aria-hidden="true" />
+                <span {...(item.pledge ? { 'data-pledge-label': '' } : {})}>{item.label}</span>
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href="#more" class="tabbar__link" data-more-open aria-haspopup="dialog">
+            <Icon
+              name="mdi:dots-horizontal-circle-outline"
+              class="tabbar__icon"
+              aria-hidden="true"
+            />
+            <span>More</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <dialog id="more" class="more-sheet" aria-labelledby="more-heading" data-more-sheet>
+      <div class="more-sheet__head">
+        <h2 id="more-heading" class="more-sheet__title">More</h2>
+        <button type="button" class="more-sheet__close" data-more-close aria-label="Close">
+          <Icon name="mdi:close" class="size-6" aria-hidden="true" />
+        </button>
+      </div>
+      <ul class="more-sheet__list">
+        {
+          moreNav.map((item) => (
+            <li>
+              <a href={item.href} class="more-sheet__link">
+                <Icon name={item.icon} class="size-6" aria-hidden="true" />
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="more-sheet__credit">
+        An initiative by <a href={lvbt.url} class="body-link">{lvbt.name}</a>
+      </p>
+    </dialog>
+    <footer
+      id="site-footer"
+      class="site-footer container-page border-t border-outline-variant/15 py-10"
+    >
       <div class="flex flex-wrap items-start justify-between gap-x-12 gap-y-6">
         <p class="max-w-md text-sm leading-relaxed text-on-surface-variant">
           An initiative by{' '}
