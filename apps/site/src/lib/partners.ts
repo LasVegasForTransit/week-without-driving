@@ -22,6 +22,8 @@ export interface Partner {
   name: string;
   slug: string;
   url?: string;
+  /** Logo image path or URL, once the partner has sent one in. */
+  logoUrl?: string;
   type: PartnerType;
   sentence: string;
 }
