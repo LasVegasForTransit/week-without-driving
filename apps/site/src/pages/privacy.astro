@@ -6,7 +6,7 @@ import { wwd } from '../lib/wwd';
 // Anyone can take part without giving us anything; signing up is only for
 // LVBT's giveaway, at /sign-up, and asks for a first name, an email address
 // or phone number, a ZIP code, an age group and (optionally) an Instagram
-// handle. Entries come from checking in on /my-week.
+// handle. Entries come from logging trips without driving on /my-week.
 // "Finalize the Privacy policy wording"
 // replaces this draft later — the whole block between the two DRAFT NOTICE
 // comments below is what to delete once that happens.
@@ -82,7 +82,10 @@ const contactMailto = `mailto:${contactEmail}`;
           giveaway's Official Rules
         </li>
         <li>Whether you'd like LVBT's newsletter (a box we never check for you)</li>
-        <li>Your daily check-ins, October 1 to 8</li>
+        <li>
+          The trips you log, October 1 to 8: the day, how you got around, and anything you tell us
+          was hard
+        </li>
         <li>
           A photo of the day, if you choose to add one on My week, and whether you let LVBT share it
         </li>
@@ -92,16 +95,17 @@ const contactMailto = `mailto:${contactEmail}`;
         When you sign up. We ask for your first name; an email address or a phone number, so we can
         reach you if you win and send your personal "Open my week" link; and your ZIP code, to
         confirm you live in Southern Nevada and to show where people took part. Your Instagram
-        handle is optional: give it and a tag of @lasvegasfortransit counts as a check-in. Signing
-        up means agreeing to the Official Rules. If you also tick "Also send me LVBT's newsletter"
-        (it's never checked for you), we pass your email address to LVBT's newsletter. See "LVBT's
-        newsletter" below.
+        handle is optional: give it and a post of your trip that tags @lasvegasfortransit counts as
+        that day's log. Signing up means agreeing to the Official Rules. If you also tick "Also send
+        me LVBT's newsletter" (it's never checked for you), we pass your email address to LVBT's
+        newsletter. See "LVBT's newsletter" below.
       </p>
       <p>
-        Your check-ins. Each day you tap "Check in for today" on My week, we record that day as an
-        entry, up to {wwd.maxEntries} entries for October 1 to 8. Checking in is free: no purchase, upload
-        or post is necessary. If you gave an Instagram handle and tag @lasvegasfortransit on a day you
-        haven't already checked in, a volunteer records that as your check-in for the day.
+        Your trips. Each day you log a trip without driving on My week, we record the day and how
+        you got around as an entry, up to {wwd.maxEntries} entries for October 1 to 8. If you tell us
+        what was hard, we keep that too, and LVBT uses it, without your name, to push for better stops,
+        sidewalks and service. If you gave an Instagram handle and post a trip that tags @lasvegasfortransit
+        on a day you haven't logged one, a volunteer logs it for you.
       </p>
       <p>
         Your photo, if you add one. "Add a photo of today" on My week is optional and never gives
@@ -185,8 +189,9 @@ const contactMailto = `mailto:${contactEmail}`;
       <h2>When we delete it</h2>
       <p>
         On November 30, 2026, we delete every first name, email address, phone number, ZIP code,
-        Instagram handle, photo, check-in and draw record we hold for this campaign. After that we
-        keep only anonymous totals: how many people signed up and checked in each day, and the
+        Instagram handle, photo, trip log and draw record we hold for this campaign. After that we
+        keep only anonymous totals: how many people signed up, how many trips were logged each day
+        and how, and what people told us was hard, with nothing that identifies them, and the
         anonymous counts of page visits and actions.
       </p>
 

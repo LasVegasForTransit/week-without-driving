@@ -1,14 +1,14 @@
 /**
  * My week: fills in the page for the person signed in on this phone.
  *
- * This is a front-end demo. There is no backend yet, so check-ins, the
+ * This is a front-end demo. There is no backend yet, so logged trips, the
  * photo and reminder choices are kept in this browser's localStorage
  * under `lvwwd_me` (written by /scripts/sign-up.js) and nothing is sent.
  * The real version reads and writes the same things through the Worker.
  *
- * Before October 1, 2026 the check-in button waits for the week. Add
- * ?preview=during to see the page as it looks on Day 3, with Days 1 and 2
- * already checked in, for screenshots.
+ * Before October 1, 2026 trip logging waits for the week. Add
+ * ?preview=during to see the page as it looks on Day 3, with trips already
+ * logged on Days 1 and 2, for screenshots.
  */
 (() => {
   const STORE = 'lvwwd_me';
@@ -59,13 +59,14 @@
     return Math.min(Math.floor((now - WEEK_START) / DAY) + 1, 9);
   }
 
-  function checkedDays() {
-    const days = new Set(me.checkins ?? []);
-    if (preview) {
-      days.add(1);
-      days.add(2);
+  // Logged trips, one per day: { day, modes, hard }. Older demo data kept
+  // plain day numbers under `checkins`.
+  function trips() {
+    const logged = me.trips ?? (me.checkins ?? []).map((day) => ({ day, modes: ['walk'] }));
+    if (preview && !logged.some((t) => t.day === 1)) {
+      return [{ day: 1, modes: ['bus'] }, { day: 2, modes: ['walk'] }, ...logged];
     }
-    return days;
+    return logged;
   }
 
   function mask(contact, type) {
@@ -106,73 +107,100 @@
     );
   }
 
-  function initEntries() {
-    // Entries.
-    const button = document.querySelector('[data-checkin]');
-    const label = document.querySelector('[data-checkin-label]');
-    const status = document.querySelector('[data-checkin-status]');
+  const DAY_STATUS = {
+    done: 'Trip logged',
+    today: 'Today, no trip logged yet',
+    missed: 'No trip logged',
+    future: 'Coming up',
+  };
 
-    function renderEntries() {
-      const today = todayNumber();
-      const done = checkedDays();
-      setText('[data-me-count]', String(Math.min(done.size, MAX_ENTRIES)));
+  function renderDays(today, loggedDays) {
+    setText('[data-me-count]', String(Math.min(loggedDays.size, MAX_ENTRIES)));
+    document.querySelectorAll('[data-day]').forEach((box) => {
+      const n = Number(box.getAttribute('data-day'));
+      let state = 'future';
+      if (loggedDays.has(n)) state = 'done';
+      else if (n === today) state = 'today';
+      else if (n < today) state = 'missed';
+      box.setAttribute('data-state', state);
+      const sr = box.querySelector('[data-day-status]');
+      if (sr) sr.textContent = DAY_STATUS[state];
+      if (state === 'today') box.setAttribute('aria-current', 'date');
+      else box.removeAttribute('aria-current');
+    });
+  }
 
-      document.querySelectorAll('[data-day]').forEach((box) => {
-        const n = Number(box.getAttribute('data-day'));
-        let state = 'future';
-        if (done.has(n)) state = 'done';
-        else if (n === today) state = 'today';
-        else if (n < today) state = 'missed';
-        box.setAttribute('data-state', state);
-        const sr = box.querySelector('[data-day-status]');
-        if (sr) {
-          sr.textContent = {
-            done: 'Checked in',
-            today: 'Today, not checked in yet',
-            missed: 'Missed',
-            future: 'Coming up',
-          }[state];
-        }
-        if (state === 'today') box.setAttribute('aria-current', 'date');
-        else box.removeAttribute('aria-current');
-      });
+  function showShare(trip, count) {
+    const done = document.querySelector('[data-log-done]');
+    if (!done) return;
+    done.hidden = false;
+    setText(
+      '[data-log-done-title]',
+      `Day ${trip.day} logged. That’s entry ${count} of ${MAX_ENTRIES}.`,
+    );
+    window.lvwwdShareTrip?.setUp(done, { ...trip, dayCount: count });
+  }
 
-      if (!(button instanceof HTMLButtonElement) || !label) return;
-      if (today === 0) {
-        button.disabled = true;
-        label.textContent = 'Check-ins open October 1';
-        setText(
-          '[data-me-phase]',
-          'Check-ins open October 1. Come back then, or turn on a reminder.',
-        );
-      } else if (today > 8) {
-        button.disabled = true;
-        label.textContent = 'Check-ins are closed';
-        setText('[data-me-phase]', 'The week is over. We’ll draw the winner by October 15, 2026.');
-      } else if (done.has(today)) {
-        button.disabled = true;
-        label.textContent = 'You’re checked in for today';
-        setText('[data-me-phase]', `Day ${today} of 8. Come back tomorrow for your next entry.`);
-      } else {
-        button.disabled = false;
-        label.textContent = 'Check in for today';
-        setText('[data-me-phase]', `Day ${today} of 8. Check in once today for one more entry.`);
+  function renderEntries() {
+    const today = todayNumber();
+    const logged = trips();
+    const loggedDays = new Set(logged.map((t) => t.day));
+    renderDays(today, loggedDays);
+
+    const form = document.querySelector('[data-log-form]');
+    const closed = document.querySelector('[data-log-closed]');
+    if (form) form.hidden = true;
+    if (closed) closed.hidden = true;
+
+    if (today === 0 || today > 8) {
+      const text =
+        today === 0
+          ? 'Logging trips opens October 1. Turn on a reminder so you don’t miss it.'
+          : 'The week is over. We’ll draw the winner by October 15, 2026.';
+      setText('[data-me-phase]', text);
+      if (closed) {
+        closed.hidden = false;
+        closed.textContent = text;
       }
+      return;
     }
+    const todays = logged.find((t) => t.day === today);
+    if (todays) {
+      setText(
+        '[data-me-phase]',
+        `Day ${today} of 8. Nice work. Come back tomorrow for another entry.`,
+      );
+      showShare(todays, Math.min(loggedDays.size, MAX_ENTRIES));
+    } else {
+      setText('[data-me-phase]', `Day ${today} of 8. Skip the car today for one more entry.`);
+      if (form) form.hidden = false;
+    }
+  }
 
+  function initEntries() {
     renderEntries();
-
-    button?.addEventListener('click', () => {
+    const form = document.querySelector('[data-log-form]');
+    if (!(form instanceof HTMLFormElement)) return;
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
       const today = todayNumber();
-      if (today < 1 || today > 8) return;
-      const days = new Set(me.checkins ?? []);
-      days.add(today);
-      me.checkins = [...days].sort((a, b) => a - b);
+      const modes = [...form.querySelectorAll('input[name="mode"]:checked')].map(
+        (box) => box.value,
+      );
+      if (modes.length === 0) {
+        setText('[data-log-error]', 'Pick how you got around. Pick more than one if you like.');
+        return;
+      }
+      setText('[data-log-error]', '');
+      const hard = form.elements.namedItem('hard');
+      const trip = {
+        day: today,
+        modes,
+        hard: hard instanceof HTMLTextAreaElement ? hard.value.trim() : '',
+      };
+      me.trips = [...trips().filter((t) => t.day !== today), trip].sort((x, y) => x.day - y.day);
       saveMe(me);
       renderEntries();
-      const count = Math.min(checkedDays().size, MAX_ENTRIES);
-      if (status)
-        status.textContent = `You’re checked in. That’s entry ${count} of ${MAX_ENTRIES}.`;
     });
   }
 

@@ -30,7 +30,7 @@ export const mainNav = [
   {
     href: '/giveaway',
     label: 'Win prizes',
-    help: 'Check in each day to win a bus pass.',
+    help: 'Every day you skip the car is a chance to win.',
     icon: 'mdi:gift-outline',
   },
   {
