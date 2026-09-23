@@ -1,8 +1,6 @@
-import process from 'node:process';
-
 import { defineConfig } from '@playwright/test';
 
-import { foregroundServerEnvironment, sharedConfig } from '@lvbt/playwright-config';
+import { foregroundServerEnvironment, sharedConfig } from '@lasvegasfortransit/playwright-config';
 
 const url = 'http://127.0.0.1:4321';
 

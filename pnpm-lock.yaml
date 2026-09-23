@@ -82,10 +82,10 @@ importers:
 
   .:
     devDependencies:
-      '@lvbt/cli':
+      '@lasvegasfortransit/cli':
         specifier: file:.lvbt/web-platform/packages/cli
         version: file:.lvbt/web-platform/packages/cli
-      '@lvbt/prettier-config':
+      '@lasvegasfortransit/prettier-config':
         specifier: file:.lvbt/web-platform/packages/prettier-config
         version: file:.lvbt/web-platform/packages/prettier-config(prettier@3.9.6)
       lint-staged:
@@ -143,16 +143,16 @@ importers:
       '@cloudflare/workers-types':
         specifier: 'catalog:'
         version: 5.20260901.1
-      '@lvbt/eslint-config':
+      '@lasvegasfortransit/eslint-config':
         specifier: file:../../.lvbt/web-platform/packages/eslint-config
         version: file:.lvbt/web-platform/packages/eslint-config(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(turbo@2.10.12)(typescript@6.0.3)
-      '@lvbt/playwright-config':
+      '@lasvegasfortransit/playwright-config':
         specifier: file:../../.lvbt/web-platform/packages/playwright-config
         version: file:.lvbt/web-platform/packages/playwright-config(@playwright/test@1.62.1)
-      '@lvbt/typescript-config':
+      '@lasvegasfortransit/typescript-config':
         specifier: file:../../.lvbt/web-platform/packages/typescript-config
         version: file:.lvbt/web-platform/packages/typescript-config
-      '@lvbt/vitest-config':
+      '@lasvegasfortransit/vitest-config':
         specifier: file:../../.lvbt/web-platform/packages/vitest-config
         version: file:.lvbt/web-platform/packages/vitest-config(vitest@4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0)))
       '@playwright/test':
@@ -1077,31 +1077,31 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@lvbt/cli@file:.lvbt/web-platform/packages/cli':
+  '@lasvegasfortransit/cli@file:.lvbt/web-platform/packages/cli':
     resolution: {directory: .lvbt/web-platform/packages/cli, type: directory}
     engines: {node: '>=24'}
     hasBin: true
 
-  '@lvbt/eslint-config@file:.lvbt/web-platform/packages/eslint-config':
+  '@lasvegasfortransit/eslint-config@file:.lvbt/web-platform/packages/eslint-config':
     resolution: {directory: .lvbt/web-platform/packages/eslint-config, type: directory}
     peerDependencies:
       eslint: '>=10'
       typescript: '>=5.9'
 
-  '@lvbt/playwright-config@file:.lvbt/web-platform/packages/playwright-config':
+  '@lasvegasfortransit/playwright-config@file:.lvbt/web-platform/packages/playwright-config':
     resolution: {directory: .lvbt/web-platform/packages/playwright-config, type: directory}
     peerDependencies:
       '@playwright/test': '>=1.60'
 
-  '@lvbt/prettier-config@file:.lvbt/web-platform/packages/prettier-config':
+  '@lasvegasfortransit/prettier-config@file:.lvbt/web-platform/packages/prettier-config':
     resolution: {directory: .lvbt/web-platform/packages/prettier-config, type: directory}
     peerDependencies:
       prettier: '>=3'
 
-  '@lvbt/typescript-config@file:.lvbt/web-platform/packages/typescript-config':
+  '@lasvegasfortransit/typescript-config@file:.lvbt/web-platform/packages/typescript-config':
     resolution: {directory: .lvbt/web-platform/packages/typescript-config, type: directory}
 
-  '@lvbt/vitest-config@file:.lvbt/web-platform/packages/vitest-config':
+  '@lasvegasfortransit/vitest-config@file:.lvbt/web-platform/packages/vitest-config':
     resolution: {directory: .lvbt/web-platform/packages/vitest-config, type: directory}
     peerDependencies:
       vitest: '>=4'
@@ -4169,9 +4169,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lvbt/cli@file:.lvbt/web-platform/packages/cli': {}
+  '@lasvegasfortransit/cli@file:.lvbt/web-platform/packages/cli': {}
 
-  '@lvbt/eslint-config@file:.lvbt/web-platform/packages/eslint-config(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(turbo@2.10.12)(typescript@6.0.3)':
+  '@lasvegasfortransit/eslint-config@file:.lvbt/web-platform/packages/eslint-config(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(turbo@2.10.12)(typescript@6.0.3)':
     dependencies:
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))
       '@eslint/js': 10.0.1(eslint@10.9.1(jiti@2.7.0)(supports-color@10.2.2))
@@ -4187,19 +4187,19 @@ snapshots:
       - supports-color
       - turbo
 
-  '@lvbt/playwright-config@file:.lvbt/web-platform/packages/playwright-config(@playwright/test@1.62.1)':
+  '@lasvegasfortransit/playwright-config@file:.lvbt/web-platform/packages/playwright-config(@playwright/test@1.62.1)':
     dependencies:
       '@axe-core/playwright': 4.13.0(playwright-core@1.62.1)
       '@playwright/test': 1.62.1
       playwright-core: 1.62.1
 
-  '@lvbt/prettier-config@file:.lvbt/web-platform/packages/prettier-config(prettier@3.9.6)':
+  '@lasvegasfortransit/prettier-config@file:.lvbt/web-platform/packages/prettier-config(prettier@3.9.6)':
     dependencies:
       prettier: 3.9.6
 
-  '@lvbt/typescript-config@file:.lvbt/web-platform/packages/typescript-config': {}
+  '@lasvegasfortransit/typescript-config@file:.lvbt/web-platform/packages/typescript-config': {}
 
-  '@lvbt/vitest-config@file:.lvbt/web-platform/packages/vitest-config(vitest@4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0)))':
+  '@lasvegasfortransit/vitest-config@file:.lvbt/web-platform/packages/vitest-config(vitest@4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0)))':
     dependencies:
       vitest: 4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
 

@@ -8,7 +8,7 @@
     "dev": "astro dev --host 127.0.0.1 --port 4321",
     "preview": "astro preview --host 127.0.0.1 --port 4321",
     "lint": "eslint . --max-warnings 0",
-    "check-types": "astro check",
+    "check-types": "astro check && tsc --project worker",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
@@ -24,10 +24,10 @@
   "devDependencies": {
     "@astrojs/check": "catalog:",
     "@cloudflare/workers-types": "catalog:",
-    "@lvbt/eslint-config": "file:../../.lvbt/web-platform/packages/eslint-config",
-    "@lvbt/playwright-config": "file:../../.lvbt/web-platform/packages/playwright-config",
-    "@lvbt/typescript-config": "file:../../.lvbt/web-platform/packages/typescript-config",
-    "@lvbt/vitest-config": "file:../../.lvbt/web-platform/packages/vitest-config",
+    "@lasvegasfortransit/eslint-config": "file:../../.lvbt/web-platform/packages/eslint-config",
+    "@lasvegasfortransit/playwright-config": "file:../../.lvbt/web-platform/packages/playwright-config",
+    "@lasvegasfortransit/typescript-config": "file:../../.lvbt/web-platform/packages/typescript-config",
+    "@lasvegasfortransit/vitest-config": "file:../../.lvbt/web-platform/packages/vitest-config",
     "@playwright/test": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",

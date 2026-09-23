@@ -28,5 +28,5 @@ pnpm dev         # the site at http://127.0.0.1:4321
 `pnpm run deploy` builds and runs `wrangler deploy`; `.github/workflows/deploy.yml` does the same on
 every push to `main` with the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets.
 
-Lint, format, TypeScript, and test settings extend the `@lvbt/*` packages from
+Lint, format, TypeScript, and test settings extend the `@lasvegasfortransit/*` packages from
 [`LasVegasForTransit/repository-tooling`](https://github.com/LasVegasForTransit/repository-tooling).
