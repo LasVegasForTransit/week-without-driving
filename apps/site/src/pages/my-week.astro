@@ -1,0 +1,471 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { days } from '../lib/campaign';
+import { lvbt } from '../lib/site';
+import { wwd } from '../lib/wwd';
+
+// My week: the page a signed-up person comes back to. It shows their
+// entries as the eight days of the week, the one button that checks them
+// in for today, an optional photo, reminders, and their details. The page
+// is the same for everyone; /scripts/my-week.js fills it in for the person
+// signed in on this phone, or shows the signed-out state.
+const title = 'My week · Week Without Driving Las Vegas';
+
+const shortcuts = [
+  { href: '/go', label: 'Find a bus', icon: 'mdi:bus' },
+  { href: '/guides', label: 'Rider guides', icon: 'mdi:book-open-variant-outline' },
+  { href: '/bingo', label: 'Play bingo', icon: 'mdi:grid' },
+] as const;
+---
+
+<BaseLayout title={title} description="Your check-ins, entries and details." noindex>
+  <div class="container-page myweek">
+    {/* Signed out on this phone */}
+    <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
+      <h1 id="out-heading" class="myweek__title">My week</h1>
+      <p class="myweek__lede">This phone isn’t signed in.</p>
+      <div class="myweek__actions">
+        <a href="/my-week/link" class="btn btn--primary btn--big">Get my link</a>
+        <a href="/sign-up" class="btn btn--outline">Sign up to win</a>
+      </div>
+      <p class="myweek__note">
+        Signed up on another phone? We’ll send your link to the phone number or email you used.
+      </p>
+    </section>
+
+    {/* Signed in */}
+    <div data-me-in hidden>
+      <section class="myweek__hello" aria-labelledby="hello-heading">
+        <p class="myweek__welcome" data-me-welcome hidden>
+          <Icon name="mdi:check-circle" class="size-6" aria-hidden="true" />
+          <span data-me-welcome-text>You’re signed up.</span>
+        </p>
+        <h1 id="hello-heading" class="myweek__title">
+          Hi, <span data-me-name>there</span>.
+        </h1>
+        <p class="myweek__lede" data-me-phase>Check in each day, October 1 to 8.</p>
+      </section>
+
+      {/* ENTRIES: the eight days, and the one button. */}
+      <section class="entries" aria-labelledby="entries-heading">
+        <div class="entries__head">
+          <h2 id="entries-heading" class="entries__count">
+            <span data-me-count>0</span> of {wwd.maxEntries} entries
+          </h2>
+          <p class="entries__prize">Win a one-month RTC bus pass.</p>
+        </div>
+        <ol class="entries__days">
+          {
+            days.map((d) => (
+              <li class="entries__day" data-day={d.number}>
+                <span class="entries__weekday">{d.weekday}</span>
+                <span class="entries__date">{d.monthDay.replace('Oct ', '')}</span>
+                <span class="entries__mark" aria-hidden="true">
+                  <Icon name="mdi:check-bold" class="entries__check" />
+                </span>
+                <span class="sr-only" data-day-status>
+                  Not checked in
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+        <button type="button" class="btn btn--primary btn--big btn--block" data-checkin disabled>
+          <Icon name="mdi:calendar-check-outline" class="size-6" aria-hidden="true" />
+          <span data-checkin-label>Check in for today</span>
+        </button>
+        <p class="entries__status" data-checkin-status aria-live="polite"></p>
+        <p class="entries__fine">
+          One check-in a day. No purchase or post necessary. See the{' '}
+          <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+        </p>
+      </section>
+
+      {/* PHOTO: optional, never an extra entry. */}
+      <section class="myweek__card" aria-labelledby="photo-heading">
+        <h2 id="photo-heading" class="myweek__h2">Add a photo of today</h2>
+        <p class="myweek__p">
+          Show us how you got around: the bus, your walk, your bike, the stop. It’s optional, and it
+          doesn’t add entries.
+        </p>
+        <form data-photo-form class="mt-4" novalidate>
+          <label class="photo-pick">
+            <input
+              type="file"
+              name="photo"
+              accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+              class="sr-only"
+              data-photo-input
+            />
+            <Icon name="mdi:camera-plus-outline" class="size-8" aria-hidden="true" />
+            <span data-photo-pick-label>Choose a photo</span>
+          </label>
+          <img data-photo-preview alt="" hidden class="photo-preview" />
+          <label class="check-row">
+            <input type="checkbox" name="share" />
+            <span>LVBT may share my photo on Instagram and lvwwd.org.</span>
+          </label>
+          <p class="form-help">
+            Don’t include other people’s faces, and crop out your home address.
+          </p>
+          <button type="submit" class="btn btn--outline mt-4" data-photo-submit disabled
+            >Add photo</button
+          >
+          <p class="entries__status" data-photo-status aria-live="polite"></p>
+        </form>
+      </section>
+
+      {/* GETTING AROUND */}
+      <section class="myweek__section" aria-labelledby="go-heading">
+        <h2 id="go-heading" class="myweek__h2">Plan today’s trip</h2>
+        <ul class="shortcuts">
+          {
+            shortcuts.map((s) => (
+              <li>
+                <a href={s.href} class="shortcut">
+                  <Icon name={s.icon} class="shortcut__icon" aria-hidden="true" />
+                  {s.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {/* REMINDERS */}
+      <section class="myweek__card" aria-labelledby="remind-heading">
+        <h2 id="remind-heading" class="myweek__h2">Remind me to check in</h2>
+        <p class="myweek__p">One reminder a day, October 1 to 8, at about 8 am. Stop anytime.</p>
+        <label class="check-row" data-remind-row="push">
+          <input type="checkbox" data-remind="push" />
+          <span>Send a notification to this phone.</span>
+        </label>
+        <label class="check-row" data-remind-row="text" hidden>
+          <input type="checkbox" data-remind="text" />
+          <span>
+            Text me one reminder a day, October 1 to 8, 2026, from Week Without Driving Las Vegas.
+            Up to 8 texts. Message and data rates may apply. Reply STOP to end, HELP for help.
+          </span>
+        </label>
+        <label class="check-row" data-remind-row="email" hidden>
+          <input type="checkbox" data-remind="email" />
+          <span>Email me one reminder a day, October 1 to 8.</span>
+        </label>
+        <p class="entries__status" data-remind-status aria-live="polite"></p>
+      </section>
+
+      {/* DETAILS */}
+      <section class="myweek__section" aria-labelledby="details-heading">
+        <h2 id="details-heading" class="myweek__h2">Your details</h2>
+        <dl class="details">
+          <div><dt>Name</dt><dd data-me-field="firstName"></dd></div>
+          <div><dt>Contact</dt><dd data-me-field="contact"></dd></div>
+          <div><dt>ZIP code</dt><dd data-me-field="zip"></dd></div>
+          <div><dt>Instagram</dt><dd data-me-field="instagram"></dd></div>
+        </dl>
+        <a href="/sign-up?edit=1" class="arrow-link mt-4">Change my details</a>
+      </section>
+
+      <section class="myweek__card" aria-labelledby="phones-heading">
+        <h2 id="phones-heading" class="myweek__h2">Open My week on another phone</h2>
+        <p class="myweek__p" data-me-link-line>
+          We sent you a link. Open it on any phone to come back here.
+        </p>
+        <a href="/my-week/link" class="arrow-link mt-3">Send my link again</a>
+      </section>
+
+      <section class="myweek__section" aria-labelledby="after-heading">
+        <h2 id="after-heading" class="myweek__h2">Keep going after the week</h2>
+        <p class="myweek__p">
+          Las Vegans for Better Transit works all year for better buses and safer streets.
+        </p>
+        <a href={lvbt.joinUrl} class="arrow-link mt-3">Join LVBT</a>
+      </section>
+
+      <p class="myweek__signout">
+        Not you?{' '}
+        <button type="button" class="body-link font-bold" data-signout
+          >Sign out of this phone</button
+        >
+      </p>
+    </div>
+
+    <noscript>
+      <p class="myweek__lede">My week needs JavaScript turned on in your browser.</p>
+    </noscript>
+  </div>
+
+  <script is:inline src="/scripts/my-week.js" defer></script>
+</BaseLayout>
+
+<style>
+  .myweek {
+    max-width: 44rem;
+    padding-block: clamp(2rem, 6vw, 4rem);
+  }
+  .myweek__title {
+    font-size: clamp(2.3rem, 8vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .myweek__lede {
+    margin-top: 0.6rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .myweek__welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.9rem;
+    font-weight: 800;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: 999px;
+  }
+  .myweek__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .myweek__note {
+    margin-top: 1rem;
+    color: var(--color-on-surface-variant);
+  }
+  .myweek__section,
+  .myweek__card {
+    margin-top: 2rem;
+  }
+  .myweek__card {
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    background: var(--color-surface-container);
+    border-radius: 1.25rem;
+  }
+  .myweek__h2 {
+    font-size: clamp(1.4rem, 5vw, 1.75rem);
+    line-height: 1.15;
+  }
+  .myweek__p {
+    margin-top: 0.4rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .myweek__signout {
+    margin-top: 3rem;
+    color: var(--color-on-surface-variant);
+  }
+
+  /* Entries: a ticket-like card with the eight days. */
+  .entries {
+    margin-top: 1.75rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+    border-radius: 1.25rem;
+  }
+  .entries__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+  .entries__count {
+    font-size: clamp(1.8rem, 7vw, 2.4rem);
+    line-height: 1.05;
+  }
+  .entries__count [data-me-count] {
+    color: var(--color-primary-warm);
+  }
+  .entries__prize {
+    font-weight: 700;
+    color: var(--color-on-slab-variant);
+  }
+  .entries__days {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-block: 1.25rem;
+  }
+  .entries__day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.55rem 0.25rem 0.6rem;
+    color: var(--color-on-slab);
+    border: 2px dashed color-mix(in srgb, var(--color-on-slab) 40%, transparent);
+    border-radius: 0.75rem;
+  }
+  .entries__weekday {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-on-slab-variant);
+  }
+  .entries__date {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .entries__mark {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0.2rem;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--color-on-slab) 35%, transparent);
+  }
+  .entries__mark :global(.entries__check) {
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0;
+  }
+  .entries__day[data-state='done'] {
+    color: #111;
+    background: var(--color-primary-warm);
+    border: 2px solid var(--color-primary-warm);
+  }
+  .entries__day[data-state='done'] .entries__weekday {
+    color: #111;
+  }
+  .entries__day[data-state='done'] .entries__mark {
+    color: #fff;
+    background: #111;
+    border-color: #111;
+  }
+  .entries__day[data-state='done'] :global(.entries__check) {
+    opacity: 1;
+  }
+  .entries__day[data-state='today'] {
+    border-style: solid;
+    border-color: var(--color-on-slab);
+  }
+  .entries__day[data-state='missed'] {
+    opacity: 0.45;
+  }
+  .entries .btn--primary {
+    color: #111;
+    background: var(--color-primary-warm);
+  }
+  .entries .btn--primary:not(:disabled):hover,
+  .entries .btn--primary:focus-visible {
+    background: #fff;
+  }
+  /* Waiting or done: an outlined state, not a faded button. */
+  .entries .btn--primary:disabled {
+    color: var(--color-on-slab);
+    background: transparent;
+    border: 2px solid color-mix(in srgb, var(--color-on-slab) 55%, transparent);
+    opacity: 1;
+  }
+  .entries__status {
+    margin-top: 0.75rem;
+    font-weight: 800;
+  }
+  .entries__status:empty {
+    display: none;
+  }
+  .entries__fine {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-on-slab-variant);
+  }
+  .entries__fine :global(a) {
+    color: inherit;
+  }
+
+  /* Photo */
+  .photo-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 8rem;
+    font-weight: 800;
+    color: var(--color-primary-ink);
+    border: 2px dashed color-mix(in srgb, var(--color-on-surface) 30%, transparent);
+    border-radius: 1rem;
+    cursor: pointer;
+  }
+  .photo-pick:focus-within {
+    outline: 3px solid var(--color-primary);
+  }
+  .photo-preview {
+    width: 100%;
+    max-height: 18rem;
+    margin-top: 0.75rem;
+    object-fit: cover;
+    border-radius: 1rem;
+  }
+  .myweek__card .entries__status {
+    color: var(--color-primary-ink);
+  }
+
+  /* Shortcuts */
+  .shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .shortcuts > li {
+    display: flex;
+  }
+  .shortcut {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1rem 0.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 15%, transparent);
+    border-radius: 1rem;
+  }
+  .shortcut:hover {
+    border-color: var(--color-primary);
+  }
+  .shortcut :global(.shortcut__icon) {
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-primary-ink);
+  }
+
+  /* Details */
+  .details {
+    margin-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
+  .details > div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1rem;
+    padding-block: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
+  .details dt {
+    font-weight: 800;
+  }
+  .details dd {
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 40rem) {
+    .entries__days {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+</style>

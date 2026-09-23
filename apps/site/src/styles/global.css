@@ -1413,7 +1413,7 @@ html[data-wwd-theme] :is(h1, h2, h3) {
   font-weight: 800;
 }
 
-/* ---- Navigation: a wordmark, the pledge button, and a ☰ menu on phones. ---- */
+/* ---- Navigation: a wordmark, the sign-up button, and a ☰ menu on phones. ---- */
 @layer components {
   .site-header {
     position: sticky;
@@ -1487,7 +1487,7 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     align-items: center;
     gap: 0.25rem;
   }
-  .site-pledge {
+  .site-cta {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -1499,8 +1499,8 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     border-radius: 999px;
     text-decoration: none;
   }
-  .site-pledge:hover,
-  .site-pledge:focus-visible {
+  .site-cta:hover,
+  .site-cta:focus-visible {
     background: var(--color-primary-ink);
   }
   .site-menu-button {
@@ -1515,9 +1515,9 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     background: var(--color-surface-container);
   }
 
-  /* On phones the pledge button says only "Pledge"; on the narrowest
+  /* On phones the sign-up button says only "Sign up"; on the narrowest
      phones it moves into the menu, where it is the first thing. */
-  .site-pledge__short {
+  .site-cta__short {
     display: none;
   }
   @media (max-width: 29.99rem) {
@@ -1525,13 +1525,13 @@ html[data-wwd-theme] :is(h1, h2, h3) {
       gap: 0.5rem;
       padding-inline: 1rem 0.5rem;
     }
-    .site-pledge__long {
+    .site-cta__long {
       display: none;
     }
-    .site-pledge__short {
+    .site-cta__short {
       display: inline;
     }
-    .site-header .site-pledge {
+    .site-header .site-cta {
       padding-inline: 1rem;
     }
     .site-menu-button {
@@ -1544,7 +1544,7 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     }
   }
   @media (max-width: 21.5rem) {
-    .site-header .site-pledge {
+    .site-header .site-cta {
       display: none;
     }
   }
@@ -1593,7 +1593,7 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     height: 48px;
     border-radius: 999px;
   }
-  .site-menu__pledge {
+  .site-menu__cta {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1659,7 +1659,7 @@ html[data-wwd-theme] :is(h1, h2, h3) {
     .site-header__row {
       min-height: 4.75rem;
     }
-    .site-pledge {
+    .site-cta {
       padding-inline: 1.4rem;
     }
   }
@@ -1683,4 +1683,175 @@ html[data-wwd-theme] :is(h1, h2) {
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
   letter-spacing: -0.015em;
+}
+
+/* ---- Shared campaign parts: buttons, arrow links, "to come" tags and
+   form fields, used by Home, Sign up, My week and the pages around them.
+   Layered, so a page's own scoped styles still win. ---- */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 52px;
+    padding: 0 1.5rem;
+    font-weight: 800;
+    font-size: 1.05rem;
+    border-radius: 999px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn--big {
+    min-height: 60px;
+    padding: 0 2rem;
+    font-size: 1.2rem;
+  }
+  .btn--block {
+    width: 100%;
+  }
+  .btn--primary {
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+  }
+  .btn--primary:not(:disabled):hover,
+  .btn--primary:focus-visible {
+    background: var(--color-primary-ink);
+  }
+  .btn--outline {
+    color: var(--color-on-surface);
+    border: 2px solid var(--color-on-surface);
+  }
+  .btn--outline:not(:disabled):hover,
+  .btn--outline:focus-visible {
+    color: var(--color-surface);
+    background: var(--color-on-surface);
+  }
+  .arrow-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 800;
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .arrow-link::after {
+    content: '→';
+  }
+  .to-come {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-on-surface-variant);
+    border: 1.5px dashed color-mix(in srgb, var(--color-on-surface) 35%, transparent);
+    border-radius: 999px;
+  }
+
+  /* Form fields: a bold label, a big input, a line of help, an error. */
+  .form-field + .form-field,
+  .form-field + .form-choices,
+  .form-choices + .form-field,
+  .form-choices + .form-choices {
+    margin-top: 1.5rem;
+  }
+  .form-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .form-optional {
+    font-weight: 400;
+    color: var(--color-on-surface-variant);
+  }
+  .form-help {
+    margin-top: 0.2rem;
+    font-size: 0.95rem;
+    color: var(--color-on-surface-variant);
+  }
+  .form-input {
+    display: block;
+    width: 100%;
+    min-height: 56px;
+    margin-top: 0.5rem;
+    padding: 0 1rem;
+    font-size: 1.15rem;
+    color: var(--color-on-surface);
+    background: #fff;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 45%, transparent);
+    border-radius: 0.75rem;
+  }
+  .form-input,
+  .form-choices {
+    scroll-margin-top: 6rem;
+  }
+  .form-input:focus {
+    border-color: var(--color-primary);
+    outline: 3px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+    outline-offset: 0;
+  }
+  .form-input[aria-invalid='true'] {
+    border-color: #b3261e;
+  }
+  .form-prefix {
+    position: relative;
+  }
+  .form-prefix > span {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    font-size: 1.15rem;
+    color: var(--color-on-surface-variant);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .form-prefix > .form-input {
+    padding-left: 2.1rem;
+  }
+  .form-error {
+    margin-top: 0.4rem;
+    font-weight: 700;
+    color: #b3261e;
+  }
+  .form-error:empty {
+    display: none;
+  }
+  .form-choices legend {
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .form-choice,
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+    padding: 0.85rem 1rem;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+    border-radius: 0.75rem;
+    cursor: pointer;
+  }
+  .form-choice:has(input:checked),
+  .check-row:has(input:checked) {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+  .form-choice input,
+  .check-row input {
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0.05rem;
+    accent-color: var(--color-primary);
+  }
 }

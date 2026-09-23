@@ -1,0 +1,273 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
+
+// Sign up to win. Signing up enters the Las Vegas giveaway and becomes the
+// person's identity on lvwwd.org: their phone stays signed in, and the
+// link we send opens My week on any other phone. Anyone can take part in
+// Week Without Driving without signing up; this form is only for the
+// giveaway and My week. The behaviour is in /scripts/sign-up.js.
+const title = 'Sign up to win · Week Without Driving Las Vegas';
+const description = `Sign up to win a one-month RTC bus pass. Check in each day, ${WWD_DATE_RANGE}, for more chances.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="signup container-page">
+    <div class="signup__intro">
+      <p class="signup__prize">
+        <Icon name="mdi:gift-outline" class="size-5" aria-hidden="true" />
+        Win a one-month RTC bus pass
+      </p>
+      <h1 class="signup__title">Sign up to win</h1>
+      <p class="signup__lede">
+        Sign up once. Then check in each day, {WWD_DATE_RANGE}. Each day you check in is one entry,
+        up to {wwd.maxEntries}.
+      </p>
+      <p class="signup__aside">
+        You don’t need to sign up to take part in Week Without Driving.
+        <a href="/take-part" class="arrow-link">How it works</a>
+      </p>
+      <ol class="signup__next" aria-label="What happens next">
+        <li>You land on My week. This phone stays signed in.</li>
+        <li>Check in each day, {WWD_DATE_RANGE}. Each day is one entry.</li>
+        <li>We draw the winner by October 15 and contact them.</li>
+      </ol>
+    </div>
+
+    <div data-signup-already hidden class="signup__card">
+      <h2 class="signup__h2">You’re already signed up on this phone.</h2>
+      <p class="mt-2" data-signup-already-name></p>
+      <a href="/my-week" class="btn btn--primary btn--big mt-5">Go to My week</a>
+    </div>
+
+    <form data-signup-form class="signup__card" novalidate>
+      <div class="form-field">
+        <label for="su-name" class="form-label">First name</label>
+        <input
+          id="su-name"
+          name="firstName"
+          class="form-input"
+          autocomplete="given-name"
+          autocapitalize="words"
+          maxlength="40"
+          required
+          aria-describedby="su-name-error"
+        />
+        <p id="su-name-error" class="form-error" data-error-for="firstName" aria-live="polite"></p>
+      </div>
+
+      <div class="form-field">
+        <label for="su-contact" class="form-label">Phone number or email</label>
+        <p id="su-contact-help" class="form-help">
+          We use it to tell you if you win, and to send your link to My week.
+        </p>
+        <input
+          id="su-contact"
+          name="contact"
+          class="form-input"
+          autocomplete="email"
+          autocapitalize="off"
+          spellcheck="false"
+          maxlength="120"
+          required
+          aria-describedby="su-contact-help su-contact-error"
+        />
+        <p id="su-contact-error" class="form-error" data-error-for="contact" aria-live="polite"></p>
+      </div>
+
+      <div class="form-field">
+        <label for="su-zip" class="form-label">ZIP code</label>
+        <p id="su-zip-help" class="form-help">
+          The giveaway is for people who live in Southern Nevada.
+        </p>
+        <input
+          id="su-zip"
+          name="zip"
+          class="form-input signup__zip"
+          inputmode="numeric"
+          autocomplete="postal-code"
+          maxlength="5"
+          required
+          aria-describedby="su-zip-help su-zip-error"
+        />
+        <p id="su-zip-error" class="form-error" data-error-for="zip" aria-live="polite"></p>
+      </div>
+
+      <div class="form-field">
+        <label for="su-ig" class="form-label">
+          Instagram <span class="form-optional">(optional)</span>
+        </label>
+        <p id="su-ig-help" class="form-help">
+          Tag @lasvegasfortransit in a post or story, and it counts as that day’s check-in.
+        </p>
+        <div class="form-prefix">
+          <span aria-hidden="true">@</span>
+          <input
+            id="su-ig"
+            name="instagram"
+            class="form-input"
+            autocapitalize="off"
+            spellcheck="false"
+            maxlength="30"
+            aria-describedby="su-ig-help su-ig-error"
+          />
+        </div>
+        <p id="su-ig-error" class="form-error" data-error-for="instagram" aria-live="polite"></p>
+      </div>
+
+      <fieldset class="form-choices" aria-describedby="su-age-error">
+        <legend>How old are you?</legend>
+        <label class="form-choice">
+          <input type="radio" name="age" value="adult" />
+          <span>18 or older</span>
+        </label>
+        <label class="form-choice">
+          <input type="radio" name="age" value="teen" />
+          <span>13 to 17, and my parent or guardian agrees to the Official Rules</span>
+        </label>
+        <p id="su-age-error" class="form-error" data-error-for="age" aria-live="polite"></p>
+      </fieldset>
+
+      <fieldset class="form-choices">
+        <legend class="sr-only">Newsletter</legend>
+        <label class="check-row">
+          <input type="checkbox" name="newsletter" />
+          <span
+            >Also send me LVBT’s newsletter: transit news and easy ways to help in Las Vegas.</span
+          >
+        </label>
+      </fieldset>
+
+      <p class="signup__legal">
+        By signing up, you agree to the <a href="/giveaway/rules" class="body-link"
+          >Official Rules</a
+        >. We delete your details on November 30, 2026. See <a href="/privacy" class="body-link"
+          >Privacy</a
+        >.
+      </p>
+
+      <button type="submit" class="btn btn--primary btn--big btn--block" data-signup-submit>
+        Sign up
+      </button>
+      <p class="form-error mt-3 text-center" data-signup-status aria-live="polite"></p>
+
+      <p class="signup__back">
+        Already signed up on another phone?
+        <a href="/my-week/link" class="arrow-link">Get your link</a>
+      </p>
+    </form>
+
+    <noscript>
+      <p class="signup__card font-bold">
+        Signing up needs JavaScript turned on in your browser. You can still take part in the week,
+        use the rider guides and play bingo without it.
+      </p>
+    </noscript>
+  </section>
+
+  <script is:inline src="/scripts/sign-up.js" defer></script>
+</BaseLayout>
+
+<style>
+  .signup {
+    display: grid;
+    gap: 2rem;
+    padding-block: clamp(2rem, 6vw, 4.5rem);
+  }
+  .signup__prize {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    font-weight: 800;
+    color: #111;
+    background: var(--color-primary-warm);
+    border-radius: 999px;
+  }
+  .signup__title {
+    margin-top: 1rem;
+    font-size: clamp(2.4rem, 9vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .signup__lede {
+    margin-top: 1rem;
+    max-width: 30rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+  .signup__aside {
+    margin-top: 1rem;
+    color: var(--color-on-surface-variant);
+  }
+  .signup__aside .arrow-link {
+    margin-left: 0.25rem;
+  }
+  .signup__next {
+    display: none;
+  }
+  .signup__card {
+    width: 100%;
+    max-width: 34rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    background: var(--color-surface-container);
+    border-radius: 1.25rem;
+  }
+  .signup__h2 {
+    font-size: 1.6rem;
+    line-height: 1.15;
+  }
+  .signup__zip {
+    max-width: 10rem;
+  }
+  .signup__legal {
+    margin-block: 1.75rem 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .signup__back {
+    margin-top: 1.25rem;
+    text-align: center;
+  }
+  .signup__back .arrow-link {
+    margin-left: 0.25rem;
+  }
+  @media (min-width: 64rem) {
+    .signup {
+      grid-template-columns: 1fr 34rem;
+      align-items: start;
+      column-gap: 4rem;
+    }
+    .signup__intro {
+      position: sticky;
+      top: 7rem;
+    }
+    .signup__next {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      counter-reset: next;
+      font-size: 1.1rem;
+    }
+    .signup__next li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      counter-increment: next;
+    }
+    .signup__next li::before {
+      content: counter(next);
+      display: grid;
+      flex: none;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-weight: 800;
+      color: var(--color-primary-ink);
+      border: 3px solid var(--color-primary);
+      border-radius: 50%;
+    }
+  }
+</style>
