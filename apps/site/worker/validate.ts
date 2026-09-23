@@ -57,6 +57,11 @@ export function parseContact(raw: string): Contact | null {
   return null;
 }
 
+/** Whether a cleaned Instagram name is one Instagram allows. */
+export function isHandle(handle: string): boolean {
+  return HANDLE.test(handle);
+}
+
 /** An Instagram name without the @ or the instagram.com address around it. */
 export function cleanHandle(raw: string): string {
   return raw
@@ -83,7 +88,7 @@ export function checkDetails(
   else if (!SOUTHERN_NEVADA_ZIP.test(zip)) errors.zip = FIELD_MESSAGES.zipOutside;
 
   const instagram = cleanHandle(text(input.instagram));
-  if (instagram && !HANDLE.test(instagram)) errors.instagram = FIELD_MESSAGES.instagram;
+  if (instagram && !isHandle(instagram)) errors.instagram = FIELD_MESSAGES.instagram;
 
   // Under 13 is not an option: the form offers only these two.
   const age = input.age === 'adult' || input.age === 'teen' ? input.age : null;

@@ -13,6 +13,8 @@ import worker from '../../worker/index';
  */
 
 const TABLES = [
+  'draws',
+  'volunteers',
   'checkins',
   'reminders',
   'bingo',
@@ -103,18 +105,29 @@ export interface Outbound {
   emails: { to: string[]; text: string }[];
   /** Whether Turnstile says yes. */
   turnstilePasses: boolean;
+  /** The public keys a Cloudflare Access team publishes, for the admin tests. */
+  accessKeys: JsonWebKey[];
+  /** How many times the Worker fetched the Access keys. */
+  accessKeyFetches: number;
 }
 
 /**
- * Stands in for Turnstile and Resend. Anything else goes to the real fetch,
- * which the platform proxy uses to reach its local runtime.
+ * Stands in for Turnstile, Resend and Cloudflare Access's key list. Anything
+ * else goes to the real fetch, which the platform proxy uses to reach its
+ * local runtime.
  */
 export function fakeOutbound(realFetch: typeof fetch): Outbound {
   const outbound: Outbound = {
     emails: [],
     turnstilePasses: true,
+    accessKeys: [],
+    accessKeyFetches: 0,
     fetch: async (input, init) => {
       const url = input instanceof Request ? input.url : String(input);
+      if (url.endsWith('.cloudflareaccess.com/cdn-cgi/access/certs')) {
+        outbound.accessKeyFetches += 1;
+        return Response.json({ keys: outbound.accessKeys });
+      }
       if (url.startsWith('https://challenges.cloudflare.com/')) {
         return Response.json({ success: outbound.turnstilePasses });
       }
