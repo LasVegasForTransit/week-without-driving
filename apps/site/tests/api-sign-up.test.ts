@@ -149,6 +149,21 @@ describe('sign-up and links', () => {
     expect(await count('participants')).toBe(0);
   });
 
+  it('skips the bot check only when BOT_CHECK is "off"', async () => {
+    outbound.turnstilePasses = false;
+    const off = await platform.send(apiRequest('POST', '/api/signup', { body: SIGN_UP }), {
+      TURNSTILE_SECRET: '',
+      BOT_CHECK: 'off',
+    });
+    expect(off.status).toBe(201);
+    outbound.turnstilePasses = true;
+    const other = await platform.send(
+      apiRequest('POST', '/api/signup', { body: { ...SIGN_UP, contact: 'other@example.com' } }),
+      { TURNSTILE_SECRET: '', BOT_CHECK: 'no' },
+    );
+    expect(other.status).toBe(503);
+  });
+
   it('allows five sign-ups an hour from one connection', async () => {
     for (let n = 0; n < 5; n += 1) {
       expect((await signUp({ contact: `person${n}@example.com` }, '198.51.100.1')).status).toBe(

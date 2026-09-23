@@ -10,6 +10,9 @@ export type BotCheck = 'pass' | 'fail' | 'unavailable';
  * the forms stay closed rather than open to bots.
  */
 export async function checkTurnstile(env: Env, token: unknown, ip: string): Promise<BotCheck> {
+  // Only an explicit BOT_CHECK="off" skips the check; a missing secret alone
+  // never opens the forms.
+  if (env.BOT_CHECK === 'off') return 'pass';
   if (!env.TURNSTILE_SECRET) {
     console.error('TURNSTILE_SECRET is not set, so sign-ups and links are refused.');
     return 'unavailable';
