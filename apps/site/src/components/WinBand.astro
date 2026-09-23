@@ -1,0 +1,67 @@
+---
+import { Icon } from 'astro-icon/components';
+import { WWD_DATE_RANGE } from '../lib/wwd';
+
+// The giveaway, one band tall, at the foot of the free tools (Find a bus,
+// Rider guides, Bingo). The site exists to run the giveaway, so every tool
+// page points back to it. For someone signed in on this phone, the button
+// becomes "My week" (see /scripts/site-nav.js).
+---
+
+<section class="win-band" aria-labelledby="win-band-heading">
+  <div class="container-page win-band__inner">
+    <Icon name="mdi:gift-outline" class="win-band__icon" aria-hidden="true" />
+    <div class="win-band__text">
+      <h2 id="win-band-heading" class="win-band__title">Win a free month of bus rides.</h2>
+      <p>
+        Sign up, then check in each day,{' '}
+        <span class="whitespace-nowrap">{WWD_DATE_RANGE}</span>. Each day is one entry.
+      </p>
+    </div>
+    <a href="/sign-up" class="btn win-band__btn" data-signup-link>
+      <span data-signup-label>Sign up to win</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .win-band {
+    padding-block: 2.25rem;
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+  }
+  .win-band__inner {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+  }
+  .win-band :global(.win-band__icon) {
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--color-primary-warm);
+  }
+  .win-band__title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.1;
+  }
+  .win-band__text p {
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+    color: var(--color-on-slab-variant);
+  }
+  .win-band__btn {
+    color: #111;
+    background: var(--color-primary-warm);
+  }
+  .win-band__btn:hover,
+  .win-band__btn:focus-visible {
+    background: #fff;
+  }
+  @media (min-width: 48rem) {
+    .win-band__inner {
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      column-gap: 1.5rem;
+    }
+  }
+</style>

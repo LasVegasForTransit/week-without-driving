@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
 import BaseLayout from './BaseLayout.astro';
+import WinBand from '../components/WinBand.astro';
 import ShadeDiagram from '../components/guides/ShadeDiagram.astro';
 import { parseInlineLinks } from '../lib/guides';
 import type { Guide } from '../lib/guides';
@@ -118,4 +119,5 @@ const { title, intro, cardSummary, steps } = guide.data;
       <a href="/guides" class="body-link font-semibold">All guides</a>
     </nav>
   </article>
+  <WinBand />
 </BaseLayout>

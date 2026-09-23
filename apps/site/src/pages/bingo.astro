@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WinBand from '../components/WinBand.astro';
 import { Icon } from 'astro-icon/components';
 import { BINGO_SQUARES } from '../lib/bingo';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
@@ -179,7 +180,9 @@ const description =
         </a>
       </div>
       <p class="mt-4" data-bingo-giveaway-link style={showGiveawayLink ? '' : 'display:none'}>
-        <a href="/giveaway" class="body-link font-semibold">Enter the giveaway &#8594;</a>
+        <a href="/sign-up" class="body-link font-semibold" data-signup-link
+          ><span data-signup-label>Sign up to win</span> &#8594;</a
+        >
       </p>
 
       {/* "Bingo!" / whole-card celebration */}
@@ -196,11 +199,12 @@ const description =
             Share your card
           </button>
           <a
-            href="/giveaway"
+            href="/sign-up"
             class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-3 font-bold text-on-surface no-underline hover:bg-surface-container focus-visible:bg-surface-container"
             data-bingo-dialog-giveaway
+            data-signup-link
           >
-            Enter the giveaway
+            <span data-signup-label>Sign up to win</span>
           </a>
           <button type="button" class="body-link font-semibold" data-bingo-dialog-close>
             Keep playing
@@ -253,24 +257,25 @@ const description =
         </li>
         <li>
           Two squares use this site: find your nearest stop on the <a href="/go" class="body-link"
-            >Go page</a
+            >Find a bus page</a
           >, and follow the <a href="/guides/sidewalk-audit" class="body-link"
             >sidewalk audit guide</a
           >.
         </li>
         <li>It's on the honor system. Nobody checks your card.</li>
         <li>
-          Bingos are for fun and don't win a prize by themselves. From October 1 to 8, a screenshot
-          of your card counts as that day's <a href="/giveaway" class="body-link">giveaway entry</a
-          >, even with one square marked.
+          Bingos are for fun and don't win a prize by themselves. To win, <a
+            href="/sign-up"
+            class="body-link">sign up</a
+          > and check in each day, October 1 to 8.
         </li>
       </ol>
     </section>
 
     <p class="mt-8 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
-      Your card is saved on this phone or computer, in this browser. There's no account, and nothing
-      is sent to us. If you clear your browsing data or switch to another phone or browser, you'll
-      start a new card. In a private window, your card is gone when you close it.
+      Your card is saved on this phone or computer, in this browser, and nothing is sent to us. If
+      you clear your browsing data or switch to another phone or browser, you'll start a new card.
+      In a private window, your card is gone when you close it.
     </p>
 
     <button
@@ -319,6 +324,7 @@ const description =
   </noscript>
 
   <script is:inline src="/scripts/bingo.js" defer></script>
+  <WinBand />
 </BaseLayout>
 
 <style>
