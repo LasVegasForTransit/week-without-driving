@@ -16,6 +16,7 @@ interface Me {
   contactType: string;
   instagram: string | null;
   days: number[];
+  trips: { day: number; modes: string[] }[];
   today: number;
   reminders: { push: boolean; text: boolean; email: boolean };
   photos: { day: number; share: boolean }[];
@@ -49,11 +50,12 @@ describe('my week', () => {
     const response = await platform.send(apiRequest('GET', '/api/me', { cookie }));
     return response.json<Me>();
   };
-  const checkIn = (previewDay?: string) =>
+  const logTrip = (previewDay?: string, body: Record<string, unknown> = { modes: ['bus'] }) =>
     platform.send(
-      apiRequest('POST', '/api/checkin', { cookie, body: {} }),
+      apiRequest('POST', '/api/checkin', { cookie, body }),
       previewDay === undefined ? {} : { CHECKIN_PREVIEW_DAY: previewDay },
     );
+  const checkIn = (previewDay?: string) => logTrip(previewDay);
 
   it('says who is signed in, with the contact masked', async () => {
     const mine = await me();
@@ -74,19 +76,41 @@ describe('my week', () => {
     ).toBe(true);
   });
 
-  it('checks in once a day, however many times the button is pressed', async () => {
+  it('counts one entry a day, however many times a trip is logged', async () => {
     const first = await checkIn('3');
     expect(first.status).toBe(200);
-    expect(await first.json()).toEqual({ count: 1, days: [3] });
-    expect(await (await checkIn('3')).json()).toEqual({ count: 1, days: [3] });
-    expect(await (await checkIn('4')).json()).toEqual({ count: 2, days: [3, 4] });
+    expect(await first.json()).toMatchObject({ count: 1, days: [3] });
+    expect(await (await checkIn('3')).json()).toMatchObject({ count: 1, days: [3] });
+    expect(await (await checkIn('4')).json()).toMatchObject({ count: 2, days: [3, 4] });
+  });
+
+  it('keeps how the person got around, and lets them change it that day', async () => {
+    await logTrip('3', { modes: ['bus', 'walk'], hard: 'No shade at the stop.' });
+    expect((await me()).trips).toEqual([{ day: 3, modes: ['bus', 'walk'] }]);
+    const again = await logTrip('3', { modes: ['bike'] });
+    expect(await again.json()).toMatchObject({ count: 1, trips: [{ day: 3, modes: ['bike'] }] });
+  });
+
+  it('asks how the person got around before logging a trip', async () => {
+    for (const body of [{}, { modes: [] }, { modes: ['car'] }, { modes: ['bus', 'bus'] }]) {
+      const response = await logTrip('3', body);
+      expect(response.status).toBe(400);
+      expect((await response.json<{ message: string }>()).message).toBeTruthy();
+    }
+    expect((await me()).days).toEqual([]);
+  });
+
+  it('turns away a note that is too long', async () => {
+    const response = await logTrip('3', { modes: ['walk'], hard: 'x'.repeat(281) });
+    expect(response.status).toBe(400);
+    expect((await me()).days).toEqual([]);
   });
 
   it('checks in on the Las Vegas date, and only October 1 to 8', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     // 11 pm on October 4 in Las Vegas is already October 5 in UTC.
     vi.setSystemTime(new Date('2026-10-05T06:00:00Z'));
-    expect(await (await checkIn()).json()).toEqual({ count: 1, days: [4] });
+    expect(await (await checkIn()).json()).toMatchObject({ count: 1, days: [4] });
     expect((await me()).today).toBe(4);
 
     vi.setSystemTime(new Date('2026-09-30T20:00:00Z'));
