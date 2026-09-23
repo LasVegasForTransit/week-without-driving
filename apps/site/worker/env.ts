@@ -16,6 +16,12 @@ export interface Env {
   TURNSTILE_SITE_KEY?: string;
   /** Turnstile's secret. A secret, never a var. Without it, forms are refused. */
   TURNSTILE_SECRET?: string;
+  /**
+   * "off" skips the Turnstile bot check on purpose, for the short time
+   * before the lvwwd.org widget exists. Rate limits still apply. Anything
+   * else, or unset, keeps the check on.
+   */
+  BOT_CHECK?: string;
   /** Resend's API key. Without it, email links are recorded but not sent. */
   RESEND_API_KEY?: string;
   /** "true" on the preview Worker only: API responses include the link. */

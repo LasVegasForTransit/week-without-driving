@@ -29,22 +29,27 @@
   "observability": {
     "enabled": true,
   },
-  // TODO(participant-api): production is not wired to a database yet.
-  // lvwwd.org's zone is not on the LVBT Cloudflare account that wrangler
-  // deploys from, so the production D1 database, R2 bucket and Turnstile
-  // widget have to be created on the account that owns the zone. Until
-  // then the API answers 503 "Sign-up isn't open yet" and the pages work.
-  // Once they exist, add:
-  //
-  //   "d1_databases": [
-  //     { "binding": "DB", "database_name": "lvwwd", "database_id": "<from wrangler d1 create lvwwd>", "migrations_dir": "migrations" },
-  //   ],
-  //   "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-photos" }],
-  //   "vars": { "TURNSTILE_SITE_KEY": "<the lvwwd.org widget's site key>" },
-  //
-  // then run `wrangler d1 migrations apply lvwwd --remote` and set the
-  // secrets with `wrangler secret put TURNSTILE_SECRET` and
-  // `wrangler secret put RESEND_API_KEY`.
+  // The participant database and the bucket for screenshots of shared
+  // posts, on LVBT's account with the lvwwd.org zone. Apply migrations with
+  // `npx wrangler d1 migrations apply lvwwd --remote`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lvwwd",
+      "database_id": "a3a6c177-f000-4a64-8bc8-a4aad6d07cf1",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-photos" }],
+  // TODO(turnstile): the Turnstile bot check is off until the lvwwd.org
+  // widget exists; sign-up and "Get my link" still have their rate limits.
+  // Create a Turnstile widget for lvwwd.org in the Cloudflare dashboard,
+  // put its site key in TURNSTILE_SITE_KEY below, remove BOT_CHECK, and run
+  // `npx wrangler secret put TURNSTILE_SECRET`.
+  "vars": { "BOT_CHECK": "off" },
+  // TODO(email): set `npx wrangler secret put RESEND_API_KEY` once Resend
+  // can send from lvwwd.org. Until then, "Open my week" links are recorded
+  // but not emailed.
   //
   // TODO(admin-access): the admin views refuse every request until
   // Cloudflare Access is in front of them ("Set up admin sign-in
