@@ -1,0 +1,83 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSortedGuides } from '../lib/guides';
+
+// The offline page. The service worker (public/sw.js) shows it, at the
+// address the visitor asked for, when there is no connection and that page
+// isn't saved on the phone. /scripts/offline-page.js keeps only the pages
+// in this list that are saved, and says so when none are yet.
+const guides = await getSortedGuides();
+const saved = [
+  { href: '/guides', label: 'Rider guides', icon: 'mdi:book-open-variant-outline' },
+  ...guides.map((guide) => ({
+    href: `/guides/${guide.id}`,
+    label: guide.data.title,
+    icon: guide.data.icon,
+  })),
+  { href: '/go', label: 'Find a bus', icon: 'mdi:bus' },
+  { href: '/bingo', label: 'Bingo', icon: 'mdi:grid' },
+  { href: '/giveaway', label: 'Win prizes', icon: 'mdi:gift-outline' },
+];
+---
+
+<BaseLayout title="You’re offline · Week Without Driving Las Vegas" noindex>
+  <section class="container-page page-top narrow offline" aria-labelledby="offline-heading">
+    <h1 id="offline-heading" class="page-title">You’re offline</h1>
+    <p class="page-lede" data-offline-text>
+      This page isn’t saved on this phone yet. These pages are saved and work without a connection:
+    </p>
+    <p class="page-lede" data-offline-private hidden>
+      My week and Sign up need a connection, because they show your own details. These pages are
+      saved and work without a connection:
+    </p>
+    <p class="page-lede" data-offline-none hidden>
+      No pages are saved on this phone yet. Open a page once with a connection, and it will work
+      offline after that.
+    </p>
+    <ul class="offline__list" data-offline-list>
+      {
+        saved.map((page) => (
+          <li data-offline-page={page.href}>
+            <a href={page.href} class="offline__link">
+              <Icon name={page.icon} class="offline__icon" aria-hidden="true" />
+              {page.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    {/* An empty href is this address, so this works without JavaScript. */}
+    <a href="" class="btn btn--primary offline__retry">Try again</a>
+  </section>
+  <script is:inline src="/scripts/offline-page.js" defer></script>
+</BaseLayout>
+
+<style>
+  .offline__list {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .offline__link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    padding: 0.5rem 0.9rem;
+    font-weight: 800;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    background: var(--color-surface-container);
+    border-radius: 0.9rem;
+  }
+  .offline__link :global(.offline__icon) {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-primary-ink);
+  }
+  .offline__retry {
+    margin-top: 1.75rem;
+  }
+</style>
