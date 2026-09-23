@@ -210,7 +210,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
                   <span>{d.weekday}</span>
                   {d.monthDay}
                 </p>
-                <p class="home-day__host">{d.host ?? <span class="to-come">Host to come</span>}</p>
+                {d.host && <p class="home-day__host">{d.host}</p>}
               </li>
             ))}
           </ol>

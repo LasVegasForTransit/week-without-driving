@@ -25,10 +25,8 @@ const hasRoster = roster.length > 0;
 // `wwd.end` already carries that instant.
 const campaignOver = Date.now() > wwd.end.getTime();
 
-// Groups taking part: a logo wall, not the detailed writeup below it. Real
-// partner tiles (once there are any) render first, then enough dashed
-// "Your group here" placeholder tiles to keep the wall at a full row of 6 —
-// so the empty roster still shows visitors exactly where a logo goes.
+// Groups taking part: a logo wall, not the detailed writeup below it. It
+// appears once the roster has its first confirmed partner.
 
 const siteHost = site.url.replace(/^https?:\/\//, '');
 const igHandle = handleFromUrl(lvbt.instagramUrl) ?? '@lasvegasfortransit';
