@@ -14,14 +14,16 @@
     // Pages answer at /guides, as every link on the site writes them, with
     // no redirect to /guides/ on the way (a round trip on a slow phone).
     "html_handling": "drop-trailing-slash",
-    // The Worker has to see these before the assets answer them.
-    "run_worker_first": ["/api/*", "/admin*", "/my-week*", "/sign-up*"],
+    // The Worker sees every request first: it sends www to the apex on every
+    // path, and runs the API, the admin views and the pages it fills in.
+    "run_worker_first": true,
   },
-  // Custom domains: wrangler creates the DNS records on deploy when the zone
-  // is on the same account.
+  // Routes on the lvwwd.org zone: the Worker answers every request for the
+  // apex and www in front of the zone's proxied DNS records, and serves the
+  // site from its own assets, so nothing reaches an origin.
   "routes": [
-    { "pattern": "lvwwd.org", "custom_domain": true },
-    { "pattern": "www.lvwwd.org", "custom_domain": true },
+    { "pattern": "lvwwd.org/*", "zone_name": "lvwwd.org" },
+    { "pattern": "www.lvwwd.org/*", "zone_name": "lvwwd.org" },
   ],
   // Rate-limit housekeeping every day, and the deletion of all participant
   // data from November 30, 2026 (worker/cleanup.ts).
