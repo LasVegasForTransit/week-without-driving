@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WinBand from '../components/WinBand.astro';
 import { buildMapLinks } from '../lib/map-links';
 
 // The Go page: find the bus stops nearest you (or a chosen place, without
@@ -161,22 +162,16 @@ const destinations: Destination[] = [
 ---
 
 <BaseLayout title="Find a bus · Week Without Driving Las Vegas" description={description}>
-  <section class="container-page py-16 md:py-20" aria-labelledby="page-heading">
-    <h1 id="page-heading" class="text-display-sm">Find a bus</h1>
-    <p class="lede mt-4 max-w-2xl">
-      Find the bus stops nearest you, or a place you already know, and get directions there.
-    </p>
-  </section>
-
-  {/* FIND ROUTES NEAR YOU — the nearest-route finder */}
+  {/* FIND A BUS — the nearest-route finder, straight under the title */}
   <section
     id="find-routes"
-    class="container-page scroll-mt-24 border-t border-outline-variant/15 pb-16 md:pb-24"
+    class="container-page scroll-mt-24 pt-12 pb-16 md:pt-16 md:pb-24"
     aria-labelledby="find-routes-heading"
   >
-    <h2 id="find-routes-heading" class="text-headline-lg pt-16 md:pt-24">Find routes near you</h2>
+    <h1 id="find-routes-heading" class="text-display-sm">Find a bus</h1>
     <p class="lede mt-4 max-w-2xl">
-      See the five closest bus stops and the routes that stop there.
+      See the five bus stops closest to you and the routes that stop there. Or pick a place you
+      already know.
     </p>
 
     <div data-finder class="mt-8 max-w-2xl">
@@ -337,4 +332,5 @@ const destinations: Destination[] = [
 
   <script is:inline src="/scripts/map-links.js" defer></script>
   <script is:inline src="/scripts/nearest-routes.js" defer></script>
+  <WinBand />
 </BaseLayout>
