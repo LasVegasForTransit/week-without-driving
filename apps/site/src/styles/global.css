@@ -1310,38 +1310,6 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
   }
 }
 
-/* Site header: the campaign's own navigation, sticky on every page. */
-@layer components {
-  .site-header {
-    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-    backdrop-filter: var(--chrome-blur);
-  }
-  .pledge-button {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding-inline: 1.1rem;
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .pledge-button:hover,
-  .pledge-button:focus-visible {
-    background: var(--color-on-surface);
-    color: var(--color-surface);
-  }
-  .menu-button {
-    min-height: 44px;
-    padding-inline: 1rem;
-    border: 1px solid var(--color-outline-variant);
-    font-weight: 700;
-  }
-  .mobile-menu {
-    border-top: 1px solid var(--chrome-hairline);
-  }
-}
-
 /* Bungee by David Jonathan Ross (SIL Open Font License 1.1): the campaign's
    marquee face. Self-hosted as a small subset of capitals, digits and a few
    marks, so it only suits short uppercase display text. */
@@ -1349,47 +1317,6 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
   font-family: 'Bungee Subset';
   src: url('/fonts/bungee-subset.woff2') format('woff2');
   font-display: swap;
-}
-
-/* Header site mark: a deliberate two-line lockup instead of a wrapping line. */
-@layer components {
-  .site-mark {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.05;
-    color: var(--color-on-surface);
-  }
-  .site-mark__name {
-    font-weight: 800;
-    font-size: clamp(0.95rem, 4vw, 1.1rem);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-  }
-  .site-mark__place {
-    margin-top: 0.2rem;
-    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-primary-ink);
-  }
-}
-
-/* Narrow phones (under 360 px): keep the site mark, Pledge and Menu on one row. */
-@media (max-width: 24rem) {
-  .site-header > div {
-    gap: 0.5rem;
-  }
-  .site-mark__name {
-    font-size: 0.8rem;
-  }
-  .site-mark__place {
-    font-size: 0.58rem;
-  }
-  .pledge-button,
-  .menu-button {
-    padding-inline: 0.7rem;
-  }
 }
 
 /* ---- lvwwd.org identity candidates (preview). ----
@@ -1484,4 +1411,230 @@ html[data-wwd-theme='pop'] {
 
 html[data-wwd-theme] :is(h1, h2, h3) {
   font-weight: 800;
+}
+
+/* ---- Navigation: logo mark on top, tab bar at the thumb on phones. ---- */
+@layer components {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    backdrop-filter: var(--chrome-blur);
+    border-bottom: 1px solid var(--chrome-hairline);
+  }
+  .site-header__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 3.5rem;
+    padding-block: 0.5rem;
+  }
+
+  /* The logo: a small marquee badge, then the place and dates. */
+  .site-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-on-surface);
+    text-decoration: none;
+  }
+  .site-logo__badge {
+    display: grid;
+    place-items: center;
+    height: 2.25rem;
+    padding-inline: 0.55rem;
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    color: #fff4d6;
+    background: #120d0b;
+    border-radius: 0.45rem;
+    outline: 2px dotted #ffd98a;
+    outline-offset: -5px;
+    text-shadow: 0 2px 0 var(--color-primary);
+  }
+  .site-logo__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .site-logo__place {
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .site-logo__dates {
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-on-surface-variant);
+  }
+
+  .site-topnav {
+    display: none;
+  }
+  .site-topnav ul {
+    display: flex;
+    gap: 1.6rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .site-pledge {
+    display: none;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 1.3rem;
+    font-weight: 800;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .site-pledge:hover,
+  .site-pledge:focus-visible {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+
+  /* Bottom tab bar on phones and tablets. */
+  .tabbar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: var(--z-mobile-nav);
+    background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+    backdrop-filter: var(--chrome-blur);
+    border-top: 1px solid var(--chrome-hairline);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar ul {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+  .tabbar__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-on-surface-variant);
+    text-decoration: none;
+  }
+  .tabbar__icon {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+  .tabbar__link[aria-current='page'] {
+    color: var(--color-primary-ink);
+  }
+  .tabbar__link[aria-current='page'] .tabbar__icon {
+    color: var(--color-primary);
+  }
+  .tabbar__link[data-pledge-link] .tabbar__icon {
+    padding: 0.2rem;
+    width: 2.1rem;
+    height: 2.1rem;
+    margin-top: -0.55rem;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: 50%;
+    box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
+  body {
+    padding-bottom: calc(3.6rem + env(safe-area-inset-bottom));
+  }
+
+  /* The More sheet: slides up from the tab bar. */
+  .more-sheet {
+    width: 100%;
+    max-width: 36rem;
+    margin: auto auto 0;
+    padding: 0.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    color: var(--color-on-surface);
+    background: var(--color-surface);
+    border: none;
+    border-radius: 1.25rem 1.25rem 0 0;
+    box-shadow: 0 -20px 60px -20px rgb(0 0 0 / 0.45);
+  }
+  .more-sheet::backdrop {
+    background: rgb(10 8 20 / 0.5);
+  }
+  .more-sheet[open] {
+    animation: sheet-up 220ms var(--ease-out);
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(40%);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .more-sheet[open] {
+      animation: none;
+    }
+  }
+  .more-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .more-sheet__title {
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .more-sheet__close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+  }
+  .more-sheet__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .more-sheet__link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    padding: 0.5rem 0.8rem;
+    font-weight: 700;
+    color: var(--color-on-surface);
+    background: var(--color-surface-container);
+    border-radius: 0.8rem;
+    text-decoration: none;
+  }
+  .more-sheet__credit {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--color-on-surface-variant);
+  }
+
+  @media (min-width: 64rem) {
+    .site-topnav,
+    .site-pledge {
+      display: flex;
+    }
+    .site-header__row {
+      min-height: 4rem;
+    }
+    .tabbar {
+      display: none;
+    }
+    body {
+      padding-bottom: 0;
+    }
+  }
 }
