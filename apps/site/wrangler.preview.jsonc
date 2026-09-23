@@ -1,0 +1,13 @@
+// A preview of the site on workers.dev, on LVBT's Cloudflare account, for
+// review before lvwwd.org moves to this repository. Deploy it with
+// `npx wrangler deploy -c wrangler.preview.jsonc` after building. It has no
+// custom domain, so production traffic never reaches it.
+{
+  "name": "lvwwd-preview",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-08-31",
+  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page" },
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+}
