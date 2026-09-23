@@ -115,25 +115,101 @@ const exploreCards = [
 <BaseLayout title={`${site.name} · ${dateRange}`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
 
-  {/* HERO */}
-  <section
-    class="container-page flex flex-col pt-[clamp(3rem,9dvh,5.5rem)] pb-12 md:pb-14"
-    aria-labelledby="hero-heading"
-  >
-    <div class="reveal">
-      <p class="text-title-sm font-bold text-primary-ink">
-        Week Without Driving · Las&nbsp;Vegas · {dateRange}
-      </p>
-      <h1 id="hero-heading" class="text-display-md mt-5 max-w-[24ch] text-balance">
-        However you get around Las&nbsp;Vegas, this week is for you.
-      </h1>
-      <p class="mt-5 max-w-2xl text-body-lg leading-relaxed text-pretty">
-        More than 1 in 3 people in the U.S. don’t drive, because of disability, age, cost or choice.
-        If that’s you, this week is about your everyday trips. If you usually drive, try getting
-        where you need to go by bus, walking or rolling, biking, or getting a ride, and notice
-        what’s easy and what’s hard.
-      </p>
-      <p class="mt-4 text-body-md text-on-surface-variant">
+  {/* HERO: the campaign as a Las Vegas marquee, then one line and one action. */}
+  <section class="hero pb-12 md:pb-16" aria-labelledby="hero-heading">
+    <div class="container-page pt-6 md:pt-10">
+      <div class="marquee" aria-hidden="true">
+        <p class="marquee__small">Las Vegas</p>
+        <p class="marquee__big">Week Without Driving</p>
+        <p class="marquee__dates">Oct 1–8 · 2026</p>
+      </div>
+
+      <div class="hero__grid">
+        <div>
+          <h1 id="hero-heading" class="hero__headline">
+            However you get around Las&nbsp;Vegas, this week is for you.
+          </h1>
+          <p class="hero__line">
+            Take the bus, walk, roll, bike, or get a ride. Every trip counts.
+          </p>
+
+          <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
+            <a href="/take-part#pledge" class="hero__cta press">
+              Pick your pledge
+              <Icon name="mdi:arrow-right" class="size-5" aria-hidden="true" />
+            </a>
+            <a href="/take-part#how-it-works" class="body-link font-semibold">How it works</a>
+          </div>
+        </div>
+        <div class="hero__facts">
+          <dl class="wwd-route">
+            {
+              facts.map((f) => (
+                <div class="wwd-stop">
+                  <dt
+                    class:list={[
+                      'text-display-sm font-extrabold leading-none tnum',
+                      f.accent && 'text-primary',
+                    ]}
+                  >
+                    {f.value}
+                  </dt>
+                  <dd class="mt-2 max-w-[22rem] text-body-md leading-snug text-on-surface-variant text-pretty">
+                    {f.label}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+
+      <ol
+        class="week-route"
+        aria-label="The week runs eight days, Thursday October 1 to Thursday October 8"
+      >
+        <li class="week-route__stop week-route__stop--end">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Thu</span>
+          <span class="week-route__num">1</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Fri</span>
+          <span class="week-route__num">2</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Sat</span>
+          <span class="week-route__num">3</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Sun</span>
+          <span class="week-route__num">4</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Mon</span>
+          <span class="week-route__num">5</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Tue</span>
+          <span class="week-route__num">6</span>
+        </li>
+        <li class="week-route__stop">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Wed</span>
+          <span class="week-route__num">7</span>
+        </li>
+        <li class="week-route__stop week-route__stop--end">
+          <span class="week-route__dot"></span>
+          <span class="week-route__day">Thu</span>
+          <span class="week-route__num">8</span>
+        </li>
+      </ol>
+      <p class="mt-3 text-sm text-on-surface-variant">
         Part of the national{' '}
         <a
           href={wwd.nationalUrl}
@@ -141,69 +217,8 @@ const exploreCards = [
           target="_blank"
           rel="noopener noreferrer"
           class="body-link">Week Without Driving</a
-        >, organized by {wwd.nationalOrganizer}.
+        >.
       </p>
-    </div>
-    <div class="reveal mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
-      <a
-        href="/take-part#how-it-works"
-        class="press inline-flex items-center gap-2 bg-primary px-7 py-4 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-      >
-        How the week works
-      </a>
-      <a href="/partners" class="body-link font-semibold">Bring your organization &#8594;</a>
-    </div>
-
-    {/* Route strip: three sourced numbers as stops on one line */}
-    <div class="reveal mt-14 md:mt-20">
-      <dl class="wwd-route">
-        {
-          facts.map((f) => (
-            <div class="wwd-stop">
-              <dt
-                class:list={[
-                  'text-display-sm font-extrabold leading-none tnum',
-                  f.accent && 'text-primary',
-                ]}
-              >
-                {f.value}
-              </dt>
-              <dd class="mt-2 max-w-[22rem] text-body-md leading-snug text-on-surface-variant text-pretty">
-                {f.label}
-              </dd>
-            </div>
-          ))
-        }
-      </dl>
-    </div>
-  </section>
-
-  {
-    /* PICK YOUR PLEDGE — a short call to action; the pledge flow itself
-      lives on Take Part. */
-  }
-  <section
-    id="pledge-cta"
-    class="scroll-mt-24 bg-slab text-on-slab"
-    aria-labelledby="pledge-cta-heading"
-  >
-    <div
-      class="container-page flex flex-col items-start gap-6 py-14 md:flex-row md:items-center md:justify-between md:py-16"
-    >
-      <div class="reveal max-w-xl">
-        <h2 id="pledge-cta-heading" class="text-headline-md">Pick your pledge.</h2>
-        <p class="mt-3 leading-relaxed text-on-slab/85 text-pretty">
-          Every pledge counts the same. Already get around without a car? Pledge too. Your everyday
-          trips are what this week is about.
-        </p>
-      </div>
-      <a
-        href="/take-part#pledge"
-        class="reveal press inline-flex shrink-0 items-center gap-2 bg-primary px-7 py-4 font-bold text-on-primary no-underline hover:bg-surface hover:text-on-surface focus-visible:bg-surface focus-visible:text-on-surface"
-      >
-        Pick your pledge
-        <Icon name="mdi:arrow-right" class="size-4" aria-hidden="true" />
-      </a>
     </div>
   </section>
 
@@ -420,5 +435,176 @@ const exploreCards = [
       left: 0;
       top: calc(-1 * (var(--stop) + 1.25rem));
     }
+  }
+
+  /* ---- Hero: a Las Vegas marquee sign, one headline, one action. ---- */
+  .marquee {
+    position: relative;
+    padding: 1.4rem 1rem 1.2rem;
+    text-align: center;
+    color: #fff4d6;
+    background: radial-gradient(90% 120% at 50% 0%, #2a1a14 0%, transparent 70%), #120d0b;
+    border-radius: 1.25rem;
+    box-shadow: 0 24px 50px -24px rgb(18 13 11 / 0.7);
+    overflow: hidden;
+  }
+  .marquee::before {
+    content: '';
+    position: absolute;
+    inset: 0.5rem;
+    border: 5px dotted #ffd98a;
+    border-radius: 0.9rem;
+    filter: drop-shadow(0 0 3px #ffc658) drop-shadow(0 0 8px rgb(255 198 88 / 0.6));
+    animation: marquee-chase 1.6s steps(2) infinite;
+  }
+  @keyframes marquee-chase {
+    50% {
+      border-color: #fff1c9;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee::before {
+      animation: none;
+    }
+  }
+  .marquee__small,
+  .marquee__big,
+  .marquee__dates {
+    position: relative;
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    text-transform: uppercase;
+  }
+  .marquee__small {
+    font-size: clamp(0.8rem, 3.4vw, 1.1rem);
+    letter-spacing: 0.3em;
+    color: #ff8a5c;
+    text-shadow: 0 0 10px rgb(255 106 60 / 0.7);
+  }
+  .marquee__big {
+    margin-top: 0.35rem;
+    font-size: clamp(2.2rem, 11.5vw, 5.6rem);
+    line-height: 0.95;
+    color: #fff4d6;
+    text-shadow:
+      0 3px 0 #e5471a,
+      0 6px 0 #8f2708,
+      0 0 22px rgb(255 190 110 / 0.35);
+    text-wrap: balance;
+  }
+  .marquee__dates {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.35rem 0.9rem;
+    font-size: clamp(0.95rem, 4.2vw, 1.35rem);
+    color: #120d0b;
+    background: #ffd98a;
+    border-radius: 999px;
+    box-shadow: 0 0 16px rgb(255 217 138 / 0.55);
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 1.75rem;
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: 1.35fr 1fr;
+      align-items: end;
+      margin-top: 2.5rem;
+    }
+  }
+  .hero__facts {
+    order: 2;
+  }
+  .hero__headline {
+    margin-top: 0;
+    max-width: 20ch;
+    font-size: clamp(2rem, 7.5vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .hero__line {
+    margin-top: 0.9rem;
+    max-width: 34ch;
+    font-size: clamp(1.15rem, 4.4vw, 1.4rem);
+    line-height: 1.4;
+    color: var(--color-on-surface-variant);
+    text-wrap: pretty;
+  }
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 56px;
+    padding: 0 1.6rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 10px 24px -10px rgb(229 71 26 / 0.75);
+  }
+  .hero__cta:hover,
+  .hero__cta:focus-visible {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+
+  /* The week as a bus line: eight stops, Thursday to Thursday. */
+  .week-route {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    margin-top: 2.6rem;
+    padding: 0;
+    list-style: none;
+  }
+  .week-route::before {
+    content: '';
+    position: absolute;
+    left: calc(100% / 16);
+    right: calc(100% / 16);
+    top: 0.55rem;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-primary);
+  }
+  .week-route__stop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .week-route__dot {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 4px solid var(--color-primary);
+  }
+  .week-route__stop--end .week-route__dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: -0.2rem;
+    background: var(--color-primary);
+    border-color: var(--color-on-surface);
+  }
+  .week-route__day {
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-on-surface-variant);
+  }
+  .week-route__num {
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+    line-height: 1;
   }
 </style>

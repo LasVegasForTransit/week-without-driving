@@ -1341,3 +1341,53 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
     border-top: 1px solid var(--chrome-hairline);
   }
 }
+
+/* Bungee by David Jonathan Ross (SIL Open Font License 1.1): the campaign's
+   marquee face. Self-hosted as a small subset of capitals, digits and a few
+   marks, so it only suits short uppercase display text. */
+@font-face {
+  font-family: 'Bungee Subset';
+  src: url('/fonts/bungee-subset.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Header site mark: a deliberate two-line lockup instead of a wrapping line. */
+@layer components {
+  .site-mark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    color: var(--color-on-surface);
+  }
+  .site-mark__name {
+    font-weight: 800;
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .site-mark__place {
+    margin-top: 0.2rem;
+    font-family: 'Bungee Subset', 'Public Sans Variable', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary-ink);
+  }
+}
+
+/* Narrow phones (under 360 px): keep the site mark, Pledge and Menu on one row. */
+@media (max-width: 24rem) {
+  .site-header > div {
+    gap: 0.5rem;
+  }
+  .site-mark__name {
+    font-size: 0.8rem;
+  }
+  .site-mark__place {
+    font-size: 0.58rem;
+  }
+  .pledge-button,
+  .menu-button {
+    padding-inline: 0.7rem;
+  }
+}
