@@ -1,9 +1,516 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { BINGO_SQUARES } from '../lib/bingo';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
+
+// Digital Transit Bingo, /bingo. Copy and behavior are from the Feature
+// "Let participants mark a Digital Transit Bingo card on their phone"
+// (features/bingo/play-bingo.md) and "Let anyone print a paper bingo card"
+// (features/bingo/print-bingo-card.md). The board's interactivity — marking,
+// lines, List view, saving, printing — lives in /scripts/bingo.js because
+// the site's Content Security Policy blocks inline scripts; this page must
+// still be readable with JavaScript off, handled by the <noscript> block
+// below.
+//
+// The day line and the "Enter the giveaway" mentions below the card depend
+// on today's date, which this static page cannot know at build time. The
+// server-rendered text below is a reasonable starting state (correct as of
+// this build); /scripts/bingo.js corrects it immediately for the visitor's
+// actual clock. This mirrors the approach in index.astro's date-derived
+// copy.
+const now = new Date();
+const dayIndex = Math.floor((now.getTime() - wwd.start.getTime()) / 86_400_000) + 1;
+const isBeforeWeek = now < wwd.start;
+const isAfterWeek = now > wwd.end;
+const dayLine = isBeforeWeek
+  ? 'The week starts October 1. You can start marking squares now.'
+  : isAfterWeek
+    ? "The week has ended. Thanks for playing! Your card can't be changed now."
+    : `The week is on: day ${Math.min(Math.max(dayIndex, 1), 8)} of 8.`;
+const showGiveawayLink = !isBeforeWeek && !isAfterWeek;
+
+const title = 'Digital Transit Bingo · Week Without Driving Las Vegas';
+const description =
+  'Mark a 5-by-5 card of small challenges about getting around Las Vegas without driving, October 1 to 8, 2026. No account, no sign-up.';
 ---
 
-<BaseLayout title="Bingo · Week Without Driving Las Vegas">
-  <section class="container-page py-16">
-    <h1 class="text-display-sm">Bingo</h1>
+<BaseLayout {title} {description}>
+  <section class="container-page max-w-3xl py-12 md:py-16">
+    <h1 class="text-display-sm">Digital Transit Bingo</h1>
+    <p class="lede mt-4">
+      Small things to try from {WWD_DATE_RANGE}, {wwd.year}. Tap a square when you've done it. Five
+      in a row is a bingo.
+    </p>
+    <p class="mt-3 text-title-md font-semibold text-primary-ink" data-bingo-day-line>{dayLine}</p>
+
+    {/* View switch */}
+    <div class="mt-8 flex flex-wrap items-center gap-3" role="group" aria-label="Show the card as">
+      <button type="button" class="bingo-view-btn" data-bingo-view-btn="card" aria-pressed="true">
+        Card view
+      </button>
+      <button type="button" class="bingo-view-btn" data-bingo-view-btn="list" aria-pressed="false">
+        List view
+      </button>
+    </div>
+
+    {/* Storage-blocked notice, shown by script when localStorage is unavailable */}
+    <p
+      class="mt-4 hidden border border-outline bg-surface-container px-4 py-3 text-sm leading-relaxed"
+      role="status"
+      data-bingo-storage-notice
+      hidden
+    >
+      Your browser isn't letting this site save your card. Your marks will stay until you close or
+      reload this page. To keep them, open lvwwd.org/bingo in a regular browser window, not a
+      private one.
+    </p>
+
+    {/* "Your card is clear." transient notice */}
+    <p
+      class="mt-4 hidden text-sm font-semibold text-primary-ink"
+      role="status"
+      data-bingo-cleared-notice
+      hidden
+    >
+      Your card is clear.
+    </p>
+
+    <p class="mt-6 text-title-sm font-bold" role="status" data-bingo-progress aria-live="polite">
+      No squares marked yet. The middle square is free.
+    </p>
+
+    {/* Interactive board — hidden with JavaScript off in favor of the plain list below */}
+    <div data-bingo-interactive>
+      <div class="bingo-board mt-4" data-bingo-board data-view="card">
+        {
+          [1, 2, 3, 4, 5].map((r) => (
+            <>
+              <h2 class="bingo-row-heading">Row {r}</h2>
+              {BINGO_SQUARES.filter((s) => s.row === r).map((sq, ci) => {
+                const i = (r - 1) * 5 + ci;
+                return sq.free ? (
+                  <div class="bingo-cell bingo-cell--free">
+                    <Icon name="mdi:star" class="bingo-cell__star" aria-hidden="true" />
+                    <span class="bingo-cell__label">Week Without Driving</span>
+                    <span class="sr-only">. Free square, always marked.</span>
+                  </div>
+                ) : (
+                  <label class="bingo-cell" for={`bingo-${i}`}>
+                    <input
+                      type="checkbox"
+                      id={`bingo-${i}`}
+                      class="bingo-cell__input"
+                      data-bingo-input
+                      data-index={i}
+                    />
+                    <span class="bingo-cell__check" aria-hidden="true">
+                      <Icon name="mdi:check-bold" />
+                    </span>
+                    <span class="bingo-cell__label">{sq.label}</span>
+                    <span class="bingo-cell__full">{sq.fullText}</span>
+                    <span class="bingo-cell__suffix sr-only">
+                      {' '}
+                      Row {sq.row}, column {sq.col}.
+                    </span>
+                  </label>
+                );
+              })}
+            </>
+          ))
+        }
+      </div>
+
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <button
+          type="button"
+          class="press inline-flex items-center justify-center gap-2 bg-primary px-6 py-4 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+          data-bingo-share
+        >
+          <Icon name="mdi:share-variant-outline" class="size-5" aria-hidden="true" />
+          Share your card
+        </button>
+        <a
+          href="/bingo/print"
+          class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-4 font-bold text-on-surface no-underline hover:bg-surface-container focus-visible:bg-surface-container"
+        >
+          <Icon name="mdi:printer-outline" class="size-5" aria-hidden="true" />
+          Print a card
+        </a>
+      </div>
+      <p class="mt-4" data-bingo-giveaway-link style={showGiveawayLink ? '' : 'display:none'}>
+        <a href="/giveaway" class="body-link font-semibold">Enter the giveaway &#8594;</a>
+      </p>
+
+      {/* "Bingo!" / whole-card celebration */}
+      <dialog class="bingo-dialog" data-bingo-line-dialog aria-labelledby="bingo-line-heading">
+        <h2 id="bingo-line-heading" data-bingo-line-heading class="text-headline-sm">Bingo!</h2>
+        <p class="mt-3 leading-relaxed" data-bingo-line-message></p>
+        <p class="mt-3 leading-relaxed text-pretty" data-bingo-line-suggestion></p>
+        <div class="mt-6 flex flex-col gap-3">
+          <button
+            type="button"
+            class="press inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+            data-bingo-dialog-share
+          >
+            Share your card
+          </button>
+          <a
+            href="/giveaway"
+            class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-3 font-bold text-on-surface no-underline hover:bg-surface-container focus-visible:bg-surface-container"
+            data-bingo-dialog-giveaway
+          >
+            Enter the giveaway
+          </a>
+          <button type="button" class="body-link font-semibold" data-bingo-dialog-close>
+            Keep playing
+          </button>
+        </div>
+      </dialog>
+
+      <div class="bingo-confetti" data-bingo-confetti aria-hidden="true"></div>
+    </div>
+
+    {
+      /* Plain list for JavaScript off. Hidden by default; a <noscript> below
+      swaps visibility, matching the reveal-ready pattern in BaseLayout. */
+    }
+    <div data-bingo-noscript class="mt-8" hidden>
+      <p class="border border-outline bg-surface-container px-4 py-3 text-sm leading-relaxed">
+        Marking squares needs JavaScript turned on in your browser. You can still read the squares
+        below and print this page from your browser's menu.
+      </p>
+      {
+        [1, 2, 3, 4, 5].map((r) => (
+          <div class="mt-6">
+            <h2 class="text-title-md font-bold">Row {r}</h2>
+            <ul class="mt-2 list-none space-y-2 pl-0">
+              {BINGO_SQUARES.filter((s) => s.row === r).map((sq) => (
+                <li>{sq.free ? 'Week Without Driving (free square)' : sq.fullText}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    {/* How to play */}
+    <section class="mt-14" aria-labelledby="how-to-play">
+      <h2 id="how-to-play" class="text-headline-sm">How to play</h2>
+      <ol class="prose-doc mt-4 list-decimal space-y-2 pl-6">
+        <li>Tap a square when you've done it. Tap it again to unmark it.</li>
+        <li>
+          Five marked squares in a row, down a column, or corner to corner make a bingo. The middle
+          square is free.
+        </li>
+        <li>
+          Every way of getting around counts: by bus, walking or rolling, biking, or getting a ride.
+          Some squares you can do without leaving home.
+        </li>
+        <li>
+          If you still have to drive, you haven't failed. Noticing what made it hard is part of the
+          game.
+        </li>
+        <li>
+          Two squares use this site: find your nearest stop on the <a href="/go" class="body-link"
+            >Go page</a
+          >, and follow the <a href="/guides/sidewalk-audit" class="body-link"
+            >sidewalk audit guide</a
+          >.
+        </li>
+        <li>It's on the honor system. Nobody checks your card.</li>
+        <li>
+          Bingos are for fun and don't win a prize by themselves. From October 1 to 8, a screenshot
+          of your card counts as that day's <a href="/giveaway" class="body-link">giveaway entry</a
+          >, even with one square marked.
+        </li>
+      </ol>
+    </section>
+
+    <p class="mt-8 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
+      Your card is saved on this phone or computer, in this browser. There's no account, and nothing
+      is sent to us. If you clear your browsing data or switch to another phone or browser, you'll
+      start a new card. In a private window, your card is gone when you close it.
+    </p>
+
+    <button
+      type="button"
+      class="press mt-8 inline-flex items-center gap-2 border-2 border-outline bg-surface px-6 py-4 font-bold text-on-surface hover:bg-surface-container focus-visible:bg-surface-container"
+      data-bingo-clear
+    >
+      Clear my card
+    </button>
+
+    <dialog class="bingo-dialog" data-bingo-clear-dialog aria-labelledby="bingo-clear-heading">
+      <h2 id="bingo-clear-heading" class="text-headline-sm">Clear your card?</h2>
+      <p class="mt-3 leading-relaxed">
+        This removes all your marks on this phone. You can't undo it.
+      </p>
+      <div class="mt-6 flex flex-col gap-3">
+        <button
+          type="button"
+          class="press inline-flex items-center justify-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+          data-bingo-clear-confirm
+        >
+          Clear card
+        </button>
+        <button
+          type="button"
+          class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-3 font-bold text-on-surface hover:bg-surface-container focus-visible:bg-surface-container"
+          data-bingo-clear-cancel
+        >
+          Keep my marks
+        </button>
+      </div>
+    </dialog>
   </section>
+
+  <noscript>
+    <style>
+      [data-bingo-interactive],
+      [data-bingo-view-btn],
+      [data-bingo-clear] {
+        display: none !important;
+      }
+      [data-bingo-noscript] {
+        display: block !important;
+      }
+    </style>
+  </noscript>
+
+  <script is:inline src="/scripts/bingo.js" defer></script>
 </BaseLayout>
+
+<style>
+  .bingo-view-btn {
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface);
+    padding: 0.625rem 1.125rem;
+    font-weight: 700;
+    font-size: var(--text-body-sm);
+    min-height: 44px;
+  }
+  .bingo-view-btn[aria-pressed='true'] {
+    background: var(--color-on-surface);
+    border-color: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+
+  .bingo-board {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+  @media (min-width: 30rem) {
+    .bingo-board {
+      gap: 0.5rem;
+    }
+  }
+  .bingo-row-heading {
+    display: none;
+  }
+
+  .bingo-cell {
+    position: relative;
+    display: flex;
+    aspect-ratio: 1 / 1;
+    min-height: 44px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    border: 1.5px solid var(--color-outline-variant);
+    background: var(--color-surface);
+    padding: 0.35rem;
+    text-align: center;
+    font-size: 0.6875rem;
+    line-height: 1.15;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (min-width: 30rem) {
+    .bingo-cell {
+      font-size: 0.8125rem;
+      padding: 0.5rem;
+    }
+  }
+
+  .bingo-cell__input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .bingo-cell__input:focus-visible ~ * {
+    outline: 3px solid var(--color-primary);
+    outline-offset: -3px;
+  }
+
+  .bingo-cell__check {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    display: none;
+    color: currentColor;
+  }
+  .bingo-cell__check svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+  .bingo-cell:has(.bingo-cell__input:checked) {
+    background: var(--color-on-surface);
+    border-color: var(--color-on-surface);
+    color: var(--color-surface);
+  }
+  .bingo-cell:has(.bingo-cell__input:checked) .bingo-cell__check {
+    display: block;
+  }
+  .bingo-cell--in-line {
+    border-width: 3px;
+    border-color: var(--color-primary);
+  }
+
+  .bingo-cell--free {
+    background: var(--color-primary-container, var(--color-surface-container));
+    border-color: var(--color-primary);
+    color: var(--color-primary-ink);
+    cursor: default;
+  }
+  .bingo-cell__star {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .bingo-cell__full {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* List view: same checkboxes, reflowed as a grouped checklist with the
+     square's full text visible instead of its short label. */
+  .bingo-board[data-view='list'] {
+    display: block;
+  }
+  .bingo-board[data-view='list'] .bingo-row-heading {
+    display: block;
+    margin-top: 1.5rem;
+    font-size: var(--text-title-md);
+    font-weight: 800;
+  }
+  .bingo-board[data-view='list'] .bingo-row-heading:first-child {
+    margin-top: 0;
+  }
+  .bingo-board[data-view='list'] .bingo-cell {
+    aspect-ratio: auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 0.25rem;
+    border: none;
+    border-bottom: 1px solid var(--color-outline-variant);
+    text-align: left;
+    font-size: var(--text-body-md);
+    font-weight: 400;
+  }
+  .bingo-board[data-view='list'] .bingo-cell:has(.bingo-cell__input:checked) {
+    background: transparent;
+    color: inherit;
+    border-bottom-color: var(--color-outline-variant);
+  }
+  .bingo-board[data-view='list'] .bingo-cell__input {
+    position: static;
+    inset: auto;
+    opacity: 1;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+    margin-top: 0.15rem;
+  }
+  .bingo-board[data-view='list'] .bingo-cell__check {
+    display: none !important;
+  }
+  .bingo-board[data-view='list'] .bingo-cell__label {
+    display: none;
+  }
+  .bingo-board[data-view='list'] .bingo-cell__full {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+  .bingo-board[data-view='list'] .bingo-cell__suffix {
+    display: none;
+  }
+  .bingo-board[data-view='list'] .bingo-cell--free {
+    border-bottom: 1px solid var(--color-outline-variant);
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    justify-content: flex-start;
+    padding: 0.75rem 0.25rem;
+  }
+  .bingo-board[data-view='list'] .bingo-cell--free .bingo-cell__label::after {
+    content: ' (free square)';
+  }
+  .bingo-board[data-view='list'] .bingo-cell--in-line {
+    border-bottom-width: 1px;
+    border-left: 3px solid var(--color-primary);
+    padding-left: 0.5rem;
+  }
+
+  .bingo-dialog {
+    max-width: 26rem;
+    width: calc(100% - 2rem);
+    border: none;
+    padding: 1.5rem;
+    box-shadow: 0 20px 60px -20px rgb(0 0 0 / 0.4);
+  }
+  .bingo-dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .bingo-confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    overflow: hidden;
+  }
+  .bingo-confetti span {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    background: var(--color-primary);
+    animation: bingo-confetti-fall 1.6s ease-in forwards;
+  }
+  @keyframes bingo-confetti-fall {
+    to {
+      transform: translateY(105vh) rotate(360deg);
+      opacity: 0.2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bingo-confetti {
+      display: none;
+    }
+  }
+</style>
