@@ -1811,6 +1811,29 @@ body {
     margin-top: 0.05rem;
     accent-color: var(--color-primary);
   }
+
+  /* The bot check (Turnstile). It takes space only when it needs a tap. */
+  .bot-check {
+    margin-top: 1rem;
+  }
+
+  /* Preview Worker only: the "Open my week" link, shown instead of sent. */
+  .preview-link {
+    margin-top: 1.25rem;
+    padding: 1rem 1.1rem;
+    overflow-wrap: anywhere;
+    border: 2px dashed color-mix(in srgb, var(--color-on-surface) 45%, transparent);
+    border-radius: 0.75rem;
+  }
+  .preview-link > * + * {
+    margin-top: 0.4rem;
+  }
+  .preview-link__title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 }
 
 /* Give the older utility-built pages the same shapes as Home: pill

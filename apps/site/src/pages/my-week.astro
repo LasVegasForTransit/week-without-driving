@@ -8,8 +8,10 @@ import { wwd } from '../lib/wwd';
 // My week: the page a signed-up person comes back to. It shows their
 // entries as the eight days of the week, the one button that checks them
 // in for today, an optional photo, reminders, and their details. The page
-// is the same for everyone; /scripts/my-week.js fills it in for the person
-// signed in on this phone, or shows the signed-out state.
+// is the same for everyone; /scripts/my-week.js fills it in from the
+// Worker's API for the person signed in on this phone, or shows the
+// signed-out state. Opening an "Open my week" link (/my-week?t=...) is
+// handled by the Worker before this page loads.
 const title = 'My week · Week Without Driving Las Vegas';
 
 // How someone got around without driving. Any one of them makes the day a
@@ -30,6 +32,9 @@ const shortcuts = [
 
 <BaseLayout title={title} description="Your shared trips, entries and details." noindex>
   <div class="container-page myweek narrow">
+    {/* Shown when the API can't be reached */}
+    <p data-me-offline hidden class="myweek__lede" role="alert"></p>
+
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
       <h1 id="out-heading" class="page-title">My week</h1>
@@ -54,6 +59,7 @@ const shortcuts = [
           Hi, <span data-me-name>there</span>.
         </h1>
         <p class="myweek__lede" data-me-phase>Share each day you skip the car, October 1 to 8.</p>
+        <div class="preview-link" data-preview-link hidden></div>
       </section>
 
       {/* ENTRIES: the eight days, today's trip, and sharing it. */}
@@ -285,6 +291,7 @@ const shortcuts = [
           >Sign out of this phone</button
         >
       </p>
+      <p class="form-error" data-signout-status aria-live="polite"></p>
     </div>
 
     <noscript>
@@ -292,6 +299,7 @@ const shortcuts = [
     </noscript>
   </div>
 
+  <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/share-trip.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
 </BaseLayout>
