@@ -1,23 +1,54 @@
 import type { ApiContext, Participant } from '../env';
 import { MESSAGES, json, problem, readJsonObject } from '../http';
 import { todayNumber } from '../time';
+import { MAX_SCREENSHOT_BYTES, SCREENSHOT_REPLIES, storeScreenshot } from './photo';
 
 /**
- * What a signed-in person does during the week: log a trip they took
- * without driving, choose reminders, and keep their bingo card.
+ * What a signed-in person does during the week: share a trip they took
+ * without driving (their giveaway entry), choose reminders, and keep their
+ * bingo card.
  */
 
 const MAX_BINGO_BYTES = 4096;
 
 /** The ways to get around without driving that count as a trip. */
 export const TRIP_MODES = ['bus', 'walk', 'bike', 'ride'] as const;
+
+// Public posts can come from these apps. Anything else is refused, so a
+// volunteer only ever opens links to known social media sites.
+const POST_HOSTS = [
+  'instagram.com',
+  'facebook.com',
+  'fb.com',
+  'tiktok.com',
+  'threads.net',
+  'threads.com',
+  'x.com',
+  'twitter.com',
+  'bsky.app',
+];
+
+export function isPostLink(text: string): boolean {
+  try {
+    const url = new URL(text);
+    const host = url.hostname.replace(/^www\./, '');
+    return (
+      url.protocol === 'https:' &&
+      POST_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`))
+    );
+  } catch {
+    return false;
+  }
+}
 const MAX_NOTE_LENGTH = 280;
 
 export const WEEK_REPLIES = {
   notYet: 'Logging trips opens October 1.',
   over: 'Logging trips is closed. The week is over.',
-  noModes: 'Pick how you got around. Pick more than one if you like.',
+  noModes: 'Pick how you got around, in step 1.',
   noteTooLong: `Keep the note under ${MAX_NOTE_LENGTH} characters.`,
+  noPost: 'Paste the link to your post, or add a screenshot of it.',
+  badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
   bingoTooBig: 'That bingo card is too big to save.',
   remindersNotTrueFalse: 'Reminders can only be turned on or off.',
 } as const;
@@ -25,17 +56,49 @@ export const WEEK_REPLIES = {
 interface TripInput {
   modes: string;
   hard: string | null;
+  link: string | null;
+  screenshot: File | null;
+  share: boolean;
 }
 
-/** Reads { modes: string[], hard?: string } from a trip log, or returns a problem. */
-function readTrip(body: Record<string, unknown>): TripInput | string {
-  const raw = Array.isArray(body.modes) ? body.modes : [];
+/** A text field from the form, trimmed; a file or a missing field reads as empty. */
+function textField(form: FormData, name: string): string {
+  const value = form.get(name);
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+/** Reads a shared trip from the entry form, or returns the problem with it. */
+function readTrip(form: FormData): TripInput | string {
+  const raw = form.getAll('mode').map(String);
   const modes = TRIP_MODES.filter((mode) => raw.includes(mode));
   // Every item must be a known mode, listed once.
   if (modes.length === 0 || modes.length !== raw.length) return WEEK_REPLIES.noModes;
-  const hard = typeof body.hard === 'string' ? body.hard.trim() : '';
+  const hard = textField(form, 'hard');
   if (hard.length > MAX_NOTE_LENGTH) return WEEK_REPLIES.noteTooLong;
-  return { modes: modes.join(','), hard: hard || null };
+  const link = textField(form, 'link');
+  const file = form.get('screenshot');
+  const screenshot = file instanceof File && file.size > 0 ? file : null;
+  if (!link && !screenshot) return WEEK_REPLIES.noPost;
+  if (link && !isPostLink(link)) return WEEK_REPLIES.badLink;
+  return {
+    modes: modes.join(','),
+    hard: hard || null,
+    link: link || null,
+    screenshot,
+    share: form.get('share') === '1',
+  };
+}
+
+async function readForm(request: Request): Promise<FormData | null> {
+  // Refuse an oversized upload before reading it; the form adds a little on top of the file.
+  if (Number(request.headers.get('Content-Length') ?? '0') > MAX_SCREENSHOT_BYTES + 64 * 1024) {
+    return null;
+  }
+  try {
+    return await request.formData();
+  } catch {
+    return null;
+  }
 }
 
 /** The person's logged trips, oldest first, as { day, modes }. */
@@ -55,25 +118,53 @@ export async function listTrips(
 }
 
 /**
- * Logs a trip without driving for today, where "today" is the server's Las
- * Vegas date, never the phone's. Logging again on the same day replaces how
- * they got around and the note; it is still one entry for that day.
+ * Enters today's shared trip, where "today" is the server's Las Vegas date,
+ * never the phone's. It needs how the person got around and the post: a
+ * link to a public post, or a screenshot from a private account. Entering
+ * again the same day replaces the trip; it is still one entry for that day.
+ * Volunteers check every post before the draw.
  */
 export async function checkIn(c: ApiContext, me: Participant): Promise<Response> {
   const today = todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now);
   if (today < 1 || today > 8) {
     return problem(409, today === 0 ? WEEK_REPLIES.notYet : WEEK_REPLIES.over);
   }
-  const body = await readJsonObject(c.request);
-  if (!body) return problem(400, MESSAGES.badRequest);
-  const trip = readTrip(body);
+  const form = await readForm(c.request);
+  if (!form) return problem(413, SCREENSHOT_REPLIES.tooBig);
+  const trip = readTrip(form);
   if (typeof trip === 'string') return problem(400, trip);
-  await c.env.DB.prepare(
-    `INSERT INTO checkins (participant_id, day, created_at, modes, hard) VALUES (?1, ?2, ?3, ?4, ?5)
-     ON CONFLICT (participant_id, day) DO UPDATE SET modes = ?4, hard = ?5`,
+
+  let key: string | null = null;
+  if (trip.screenshot) {
+    const stored = await storeScreenshot(c, me, today, trip.screenshot);
+    if (stored instanceof Response) return stored;
+    key = stored;
+  }
+  const previous = await c.env.DB.prepare(
+    'SELECT screenshot_key FROM checkins WHERE participant_id = ?1 AND day = ?2',
   )
-    .bind(me.id, today, c.now.toISOString(), trip.modes, trip.hard)
+    .bind(me.id, today)
+    .first<{ screenshot_key: string | null }>();
+  await c.env.DB.prepare(
+    `INSERT INTO checkins (participant_id, day, created_at, modes, hard, post_url, screenshot_key, share)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+     ON CONFLICT (participant_id, day) DO UPDATE SET
+       modes = ?4, hard = ?5, post_url = ?6, screenshot_key = ?7, share = ?8`,
+  )
+    .bind(
+      me.id,
+      today,
+      c.now.toISOString(),
+      trip.modes,
+      trip.hard,
+      trip.link,
+      key,
+      trip.share ? 1 : 0,
+    )
     .run();
+  // A replaced screenshot is no longer needed.
+  if (previous?.screenshot_key) await c.env.PHOTOS?.delete(previous.screenshot_key);
+
   const trips = await listTrips(c, me);
   return json({ count: trips.length, days: trips.map((t) => t.day), trips });
 }
