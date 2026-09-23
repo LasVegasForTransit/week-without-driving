@@ -1,3 +1,4 @@
+import { handleAdmin, isAdminPath } from './admin/index';
 import { handleApi } from './api/index';
 import { dailyCleanup } from './cleanup';
 import type { Env } from './env';
@@ -7,7 +8,8 @@ import { redirectFor } from './redirect';
 
 /**
  * lvwwd.org's Worker. The site is static pages; the Worker adds the
- * participant API under /api/, opens "Open my week" links, writes the
+ * participant API under /api/, the volunteer admin views under /admin and
+ * /api/admin/ (behind Cloudflare Access), opens "Open my week" links, writes the
  * Turnstile site key into the two pages with a bot check, and sends www to
  * the apex. wrangler.jsonc's run_worker_first lists the page paths it has
  * to see before the assets do.
@@ -20,6 +22,7 @@ export default {
     const redirect = redirectFor(request);
     if (redirect) return redirect;
     const url = new URL(request.url);
+    if (isAdminPath(url.pathname)) return handleAdmin(request, env, ctx);
     if (url.pathname.startsWith('/api/')) return handleApi(request, env, ctx);
 
     const page = url.pathname.replace(/\/$/, '');
