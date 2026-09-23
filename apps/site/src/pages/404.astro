@@ -1,14 +1,78 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { mainNav } from '../lib/nav';
+
+// Page not found: say so plainly, then offer the same places the menu does.
 ---
 
-<BaseLayout title="Page not found · Week Without Driving Las Vegas">
-  <section class="container-page py-16 md:py-24">
-    <h1 class="text-headline-lg">Page not found.</h1>
-    <p class="lede mt-4">
-      This site is one page. <a href="/" class="body-link font-semibold"
-        >Back to the challenge &#8594;</a
-      >
-    </p>
+<BaseLayout title="Page not found · Week Without Driving Las Vegas" noindex>
+  <section class="container-page notfound">
+    <h1 class="notfound__title">We can’t find that page.</h1>
+    <p class="notfound__lede">It may have moved. Try one of these instead.</p>
+    <div class="notfound__actions">
+      <a href="/" class="btn btn--primary">Go to the home page</a>
+      <a href="/sign-up" class="btn btn--outline" data-signup-link>
+        <span data-signup-label>Sign up to win</span>
+      </a>
+    </div>
+    <ul class="notfound__list">
+      {
+        mainNav.map((item) => (
+          <li>
+            <a href={item.href} class="notfound__link">
+              <Icon name={item.icon} class="notfound__icon" aria-hidden="true" />
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </BaseLayout>
+
+<style>
+  .notfound {
+    max-width: 44rem;
+    padding-block: clamp(3rem, 8vw, 5rem);
+  }
+  .notfound__title {
+    font-size: clamp(2.2rem, 8vw, 3.25rem);
+    line-height: 1.05;
+  }
+  .notfound__lede {
+    margin-top: 0.75rem;
+    font-size: 1.2rem;
+    color: var(--color-on-surface-variant);
+  }
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .notfound__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 2rem;
+  }
+  .notfound__link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    padding: 0.5rem 0.9rem;
+    font-weight: 800;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    background: var(--color-surface-container);
+    border-radius: 0.9rem;
+  }
+  .notfound__link :global(.notfound__icon) {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-primary-ink);
+  }
+</style>
