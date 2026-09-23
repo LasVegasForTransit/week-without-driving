@@ -8,7 +8,12 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SCHEMES = ['light', 'dark'] as const;
 
-type Pair = { name: string; fg: string; bg: string; min: number };
+interface Pair {
+  name: string;
+  fg: string;
+  bg: string;
+  min: number;
+}
 
 const PAIRS: Pair[] = [
   { name: 'text on the page', fg: 'on-surface', bg: 'surface', min: 4.5 },
