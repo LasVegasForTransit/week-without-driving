@@ -61,7 +61,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
 
       <div class="form-field">
         <label for="su-contact" class="form-label">Phone number or email</label>
-        <p id="su-contact-help" class="form-help">
+        <p id="su-contact-help" class="form-help" data-contact-help>
           We use it to tell you if you win, and to send your link to My week.
         </p>
         <input
@@ -149,10 +149,14 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
         >.
       </p>
 
+      {/* Turnstile, the bot check. The Worker writes the site key into data-sitekey. */}
+      <div class="bot-check" data-turnstile data-sitekey=""></div>
+
       <button type="submit" class="btn btn--primary btn--big btn--block" data-signup-submit>
         Sign up
       </button>
       <p class="form-error mt-3 text-center" data-signup-status aria-live="polite"></p>
+      <div class="preview-link" data-preview-link hidden></div>
 
       <p class="signup__back">
         Already signed up on another phone?
@@ -168,6 +172,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
     </noscript>
   </section>
 
+  <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/sign-up.js" defer></script>
 </BaseLayout>
 
@@ -225,6 +230,9 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
     font-size: 0.95rem;
     line-height: 1.5;
     color: var(--color-on-surface-variant);
+  }
+  .signup__note {
+    font-weight: 800;
   }
   .signup__back {
     margin-top: 1.25rem;
