@@ -9,7 +9,7 @@ import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 // Week Without Driving without signing up; this form is only for the
 // giveaway and My week. The behaviour is in /scripts/sign-up.js.
 const title = 'Sign up to win · Week Without Driving Las Vegas';
-const description = `Sign up to win a one-month RTC bus pass. Check in each day, ${WWD_DATE_RANGE}, for more chances.`;
+const description = `Sign up to win a one-month RTC bus pass. Each day you take a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -21,8 +21,9 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
       </p>
       <h1 class="page-title signup__title">Sign up to win</h1>
       <p class="signup__lede">
-        Sign up once. Then check in each day, {WWD_DATE_RANGE}. Each day you check in is one entry,
-        up to {wwd.maxEntries}.
+        Sign up once. Then, each day you take a trip without driving, log it for one entry, up to {
+          wwd.maxEntries
+        }.
       </p>
       <p class="signup__aside">
         You don’t need to sign up to take part in Week Without Driving.
@@ -30,7 +31,7 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
       </p>
       <ol class="signup__next" aria-label="What happens next">
         <li>You land on My week. This phone stays signed in.</li>
-        <li>Check in each day, {WWD_DATE_RANGE}. Each day is one entry.</li>
+        <li>Each day you skip the car, log your trip. Each day is one entry.</li>
         <li>We draw the winner by October 15 and contact them.</li>
       </ol>
     </div>
@@ -99,7 +100,7 @@ const description = `Sign up to win a one-month RTC bus pass. Check in each day,
           Instagram <span class="form-optional">(optional)</span>
         </label>
         <p id="su-ig-help" class="form-help">
-          Tag @lasvegasfortransit in a post or story, and it counts as that day’s check-in.
+          Post a trip without driving and tag @lasvegasfortransit, and it counts as that day’s log.
         </p>
         <div class="form-prefix">
           <span aria-hidden="true">@</span>

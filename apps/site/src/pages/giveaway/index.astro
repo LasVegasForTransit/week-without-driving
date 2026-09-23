@@ -6,20 +6,20 @@ import Steps from '../../components/Steps.astro';
 import { prizes, winSteps } from '../../lib/campaign';
 import { wwd } from '../../lib/wwd';
 
-// Win prizes, /giveaway. Entries come from checking in on My week (or, for
-// someone who gave an Instagram handle, a tag of @lasvegasfortransit on a
-// day they haven't checked in). Signing up happens once, at /sign-up; this
+// Win prizes, /giveaway. Each day a participant takes a trip without driving
+// and logs it on My week is one entry (or, for someone who gave an Instagram
+// handle, a post of the trip that tags @lasvegasfortransit). Signing up happens once, at /sign-up; this
 // page explains the giveaway and points there.
 
 const title = 'Win prizes · Week Without Driving Las Vegas';
 const description =
-  'Sign up and check in each day, October 1 to 8, for a chance to win a one-month RTC bus pass and an LVBT sticker pack.';
+  'Each day you take a trip without driving, October 1 to 8, is a chance to win a one-month RTC bus pass and an LVBT sticker pack.';
 ---
 
 <BaseLayout {title} {description}>
   <PageHeader
     title="Win prizes"
-    lede={`Sign up, then check in each day, October 1 to 8. Each day is one entry, up to ${wwd.maxEntries}. No purchase or post necessary.`}
+    lede={`Each day from October 1 to 8 that you take a trip without driving is one entry, up to ${wwd.maxEntries}. Walking counts. No purchase or post necessary.`}
   >
     <div class="giveaway-cta">
       <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
@@ -56,9 +56,9 @@ const description =
     <h2 id="enter-heading" class="section-title">How to enter</h2>
     <Steps steps={winSteps} class="section-body" />
     <p class="section-intro giveaway-note">
-      No Instagram? You don’t need it. Sign up with an email address or phone number instead. If you
-      do give an Instagram name, tagging @lasvegasfortransit on a day you haven’t checked in counts
-      as that day’s entry.
+      No Instagram? You don’t need it. Log your trips on My week. If you gave us your Instagram
+      name, a post of your trip that tags @lasvegasfortransit counts as that day’s log. It’s on the
+      honor system: we don’t check.
     </p>
   </section>
 
@@ -68,7 +68,10 @@ const description =
     <ul class="section-body giveaway-rules">
       <li>The giveaway is open to people who live in Southern Nevada and are 13 or older.</li>
       <li>If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.</li>
-      <li>You get one entry a day, October 1 to 8, for up to 8 entries.</li>
+      <li>
+        You get one entry for each day, October 1 to 8, that you take a trip without driving and log
+        it, for up to 8 entries.
+      </li>
       <li>We draw a winner at random by October 15, 2026. Each entry is one chance.</li>
       <li>The winner has 7 days to reply before we draw someone else.</li>
       <li>No purchase or post necessary.</li>
