@@ -9,6 +9,9 @@ import { serviceWorker } from './src/integrations/service-worker';
 export default defineConfig({
   // The canonical URL. The sitemap and absolute links are built from it.
   site: 'https://lvwwd.org',
+  // Page addresses have no trailing slash (/guides, not /guides/), matching
+  // the site's links and the Worker's html_handling in wrangler.jsonc.
+  trailingSlash: 'never',
   output: 'static',
   // Iconify-backed icons, tree-shaken to the names the page references.
   // After the build, minifyScripts() shrinks dist/scripts, then
