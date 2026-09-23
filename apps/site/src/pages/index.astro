@@ -18,7 +18,7 @@ import { partners } from '../lib/partners';
 const dateRange = `October 1 to 8, ${wwd.year}`;
 const canonical = `${site.url}/`;
 
-const description = `However you get around, ${site.name} is for you, ${dateRange}. Pledge, plan a trip, and play transit bingo.`;
+const description = `Try getting around Las Vegas without driving, ${dateRange}. Anyone can take part. Sign up to win a one-month RTC bus pass.`;
 
 const eventSchema = {
   '@context': 'https://schema.org',
@@ -62,11 +62,11 @@ const eventSchema = {
 // this order.
 const steps = [
   {
-    icon: 'mdi:hand-heart-outline',
-    title: 'Pick your pledge',
-    body: 'One trip, one day or the whole week. It takes 15 seconds.',
-    cta: 'Take the pledge',
-    href: '/take-part#pledge',
+    icon: 'mdi:account-plus-outline',
+    title: 'Sign up',
+    body: 'It takes a minute. All you need is a phone number or an email.',
+    cta: 'Sign up to win',
+    href: '/sign-up',
   },
   {
     icon: 'mdi:bus',
@@ -76,9 +76,9 @@ const steps = [
     href: '/go',
   },
   {
-    icon: 'mdi:camera-outline',
-    title: 'Share it',
-    body: `Post a photo and tag @lasvegasfortransit. Every post is a giveaway entry.`,
+    icon: 'mdi:calendar-check-outline',
+    title: 'Check in each day',
+    body: 'Tap Check in on My week, October 1–8. Each day you check in is one entry to win.',
     cta: 'See the prizes',
     href: '/giveaway',
   },
@@ -112,12 +112,12 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       </p>
       <h1 id="hero-heading" class="home-hero__title">Try a week without driving.</h1>
       <p class="home-hero__sub">
-        Take the bus, walk, bike or get a ride. Do it for one trip, one day or all week. It’s free,
-        and anyone can join.
+        Take the bus, walk, bike or get a ride. Anyone can take part. Sign up with us to win a free
+        month of bus rides.
       </p>
       <div class="home-hero__actions">
-        <a href="/take-part#pledge" class="btn btn--primary btn--big" data-pledge-link>
-          <span data-pledge-label>Take the pledge</span>
+        <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
+          <span data-signup-label>Sign up to win</span>
         </a>
         <a href="#how" class="btn btn--ghost">How it works</a>
       </div>
@@ -139,7 +139,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
                 <p class="route__num">Step {i + 1}</p>
                 <h3 class="route__title">{s.title}</h3>
                 <p class="route__body">{s.body}</p>
-                <a href={s.href} class="home-link" {...(i === 0 ? { 'data-pledge-link': '' } : {})}>
+                <a href={s.href} class="home-link">
                   {s.cta}
                 </a>
               </div>
@@ -172,11 +172,19 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   <section class="home-section" aria-labelledby="prizes-heading">
     <div class="container-page home-prizes">
       <div>
-        <h2 id="prizes-heading" class="home-h2">Share your trip. Win prizes.</h2>
+        <h2 id="prizes-heading" class="home-h2">Check in every day. Win prizes.</h2>
         <p class="home-intro">
-          Post a photo of your trip and tag us. Each post is one entry, up to {wwd.maxEntries}.
+          Sign up, then check in each day from October 1 to 8. Each check-in is one entry, up to{
+            ' '
+          }
+          {wwd.maxEntries}. No purchase or post necessary.
         </p>
-        <a href="/giveaway" class="btn btn--outline mt-6">How to enter</a>
+        <div class="home-actions">
+          <a href="/sign-up" class="btn btn--primary" data-signup-link>
+            <span data-signup-label>Sign up to win</span>
+          </a>
+          <a href="/giveaway" class="btn btn--outline">How to win</a>
+        </div>
       </div>
       <ul class="home-prizes__list">
         {
@@ -310,9 +318,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   {/* LAST CALL */}
   <section class="home-final" aria-labelledby="final-heading">
     <div class="container-page home-final__inner">
-      <h2 id="final-heading" class="home-final__title">Ready to try it?</h2>
-      <a href="/take-part#pledge" class="btn btn--light btn--big" data-pledge-link>
-        <span data-pledge-label>Take the pledge</span>
+      <h2 id="final-heading" class="home-final__title">Try it this October.</h2>
+      <a href="/sign-up" class="btn btn--light btn--big" data-signup-link>
+        <span data-signup-label>Sign up to win</span>
       </a>
       <p class="home-final__help">
         Questions? Email <a href="mailto:wwd@lasvegasfortransit.org">wwd@lasvegasfortransit.org</a>
@@ -322,30 +330,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
 </BaseLayout>
 
 <style>
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 52px;
-    padding: 0 1.5rem;
-    font-weight: 800;
-    font-size: 1.05rem;
-    border-radius: 999px;
-    text-decoration: none;
-  }
-  .btn--big {
-    min-height: 60px;
-    padding: 0 2rem;
-    font-size: 1.2rem;
-  }
-  .btn--primary {
-    color: var(--color-on-primary);
-    background: var(--color-primary);
-  }
-  .btn--primary:hover,
-  .btn--primary:focus-visible {
-    background: var(--color-primary-ink);
-  }
   .btn--ghost {
     color: #fff;
     border: 2px solid rgb(255 255 255 / 0.85);
@@ -354,15 +338,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .btn--ghost:focus-visible {
     background: #fff;
     color: #111;
-  }
-  .btn--outline {
-    color: var(--color-on-surface);
-    border: 2px solid var(--color-on-surface);
-  }
-  .btn--outline:hover,
-  .btn--outline:focus-visible {
-    background: var(--color-on-surface);
-    color: var(--color-surface);
   }
   .btn--light {
     color: var(--color-primary-ink);
@@ -384,19 +359,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
   .home-link::after {
     content: '→';
-  }
-  /* A slot for content LVBT hasn't confirmed yet. */
-  .to-come {
-    display: inline-block;
-    white-space: nowrap;
-    padding: 0.15rem 0.6rem;
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-on-surface-variant);
-    border: 1.5px dashed color-mix(in srgb, var(--color-on-surface) 35%, transparent);
-    border-radius: 999px;
   }
 
   /* Hero */
@@ -472,6 +434,12 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     font-size: 1.15rem;
     line-height: 1.5;
     color: var(--color-on-surface-variant);
+  }
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
   }
   .home-split {
     display: grid;

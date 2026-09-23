@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Get my link: sends the "Open my week" link again to the phone number or
+// email someone signed up with. The confirmation is the same whether or
+// not the contact matches a sign-up, so the page never reveals who signed
+// up. The behaviour is in /scripts/my-week-link.js.
+---
+
+<BaseLayout
+  title="Get my link · Week Without Driving Las Vegas"
+  description="Get the link that opens My week on this phone."
+  noindex
+>
+  <section class="container-page getlink">
+    <h1 class="getlink__title">Get my link</h1>
+    <p class="getlink__lede">
+      Type the phone number or email you signed up with. We’ll send a link that opens My week on
+      this phone.
+    </p>
+
+    <form data-link-form class="getlink__card" novalidate>
+      <div class="form-field">
+        <label for="gl-contact" class="form-label">Phone number or email</label>
+        <input
+          id="gl-contact"
+          name="contact"
+          class="form-input"
+          autocomplete="email"
+          autocapitalize="off"
+          spellcheck="false"
+          maxlength="120"
+          aria-describedby="gl-contact-error"
+        />
+        <p id="gl-contact-error" class="form-error" data-link-error aria-live="polite"></p>
+      </div>
+      <button type="submit" class="btn btn--primary btn--big btn--block mt-6" data-link-submit>
+        Send my link
+      </button>
+    </form>
+
+    <div data-link-sent hidden class="getlink__card" role="status">
+      <h2 class="getlink__h2">Check your texts or email.</h2>
+      <p class="mt-2">
+        If that matches a sign-up, we sent your link. It can take a few minutes. Check your spam
+        folder too.
+      </p>
+      <p class="mt-4">
+        Nothing came? Try the other phone number or email you might have used, or email
+        <a href="mailto:wwd@lasvegasfortransit.org" class="body-link">wwd@lasvegasfortransit.org</a
+        >.
+      </p>
+    </div>
+
+    <p class="getlink__alt">
+      Haven’t signed up yet? <a href="/sign-up" class="arrow-link">Sign up to win</a>
+    </p>
+  </section>
+
+  <script is:inline src="/scripts/my-week-link.js" defer></script>
+</BaseLayout>
+
+<style>
+  .getlink {
+    max-width: 38rem;
+    padding-block: clamp(2rem, 6vw, 4rem);
+  }
+  .getlink__title {
+    font-size: clamp(2.3rem, 8vw, 3.5rem);
+    line-height: 1.05;
+  }
+  .getlink__lede {
+    margin-top: 0.75rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .getlink__card {
+    margin-top: 1.75rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    background: var(--color-surface-container);
+    border-radius: 1.25rem;
+  }
+  .getlink__h2 {
+    font-size: 1.6rem;
+    line-height: 1.15;
+  }
+  .getlink__alt {
+    margin-top: 1.75rem;
+  }
+  .getlink__alt .arrow-link {
+    margin-left: 0.25rem;
+  }
+</style>
