@@ -1,11 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { wwd } from '../lib/wwd';
 
 // The Privacy page.
-// Wording is the task's draft Specification, word for word. "Finalize the
-// Privacy policy wording"
-// replaces it later — the whole block between the two DRAFT NOTICE comments
-// below is what to delete once that happens.
+// Wording was originally the task's draft Specification, word for word.
+// Rewritten on 2026-09-23 to match tonight's model: there is no pledge and
+// no One Trip / One Day / One Week tiers anymore. Anyone can take part
+// without giving us anything; signing up is only for LVBT's giveaway, at
+// /sign-up, and asks for a first name, an email address or phone number, a
+// ZIP code, and (optionally) an Instagram handle and an age band. Entries
+// come from checking in on /my-week, not from uploading a screenshot.
+// "Finalize the Privacy policy wording"
+// replaces this draft later — the whole block between the two DRAFT NOTICE
+// comments below is what to delete once that happens.
 
 const title = 'Privacy · Week Without Driving Las Vegas';
 const description = 'What Week Without Driving Las Vegas collects, why, and when it is deleted.';
@@ -32,7 +39,7 @@ const contactMailto = `mailto:${contactEmail}`;
 
     <h1 class="text-display-sm">Privacy</h1>
     <p class="mt-3 text-sm font-semibold text-on-surface-variant">
-      Last updated: September 22, 2026.
+      Last updated: September 23, 2026.
     </p>
 
     <article class="prose-doc mt-8">
@@ -45,12 +52,12 @@ const contactMailto = `mailto:${contactEmail}`;
       <h2>The short version</h2>
       <ul>
         <li>
-          You can pledge, play bingo and read every guide without giving us your name, email address
-          or phone number.
+          Anyone can take part in Week Without Driving. You can read every guide, find a bus and
+          play bingo without giving us your name, email address or phone number.
         </li>
         <li>
-          Everything personal we collect is optional, and we use it only for Week Without Driving
-          2026.
+          Signing up is only for LVBT's giveaway. It asks for a few required details and a couple of
+          optional ones, and we use them only for Week Without Driving 2026.
         </li>
         <li>
           We delete personal campaign information on November 30, 2026. You can ask us to delete
@@ -64,92 +71,73 @@ const contactMailto = `mailto:${contactEmail}`;
       </ul>
 
       <h2>What we collect and why</h2>
-      <p>We collect these kinds of personal information, and only when you give them to us:</p>
+      <p>
+        We only collect personal information if you sign up for LVBT's giveaway, at
+        lvwwd.org/sign-up. These are the kinds we collect:
+      </p>
       <ul>
-        <li>Email address</li>
-        <li>Phone number</li>
-        <li>Instagram handle</li>
-        <li>Screenshots and photos you upload</li>
+        <li>First name</li>
+        <li>Email address or phone number</li>
+        <li>ZIP code</li>
+        <li>Instagram handle (optional)</li>
         <li>
-          Whether you're 13 to 17 and your parent or guardian agrees to the giveaway's Official
-          Rules
+          Whether you're 18 or older, or 13 to 17 with a parent's or guardian's agreement to the
+          giveaway's Official Rules
         </li>
-        <li>A notification address from your browser, if you turn on notifications</li>
-        <li>Your reply, if you win the giveaway and answer our text message</li>
+        <li>Whether you'd like LVBT's newsletter (a box we never check for you)</li>
+        <li>Your daily check-ins, October 1 to 8</li>
+        <li>
+          A photo of the day, if you choose to add one on My week, and whether you let LVBT share it
+        </li>
+        <li>Your reply, if you win the giveaway and we contact you</li>
       </ul>
       <p>
-        Your pledge. When you pledge, we store the level you chose (One Trip, One Day or One Week).
-        If you came from a partner organization's link or QR code, we also store that organization's
-        short name, so we can tell them how many people they brought. Neither of these says who you
-        are.
+        When you sign up. We ask for your first name; an email address or a phone number, so we can
+        reach you if you win and send your personal "Open my week" link; and your ZIP code, to
+        confirm you live in Southern Nevada and to show where people took part. Your Instagram
+        handle is optional: give it and a tag of @lasvegasfortransit counts as a check-in. Signing
+        up means agreeing to the Official Rules. If you also tick "Also send me LVBT's newsletter"
+        (it's never checked for you), we pass your email address to LVBT's newsletter. See "LVBT's
+        newsletter" below.
       </p>
       <p>
-        Your email address, if you give it with your pledge. If you tick "Email me a copy of my
-        participant kit", we use your address to send you that one email, and we note whether it was
-        sent. It is the only email lvwwd.org sends. If you also tick "Also send me LVBT's
-        newsletter", we pass your address to LVBT's newsletter. See "LVBT's newsletter" below.
+        Your check-ins. Each day you tap "Check in for today" on My week, we record that day as an
+        entry, up to {wwd.maxEntries} entries for October 1 to 8. Checking in is free: no purchase, upload
+        or post is necessary. If you gave an Instagram handle and tag @lasvegasfortransit on a day you
+        haven't already checked in, a volunteer records that as your check-in for the day.
       </p>
       <p>
-        Your giveaway entries, if you enter the giveaway. For each entry we store one way to tell
-        your entries apart and to reach you if you win: your Instagram handle, or the email address
-        or phone number you type on the free entry form. If you upload a screenshot or photo, we
-        store it. We never publish it. If you tag @lasvegasfortransit on Instagram, a volunteer
-        records your handle. If you're 13 to 17, we store that your parent or guardian agrees to the
-        Official Rules. When we draw a winner, we keep a record of the draw with the winner's
-        handle, email address or phone number. We contact the winner the same way they entered: by
-        Instagram message, by email from{' '}
-        <a href={contactMailto} data-print-url={contactEmail}>{contactEmail}</a>, or by text
-        message. If the winner answers our text, we keep the reply with the record of the draw.
+        Your photo, if you add one. "Add a photo of today" on My week is optional and never gives
+        you an extra entry. We never publish it unless you separately check the box that lets LVBT
+        share it.
       </p>
       <p>
-        Your phone number, if you sign up for text reminders. We store your number, when you agreed,
-        and whether you confirmed, so we can send you one reminder a day during the week. See "Text
-        messages" below.
-      </p>
-      <p>
-        Your notification address, if you turn on notifications. Your browser gives us an address
-        that lets us send notifications to that one browser. It doesn't include your name or phone
-        number.
+        If you win. We keep a record of the draw with the way you entered — your email address,
+        phone number or Instagram handle — and your reply when we contact you at{' '}
+        <a href={contactMailto} data-print-url={contactEmail}>{contactEmail}</a>, at the phone
+        number you gave, or by Instagram direct message.
       </p>
 
       <h2>What the site keeps on your device</h2>
       <p>Some things are saved only in your browser, on your phone or computer:</p>
       <ul>
         <li>
-          Two pledge cookies, so the site remembers your pledge. <code>lvwwd_pledge</code> holds a random
-          code for your pledge, and <code>lvwwd_tier</code> holds the level you chose. They last one year,
-          or until you tap "Start a new pledge" or clear your browser's data.
+          A sign-in session, so My week remembers you're signed up. One cookie holds a session code;
+          a second just says whether this browser is signed in. Neither one is your name or contact
+          information by itself. They last until November 30, 2026, or until you sign out.
         </li>
         <li>
           Your bingo card: which squares you marked, and whether you chose the grid or the list.
           This is never sent to us.
         </li>
-        <li>
-          Whether you've already seen or closed the suggestion to add lvwwd.org to your home screen,
-          so we don't keep showing it.
-        </li>
-        <li>
-          While a browser tab is open, that tab keeps the email address you typed, whether you asked
-          for the newsletter, and the short name of the partner whose link you used. They're erased
-          when you close the tab.
-        </li>
-        <li>
-          Copies of pages you've visited, such as the guides, Go, Bingo and your participant kit, so
-          they work without a connection. Your browser keeps them until you clear your browser's
-          data.
-        </li>
-        <li>
-          If you turn on notifications, your browser keeps the subscription that lets us reach it.
-          Tap "Stop reminders" on your participant kit to remove it.
-        </li>
       </ul>
 
       <h2>How we measure use</h2>
       <p>
-        We count page visits and actions like pledging with Cloudflare Web Analytics and LVBT's own
-        analytics. These counts contain no personal information: no names, email addresses, phone
-        numbers or IP addresses. We don't let advertisers or other companies track what you do on
-        lvwwd.org across other websites.
+        We count page visits and actions like signing up with Cloudflare Web Analytics and LVBT's
+        own analytics. These counts contain no personal information: no names, email addresses,
+        phone numbers or IP addresses. We don't let advertisers or other companies track what you do
+        on lvwwd.org across other websites.
       </p>
 
       <h2>Who we share it with</h2>
@@ -160,19 +148,15 @@ const contactMailto = `mailto:${contactEmail}`;
       </p>
       <ul>
         <li>
-          Cloudflare hosts the site, stores the database and uploaded files, checks that forms are
-          filled in by people and not bots, and provides Cloudflare Web Analytics.
+          Cloudflare hosts the site, stores the sign-up database and any photo you add, checks that
+          forms are filled in by people and not bots, and provides Cloudflare Web Analytics.
         </li>
-        <li>Resend sends the kit email.</li>
+        <li>Resend sends your sign-up confirmation and your "Open my week" link.</li>
         <li>Beehiiv runs LVBT's newsletter, only if you ask to join it.</li>
-        <li>Twilio sends text reminders.</li>
-        <li>
-          Your browser's notification service, from Apple, Google, Mozilla or Microsoft, delivers
-          notifications.
-        </li>
         <li>
           Instagram, only for tags you post publicly. When you tag @lasvegasfortransit, a volunteer
-          sees your post on Instagram and records your handle. If you win, we message you there.
+          sees your post on Instagram and records your handle. If you win by a tag, we message you
+          there.
         </li>
       </ul>
       <p>
@@ -180,25 +164,14 @@ const contactMailto = `mailto:${contactEmail}`;
         email <a href={contactMailto} data-print-url={contactEmail}>{contactEmail}</a> and we'll confirm.
       </p>
 
-      <h2>Text messages</h2>
-      <p>
-        If you sign up for text reminders, you agree to get texts from Week Without Driving Las
-        Vegas at the number you gave. We first text you to confirm. You're signed up only after you
-        reply YES. Then we send 1 reminder a day, October 1 to 8, 2026, at about 8 am. Reply STOP at
-        any time to stop. Reply HELP for help. Message and data rates may apply. You don't have to
-        sign up for texts to take part. If you enter the giveaway with your phone number and you
-        win, we text you to tell you, even if you didn't sign up for reminders. Reply CLAIM to claim
-        your prize. Replying to that text never signs you up for reminders. We never share your
-        phone number or your agreement to get texts with anyone for their marketing.
-      </p>
-
       <h2>Children</h2>
       <p>
-        We don't knowingly collect information from children under 13. If you think a child under 13
-        has given us information, email <a href={contactMailto} data-print-url={contactEmail}
-          >{contactEmail}</a
-        > and we'll delete it. To enter the giveaway, you must be 13 or older. If you're 13 to 17, your
-        parent or guardian must agree to the Official Rules before you enter.
+        Anyone can take part in Week Without Driving, at any age. We don't knowingly collect
+        information from children under 13, and sign-up doesn't allow it: you must be 13 or older to
+        sign up for the giveaway. If you're 13 to 17, your parent or guardian must agree to the
+        Official Rules when you sign up. If you think a child under 13 has given us information,
+        email <a href={contactMailto} data-print-url={contactEmail}>{contactEmail}</a> and we'll delete
+        it.
       </p>
 
       <h2>LVBT's newsletter</h2>
@@ -214,31 +187,20 @@ const contactMailto = `mailto:${contactEmail}`;
 
       <h2>When we delete it</h2>
       <p>
-        On November 30, 2026, we delete every email address, phone number, Instagram handle,
-        uploaded screenshot, giveaway entry, draw record and notification address we hold for this
-        campaign. After that we keep only anonymous totals: how many people pledged at each level
-        and through each partner organization, and the anonymous counts of page visits and actions.
+        On November 30, 2026, we delete every first name, email address, phone number, ZIP code,
+        Instagram handle, photo, check-in and draw record we hold for this campaign. After that we
+        keep only anonymous totals: how many people signed up and checked in each day, and the
+        anonymous counts of page visits and actions.
       </p>
 
       <h2>See, change or delete your information</h2>
       <p>
         To see the information we hold about you, correct it, or delete it before November 30, 2026,
         email <a href={contactMailto} data-print-url={contactEmail}>{contactEmail}</a>. Tell us the
-        email address, phone number or Instagram handle you used. We'll reply within 7 days.
+        email address, phone number or Instagram handle you used. We'll reply within 7 days. You can
+        also unsubscribe from LVBT's newsletter at any time with the link at the bottom of any
+        newsletter email; that doesn't delete your sign-up.
       </p>
-      <p>You can also stop messages yourself at any time:</p>
-      <ul>
-        <li>
-          Kit email: use the unsubscribe link at the bottom of the email. This also deletes your
-          email address from lvwwd.org.
-        </li>
-        <li>Text reminders: reply STOP.</li>
-        <li>
-          Notifications: tap "Stop reminders" on your participant kit, or turn off notifications for
-          lvwwd.org in your browser or phone settings.
-        </li>
-        <li>LVBT's newsletter: use the unsubscribe link in any newsletter email.</li>
-      </ul>
 
       <h2>Changes to this page</h2>
       <p>
