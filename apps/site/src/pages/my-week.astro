@@ -12,6 +12,15 @@ import { wwd } from '../lib/wwd';
 // signed in on this phone, or shows the signed-out state.
 const title = 'My week · Week Without Driving Las Vegas';
 
+// How someone got around without driving. Any one of them makes the day a
+// car-free trip and an entry.
+const modes = [
+  { value: 'bus', label: 'Bus', icon: 'mdi:bus' },
+  { value: 'walk', label: 'Walked or rolled', icon: 'mdi:walk' },
+  { value: 'bike', label: 'Bike or scooter', icon: 'mdi:bike' },
+  { value: 'ride', label: 'Got a ride', icon: 'mdi:account-multiple-outline' },
+] as const;
+
 const shortcuts = [
   { href: '/go', label: 'Find a bus', icon: 'mdi:bus' },
   { href: '/guides', label: 'Rider guides', icon: 'mdi:book-open-variant-outline' },
@@ -19,7 +28,7 @@ const shortcuts = [
 ] as const;
 ---
 
-<BaseLayout title={title} description="Your check-ins, entries and details." noindex>
+<BaseLayout title={title} description="Your trips, entries and details." noindex>
   <div class="container-page myweek narrow">
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
@@ -44,10 +53,10 @@ const shortcuts = [
         <h1 id="hello-heading" class="page-title">
           Hi, <span data-me-name>there</span>.
         </h1>
-        <p class="myweek__lede" data-me-phase>Check in each day, October 1 to 8.</p>
+        <p class="myweek__lede" data-me-phase>Log each day you skip the car, October 1 to 8.</p>
       </section>
 
-      {/* ENTRIES: the eight days, and the one button. */}
+      {/* ENTRIES: the eight days, today's trip, and sharing it. */}
       <section class="entries" aria-labelledby="entries-heading">
         <div class="entries__head">
           <h2 id="entries-heading" class="entries__count">
@@ -65,26 +74,85 @@ const shortcuts = [
                   <Icon name="mdi:check-bold" class="entries__check" />
                 </span>
                 <span class="sr-only" data-day-status>
-                  Not checked in
+                  No trip logged
                 </span>
               </li>
             ))
           }
         </ol>
-        <button type="button" class="btn btn--primary btn--big btn--block" data-checkin disabled>
-          <Icon name="mdi:calendar-check-outline" class="size-6" aria-hidden="true" />
-          <span data-checkin-label>Check in for today</span>
-        </button>
-        <p class="entries__status" data-checkin-status aria-live="polite"></p>
+
+        {/* Today's trip: shown on each day of the week until it is logged. */}
+        <form data-log-form hidden class="log" novalidate>
+          <fieldset class="log__modes" aria-describedby="log-error">
+            <legend class="log__q">How did you get around today without driving?</legend>
+            {
+              modes.map((m) => (
+                <label class="log__mode">
+                  <input type="checkbox" name="mode" value={m.value} />
+                  <Icon name={m.icon} class="log__icon" aria-hidden="true" />
+                  <span>{m.label}</span>
+                </label>
+              ))
+            }
+          </fieldset>
+          <label for="log-hard" class="log__hard-label">
+            Was anything hard? <span class="log__optional">(optional)</span>
+          </label>
+          <textarea
+            id="log-hard"
+            name="hard"
+            rows="2"
+            maxlength="280"
+            class="log__hard"
+            placeholder="A stop with no shade, a sidewalk that ends, a long wait…"></textarea>
+          <button type="submit" class="btn btn--primary btn--big btn--block" data-log-submit>
+            Log today’s trip
+          </button>
+          <p id="log-error" class="log__error" data-log-error aria-live="polite"></p>
+          <p class="log__drove">
+            Had to drive today? You haven’t failed. Try one trip without the car tomorrow.
+          </p>
+        </form>
+
+        {/* After logging: the entry, then a picture to share. */}
+        <div data-log-done hidden class="shared">
+          <p class="shared__title" data-log-done-title aria-live="polite"></p>
+          <p class="shared__ask">Share it, so your friends try it too.</p>
+          <img
+            data-share-preview
+            alt=""
+            hidden
+            class="shared__preview"
+            width="1080"
+            height="1350"
+          />
+          <div class="shared__actions">
+            <button type="button" class="btn shared__share" data-share-image>
+              <Icon name="mdi:share-variant" class="size-5" aria-hidden="true" />
+              Share it
+            </button>
+            <button type="button" class="btn shared__save" data-save-image>
+              <Icon name="mdi:download" class="size-5" aria-hidden="true" />
+              Save the picture
+            </button>
+          </div>
+          <p class="shared__caption-label">Caption to paste</p>
+          <p class="shared__caption" data-share-caption></p>
+          <button type="button" class="shared__copy" data-copy-caption>Copy the caption</button>
+          <p class="shared__status" data-share-status aria-live="polite"></p>
+        </div>
+
+        <p class="entries__status" data-log-closed hidden></p>
         <p class="entries__fine">
-          One check-in a day. No purchase or post necessary. See the{' '}
+          One entry for each day you take a trip without driving, up to 8. Walking counts. It’s on
+          the honor system. No purchase or post necessary. See the{' '}
           <a href="/giveaway/rules" class="body-link">Official Rules</a>.
         </p>
       </section>
 
       {/* PHOTO: optional, never an extra entry. */}
       <section class="myweek__card" aria-labelledby="photo-heading">
-        <h2 id="photo-heading" class="myweek__h2">Add a photo of today</h2>
+        <h2 id="photo-heading" class="myweek__h2">Send us a photo</h2>
         <p class="myweek__p">
           Show us how you got around: the bus, your walk, your bike, the stop. It’s optional, and it
           doesn’t add entries.
@@ -135,7 +203,7 @@ const shortcuts = [
 
       {/* REMINDERS */}
       <section class="myweek__card" aria-labelledby="remind-heading">
-        <h2 id="remind-heading" class="myweek__h2">Remind me to check in</h2>
+        <h2 id="remind-heading" class="myweek__h2">Remind me to log my trip</h2>
         <p class="myweek__p">One reminder a day, October 1 to 8, at about 8 am. Stop anytime.</p>
         <label class="check-row" data-remind-row="push">
           <input type="checkbox" data-remind="push" />
@@ -196,6 +264,7 @@ const shortcuts = [
     </noscript>
   </div>
 
+  <script is:inline src="/scripts/share-trip.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
 </BaseLayout>
 
@@ -375,6 +444,149 @@ const shortcuts = [
   }
   .entries__fine :global(a) {
     color: inherit;
+  }
+
+  /* Today's trip */
+  .log__modes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .log__q {
+    grid-column: 1 / -1;
+    margin-bottom: 0.4rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+  .log__mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 5.5rem;
+    padding: 0.6rem;
+    font-weight: 800;
+    text-align: center;
+    border: 2px solid color-mix(in srgb, var(--color-on-slab) 35%, transparent);
+    border-radius: 1rem;
+    cursor: pointer;
+  }
+  .log__mode input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .log__mode :global(.log__icon) {
+    width: 2rem;
+    height: 2rem;
+  }
+  .log__mode:has(input:checked) {
+    color: var(--color-on-primary-warm);
+    background: var(--color-primary-warm);
+    border-color: var(--color-primary-warm);
+  }
+  .log__mode:has(input:focus-visible) {
+    outline: 3px solid var(--color-on-slab);
+    outline-offset: 2px;
+  }
+  .log__hard-label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 800;
+  }
+  .log__optional {
+    font-weight: 400;
+    color: var(--color-on-slab-variant);
+  }
+  .log__hard {
+    display: block;
+    width: 100%;
+    margin-block: 0.4rem 1rem;
+    padding: 0.7rem 0.9rem;
+    font-size: 1.05rem;
+    color: var(--color-on-surface);
+    background: var(--color-field);
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+  }
+  .log__error {
+    margin-top: 0.6rem;
+    font-weight: 800;
+    color: var(--color-on-slab-accent);
+  }
+  .log__error:empty {
+    display: none;
+  }
+  .log__drove {
+    margin-top: 0.75rem;
+    color: var(--color-on-slab-variant);
+  }
+
+  /* Share what you did */
+  .shared__title {
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+  .shared__ask {
+    margin-top: 0.25rem;
+    color: var(--color-on-slab-variant);
+  }
+  .shared__preview {
+    width: 100%;
+    max-width: 18rem;
+    height: auto;
+    margin-top: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.5);
+  }
+  .shared__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .shared__share {
+    color: var(--color-on-primary-warm);
+    background: var(--color-primary-warm);
+  }
+  .shared__save {
+    color: var(--color-on-slab);
+    border: 2px solid color-mix(in srgb, var(--color-on-slab) 60%, transparent);
+  }
+  .shared__caption-label {
+    margin-top: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-on-slab-variant);
+  }
+  .shared__caption {
+    margin-top: 0.3rem;
+    padding: 0.75rem 0.9rem;
+    line-height: 1.45;
+    background: color-mix(in srgb, var(--color-on-slab) 10%, transparent);
+    border-radius: 0.75rem;
+  }
+  .shared__copy {
+    margin-top: 0.5rem;
+    font-weight: 800;
+    color: var(--color-on-slab);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .shared__status {
+    margin-top: 0.5rem;
+    font-weight: 700;
+  }
+  .shared__status:empty {
+    display: none;
+  }
+  @media (min-width: 40rem) {
+    .log__modes {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* Photo */

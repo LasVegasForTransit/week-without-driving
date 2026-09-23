@@ -56,13 +56,15 @@ export const winSteps = [
     href: '/sign-up',
   },
   {
-    icon: 'mdi:calendar-check-outline',
-    title: 'Check in each day',
-    body: 'From October 1 to 8, tap Check in for today on My week. Each day is one entry, up to 8.',
+    icon: 'mdi:bus',
+    title: 'Leave the car at home',
+    body: 'Take the bus, walk, roll, bike or get a ride. One trip is enough.',
+    cta: 'Find a bus near you',
+    href: '/go',
   },
   {
-    icon: 'mdi:gift-outline',
-    title: 'Win',
-    body: 'We draw a winner by October 15, 2026, and contact them the way they signed up.',
+    icon: 'mdi:share-variant-outline',
+    title: 'Log it and share it',
+    body: 'Tell us how you got around on My week. Each day you do is one entry, up to 8. Then share it.',
   },
 ] as const;
