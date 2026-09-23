@@ -786,55 +786,6 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
 }
 
 @layer components {
-  .heading-anchor {
-    color: inherit;
-    display: inline;
-    position: relative;
-    text-decoration: none;
-  }
-
-  .heading-anchor__glyph {
-    color: var(--color-on-surface-variant);
-    display: inline-block;
-    font-size: 0.68em;
-    font-weight: 700;
-    margin-inline-start: 0.35em;
-    opacity: 0;
-    position: relative;
-    transition:
-      color 150ms var(--ease-out),
-      opacity 150ms var(--ease-out);
-  }
-
-  .heading-anchor:hover .heading-anchor__glyph,
-  .heading-anchor:focus-visible .heading-anchor__glyph,
-  .heading-anchor[data-copied] .heading-anchor__glyph {
-    opacity: 1;
-  }
-
-  .heading-anchor[data-copied] .heading-anchor__glyph {
-    color: var(--color-primary-ink);
-  }
-
-  .heading-anchor[data-copied] .heading-anchor__glyph::after {
-    background: var(--color-surface-container);
-    border: 1px solid color-mix(in srgb, var(--color-outline) 18%, transparent);
-    color: var(--color-primary-ink);
-    content: 'Copied';
-    font-size: var(--text-body-sm);
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1;
-    margin-inline-start: 0;
-    padding: 0.3rem 0.45rem;
-    position: absolute;
-    top: 50%;
-    left: calc(100% + 0.45rem);
-    transform: translateY(-50%);
-    white-space: nowrap;
-    z-index: 20;
-  }
-
   .lift {
     /* Always render the shadow shape; modulate opacity via the typed
        --lift-shadow-strength custom property so hover/rest interpolates
