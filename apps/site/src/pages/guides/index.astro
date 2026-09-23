@@ -6,6 +6,7 @@
 // change when a guide's copy does.
 import { Icon } from 'astro-icon/components';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import WinBand from '../../components/WinBand.astro';
 import { getSortedGuides } from '../../lib/guides';
 
 const guides = await getSortedGuides();
@@ -13,10 +14,10 @@ const description =
   'New to getting around Las Vegas without a car, or trying something new? These short guides answer what riders ask about most.';
 ---
 
-<BaseLayout title="Guides · Week Without Driving Las Vegas" description={description}>
+<BaseLayout title="Rider guides · Week Without Driving Las Vegas" description={description}>
   <section class="container-page py-16 md:py-24" aria-labelledby="guides-heading">
     <div class="reveal max-w-3xl">
-      <h1 id="guides-heading" class="text-display-sm">Guides</h1>
+      <h1 id="guides-heading" class="text-display-sm">Rider guides</h1>
       <p class="lede mt-5">{description}</p>
     </div>
 
@@ -47,4 +48,5 @@ const description =
       </a>
     </p>
   </section>
+  <WinBand />
 </BaseLayout>

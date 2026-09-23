@@ -1855,3 +1855,18 @@ html[data-wwd-theme] :is(h1, h2) {
     accent-color: var(--color-primary);
   }
 }
+
+/* The campaign themes give the older utility-built pages the same shapes
+   as Home: pill buttons, soft rounded cards and rounded form controls.
+   Unlayered, so these win over the Tailwind utilities they refine. */
+html[data-wwd-theme] .press {
+  border-radius: 999px;
+}
+html[data-wwd-theme] .border.bg-surface-container {
+  border-color: transparent;
+  border-radius: 1rem;
+}
+html[data-wwd-theme] :is(input, select, textarea).border,
+html[data-wwd-theme] :is(input, select, textarea)[class*='border-'] {
+  border-radius: 0.75rem;
+}
