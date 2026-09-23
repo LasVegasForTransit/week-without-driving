@@ -38,6 +38,7 @@
   const LOCATION_MAX_AGE_MS = 60000;
 
   const COPY = {
+    loading: 'Loading bus stops…',
     locating: 'Finding your location…',
     denied: 'Location is turned off for this site. Pick a place instead.',
     notFound: "We couldn't find your location. Try again, or pick a place instead.",
@@ -205,11 +206,12 @@
     showResults(stops, headingText, `${stops.length} stops found near ${announceLabel}.`);
   }
 
-  function useMyLocation() {
+  function useMyLocation(ready) {
     setStatus(COPY.locating);
     clearResults();
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        if (!(await ready)) return;
         searchFrom(position.coords.latitude, position.coords.longitude, 'Stops near you', 'you');
       },
       (error) => {
@@ -224,12 +226,13 @@
     );
   }
 
-  function choosePlace() {
+  async function choosePlace() {
     const option = placeSelect.selectedOptions[0];
     if (!option || !option.value) return; // "Choose a place" re-selected: leave results as they are
     const lat = Number(option.dataset.lat);
     const lng = Number(option.dataset.lng);
     const label = option.textContent.trim();
+    if (!(await ensureData())) return;
     searchFrom(lat, lng, `Stops near ${label}`, label);
   }
 
@@ -239,10 +242,12 @@
     return map;
   }
 
-  async function init() {
-    if (!('geolocation' in navigator)) useLocationButton.hidden = true;
-
-    try {
+  // The stop data is about 75 KB, so it loads the first time someone asks
+  // for stops rather than with the page. Once the service worker has saved
+  // it, that is instant, with or without a connection.
+  let dataLoading = null;
+  function loadData() {
+    dataLoading ??= (async () => {
       const [stopsResponse, routesResponse] = await Promise.all([
         fetch('/data/stops.json'),
         fetch('/data/routes.json'),
@@ -254,17 +259,36 @@
       if (dataCredit) {
         dataCredit.textContent = `Stop and route data from RTC (${stops.feedVersion}).`;
       }
-      app.hidden = false;
-      nodata.hidden = true;
-    } catch {
-      app.hidden = true;
-      nodata.hidden = false;
-      return;
-    }
-
-    useLocationButton.addEventListener('click', useMyLocation);
-    placeSelect.addEventListener('change', choosePlace);
+    })();
+    return dataLoading;
   }
 
-  void init();
+  /** True once the stop data is in; otherwise explains that it isn't saved yet. */
+  async function ensureData() {
+    if (stopsData) return true;
+    setStatus(COPY.loading);
+    try {
+      await loadData();
+      return true;
+    } catch {
+      dataLoading = null;
+      setStatus('');
+      app.hidden = true;
+      nodata.hidden = false;
+      return false;
+    }
+  }
+
+  function init() {
+    if (!('geolocation' in navigator)) useLocationButton.hidden = true;
+    app.hidden = false;
+    useLocationButton.addEventListener('click', () => {
+      // Load the data while the phone finds its position.
+      const ready = ensureData();
+      useMyLocation(ready);
+    });
+    placeSelect.addEventListener('change', () => void choosePlace());
+  }
+
+  init();
 })();
