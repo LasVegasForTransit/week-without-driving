@@ -43,27 +43,11 @@
     },
   ],
   "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-photos" }],
-  // TODO(turnstile): the Turnstile bot check is off until the lvwwd.org
-  // widget exists; sign-up and "Get my link" still have their rate limits.
-  // Create a Turnstile widget for lvwwd.org in the Cloudflare dashboard,
-  // put its site key in TURNSTILE_SITE_KEY below, remove BOT_CHECK, and run
-  // `npx wrangler secret put TURNSTILE_SECRET`.
+  // The secrets, the Turnstile widget, volunteer sign-in (Cloudflare Access)
+  // and email are listed in platform.json; `pnpm bootstrap --production`
+  // sets them up and `pnpm preflight --production` checks them. The bot
+  // check stays off until the Turnstile widget exists: then add its public
+  // site key here as TURNSTILE_SITE_KEY and remove BOT_CHECK. Sign-up and
+  // "Get my link" keep their rate limits either way.
   "vars": { "BOT_CHECK": "off" },
-  // TODO(email): set `npx wrangler secret put RESEND_API_KEY` once Resend
-  // can send from lvwwd.org. Until then, "Open my week" links are recorded
-  // but not emailed.
-  //
-  // TODO(admin-access): the admin views refuse every request until
-  // Cloudflare Access is in front of them (Docket: "Set up admin sign-in
-  // through the wwd-admin Google Group"). Create a self-hosted Access
-  // application with three destinations, lvwwd.org/admin, lvwwd.org/admin/*
-  // and lvwwd.org/api/admin/* (a path doesn't cover the paths under it, and
-  // a wildcard doesn't cover its parent), allowing only the Google
-  // Workspace group wwd-admin@lasvegasfortransit.org. Then set two secrets:
-  // `wrangler secret put ACCESS_TEAM_DOMAIN` (the team domain, such as
-  // lasvegasfortransit.cloudflareaccess.com) and
-  // `wrangler secret put ACCESS_AUD` (the application's AUD tag).
-  // Never set PREVIEW_ADMIN_KEY or PREVIEW_DRAW_ANYTIME here: they are for
-  // the workers.dev preview only, and the first opens the admin views to
-  // anyone holding the key.
 }
