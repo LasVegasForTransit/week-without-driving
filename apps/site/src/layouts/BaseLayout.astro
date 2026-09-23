@@ -31,10 +31,9 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
     <noscript> override restores graceful degradation for visitors without
     JS: reveals snap to visible instead of getting stuck hidden. */
 }
-<html lang="en" class="reveal-ready" data-wwd-theme="desert">
+<html lang="en" class="reveal-ready">
   <head>
     <meta charset="UTF-8" />
-    <script is:inline src="/scripts/theme-preview.js"></script>
     <noscript>
       <style>
         .reveal-ready .reveal,
@@ -48,6 +47,10 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
       </style>
     </noscript>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    {/* Light and dark follow the device setting; there is no toggle. */}
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fbf4e6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17130f" media="(prefers-color-scheme: dark)" />
     <link
       rel="preload"
       href="/fonts/atkinson-next-400.woff2"

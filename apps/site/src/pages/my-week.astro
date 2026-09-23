@@ -330,17 +330,17 @@ const shortcuts = [
     opacity: 0;
   }
   .entries__day[data-state='done'] {
-    color: #111;
+    color: var(--color-on-primary-warm);
     background: var(--color-primary-warm);
     border: 2px solid var(--color-primary-warm);
   }
   .entries__day[data-state='done'] .entries__weekday {
-    color: #111;
+    color: var(--color-on-primary-warm);
   }
   .entries__day[data-state='done'] .entries__mark {
-    color: #fff;
-    background: #111;
-    border-color: #111;
+    color: var(--color-primary-warm);
+    background: var(--color-on-primary-warm);
+    border-color: var(--color-on-primary-warm);
   }
   .entries__day[data-state='done'] :global(.entries__check) {
     opacity: 1;
@@ -353,12 +353,12 @@ const shortcuts = [
     opacity: 0.45;
   }
   .entries .btn--primary {
-    color: #111;
+    color: var(--color-on-primary-warm);
     background: var(--color-primary-warm);
   }
   .entries .btn--primary:not(:disabled):hover,
   .entries .btn--primary:focus-visible {
-    background: #fff;
+    background: var(--color-on-slab);
   }
   /* Waiting or done: an outlined state, not a faded button. */
   .entries .btn--primary:disabled {
