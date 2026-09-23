@@ -1,0 +1,8 @@
+{
+  // Local bindings for the API tests (tests/support/platform.ts). Nothing
+  // here is deployed; getPlatformProxy simulates D1 and R2 in memory.
+  "name": "lvwwd-test",
+  "compatibility_date": "2026-08-31",
+  "d1_databases": [{ "binding": "DB", "database_name": "lvwwd-test", "database_id": "local" }],
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "lvwwd-test-photos" }],
+}
