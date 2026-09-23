@@ -1,0 +1,23 @@
+---
+// "Put your bike on the bus" (build-brief.md section 5.4). Content lives
+// in src/content/guides/bike-rack.md; this file only wires it into the
+// shared GuideLayout.
+//
+// Unverified RTC facts: the rack's capacity, any fee, and any size or
+// weight limit on bikes it accepts are not stated as fact here, because
+// nobody has checked them against RTC's current pages for this rewrite.
+// Before launch, check https://www.rtcsnv.com/ and fill those specifics
+// into the Markdown file.
+import { getEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getNextGuide, getSortedGuides } from '../../lib/guides';
+
+const guide = await getEntry('guides', 'bike-rack');
+if (!guide) {
+  throw new Error('Guide "bike-rack" is missing from src/content/guides.');
+}
+const guides = await getSortedGuides();
+const nextGuide = getNextGuide(guides, guide.id);
+---
+
+<GuideLayout guide={guide} nextGuide={nextGuide} />
