@@ -74,19 +74,68 @@
     }
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const me = readMe();
-  const signedIn = document.cookie.split('; ').includes(`${FLAG}=1`);
+  // Each check returns an error message, or '' when the answer is fine.
+  function checkContact(raw) {
+    if (!raw.trim()) return 'Enter a phone number or an email address.';
+    if (!parseContact(raw)) {
+      return 'Enter a phone number, like 702-555-0123, or an email, like name@example.com.';
+    }
+    return '';
+  }
 
-  if (signedIn && me && params.get('edit') !== '1') {
+  function checkZip(zip) {
+    if (!/^\d{5}$/.test(zip)) return 'Enter a 5-digit ZIP code.';
+    if (!/^89[01]\d\d$/.test(zip)) {
+      return 'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.';
+    }
+    return '';
+  }
+
+  function checkInstagram(handle) {
+    if (handle && !/^[a-z0-9._]{1,30}$/.test(handle)) {
+      return 'Instagram names use only letters, numbers, periods and underscores.';
+    }
+    return '';
+  }
+
+  function readForm() {
+    const ageInput = form.querySelector('input[name="age"]:checked');
+    return {
+      firstName: field('firstName').value.trim(),
+      contact: field('contact').value.trim(),
+      zip: field('zip').value.trim(),
+      instagram: cleanHandle(field('instagram').value),
+      age: ageInput instanceof HTMLInputElement ? ageInput.value : '',
+      newsletter: field('newsletter').checked,
+    };
+  }
+
+  // Shows every error at once and returns the first field with one, or null.
+  function validate(values) {
+    const errors = {
+      firstName: values.firstName ? '' : 'Enter your first name.',
+      contact: checkContact(values.contact),
+      zip: checkZip(values.zip),
+      instagram: checkInstagram(values.instagram),
+      age: values.age ? '' : 'Pick one. You need to be 13 or older to sign up.',
+    };
+    Object.entries(errors).forEach(([name, message]) => setError(name, message));
+    return Object.keys(errors).find((name) => errors[name]) ?? null;
+  }
+
+  function focusField(name) {
+    const target = name === 'age' ? form.querySelector('input[name="age"]') : field(name);
+    if (target instanceof HTMLElement) target.focus();
+  }
+
+  function showAlreadySignedIn(me) {
     form.hidden = true;
     already.hidden = false;
     const nameLine = already.querySelector('[data-signup-already-name]');
     if (nameLine) nameLine.textContent = `You signed up as ${me.firstName}.`;
-    return;
   }
 
-  if (signedIn && me && params.get('edit') === '1') {
+  function prefill(me) {
     field('firstName').value = me.firstName ?? '';
     field('contact').value = me.contact ?? '';
     field('zip').value = me.zip ?? '';
@@ -98,68 +147,25 @@
     if (submit) submit.textContent = 'Save my details';
   }
 
-  form.addEventListener('submit', (event) => {
+  function submit(event) {
     event.preventDefault();
-    let firstBad = null;
-    const fail = (name, message) => {
-      setError(name, message);
-      if (!firstBad) firstBad = name;
-    };
-    ['firstName', 'contact', 'zip', 'instagram', 'age'].forEach((name) => setError(name, ''));
-
-    const firstName = field('firstName').value.trim();
-    if (!firstName) fail('firstName', 'Enter your first name.');
-
-    const contact = parseContact(field('contact').value);
-    if (!field('contact').value.trim()) {
-      fail('contact', 'Enter a phone number or an email address.');
-    } else if (!contact) {
-      fail(
-        'contact',
-        'Enter a phone number, like 702-555-0123, or an email, like name@example.com.',
-      );
-    }
-
-    const zip = field('zip').value.trim();
-    if (!/^\d{5}$/.test(zip)) {
-      fail('zip', 'Enter a 5-digit ZIP code.');
-    } else if (!/^89[01]\d\d$/.test(zip)) {
-      fail(
-        'zip',
-        'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.',
-      );
-    }
-
-    const instagram = cleanHandle(field('instagram').value);
-    if (instagram && !/^[a-z0-9._]{1,30}$/.test(instagram)) {
-      fail('instagram', 'Instagram names use only letters, numbers, periods and underscores.');
-    }
-
-    const ageInput = form.querySelector('input[name="age"]:checked');
-    const age = ageInput instanceof HTMLInputElement ? ageInput.value : '';
-    if (!age) fail('age', 'Pick one. You need to be 13 or older to sign up.');
-
+    const values = readForm();
+    const firstBad = validate(values);
     if (firstBad) {
-      const target = firstBad === 'age' ? form.querySelector('input[name="age"]') : field(firstBad);
-      if (target instanceof HTMLElement) target.focus();
+      focusField(firstBad);
       return;
     }
 
-    const submit = form.querySelector('[data-signup-submit]');
-    if (submit instanceof HTMLButtonElement) {
-      submit.disabled = true;
-      submit.textContent = 'Signing up…';
+    const button = form.querySelector('[data-signup-submit]');
+    if (button instanceof HTMLButtonElement) {
+      button.disabled = true;
+      button.textContent = 'Signing up…';
     }
 
     const previous = readMe();
     saveMe({
-      firstName,
-      contact: field('contact').value.trim(),
-      contactType: contact.type,
-      zip,
-      instagram,
-      age,
-      newsletter: field('newsletter').checked,
+      ...values,
+      contactType: parseContact(values.contact).type,
       checkins: previous?.checkins ?? [],
       photos: previous?.photos ?? [],
       reminders: previous?.reminders ?? {},
@@ -169,5 +175,16 @@
     window.setTimeout(() => {
       window.location.href = previous ? '/my-week?saved=1' : '/my-week?welcome=1';
     }, 450);
-  });
+  }
+
+  const editing = new URLSearchParams(window.location.search).get('edit') === '1';
+  const me = readMe();
+  const signedIn = document.cookie.split('; ').includes(`${FLAG}=1`);
+
+  if (signedIn && me && !editing) {
+    showAlreadySignedIn(me);
+    return;
+  }
+  if (signedIn && me) prefill(me);
+  form.addEventListener('submit', submit);
 })();
