@@ -76,8 +76,9 @@ const canonical = new URL(Astro.url.pathname, site.url).toString();
         class="site-header sticky top-0 z-(--z-header) border-b border-outline-variant/15"
       >
         <div class="container-page flex items-center justify-between gap-4 py-3">
-          <a href="/" class="text-title-sm font-bold text-on-surface no-underline">
-            Week Without Driving <span class="text-on-surface-variant">· Las&nbsp;Vegas</span>
+          <a href="/" class="site-mark no-underline">
+            <span class="site-mark__name">Week Without Driving</span>
+            <span class="site-mark__place">Las Vegas · Oct 1–8</span>
           </a>
           <nav aria-label="Main" class="hidden lg:block">
             <ul class="flex items-center gap-5 text-sm font-semibold">
