@@ -97,6 +97,8 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
 
 <BaseLayout title={`${site.name} · ${dateRange}`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
+  {/* Old one-page links like /#giveaway: runs before the page shows, so it can't wait. */}
+  <script is:inline slot="head" src="/scripts/old-links.js"></script>
 
   {/* HERO: what it is, when, and one button. */}
   <section class="home-hero" aria-labelledby="hero-heading">
