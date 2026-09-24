@@ -206,19 +206,22 @@ only once.
 ### The deploy token
 
 It becomes the GitHub secret `CLOUDFLARE_API_TOKEN` in the `production` environment, which the
-Deploy workflow uses.
+Deploy workflow uses. Make it an account API token, which belongs to the LVBT account rather than to
+you, so deploys keep working after you leave; creating one needs the Super Administrator role. It
+works with Wrangler because the workflow also sets `CLOUDFLARE_ACCOUNT_ID`.
 
-1. Open <https://dash.cloudflare.com/profile/api-tokens> and click "Create Token".
-2. Next to "Edit Cloudflare Workers", click "Use template". It grants Workers Scripts, Workers KV
-   Storage, and Workers R2 Storage with "Edit", Workers Tail and Account Settings with "Read",
-   Workers Routes on the zone with "Edit", and User Details and Memberships with "Read". The deploy
-   applies no migrations, so it needs no D1 permission.
-3. Under "Account Resources", choose "Include" and "Las Vegas for Better Transit", not "All
-   accounts". Under "Zone Resources", choose "Include", then "Specific zone", then `lvwwd.org`.
-4. Rename it `lvwwd.org deploy (GitHub Actions)`, leave "TTL" empty, click "Continue to summary",
-   then "Create Token", and copy it. Paste it when the command asks for `CLOUDFLARE_API_TOKEN`.
+1. In the Cloudflare dashboard, choose "Las Vegas for Better Transit" and go to Manage Account, then
+   "Account API Tokens". Click "Create Token", then "Create Custom Token".
+2. Name it `lvwwd.org deploy (GitHub Actions)`.
+3. Under "Permissions", add three rows: "Account", "Workers Scripts", "Edit"; "Account", "Account
+   Settings", "Read"; and "Zone", "Workers Routes", "Edit". The deploy applies no migrations, so it
+   needs no D1 permission.
+4. Under "Zone Resources", choose "Include", then "Specific zone", then `lvwwd.org`.
+5. Leave the expiration empty, click "Continue to summary", then "Create Token", and copy it;
+   Cloudflare shows it only once. Paste it when the command asks for `CLOUDFLARE_API_TOKEN`.
 
-The command copies `CLOUDFLARE_ACCOUNT_ID` into the same environment itself.
+The command copies `CLOUDFLARE_ACCOUNT_ID` into the same environment itself. The setup token stays a
+personal token that expires the next day, because account API tokens cannot manage Turnstile.
 
 ### Resend
 

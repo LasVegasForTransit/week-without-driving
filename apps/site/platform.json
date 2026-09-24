@@ -124,14 +124,14 @@
       "use": "live",
       "neededFor": "deploying lvwwd.org from GitHub",
       "targets": ["github:production"],
-      "url": "https://dash.cloudflare.com/profile/api-tokens",
+      "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/api-tokens",
       "steps": [
-        "Open https://dash.cloudflare.com/profile/api-tokens with your LVBT Cloudflare account and click \"Create Token\".",
-        "Next to \"Edit Cloudflare Workers\", click \"Use template\". It grants what a deploy needs: Workers Scripts, Workers KV Storage, and Workers R2 Storage with Edit, Workers Tail and Account Settings with Read, Workers Routes on the zone with Edit, and User Details and Memberships with Read.",
-        "Under \"Account Resources\", choose \"Include\" and \"Las Vegas for Better Transit\", not \"All accounts\".",
+        "Make it an account API token, which belongs to the LVBT account rather than to you, so deploys keep working after you leave. Creating one needs the Super Administrator role on the account.",
+        "In the Cloudflare dashboard, choose the \"Las Vegas for Better Transit\" account and go to Manage Account → \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
+        "Name it lvwwd.org deploy (GitHub Actions).",
+        "Under \"Permissions\", add three rows: \"Account\", \"Workers Scripts\", \"Edit\"; \"Account\", \"Account Settings\", \"Read\"; and \"Zone\", \"Workers Routes\", \"Edit\". The deploy applies no migrations, so it needs no D1 permission.",
         "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
-        "Rename the token to lvwwd.org deploy (GitHub Actions) and leave \"TTL\" empty, so deploys keep working.",
-        "Click \"Continue to summary\", then \"Create Token\", then \"Copy\". Cloudflare shows it only once. This command stores it as the production environment secret CLOUDFLARE_API_TOKEN in GitHub."
+        "Leave the expiration empty, so deploys keep working. Click \"Continue to summary\", then \"Create Token\", then \"Copy\". Cloudflare shows it only once. This command stores it as the production environment secret CLOUDFLARE_API_TOKEN in GitHub; the Deploy workflow also sets CLOUDFLARE_ACCOUNT_ID, which Wrangler needs with an account API token."
       ],
       "pattern": "^\\S{40,}$",
       "patternHint": "A Cloudflare API token is at least 40 characters with no spaces."
