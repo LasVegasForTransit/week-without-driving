@@ -2,10 +2,12 @@ import { partners } from '../../src/lib/partners';
 import type { ContactType } from '../env';
 import type { AdminContext, Filters, Source, View } from './common';
 import { ELIGIBLE_COUNT_SQL } from './pick';
+import { PUSH_COUNT_SQL, PUSH_LIST_SQL, type PushRow } from './push';
 
 /**
- * Everything /admin shows, read in one batch of five queries, then the
- * partner counts: two round trips, well within the Workers Free plan.
+ * Everything /admin shows, read in three batches: one round trip for the
+ * entries, counts, draws and volunteers, one for the partner counts, and
+ * one for browser reminders, well within the Workers Free plan.
  */
 
 export const PAGE_SIZE = 50;
@@ -90,6 +92,11 @@ export interface PageData {
   volunteers: string[];
   /** Every partner on the roster, or null while the database lacks migration 0005. */
   partners: PartnerCount[] | null;
+  /**
+   * The newest browsers with reminders on, and how many there are; null
+   * until the database has the reminders table (migration 0006).
+   */
+  pushes: { rows: PushRow[]; total: number } | null;
 }
 
 const VIEW_WHERE: Record<View, string> = {
@@ -182,5 +189,22 @@ export async function loadPage(c: AdminContext, filters: Filters): Promise<PageD
     draws: (draws?.results ?? []) as unknown as DrawRow[],
     volunteers: (volunteers?.results ?? []).map((row) => String(row.email)),
     partners: await partnerCounts(db),
+    pushes: await loadPushes(db),
   };
+}
+
+/** Browser reminders, read on their own so the page still opens before migration 0006. */
+async function loadPushes(db: D1Database): Promise<PageData['pushes']> {
+  try {
+    const [rows, total] = await db.batch<Record<string, unknown>>([
+      db.prepare(PUSH_LIST_SQL),
+      db.prepare(PUSH_COUNT_SQL),
+    ]);
+    return {
+      rows: (rows?.results ?? []) as unknown as PushRow[],
+      total: Number(total?.results[0]?.n ?? 0),
+    };
+  } catch {
+    return null;
+  }
 }

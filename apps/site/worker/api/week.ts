@@ -5,8 +5,7 @@ import { MAX_SCREENSHOT_BYTES, SCREENSHOT_REPLIES, storeScreenshot } from './pho
 
 /**
  * What a signed-in person does during the week: share a trip they took
- * without driving (their giveaway entry), choose reminders, and keep their
- * bingo card.
+ * without driving (their giveaway entry) and keep their bingo card.
  */
 
 const MAX_BINGO_BYTES = 4096;
@@ -51,7 +50,6 @@ export const WEEK_REPLIES = {
   alreadyChecked: 'A volunteer already checked today’s entry, so it can’t be changed.',
   badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
   bingoTooBig: 'That bingo card is too big to save.',
-  remindersNotTrueFalse: 'Reminders can only be turned on or off.',
 } as const;
 
 interface TripInput {
@@ -220,42 +218,6 @@ export async function checkIn(c: ApiContext, me: Participant): Promise<Response>
 
   const trips = await listTrips(c, me);
   return json({ count: trips.length, days: trips.map((t) => t.day), trips });
-}
-
-function onOff(value: unknown): number | null | undefined {
-  if (value === undefined) return null;
-  if (typeof value === 'boolean') return value ? 1 : 0;
-  return undefined;
-}
-
-/**
- * Saves reminder choices; nothing is sent yet. Texts are offered only to
- * people who signed up with a phone number, and email only to people who
- * signed up with an email, so the other one is always off.
- */
-export async function setReminders(c: ApiContext, me: Participant): Promise<Response> {
-  const body = await readJsonObject(c.request);
-  if (!body) return problem(400, MESSAGES.badRequest);
-  const push = onOff(body.push);
-  const text = me.contactType === 'phone' ? onOff(body.text) : 0;
-  const email = me.contactType === 'email' ? onOff(body.email) : 0;
-  if (push === undefined || text === undefined || email === undefined) {
-    return problem(400, WEEK_REPLIES.remindersNotTrueFalse);
-  }
-  // A null leaves that choice as it was.
-  const row = await c.env.DB.prepare(
-    `INSERT INTO reminders (participant_id, push, text, email, updated_at)
-     VALUES (?1, coalesce(?2, 0), coalesce(?3, 0), coalesce(?4, 0), ?5)
-     ON CONFLICT (participant_id) DO UPDATE SET
-       push = coalesce(?2, push), text = coalesce(?3, text), email = coalesce(?4, email),
-       updated_at = ?5
-     RETURNING push, text, email`,
-  )
-    .bind(me.id, push, text, email, c.now.toISOString())
-    .first<{ push: number; text: number; email: number }>();
-  return json({
-    reminders: { push: row?.push === 1, text: row?.text === 1, email: row?.email === 1 },
-  });
 }
 
 export async function getBingo(c: ApiContext, me: Participant): Promise<Response> {

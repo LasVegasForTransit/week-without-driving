@@ -3,8 +3,9 @@ import type { ApiContext, ApiEnv, Env, Participant } from '../env';
 import { MESSAGES, isSameOriginWrite, json, problem } from '../http';
 import { signedInParticipant } from '../session';
 import { getMe, signOut, updateMe } from './me';
+import { pushKey, subscribe, unsubscribe } from './push';
 import { sendMyLink, signUp } from './sign-up';
-import { checkIn, getBingo, putBingo, setReminders } from './week';
+import { checkIn, getBingo, putBingo } from './week';
 
 /**
  * The participant API under /api/. Every route says whether it needs a
@@ -25,7 +26,9 @@ const ROUTES: Route[] = [
   { method: 'GET', path: '/api/me', signedIn: true, handler: getMe },
   { method: 'PATCH', path: '/api/me', signedIn: true, handler: updateMe },
   { method: 'POST', path: '/api/checkin', signedIn: true, multipart: true, handler: checkIn },
-  { method: 'POST', path: '/api/reminders', signedIn: true, handler: setReminders },
+  { method: 'GET', path: '/api/push/key', signedIn: false, handler: pushKey },
+  { method: 'POST', path: '/api/push/subscribe', signedIn: true, handler: subscribe },
+  { method: 'POST', path: '/api/push/unsubscribe', signedIn: false, handler: unsubscribe },
   { method: 'GET', path: '/api/bingo', signedIn: true, handler: getBingo },
   { method: 'PUT', path: '/api/bingo', signedIn: true, handler: putBingo },
 ];

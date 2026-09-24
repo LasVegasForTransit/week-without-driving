@@ -4,11 +4,12 @@ import { Icon } from 'astro-icon/components';
 import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { days } from '../lib/campaign';
 import { KEEP_GOING } from '../lib/newsletter';
+import { REMINDERS } from '../lib/reminders';
 import { wwd } from '../lib/wwd';
 
 // My week: the page a signed-up person comes back to. It shows their
 // entries as the eight days of the week, the form that sends today's
-// shared trip, reminders, their details, and, at the foot, "Sign up
+// shared trip, daily reminders, their details, and, at the foot, "Sign up
 // someone else" for a volunteer signing people up on one tablet. The page
 // is the same for everyone; /scripts/my-week.js fills it in from the
 // Worker's API for the person signed in on this phone, or shows the
@@ -244,30 +245,73 @@ const shortcuts = [
         </ul>
       </section>
 
-      {/* REMINDERS */}
+      {
+        /*
+        REMINDERS: the intro, then one part for each way to get them.
+        /scripts/reminders.js shows the parts and switches the whole
+        section to its closing line once sign-up for reminders closes.
+      */
+      }
       <section
         class="myweek__card"
         aria-labelledby="remind-heading"
+        data-remind
+        data-closes-at={REMINDERS.signupClosesAt}
         data-needs-connection="reminders"
       >
-        <h2 id="remind-heading" class="myweek__h2">Remind me to share my trip</h2>
-        <p class="myweek__p">One reminder a day, October 1 to 8, at about 8 am. Stop anytime.</p>
-        <label class="check-row" data-remind-row="push">
-          <input type="checkbox" data-remind="push" data-needs-connection-button />
-          <span>Send a notification to this phone.</span>
-        </label>
-        <label class="check-row" data-remind-row="text" hidden>
-          <input type="checkbox" data-remind="text" data-needs-connection-button />
-          <span>
-            Text me one reminder a day, October 1 to 8, 2026, from Week Without Driving Las Vegas.
-            Up to 8 texts. Message and data rates may apply. Reply STOP to end, HELP for help.
-          </span>
-        </label>
-        <label class="check-row" data-remind-row="email" hidden>
-          <input type="checkbox" data-remind="email" data-needs-connection-button />
-          <span>Email me one reminder a day, October 1 to 8.</span>
-        </label>
-        <p class="entries__status" data-remind-status aria-live="polite"></p>
+        <div data-remind-intro>
+          <h2 id="remind-heading" class="myweek__h2">Remind me to share my trip</h2>
+          <p class="myweek__p">
+            One short reminder each morning, October 1 to 8, at about 8:00 am, to leave the car at
+            home and share your trip. You can stop anytime.
+          </p>
+        </div>
+        <p class="myweek__p remind__closed" data-remind-closed hidden>
+          Daily reminders have ended. Thanks for taking part!
+        </p>
+        <div class="remind__part" data-push hidden>
+          <h3 class="remind__h3">Browser notifications</h3>
+          <p class="myweek__p" data-push-consent hidden>
+            One notification a day on this phone, October 1 to 8, at about 8:00 am. No phone number
+            needed. Tap it to open My week and share your trip. Turn them off anytime with Stop
+            reminders on this page. See <a href="/privacy" class="body-link">Privacy</a>.
+          </p>
+          <p class="myweek__p" data-push-iphone hidden>
+            On iPhone, notifications work only from the Home Screen. Add lvwwd.org to your Home
+            Screen from this page, open it from the new WWD Las Vegas icon, tap My week, then tap
+            Turn on notifications.
+          </p>
+          <p class="remind__status" data-push-status aria-live="polite"></p>
+          <div class="remind__actions">
+            <button
+              type="button"
+              class="btn btn--primary"
+              data-push-on
+              data-needs-connection-button
+              hidden
+            >
+              Turn on notifications
+            </button>
+            <button
+              type="button"
+              class="btn btn--outline"
+              data-push-stop
+              data-needs-connection-button
+              hidden
+            >
+              Stop reminders
+            </button>
+            <button
+              type="button"
+              class="btn btn--outline"
+              data-push-how
+              data-open-install-sheet
+              hidden
+            >
+              Show me how
+            </button>
+          </div>
+        </div>
       </section>
 
       <div class="myweek__card">
@@ -328,6 +372,7 @@ const shortcuts = [
 
   <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/share-trip.js" defer></script>
+  <script is:inline src="/scripts/reminders.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
   <script is:inline src="/scripts/needs-connection.js" defer></script>
   <script is:inline src="/scripts/keep-going.js" defer></script>
@@ -756,8 +801,42 @@ const shortcuts = [
     object-fit: cover;
     border-radius: 1rem;
   }
-  .myweek__card .entries__status {
-    color: var(--color-primary-ink);
+
+  /* Reminders */
+  .remind__part {
+    margin-top: 1.25rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+  }
+  .remind__h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .remind__closed {
+    margin-top: 0;
+    font-weight: 700;
+    color: var(--color-on-surface);
+  }
+  .remind__status {
+    margin-top: 0.6rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+  .remind__status:empty {
+    display: none;
+  }
+  .remind__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+  .remind__actions .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
   }
 
   /* Shortcuts */

@@ -16,13 +16,7 @@ const CONTACT_IS_FIXED =
   'You can’t change your phone number or email here. Email wwd@lasvegasfortransit.org and we’ll change it for you.';
 
 export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
-  const reminders = await c.env.DB.prepare(
-    'SELECT push, text, email FROM reminders WHERE participant_id = ?1',
-  )
-    .bind(me.id)
-    .all<Record<string, number>>();
   const trips = await listTrips(c, me);
-  const chosen = reminders.results[0];
   return json({
     firstName: me.firstName,
     contactMasked: maskContact(me.contact, me.contactType),
@@ -34,11 +28,6 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     days: trips.map((trip) => trip.day),
     trips,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
-    reminders: {
-      push: chosen?.push === 1,
-      text: chosen?.text === 1,
-      email: chosen?.email === 1,
-    },
   });
 }
 

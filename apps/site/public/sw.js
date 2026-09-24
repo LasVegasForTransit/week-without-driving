@@ -16,6 +16,11 @@
  * is only the offline page and what it needs; everything else is saved as
  * the visitor opens it.
  *
+ * It also shows the daily reminders. Each one arrives as a push message,
+ * encrypted by the Worker for this browser alone, with the day's title and
+ * body. Tapping it opens My week, in a window that is already open if there
+ * is one. Nothing about the reminder is stored.
+ *
  * public/scripts/app.js registers this file and shows the update bar.
  */
 
@@ -50,6 +55,16 @@ const PRIVATE_PAGES = [/^\/my-week(?:\/|$)/, /^\/sign-up(?:\/|$)/];
 
 // Past this, a page on a weak connection is shown from the phone instead.
 const NETWORK_WAIT_MS = 4000;
+
+// Every reminder opens My week; a new one replaces the one before.
+const REMINDER = { url: '/my-week', tag: 'wwd-reminder', icon: '/icons/icon-192.png' };
+
+// Shown only if a reminder arrives without its words, which the Worker
+// never sends; the browser needs something to show for every push.
+const REMINDER_FALLBACK = {
+  title: 'Week Without Driving Las Vegas',
+  body: 'Leave the car at home today, then share your trip on My week.',
+};
 
 /**
  * How one request is answered:
@@ -126,6 +141,58 @@ function staleCaches(names) {
 function staleKeys(keys, wanted) {
   return keys.filter((key) => !wanted.has(key));
 }
+
+/**
+ * The title and body of a reminder from its push message.
+ *
+ * @param {{ json(): unknown } | null | undefined} data
+ * @returns {{ title: string, body: string }}
+ */
+function reminderFrom(data) {
+  try {
+    const message = /** @type {{ title?: unknown, body?: unknown }} */ (data?.json());
+    if (typeof message.title === 'string' && typeof message.body === 'string' && message.title) {
+      return { title: message.title, body: message.body };
+    }
+  } catch {
+    // Not JSON: fall through.
+  }
+  return REMINDER_FALLBACK;
+}
+
+/** Brings an open lvwwd.org window to My week, or opens a new one there. */
+async function openMyWeek() {
+  const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const open = windows.find((client) => new URL(client.url).origin === self.location.origin);
+  if (open) {
+    try {
+      const focused = await open.focus();
+      return await focused.navigate(REMINDER.url);
+    } catch {
+      // A window this worker doesn't control can't be sent elsewhere.
+    }
+  }
+  return self.clients.openWindow(REMINDER.url);
+}
+
+self.addEventListener('push', (event) => {
+  const { title, body } = reminderFrom(event.data);
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: REMINDER.icon,
+      tag: REMINDER.tag,
+      // A new day's reminder still sounds, even while yesterday's is shown.
+      renotify: true,
+      data: { url: REMINDER.url },
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(openMyWeek());
+});
 
 /** @param {Build} build */
 function precacheKeys(build) {

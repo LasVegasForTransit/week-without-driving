@@ -2,12 +2,16 @@ import type { Env } from './env';
 import { currentMinute } from './rate-limit';
 import { DELETE_FROM } from './time';
 
+/** The Cron Trigger the daily job runs on (wrangler.jsonc). */
+export const CLEANUP_CRON = '0 13 * * *';
+
 /**
  * The daily job (cron "0 13 * * *", early morning in Las Vegas). Every day
  * it drops rate-limit counters older than a day. From November 30, 2026 it
  * deletes every participant's data and screenshots, as the Privacy page
- * promises, with every entry volunteers logged, the draws, and the list of
- * volunteers. LVBT's newsletter list lives elsewhere and is not touched.
+ * promises, with every entry volunteers logged, every browser's reminder
+ * subscription, the draws, and the list of volunteers. LVBT's newsletter
+ * list lives elsewhere and is not touched.
  */
 
 // Screenshots are deleted a page at a time; the Free plan allows 50 outgoing
@@ -47,7 +51,7 @@ export async function dailyCleanup(env: Env, now: Date): Promise<void> {
       'draws',
       'volunteers',
       'checkins',
-      'reminders',
+      'push_subscriptions',
       'bingo',
       'link_tokens',
       'sessions',

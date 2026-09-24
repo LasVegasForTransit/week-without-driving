@@ -6,9 +6,10 @@ import { wwd } from '../lib/wwd';
 // signing up is only for LVBT's giveaway, at /sign-up, and asks for a
 // first name, an email address or phone number, a ZIP code, an age group
 // and (optionally) an Instagram handle. Entries come from sharing trips
-// without driving on /my-week, or by mail. This wording is a draft: once
-// the final wording is approved, it replaces this text and the block
-// between the two DRAFT NOTICE comments below is deleted.
+// without driving on /my-week, or by mail. Daily reminders are a separate
+// choice on My week.
+// The wording is a draft until LVBT approves the final wording; then
+// delete the whole block between the two DRAFT NOTICE comments below.
 
 const title = 'Privacy · Week Without Driving Las Vegas';
 const description = 'What Week Without Driving Las Vegas collects, why, and when it is deleted.';
@@ -19,20 +20,22 @@ const contactMailto = `mailto:${contactEmail}`;
 <BaseLayout title={title} description={description}>
   <section class="container-page page-top reading">
     {
-      /* DRAFT NOTICE — remove this block, and this comment, once the final
-        wording is approved. */
+      /* DRAFT NOTICE — remove this block, and this comment, once the
+        final wording is approved. */
     }
     <div
       class="mb-10 flex items-start gap-3 border border-primary bg-primary-container px-5 py-4 text-on-primary-container"
     >
       <span class="mt-0.5 font-bold" aria-hidden="true">&#9888;</span>
-      <p class="text-sm font-semibold leading-relaxed">Draft: final wording pending review.</p>
+      <p class="text-sm font-semibold leading-relaxed">
+        Draft: this wording is waiting for final review.
+      </p>
     </div>
     {/* END DRAFT NOTICE */}
 
     <h1 class="page-title">Privacy</h1>
     <p class="mt-3 text-sm font-semibold text-on-surface-variant">
-      Last updated: September 23, 2026.
+      Last updated: September 23, 2026. We added what we keep when you turn on daily reminders.
     </p>
 
     <article class="prose-doc mt-8">
@@ -51,6 +54,10 @@ const contactMailto = `mailto:${contactEmail}`;
         <li>
           Signing up is only for LVBT's giveaway. It asks for a few required details and a couple of
           optional ones, and we use them only for Week Without Driving 2026.
+        </li>
+        <li>
+          Daily reminders are your choice. If you turn them on, we keep the address your browser
+          gives us for them until you stop them, and never after November 30, 2026.
         </li>
         <li>
           We delete personal campaign information on November 30, 2026. You can ask us to delete
@@ -84,6 +91,10 @@ const contactMailto = `mailto:${contactEmail}`;
           The trips you share, October 1 to 8: the day, how you got around, the link to your post or
           a screenshot of it, and anything you tell us was hard
         </li>
+        <li>
+          If you turn on daily reminders: the notification address your browser gives us, with its
+          two keys, when you turned reminders on, and the date of the last reminder we sent
+        </li>
         <li>Any entry you mail us, as you wrote it</li>
         <li>Your reply, if you win the giveaway and we contact you</li>
       </ul>
@@ -110,6 +121,16 @@ const contactMailto = `mailto:${contactEmail}`;
         your name, to push for better stops, sidewalks and service. If you gave an Instagram handle and
         post a trip that tags @lasvegasfortransit, a volunteer records it for you. If you enter by mail,
         we keep what you write on the card until November 30, 2026.
+      </p>
+      <p>
+        Daily reminders. They are off until you turn them on. If you tap "Turn on notifications" in
+        My week and allow it, your browser gives us an address at its push service and two keys. We
+        keep them with your sign-up, with when you turned reminders on and the date of the last
+        reminder we sent, and use them only to send one reminder each morning, October 1 to 8, 2026.
+        Every reminder is the same for everyone and carries nothing about you, and it is encrypted
+        so only your browser can read it. To stop, tap "Stop reminders" in My week, which deletes
+        the address, or turn off notifications for lvwwd.org in your browser's settings. Signing out
+        of My week doesn't stop reminders on that phone.
       </p>
       <p>
         Your post or screenshot. We look at it only to check your entry. We never repost or publish
@@ -143,6 +164,12 @@ const contactMailto = `mailto:${contactEmail}`;
           you've signed up to win, we also keep which squares you marked with your sign-up, so the
           card follows you to another phone, and delete it on November 30, 2026.
         </li>
+        <li>
+          If you turn on daily reminders: your browser's permission for lvwwd.org to show
+          notifications, and its subscription for them. The site's background script shows each
+          reminder when it arrives and keeps no copy. You can take the permission back in your
+          browser's settings at any time.
+        </li>
       </ul>
 
       <h2>How we measure use</h2>
@@ -165,6 +192,12 @@ const contactMailto = `mailto:${contactEmail}`;
           forms are filled in by people and not bots, and provides Cloudflare Web Analytics.
         </li>
         <li>Resend sends your sign-up confirmation and your "Open my week" link.</li>
+        <li>
+          Your browser's push service delivers daily reminders, only if you turn them on: Google for
+          Chrome and Android, Apple for Safari and iPhone, Mozilla for Firefox, or Microsoft for
+          Edge. It passes each reminder to your browser but can't read it, and we don't give it your
+          name or contact details.
+        </li>
         <li>Beehiiv runs LVBT's newsletter, only if you ask to join it.</li>
         <li>
           Instagram, only for tags you post publicly. When you tag @lasvegasfortransit, a volunteer
@@ -201,10 +234,10 @@ const contactMailto = `mailto:${contactEmail}`;
       <h2>When we delete it</h2>
       <p>
         On November 30, 2026, we delete every first name, email address, phone number, ZIP code,
-        Instagram handle, post link, screenshot, mailed entry and draw record we hold for this
-        campaign. After that we keep only anonymous totals: how many people signed up, how many
-        trips were shared each day and how, and what people told us was hard, with nothing that
-        identifies them, and the anonymous counts of page visits and actions.
+        Instagram handle, post link, screenshot, notification address, mailed entry and draw record
+        we hold for this campaign. After that we keep only anonymous totals: how many people signed
+        up, how many trips were shared each day and how, and what people told us was hard, with
+        nothing that identifies them, and the anonymous counts of page visits and actions.
       </p>
 
       <h2>See, change or delete your information</h2>

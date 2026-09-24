@@ -44,6 +44,15 @@ export interface Env {
   PREVIEW_ADMIN_KEY?: string;
   /** "true" on the preview Worker only: the draw can run before October 14. */
   PREVIEW_DRAW_ANYTIME?: string;
+  /**
+   * The private key that signs every reminder notification (VAPID), as 32
+   * bytes in base64url. A secret, never a var. The Worker works out the
+   * public key from it. Without it, nobody can turn on notifications and
+   * none are sent.
+   */
+  VAPID_PRIVATE_KEY?: string;
+  /** Where push services can reach LVBT about its notifications, as a mailto: address. */
+  VAPID_SUBJECT?: string;
 }
 
 /** The environment once the API has checked the database is there. */

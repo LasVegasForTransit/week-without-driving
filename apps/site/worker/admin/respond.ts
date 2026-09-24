@@ -32,6 +32,15 @@ export const NOTICES: Record<string, Notice> = {
   'draw-unchecked': problem('Some entries still need a check. Check or remove them, then draw.'),
   'draw-no-entries': problem('There are no checked entries to draw from.'),
   'draw-stale': problem('Another volunteer drew at the same moment. Their draw is shown below.'),
+  'push-sent': done('Test reminder sent. It should show on that phone within a minute.'),
+  'push-gone': problem(
+    'That browser no longer takes notifications, so it was taken off the list. Turn reminders on again on that phone, then try again.',
+  ),
+  'push-failed': problem('The push service didn’t take the test reminder. Try again in a minute.'),
+  'push-missing': problem('That browser isn’t on the list anymore. Reload the page.'),
+  'push-off': problem(
+    'Reminders aren’t set up: the Worker has no VAPID_PRIVATE_KEY. See Set up lvwwd.org’s production.',
+  ),
 };
 
 /** GET /admin. */

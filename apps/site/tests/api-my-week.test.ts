@@ -18,7 +18,6 @@ interface Me {
   days: number[];
   trips: { day: number; modes: string[] }[];
   today: number;
-  reminders: { push: boolean; text: boolean; email: boolean };
 }
 
 interface Trip {
@@ -176,27 +175,6 @@ describe('my week', () => {
     const contact = await change({ contact: 'someone@else.com' });
     expect(contact.status).toBe(400);
     expect((await me()).contactMasked).toMatch(/@example\.com$/);
-  });
-
-  it('keeps reminder choices, offering texts only to phone sign-ups', async () => {
-    const set = (body: object) =>
-      platform.send(apiRequest('POST', '/api/reminders', { cookie, body }));
-    expect((await set({ push: true, text: true, email: true })).status).toBe(200);
-    expect((await me()).reminders).toEqual({ push: true, text: false, email: true });
-    await set({ email: false });
-    expect((await me()).reminders).toEqual({ push: true, text: false, email: false });
-    expect((await set({ push: 'yes' })).status).toBe(400);
-
-    const phone = await signUpAs(platform, { contact: '702-555-0199' });
-    await platform.send(
-      apiRequest('POST', '/api/reminders', { cookie: phone, body: { text: true, email: true } }),
-    );
-    const response = await platform.send(apiRequest('GET', '/api/me', { cookie: phone }));
-    expect((await response.json<Me>()).reminders).toEqual({
-      push: false,
-      text: true,
-      email: false,
-    });
   });
 
   it('keeps a bingo card of up to 4 KB', async () => {
