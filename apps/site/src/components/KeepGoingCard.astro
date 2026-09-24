@@ -1,0 +1,191 @@
+---
+import { lvbt } from '../lib/site';
+import { NEWSLETTER_PAGE, ONE_TAP_NEWSLETTER } from '../lib/newsletter';
+
+// The invitation to keep going with LVBT: a newsletter sign-up and the
+// membership link. My week shows it as "Keep going after the week"; Home
+// shows it as "Stay involved with LVBT" once the giveaway closes.
+//
+// Everyone sees the link to LVBT's newsletter page and "Become a member".
+// When the one-tap sign-up is on (src/lib/newsletter.ts), /scripts/keep-going.js
+// swaps the link for "Join the newsletter": with the signed-in participant's
+// own address on My week, or an email field.
+
+interface Props {
+  /** The anchor that opens the page at this card. */
+  id: string;
+  heading: string;
+  text: string;
+  /** Where the sign-up came from, as the newsletter route records it. */
+  source: 'keep_going' | 'home';
+}
+
+const { id, heading, text, source } = Astro.props;
+const headingId = `${id}-heading`;
+---
+
+<section
+  class="keep-going"
+  id={id}
+  aria-labelledby={headingId}
+  data-keep-going
+  data-source={source}
+  data-one-tap={ONE_TAP_NEWSLETTER ? 'on' : undefined}
+>
+  <h2 id={headingId} class="keep-going__heading" tabindex="-1">{heading}</h2>
+  <p class="keep-going__text">{text}</p>
+
+  <p class="keep-going__link" data-kg-page-link>
+    <a href={NEWSLETTER_PAGE} class="arrow-link">Sign up on LVBT's newsletter page</a>
+  </p>
+
+  <form class="keep-going__form" data-kg-form novalidate hidden>
+    <p class="keep-going__offline" data-kg-offline hidden>
+      You're offline. Joining the newsletter needs a connection. Try again when you're back online.
+    </p>
+    <p class="keep-going__address" data-kg-known hidden>
+      We'll send it to <span data-kg-address></span>.
+    </p>
+    <div class="keep-going__field" data-kg-field hidden>
+      <label for={`${id}-email`} class="keep-going__label">Email</label>
+      <input
+        id={`${id}-email`}
+        class="keep-going__input"
+        type="email"
+        name="email"
+        autocomplete="email"
+        aria-describedby={`${id}-email-error`}
+        data-kg-email
+      />
+      <p id={`${id}-email-error`} class="keep-going__error" data-kg-email-error></p>
+    </div>
+    <button
+      type="submit"
+      class="btn btn--primary keep-going__join"
+      aria-describedby={`${id}-note`}
+      data-kg-join
+    >
+      Join the newsletter
+    </button>
+    <button type="button" class="keep-going__other body-link" data-kg-other hidden>
+      Use a different email
+    </button>
+    <p id={`${id}-note`} class="keep-going__note">
+      The newsletter comes from LVBT, not this campaign, so your subscription isn't deleted on
+      November 30. You can unsubscribe at any time. See our <a href="/privacy" class="body-link"
+        >Privacy page</a
+      >.
+    </p>
+    <div data-turnstile data-sitekey=""></div>
+  </form>
+  <p class="keep-going__message" aria-live="polite" data-kg-message></p>
+
+  <p class="keep-going__more">Ready to do more?</p>
+  <a href={lvbt.joinUrl} class="arrow-link keep-going__member">Become a member</a>
+</section>
+
+<style>
+  .keep-going {
+    scroll-margin-top: 5rem;
+  }
+  .keep-going__heading {
+    font-size: var(--text-headline-sm);
+    line-height: 1.15;
+  }
+  .keep-going__heading:focus {
+    outline: none;
+  }
+  .keep-going__text {
+    margin-top: 0.75rem;
+    max-width: 38rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+  .keep-going__link,
+  .keep-going__form {
+    margin-top: 1.25rem;
+  }
+  .keep-going__form[hidden],
+  .keep-going__link[hidden],
+  [data-kg-field][hidden],
+  [data-kg-known][hidden],
+  [data-kg-offline][hidden],
+  [data-kg-other][hidden] {
+    display: none;
+  }
+  .keep-going__form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 30rem;
+  }
+  .keep-going__offline {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface-container);
+    font-weight: 600;
+  }
+  .keep-going__address {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .keep-going__field {
+    width: 100%;
+  }
+  .keep-going__label {
+    display: block;
+    font-weight: 700;
+  }
+  .keep-going__input {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-field);
+    color: var(--color-on-surface);
+    font-size: 1rem;
+  }
+  .keep-going__input[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+  .keep-going__error {
+    margin-top: 0.35rem;
+    color: var(--color-error);
+    font-weight: 600;
+  }
+  .keep-going__join {
+    width: 100%;
+    min-height: 48px;
+  }
+  .keep-going__join[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .keep-going__other {
+    min-height: 44px;
+    font-weight: 700;
+  }
+  .keep-going__note {
+    font-size: var(--text-body-sm);
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .keep-going__message {
+    margin-top: 0.75rem;
+    max-width: 30rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .keep-going__message:empty {
+    margin: 0;
+  }
+  .keep-going__more {
+    margin-top: 1.5rem;
+    font-weight: 700;
+  }
+  .keep-going__member {
+    min-height: 44px;
+  }
+</style>

@@ -9,6 +9,8 @@ import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
 import { days, prizes, proclamations } from '../lib/campaign';
 import { partners } from '../lib/partners';
+import KeepGoingCard from '../components/KeepGoingCard.astro';
+import { STAY_INVOLVED } from '../lib/newsletter';
 
 // The Home page, for someone who has five seconds: what the week is, when
 // it is, and one button. Below that, the three steps, why it matters, the
@@ -120,10 +122,21 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
         Take the bus, walk, bike or get a ride. Anyone can take part. Sign up with us to win a free
         month of bus rides.
       </p>
+      {/* From October 9, /scripts/keep-going.js swaps "Sign up to win" for these. */}
+      <p class="home-hero__sub home-hero__ended" data-home-closed hidden>
+        Week Without Driving 2026 has ended. Thanks to everyone who took part.
+      </p>
       <div class="home-hero__actions">
-        <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
+        <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link data-home-open>
           <span data-signup-label>Sign up to win</span>
         </a>
+        <a
+          href="#stay-involved"
+          class="btn btn--primary btn--big"
+          data-home-closed
+          data-stay-involved-link
+          hidden>Stay involved with LVBT</a
+        >
         <a href="#how" class="btn btn--ghost">How it works</a>
       </div>
     </div>
@@ -308,11 +321,23 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     </div>
   </section>
 
+  {/* STAY INVOLVED: from October 9, in place of the last call to sign up. */}
+  <section class="home-section" data-home-closed hidden>
+    <div class="container-page">
+      <KeepGoingCard
+        id="stay-involved"
+        heading={STAY_INVOLVED.heading}
+        text={STAY_INVOLVED.text}
+        source="home"
+      />
+    </div>
+  </section>
+
   {/* LAST CALL */}
   <section class="home-final" aria-labelledby="final-heading">
     <div class="container-page home-final__inner">
-      <h2 id="final-heading" class="home-final__title">Try it this October.</h2>
-      <a href="/sign-up" class="btn btn--light btn--big" data-signup-link>
+      <h2 id="final-heading" class="home-final__title" data-home-open>Try it this October.</h2>
+      <a href="/sign-up" class="btn btn--light btn--big" data-signup-link data-home-open>
         <span data-signup-label>Sign up to win</span>
       </a>
       <p class="home-final__help">
@@ -320,9 +345,14 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       </p>
     </div>
   </section>
+  <script is:inline src="/scripts/keep-going.js" defer></script>
 </BaseLayout>
 
 <style>
+  [data-home-closed][hidden],
+  [data-home-open][hidden] {
+    display: none;
+  }
   .btn--ghost {
     color: #fff;
     border: 2px solid rgb(255 255 255 / 0.85);

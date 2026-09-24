@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
+import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { days } from '../lib/campaign';
-import { lvbt } from '../lib/site';
+import { KEEP_GOING } from '../lib/newsletter';
 import { wwd } from '../lib/wwd';
 
 // My week: the page a signed-up person comes back to. It shows their
@@ -269,6 +270,15 @@ const shortcuts = [
         <p class="entries__status" data-remind-status aria-live="polite"></p>
       </section>
 
+      <div class="myweek__card">
+        <KeepGoingCard
+          id="keep-going"
+          heading={KEEP_GOING.heading}
+          text={KEEP_GOING.text}
+          source="keep_going"
+        />
+      </div>
+
       {/* DETAILS */}
       <section class="myweek__section" aria-labelledby="details-heading">
         <h2 id="details-heading" class="myweek__h2">Your details</h2>
@@ -293,14 +303,6 @@ const shortcuts = [
         <a href="/my-week/link" class="arrow-link mt-3" data-needs-connection-button
           >Send my link again</a
         >
-      </section>
-
-      <section class="myweek__section" aria-labelledby="after-heading">
-        <h2 id="after-heading" class="myweek__h2">Keep going after the week</h2>
-        <p class="myweek__p">
-          Las Vegans for Better Transit works all year for better buses and safer streets.
-        </p>
-        <a href={lvbt.joinUrl} class="arrow-link mt-3">Join LVBT</a>
       </section>
 
       <p class="myweek__signout">
@@ -328,6 +330,7 @@ const shortcuts = [
   <script is:inline src="/scripts/share-trip.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
   <script is:inline src="/scripts/needs-connection.js" defer></script>
+  <script is:inline src="/scripts/keep-going.js" defer></script>
 </BaseLayout>
 
 <style>
