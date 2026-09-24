@@ -1,5 +1,6 @@
 import { handleAdmin, isAdminPath } from './admin/index';
 import { handleApi } from './api/index';
+import { BANNER_PATH, serveBanner } from './banners';
 import { dailyCleanup } from './cleanup';
 import type { Env } from './env';
 import { openLink } from './links';
@@ -10,10 +11,10 @@ import { redirectFor } from './redirect';
  * lvwwd.org's Worker. The site is static pages; the Worker adds the
  * participant API under /api/, the volunteer admin views under /admin and
  * /api/admin/ (behind Cloudflare Access), opens "Open my week" links, writes the
- * Turnstile site key into the two pages with a bot check, and answers old
- * addresses (www, /wwd, a slash at the end) with one redirect each
- * (redirect.ts). wrangler.jsonc's run_worker_first sends it every request
- * before the assets see it.
+ * Turnstile site key into the two pages with a bot check, lets other sites
+ * show the partner banners, and answers old addresses (www, /wwd, a slash
+ * at the end) with one redirect each (redirect.ts). wrangler.jsonc's
+ * run_worker_first sends it every request before the assets see it.
  */
 
 // Only the default export: the runtime reads every named export of the entry
@@ -25,6 +26,7 @@ export default {
     const url = new URL(request.url);
     if (isAdminPath(url.pathname)) return handleAdmin(request, env, ctx);
     if (url.pathname.startsWith('/api/')) return handleApi(request, env, ctx);
+    if (url.pathname.startsWith(BANNER_PATH)) return serveBanner(request, env);
 
     const page = url.pathname.replace(/\/$/, '');
     if (page === '/my-week' && request.method === 'GET' && url.searchParams.has('t')) {

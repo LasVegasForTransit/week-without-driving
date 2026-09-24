@@ -1,0 +1,349 @@
+---
+import { Icon } from 'astro-icon/components';
+import { BANNER_DESCRIPTION as DESCRIPTION, BANNERS } from '../lib/banners';
+import { contactEmail, GENERAL, partners } from '../lib/partners';
+
+// The partner kit: pick an organization, then get its link, QR code, the
+// four banners and an embed snippet for its website. It needs JavaScript
+// (/scripts/partner-kit.js fills in the chosen organization's link), so
+// without it the kit shows only its heading and a way to ask by email.
+// The copy buttons are run by /scripts/partners.js.
+
+const bannerCards = BANNERS.map((banner) => ({
+  ...banner,
+  size: `${banner.width}x${banner.height}`,
+  src: `/partners/banners/${banner.file}`,
+}));
+---
+
+<section
+  class="section mt-12"
+  aria-labelledby="kit-heading"
+  data-partner-kit
+  data-description={DESCRIPTION}
+>
+  <h2 id="kit-heading" class="section-title">Partner kit</h2>
+
+  <noscript>
+    <p class="section-intro">
+      The partner kit needs JavaScript turned on. Or email <a
+        href={`mailto:${contactEmail}`}
+        class="body-link font-semibold">{contactEmail}</a
+      > and we'll send your link, QR code, banners and flyers.
+    </p>
+  </noscript>
+
+  <p class="section-intro" data-kit-ended hidden>
+    Week Without Driving 2026 has ended. Thank you for taking part. Your link and any banner on your
+    website keep working and open lvwwd.org/giveaway, and you can take the banner down whenever you
+    like.
+  </p>
+
+  <div class="kit" data-kit-body hidden>
+    <p class="section-intro">
+      Pick your organization to get your link, QR code, banners and flyers. Every sign-up made
+      through your link counts toward your organization.
+    </p>
+
+    <div class="kit__picker">
+      <label for="kit-organization" class="kit__label">Your organization</label>
+      <select id="kit-organization" class="kit__select" data-kit-picker>
+        <option value="" selected></option>
+        {partners.map((partner) => <option value={partner.slug}>{partner.name}</option>)}
+        <option value={GENERAL}>None (general materials)</option>
+      </select>
+      <p class="kit__hint" data-kit-hint>Pick your organization to see your link and materials.</p>
+    </div>
+
+    <div class="kit__materials" data-kit-materials hidden>
+      <div class="kit__part">
+        <h3 class="kit__h3">Your link</h3>
+        <p class="kit__link" id="kit-link" data-kit-link></p>
+        <button
+          type="button"
+          class="kit__button"
+          data-copy-target="#kit-link"
+          aria-describedby="kit-link-status"
+        >
+          <Icon name="mdi:content-copy" class="size-5" aria-hidden="true" />
+          <span data-copy-label>Copy link</span>
+        </button>
+        <p id="kit-link-status" class="kit__status" role="status"></p>
+        <p class="kit__note" data-kit-general hidden>
+          These don't credit any organization. LVBT uses them for its own outreach.
+        </p>
+      </div>
+
+      <div class="kit__part">
+        <h3 class="kit__h3">Your QR code</h3>
+        <img class="kit__qr" data-kit-qr width="200" height="200" alt="" />
+        <div class="kit__actions">
+          <a class="kit__button" data-kit-qr-png download>Download PNG</a>
+          <a class="kit__button" data-kit-qr-svg download>Download SVG</a>
+        </div>
+        <p class="kit__note">
+          Print it at least 1 inch wide so phones can scan it. Print your link under it for anyone
+          who can't scan.
+        </p>
+      </div>
+
+      <div class="kit__part">
+        <h3 class="kit__h3">Banners</h3>
+        <ul class="kit__banners">
+          {
+            bannerCards.map((card) => (
+              <li class="kit__banner">
+                <img
+                  src={card.src}
+                  width={card.width}
+                  height={card.height}
+                  alt={DESCRIPTION}
+                  loading="lazy"
+                  decoding="async"
+                  class="kit__banner-image"
+                />
+                <p class="kit__banner-name">
+                  {card.name}, {card.width} × {card.height}
+                </p>
+                <p class="kit__note">{card.purpose}</p>
+                <div class="kit__actions">
+                  <a class="kit__button" href={card.src} download>
+                    Download
+                  </a>
+                  <button
+                    type="button"
+                    class="kit__button"
+                    data-copy-text={DESCRIPTION}
+                    aria-describedby={`kit-banner-${card.size}-status`}
+                  >
+                    Copy image description
+                  </button>
+                </div>
+                <p id={`kit-banner-${card.size}-status`} class="kit__status" role="status" />
+              </li>
+            ))
+          }
+        </ul>
+        <p class="kit__note">
+          Posting on Instagram or Facebook? Add your link as a link sticker on a story, or put it in
+          your bio or post, so sign-ups count toward your organization.
+        </p>
+      </div>
+
+      <div class="kit__part">
+        <h3 class="kit__h3">Embed snippet</h3>
+        <p class="kit__note">
+          For your website. Copy this and paste it into your site's HTML where you want the banner.
+          It shows the banner with its image description built in, links to your link, and loads no
+          scripts or cookies.
+        </p>
+        <fieldset class="kit__sizes">
+          <legend class="sr-only">Banner size</legend>
+          <label class="kit__radio">
+            <input type="radio" name="kit-size" value="300x250" checked data-kit-size />
+            <span>Website box, 300 × 250</span>
+          </label>
+          <label class="kit__radio">
+            <input type="radio" name="kit-size" value="728x90" data-kit-size />
+            <span>Website strip, 728 × 90</span>
+          </label>
+        </fieldset>
+        <label for="kit-snippet" class="sr-only">Embed snippet</label>
+        <textarea
+          id="kit-snippet"
+          class="kit__snippet"
+          rows="4"
+          wrap="off"
+          readonly
+          spellcheck="false"
+          data-kit-snippet></textarea>
+        <button
+          type="button"
+          class="kit__button"
+          data-copy-target="#kit-snippet"
+          aria-describedby="kit-snippet-status"
+        >
+          <Icon name="mdi:content-copy" class="size-5" aria-hidden="true" />
+          <span data-copy-label>Copy snippet</span>
+        </button>
+        <p id="kit-snippet-status" class="kit__status" role="status"></p>
+        <p class="kit__preview-label">How it looks:</p>
+        <div class="kit__preview" data-kit-preview></div>
+      </div>
+
+      <div class="kit__part">
+        <h3 class="kit__h3">Flyers</h3>
+        <p class="kit__note">
+          Print these for tables, meetings and noticeboards. They work in black and white, and they
+          carry a QR code and link so anyone without a smartphone can still get to lvwwd.org.
+        </p>
+        <a href="/partners/flyer" class="kit__button">
+          <Icon name="mdi:file-outline" class="size-5" aria-hidden="true" />
+          View the printable flyer
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .kit[hidden],
+  .kit__materials[hidden],
+  .kit__hint[hidden],
+  .kit__note[hidden] {
+    display: none;
+  }
+  .kit__picker {
+    margin-top: 1.5rem;
+    max-width: 32rem;
+  }
+  .kit__label {
+    display: block;
+    font-weight: 700;
+  }
+  .kit__select {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-field);
+    color: var(--color-on-surface);
+    font-size: 1rem;
+  }
+  .kit__hint {
+    margin-top: 0.75rem;
+    color: var(--color-on-surface-variant);
+  }
+  .kit__part {
+    margin-top: 2.5rem;
+    max-width: 48rem;
+  }
+  .kit__h3 {
+    font-size: var(--text-title-lg);
+    font-weight: 700;
+  }
+  .kit__link {
+    margin-top: 0.75rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .kit__note {
+    margin-top: 0.75rem;
+    line-height: 1.55;
+    color: var(--color-on-surface-variant);
+  }
+  .kit__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .kit__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .kit__actions .kit__button {
+    margin-top: 0;
+  }
+  .kit__button:hover,
+  .kit__button:focus-visible {
+    background: var(--color-surface-container);
+  }
+  .kit__status {
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+  /* Kept in place while empty, so screen readers hear "Copied". */
+  .kit__status:empty {
+    margin: 0;
+  }
+  .kit__qr {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin-top: 0.75rem;
+    background: #ffffff;
+    image-rendering: pixelated;
+  }
+  .kit__banners {
+    display: grid;
+    gap: 2rem;
+    margin-top: 1rem;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .kit__banners {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .kit__banner-image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 22rem;
+    height: auto;
+    border: 1px solid var(--color-outline);
+  }
+  .kit__banner-name {
+    margin-top: 0.75rem;
+    font-weight: 700;
+  }
+  .kit__sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+    padding: 0;
+    border: 0;
+  }
+  .kit__radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .kit__radio input {
+    width: 1.35rem;
+    height: 1.35rem;
+    accent-color: var(--color-primary);
+  }
+  .kit__snippet {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+    border: 2px solid var(--color-outline);
+    background: var(--color-field);
+    color: var(--color-on-surface);
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    white-space: pre;
+    resize: vertical;
+  }
+  .kit__preview-label {
+    margin-top: 1.5rem;
+    font-weight: 700;
+  }
+  .kit__preview {
+    margin-top: 0.75rem;
+    max-width: 100%;
+    overflow: hidden;
+  }
+</style>

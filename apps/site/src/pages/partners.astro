@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PartnerKit from '../components/PartnerKit.astro';
 import { Icon } from 'astro-icon/components';
 import { partners, contactEmail, joinMailto } from '../lib/partners';
 
-// Partners, /partners: the organizations taking part, and how another
-// group can join. Every partner comes from the roster in
+// Partners, /partners: the organizations taking part, how another group
+// can join, and the partner kit. Every partner comes from the roster in
 // src/data/partners.ts; with none yet, the roster is left out entirely and
 // the page opens with "Bring your organization".
 //
@@ -141,9 +142,12 @@ const whatPartnersDo = [
         <p id="join-copy-status" class="mt-2 text-sm font-semibold" role="status"></p>
       </div>
     </div>
+
+    <PartnerKit />
   </section>
 
   <script is:inline src="/scripts/partners.js" defer></script>
+  <script is:inline src="/scripts/partner-kit.js" defer></script>
 </BaseLayout>
 
 <style>
