@@ -1,19 +1,16 @@
 // The shared deep-link builder: turns a place's latitude, longitude and
 // name into the three map links the site uses everywhere it sends a
 // visitor toward a stop or a destination (Google Maps, Apple Maps and the
-// Transit app), plus each button's accessible name. Used at build time by
-// the "Places to go" destinations on /go (src/pages/go.astro imports this
-// module directly).
+// Transit app), plus each button's name for screen readers. The "Places to
+// go" destinations on /go use it at build time (src/pages/go.astro).
 //
-// The nearest-route finder needs the same builder in the browser, for stops
+// The "Find a bus" finder needs the same builder in the browser, for stops
 // it only knows about after the visitor shares a location or picks a
 // place. A `public/scripts/*.js` file (loaded under the site's
 // `script-src 'self'` Content Security Policy, see public/_headers) cannot
 // import a TypeScript module, so public/scripts/map-links.js is a plain-JS
-// copy of the same logic. Keep the two in sync: the link formats and the
-// label wording must match exactly, because both are the same "shared
-// deep-link builder" described in the plan "Write and build the
-// destination guides".
+// copy of the same logic. Keep the two in sync: tests/map-links.test.ts
+// checks that both give the same links and names.
 //
 // Link formats:
 //   Google Maps:  https://www.google.com/maps/dir/?api=1&destination=<lat>,<lng>&travelmode=transit
