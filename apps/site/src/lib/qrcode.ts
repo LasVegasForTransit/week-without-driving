@@ -1,362 +1,449 @@
-// A from-scratch, dependency-free QR Code encoder (ISO/IEC 18004), used only
-// at build time (Astro's static render) to produce an inline SVG path — no
-// client-side JavaScript, no npm dependency. There is no QR library in the
-// pnpm catalog (see pnpm-workspace.yaml), and adding one there would touch a
-// file every worktree shares, so this file is the "pre-render the code as an
-// SVG at build time" fallback named in the partners build brief.
+// A small QR Code encoder (ISO/IEC 18004) used only when the site is built,
+// so no QR library ships to phones. It makes the printed bingo card's code
+// and every partner's link code as vector paths, and the partner PNG files.
 //
-// Scope: byte mode only, versions 1-5, and only the (version, error
-// correction level) combinations that use a single Reed-Solomon block, so no
-// codeword interleaving is needed. That covers every string this site draws
-// a QR code for: lvwwd.org links, with or without a `?ref=<slug>` partner
-// slug up to the roster's 40-character limit. A fixed mask pattern (0) is
-// used instead of evaluating all eight masks for the lowest penalty score;
-// any valid mask produces a fully scannable code, so this trades a little
-// theoretical robustness for a much smaller, easier-to-verify implementation.
+// Scope: byte mode, versions 1 to 10, any error correction level. The
+// caller names the level, and every code the site prints uses level M (it
+// still scans with about 15 percent of it damaged or covered), so a longer
+// link gets a bigger code rather than a weaker one. Codewords are split into
+// blocks and interleaved as the standard says, and the mask with the lowest
+// penalty score is chosen, like any other encoder.
 //
-// Verified against the `jsQR` decoder for several lvwwd.org URL lengths
-// during development (see the build report for how); re-run that check if
-// this file changes.
+// tests/qrcode.test.ts reads every code back with its own small decoder and
+// checks the error correction, so a change here that breaks a code fails
+// the tests.
 
-type EcLevel = 'L' | 'M' | 'Q' | 'H';
+export type EcLevel = 'L' | 'M' | 'Q' | 'H';
 
-/** Reads `arr[i]`, narrowing away `undefined`. Throws only on a real bug. */
-function idx<T>(arr: readonly T[], i: number): T {
-  const value = arr[i];
-  if (value === undefined) throw new Error(`qrcode: index ${i} out of range`);
+export interface QrCode {
+  /** Modules along one side, without the quiet zone. */
+  size: number;
+  /** `matrix[row][column]` is true for a dark module. */
+  matrix: boolean[][];
+  version: number;
+  level: EcLevel;
+  mask: number;
+}
+
+/** The white border every code needs around it, in modules. */
+export const QUIET_ZONE = 4;
+
+const MAX_VERSION = 10;
+
+// Per version (index 1 to 10): error correction codewords in each block, and
+// the number of blocks, for each level. From the standard's table 9.
+const ECC_PER_BLOCK: Record<EcLevel, readonly number[]> = {
+  L: [0, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18],
+  M: [0, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26],
+  Q: [0, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24],
+  H: [0, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28],
+};
+const BLOCKS: Record<EcLevel, readonly number[]> = {
+  L: [0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4],
+  M: [0, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5],
+  Q: [0, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8],
+  H: [0, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8],
+};
+const FORMAT_LEVEL_BITS: Record<EcLevel, number> = { L: 1, M: 0, Q: 3, H: 2 };
+
+/** Reads `list[i]`, which the tables above guarantee exists. */
+function at(list: readonly number[], i: number): number {
+  const value = list[i];
+  if (value === undefined) throw new Error(`qrcode: no table entry ${i}`);
   return value;
 }
 
-function idx2<T>(arr: readonly (readonly T[])[], row: number, col: number): T {
-  return idx(idx(arr, row), col);
+// ---- Reed-Solomon over GF(256) with the polynomial 0x11d ----------------
+
+const EXP: number[] = [];
+const LOG: number[] = new Array<number>(256).fill(0);
+for (let i = 0, x = 1; i < 255; i++) {
+  EXP.push(x);
+  LOG[x] = i;
+  x <<= 1;
+  if (x & 0x100) x ^= 0x11d;
 }
 
-const GF_EXP: number[] = new Array<number>(256).fill(0);
-const GF_LOG: number[] = new Array<number>(256).fill(0);
-(() => {
-  let x = 1;
-  for (let i = 0; i < 255; i++) {
-    GF_EXP[i] = x;
-    GF_LOG[x] = i;
-    x <<= 1;
-    if (x & 0x100) x ^= 0x11d;
+function gfMultiply(a: number, b: number): number {
+  return a === 0 || b === 0 ? 0 : at(EXP, (at(LOG, a) + at(LOG, b)) % 255);
+}
+
+/** The generator polynomial's coefficients, highest power first, without the leading 1. */
+function generator(degree: number): number[] {
+  let poly = [1];
+  for (let i = 0; i < degree; i++) {
+    const next = new Array<number>(poly.length + 1).fill(0);
+    poly.forEach((c, j) => {
+      next[j] = at(next, j) ^ c;
+      next[j + 1] = at(next, j + 1) ^ gfMultiply(c, at(EXP, i));
+    });
+    poly = next;
   }
-  GF_EXP[255] = idx(GF_EXP, 0);
-})();
-
-function gfMul(a: number, b: number): number {
-  if (a === 0 || b === 0) return 0;
-  return idx(GF_EXP, (idx(GF_LOG, a) + idx(GF_LOG, b)) % 255);
+  return poly.slice(1);
 }
 
-function multiplyPolys(a: number[], b: number[]): number[] {
-  const result: number[] = new Array<number>(a.length + b.length - 1).fill(0);
-  for (let i = 0; i < a.length; i++) {
-    for (let j = 0; j < b.length; j++) {
-      result[i + j] = idx(result, i + j) ^ gfMul(idx(a, i), idx(b, j));
-    }
+function remainder(data: readonly number[], degree: number): number[] {
+  const gen = generator(degree);
+  const result = new Array<number>(degree).fill(0);
+  for (const byte of data) {
+    const factor = byte ^ at(result, 0);
+    result.shift();
+    result.push(0);
+    gen.forEach((c, i) => {
+      result[i] = at(result, i) ^ gfMultiply(c, factor);
+    });
   }
   return result;
 }
 
-function generatorPoly(degree: number): number[] {
-  let g = [1];
-  for (let i = 0; i < degree; i++) {
-    g = multiplyPolys(g, [1, idx(GF_EXP, i)]);
-  }
-  return g;
+// ---- Sizes ----------------------------------------------------------------
+
+function alignmentCenters(version: number): number[] {
+  if (version === 1) return [];
+  const count = Math.floor(version / 7) + 2;
+  const size = version * 4 + 17;
+  const step = Math.ceil((version * 4 + 4) / (count * 2 - 2)) * 2;
+  const centers = [6];
+  for (let pos = size - 7; centers.length < count; pos -= step) centers.splice(1, 0, pos);
+  return centers;
 }
 
-function rsEncode(dataCodewords: number[], eccCount: number): number[] {
-  const gen = generatorPoly(eccCount);
-  const remainder: number[] = new Array<number>(eccCount).fill(0);
-  for (const d of dataCodewords) {
-    const factor = d ^ idx(remainder, 0);
-    remainder.shift();
-    remainder.push(0);
-    if (factor !== 0) {
-      for (let i = 0; i < gen.length - 1; i++) {
-        remainder[i] = idx(remainder, i) ^ gfMul(idx(gen, i + 1), factor);
+/** Modules left for codewords once the patterns are drawn. */
+function rawDataModules(version: number): number {
+  let modules = (16 * version + 128) * version + 64;
+  if (version >= 2) {
+    const count = Math.floor(version / 7) + 2;
+    modules -= (25 * count - 10) * count - 55;
+    if (version >= 7) modules -= 36;
+  }
+  return modules;
+}
+
+function dataCodewords(version: number, level: EcLevel): number {
+  return (
+    Math.floor(rawDataModules(version) / 8) -
+    at(ECC_PER_BLOCK[level], version) * at(BLOCKS[level], version)
+  );
+}
+
+const countBits = (version: number) => (version <= 9 ? 8 : 16);
+
+/** The smallest version that holds `bytes` bytes at `level`. */
+function chooseVersion(bytes: number, level: EcLevel): number {
+  for (let version = 1; version <= MAX_VERSION; version++) {
+    if (4 + countBits(version) + bytes * 8 <= dataCodewords(version, level) * 8) return version;
+  }
+  throw new Error(`qrcode: ${bytes} bytes is too long for a version ${MAX_VERSION} code`);
+}
+
+// ---- Codewords ------------------------------------------------------------
+
+function encodeData(bytes: readonly number[], version: number, level: EcLevel): number[] {
+  const bits: number[] = [];
+  const put = (value: number, length: number) => {
+    for (let i = length - 1; i >= 0; i--) bits.push((value >>> i) & 1);
+  };
+  put(0b0100, 4);
+  put(bytes.length, countBits(version));
+  bytes.forEach((byte) => put(byte, 8));
+  const capacity = dataCodewords(version, level) * 8;
+  put(0, Math.min(4, capacity - bits.length));
+  put(0, (8 - (bits.length % 8)) % 8);
+  for (let pad = 0xec; bits.length < capacity; pad ^= 0xec ^ 0x11) put(pad, 8);
+
+  const words: number[] = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    words.push(bits.slice(i, i + 8).reduce((byte, bit) => (byte << 1) | bit, 0));
+  }
+  return words;
+}
+
+/** Splits the data into blocks, adds each block's error correction, and interleaves them. */
+function interleave(data: readonly number[], version: number, level: EcLevel): number[] {
+  const blockCount = at(BLOCKS[level], version);
+  const eccLength = at(ECC_PER_BLOCK[level], version);
+  const shortLength = Math.floor(data.length / blockCount);
+  const longBlocks = data.length % blockCount;
+  const blocks: number[][] = [];
+  let offset = 0;
+  for (let b = 0; b < blockCount; b++) {
+    const length = shortLength + (b >= blockCount - longBlocks ? 1 : 0);
+    blocks.push(data.slice(offset, offset + length));
+    offset += length;
+  }
+  const eccs = blocks.map((block) => remainder(block, eccLength));
+
+  const result: number[] = [];
+  for (let i = 0; i <= shortLength; i++) {
+    for (const block of blocks) if (i < block.length) result.push(at(block, i));
+  }
+  for (let i = 0; i < eccLength; i++) {
+    for (const ecc of eccs) result.push(at(ecc, i));
+  }
+  return result;
+}
+
+// ---- The matrix -----------------------------------------------------------
+
+class Grid {
+  readonly size: number;
+  readonly modules: boolean[][];
+  readonly reserved: boolean[][];
+
+  constructor(size: number) {
+    this.size = size;
+    this.modules = Array.from({ length: size }, () => new Array<boolean>(size).fill(false));
+    this.reserved = Array.from({ length: size }, () => new Array<boolean>(size).fill(false));
+  }
+
+  dark(row: number, col: number): boolean {
+    return this.modules[row]?.[col] ?? false;
+  }
+
+  isReserved(row: number, col: number): boolean {
+    return this.reserved[row]?.[col] ?? false;
+  }
+
+  set(row: number, col: number, dark: boolean): void {
+    const line = this.modules[row];
+    if (line && col >= 0 && col < this.size) line[col] = dark;
+  }
+
+  /** Sets a pattern module, which the data and the mask never touch. */
+  fix(row: number, col: number, dark: boolean): void {
+    if (row < 0 || row >= this.size || col < 0 || col >= this.size) return;
+    this.set(row, col, dark);
+    const line = this.reserved[row];
+    if (line) line[col] = true;
+  }
+}
+
+function drawPatterns(grid: Grid, version: number): void {
+  const { size } = grid;
+  for (let i = 0; i < size; i++) {
+    grid.fix(6, i, i % 2 === 0);
+    grid.fix(i, 6, i % 2 === 0);
+  }
+  for (const [top, left] of [
+    [0, 0],
+    [0, size - 7],
+    [size - 7, 0],
+  ] as const) {
+    for (let r = -1; r <= 7; r++) {
+      for (let c = -1; c <= 7; c++) {
+        const ring = Math.max(Math.abs(r - 3), Math.abs(c - 3));
+        grid.fix(top + r, left + c, ring !== 2 && ring !== 4);
       }
     }
   }
-  return remainder;
+  const centers = alignmentCenters(version);
+  const last = centers.length - 1;
+  centers.forEach((row, i) => {
+    centers.forEach((col, j) => {
+      const nearFinder = (i === 0 && j === 0) || (i === 0 && j === last) || (i === last && j === 0);
+      if (nearFinder) return;
+      for (let r = -2; r <= 2; r++) {
+        for (let c = -2; c <= 2; c++)
+          grid.fix(row + r, col + c, Math.max(Math.abs(r), Math.abs(c)) !== 1);
+      }
+    });
+  });
+  drawFormat(grid, 'M', 0); // reserves the format areas; redrawn with the real values later
+  if (version >= 7) {
+    let rem = version;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+    const bits = (version << 12) | rem;
+    for (let i = 0; i < 18; i++) {
+      const dark = ((bits >>> i) & 1) === 1;
+      const a = size - 11 + (i % 3);
+      const b = Math.floor(i / 3);
+      grid.fix(b, a, dark);
+      grid.fix(a, b, dark);
+    }
+  }
 }
 
-interface VersionInfo {
-  size: number;
-  total: number;
-  align: number | null;
+function formatBits(level: EcLevel, mask: number): number {
+  const data = (FORMAT_LEVEL_BITS[level] << 3) | mask;
+  let rem = data;
+  for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+  return ((data << 10) | rem) ^ 0x5412;
 }
 
-// Versions 1-5 only. `align` is the single alignment pattern's center
-// (versions 2-6 have exactly one, at (size-7, size-7)); version 1 has none.
-const VERSION_INFO: Record<number, VersionInfo> = {
-  1: { size: 21, total: 26, align: null },
-  2: { size: 25, total: 44, align: 18 },
-  3: { size: 29, total: 70, align: 22 },
-  4: { size: 33, total: 100, align: 26 },
-  5: { size: 37, total: 134, align: 30 },
-};
-
-// Error-correction codeword counts for the (version, level) pairs that use
-// exactly one Reed-Solomon block. Versions/levels that split into multiple
-// blocks (e.g. V3-Q, V4-M) are intentionally left out.
-const ECC_COUNT: Record<number, Partial<Record<EcLevel, number>>> = {
-  1: { L: 7, M: 10, Q: 13, H: 17 },
-  2: { L: 10, M: 16, Q: 22, H: 28 },
-  3: { L: 15, M: 26 },
-  4: { L: 20 },
-  5: { L: 26 },
-};
-
-const EC_LEVEL_BITS: Record<EcLevel, number> = { L: 0b01, M: 0b00, Q: 0b11, H: 0b10 };
-
-function getVersionInfo(version: number): VersionInfo {
-  const info = VERSION_INFO[version];
-  if (!info) throw new Error(`qrcode: unsupported version ${version}`);
-  return info;
+function drawFormat(grid: Grid, level: EcLevel, mask: number): void {
+  const { size } = grid;
+  const bits = formatBits(level, mask);
+  const bit = (i: number) => ((bits >>> i) & 1) === 1;
+  for (let i = 0; i <= 5; i++) grid.fix(i, 8, bit(i));
+  grid.fix(7, 8, bit(6));
+  grid.fix(8, 8, bit(7));
+  grid.fix(8, 7, bit(8));
+  for (let i = 9; i < 15; i++) grid.fix(8, 14 - i, bit(i));
+  for (let i = 0; i < 8; i++) grid.fix(8, size - 1 - i, bit(i));
+  for (let i = 8; i < 15; i++) grid.fix(size - 15 + i, 8, bit(i));
+  grid.fix(size - 8, 8, true);
 }
 
-// Tried smallest-and-strongest first: for each byte length we want the
-// smallest code that still uses a good error correction level.
-const CANDIDATES: Array<[number, EcLevel]> = [
-  [1, 'M'],
-  [1, 'L'],
-  [2, 'M'],
-  [2, 'L'],
-  [3, 'M'],
-  [3, 'L'],
-  [4, 'L'],
-  [5, 'L'],
+/** Every module the codewords fill, in the standard's two-column zigzag order. */
+function dataModuleOrder(size: number, reserved: (row: number, col: number) => boolean) {
+  const order: Array<[number, number]> = [];
+  for (let right = size - 1; right >= 1; right -= 2) {
+    if (right === 6) right = 5;
+    const upward = ((right + 1) & 2) === 0;
+    for (let step = 0; step < size; step++) {
+      const row = upward ? size - 1 - step : step;
+      for (const col of [right, right - 1]) if (!reserved(row, col)) order.push([row, col]);
+    }
+  }
+  return order;
+}
+
+const MASKS: ReadonlyArray<(row: number, col: number) => boolean> = [
+  (r, c) => (r + c) % 2 === 0,
+  (r) => r % 2 === 0,
+  (_r, c) => c % 3 === 0,
+  (r, c) => (r + c) % 3 === 0,
+  (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
+  (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0,
+  (r, c) => (((r * c) % 2) + ((r * c) % 3)) % 2 === 0,
+  (r, c) => (((r + c) % 2) + ((r * c) % 3)) % 2 === 0,
 ];
 
-class BitBuffer {
-  bits: number[] = [];
-  put(value: number, length: number): void {
-    for (let i = length - 1; i >= 0; i--) {
-      this.bits.push((value >>> i) & 1);
+function applyMask(grid: Grid, mask: number): void {
+  const flip = MASKS[mask];
+  if (!flip) return;
+  for (let r = 0; r < grid.size; r++) {
+    for (let c = 0; c < grid.size; c++) {
+      if (!grid.isReserved(r, c) && flip(r, c)) grid.set(r, c, !grid.dark(r, c));
     }
   }
 }
 
-interface VersionChoice {
-  version: number;
-  level: EcLevel;
-  dataCodewords: number;
-  ecc: number;
+const FINDER_LIKE = [true, false, true, true, true, false, true];
+
+/** Rows and columns of the grid, each as a list of dark or light modules. */
+function linesOf(grid: Grid): boolean[][] {
+  const lines: boolean[][] = [];
+  for (let i = 0; i < grid.size; i++) {
+    lines.push(Array.from({ length: grid.size }, (_, j) => grid.dark(i, j)));
+    lines.push(Array.from({ length: grid.size }, (_, j) => grid.dark(j, i)));
+  }
+  return lines;
 }
 
-function chooseVersionLevel(byteLength: number): VersionChoice {
-  for (const [version, level] of CANDIDATES) {
-    const ecc = ECC_COUNT[version]?.[level];
-    if (ecc == null) continue;
-    const dataCodewords = getVersionInfo(version).total - ecc;
-    // Byte mode overhead for versions 1-9: 4-bit mode indicator + 8-bit
-    // character count indicator = 12 bits, i.e. 1.5 bytes.
-    const capacity = Math.floor((dataCodewords * 8 - 12) / 8);
-    if (byteLength <= capacity) {
-      return { version, level, dataCodewords, ecc };
+/** Runs of five or more modules of one color in a line. */
+function runPenalty(line: readonly boolean[]): number {
+  let score = 0;
+  let run = 1;
+  for (let i = 1; i <= line.length; i++) {
+    if (i < line.length && line[i] === line[i - 1]) {
+      run++;
+    } else {
+      if (run >= 5) score += 3 + (run - 5);
+      run = 1;
     }
   }
-  throw new Error(`QR text too long for the supported versions (1-5): ${byteLength} bytes`);
+  return score;
 }
 
-function getFormatBits(level: EcLevel, mask: number): number {
-  const data = (EC_LEVEL_BITS[level] << 3) | mask; // 5 bits
-  let d = data << 10;
-  const gen = 0b10100110111; // BCH(15,5) generator, degree 10
-  for (let i = 4; i >= 0; i--) {
-    if ((d >> (10 + i)) & 1) {
-      d ^= gen << i;
+/** Patterns in a line that look like a finder, with light space on one side. */
+function finderPenalty(line: readonly boolean[]): number {
+  const light = new Array<boolean>(4).fill(false);
+  const padded = [...light, ...line, ...light];
+  let score = 0;
+  for (let i = 4; i + 11 <= padded.length; i++) {
+    if (!FINDER_LIKE.every((dark, k) => padded[i + k] === dark)) continue;
+    const clearBefore = padded.slice(i - 4, i).every((dark) => !dark);
+    const clearAfter = padded.slice(i + 7, i + 11).every((dark) => !dark);
+    if (clearBefore || clearAfter) score += 40;
+  }
+  return score;
+}
+
+/** Two-by-two blocks of one color. */
+function blockPenalty(grid: Grid): number {
+  let score = 0;
+  for (let r = 0; r + 1 < grid.size; r++) {
+    for (let c = 0; c + 1 < grid.size; c++) {
+      const color = grid.dark(r, c);
+      const same =
+        grid.dark(r, c + 1) === color &&
+        grid.dark(r + 1, c) === color &&
+        grid.dark(r + 1, c + 1) === color;
+      if (same) score += 3;
     }
   }
-  const bch = d & 0x3ff;
-  return ((data << 10) | bch) ^ 0b101010000010010;
+  return score;
 }
 
-function buildDataCodewords(text: string, dataCodewords: number, ecc: number): number[] {
+/** How far the share of dark modules is from half. */
+function balancePenalty(grid: Grid): number {
+  const total = grid.size * grid.size;
+  const dark = grid.modules.flat().filter(Boolean).length;
+  return (Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1) * 10;
+}
+
+/** The standard's penalty score; the mask with the lowest one is used. */
+function penalty(grid: Grid): number {
+  const lines = linesOf(grid);
+  const perLine = lines.reduce((sum, line) => sum + runPenalty(line) + finderPenalty(line), 0);
+  return perLine + blockPenalty(grid) + balancePenalty(grid);
+}
+
+/** Encodes `text` as a QR code at the given error correction level (M unless told otherwise). */
+export function encodeQr(text: string, level: EcLevel = 'M'): QrCode {
   const bytes = Array.from(new TextEncoder().encode(text));
-  const bb = new BitBuffer();
-  bb.put(0b0100, 4); // byte mode indicator
-  bb.put(bytes.length, 8); // character count indicator (versions 1-9)
-  for (const byte of bytes) bb.put(byte, 8);
+  const version = chooseVersion(bytes.length, level);
+  const codewords = interleave(encodeData(bytes, version, level), version, level);
+  const size = version * 4 + 17;
 
-  const totalDataBits = dataCodewords * 8;
-  const termLen = Math.max(0, Math.min(4, totalDataBits - bb.bits.length));
-  bb.put(0, termLen);
-  while (bb.bits.length % 8 !== 0) bb.bits.push(0);
-
-  const padBytes = [0xec, 0x11];
-  let padIndex = 0;
-  while (bb.bits.length < totalDataBits) {
-    bb.put(idx(padBytes, padIndex % 2), 8);
-    padIndex++;
-  }
-
-  const dataCw: number[] = [];
-  for (let i = 0; i < bb.bits.length; i += 8) {
-    let byte = 0;
-    for (let j = 0; j < 8; j++) byte = (byte << 1) | idx(bb.bits, i + j);
-    dataCw.push(byte);
-  }
-
-  return dataCw.concat(rsEncode(dataCw, ecc));
-}
-
-function buildFinalBits(allCodewords: number[], version: number): BitBuffer {
-  // Remainder bits after the codewords: 0 for version 1, 7 for versions 2-6.
-  const remainderBits = version === 1 ? 0 : 7;
-  const finalBits = new BitBuffer();
-  for (const cw of allCodewords) finalBits.put(cw, 8);
-  finalBits.put(0, remainderBits);
-  return finalBits;
-}
-
-type SetModule = (row: number, col: number, dark: boolean) => void;
-
-function createGrids(size: number): { matrix: boolean[][]; isFn: boolean[][] } {
-  const matrix: boolean[][] = Array.from({ length: size }, () =>
-    new Array<boolean>(size).fill(false),
-  );
-  const isFn: boolean[][] = Array.from({ length: size }, () =>
-    new Array<boolean>(size).fill(false),
-  );
-  return { matrix, isFn };
-}
-
-function isFinderDark(r: number, c: number): boolean {
-  return (
-    (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
-    (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
-    (r >= 2 && r <= 4 && c >= 2 && c <= 4)
-  );
-}
-
-function drawFinder(size: number, setFn: SetModule, row: number, col: number): void {
-  for (let r = -1; r <= 7; r++) {
-    for (let c = -1; c <= 7; c++) {
-      const rr = row + r;
-      const cc = col + c;
-      if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
-      setFn(rr, cc, isFinderDark(r, c));
-    }
-  }
-}
-
-function drawTimingPatterns(size: number, setFn: SetModule): void {
-  for (let i = 8; i <= size - 9; i++) {
-    const dark = i % 2 === 0;
-    setFn(6, i, dark);
-    setFn(i, 6, dark);
-  }
-}
-
-function drawAlignmentPattern(align: number | null, setFn: SetModule): void {
-  if (align == null) return;
-  for (let r = -2; r <= 2; r++) {
-    for (let c = -2; c <= 2; c++) {
-      setFn(align + r, align + c, Math.max(Math.abs(r), Math.abs(c)) !== 1);
-    }
-  }
-}
-
-function drawFunctionPatterns(size: number, align: number | null, setFn: SetModule): void {
-  drawFinder(size, setFn, 0, 0);
-  drawFinder(size, setFn, size - 7, 0);
-  drawFinder(size, setFn, 0, size - 7);
-  drawTimingPatterns(size, setFn);
-  drawAlignmentPattern(align, setFn);
-  setFn(size - 8, 8, true); // dark module, fixed position
-}
-
-function drawFormatInfo(size: number, level: EcLevel, mask: number, setFn: SetModule): void {
-  const fmt = getFormatBits(level, mask);
-  const bit = (i: number): boolean => ((fmt >> i) & 1) === 1;
-  for (let i = 0; i <= 5; i++) setFn(i, 8, bit(i));
-  setFn(7, 8, bit(6));
-  setFn(8, 8, bit(7));
-  setFn(8, 7, bit(8));
-  for (let i = 9; i <= 14; i++) setFn(8, 14 - i, bit(i));
-  for (let i = 0; i <= 7; i++) setFn(8, size - 1 - i, bit(i));
-  for (let i = 8; i <= 14; i++) setFn(size - 15 + i, 8, bit(i));
-}
-
-interface Grid {
-  matrix: boolean[][];
-  isFn: boolean[][];
-  size: number;
-}
-
-interface PlacementCursor {
-  bitIndex: number;
-  col: number;
-  upward: boolean;
-}
-
-function placeDataColumn(grid: Grid, bits: number[], cursor: PlacementCursor): void {
-  const { matrix, isFn, size } = grid;
-  const { col, upward } = cursor;
-  for (let i = 0; i < size; i++) {
-    const row = upward ? size - 1 - i : i;
-    for (const c of [col, col - 1]) {
-      if (idx2(isFn, row, c)) continue;
-      const b = cursor.bitIndex < bits.length ? idx(bits, cursor.bitIndex) : 0;
-      cursor.bitIndex++;
-      const invert = (row + c) % 2 === 0; // mask 0
-      idx(matrix, row)[c] = invert ? b === 0 : b === 1;
-    }
-  }
-}
-
-function placeDataBits(grid: Grid, bits: number[]): void {
-  const cursor: PlacementCursor = { bitIndex: 0, col: grid.size - 1, upward: true };
-  while (cursor.col > 0) {
-    if (cursor.col === 6) cursor.col--; // skip the vertical timing column
-    placeDataColumn(grid, bits, cursor);
-    cursor.upward = !cursor.upward;
-    cursor.col -= 2;
-  }
-}
-
-export interface QrCode {
-  size: number;
-  matrix: boolean[][];
-  version: number;
-  level: EcLevel;
-}
-
-/** Encodes `text` (byte mode) into a QR code matrix, ready to render as SVG. */
-export function encodeQr(text: string): QrCode {
-  const bytes = Array.from(new TextEncoder().encode(text));
-  const { version, level, dataCodewords, ecc } = chooseVersionLevel(bytes.length);
-  const { size, align } = getVersionInfo(version);
-
-  const allCw = buildDataCodewords(text, dataCodewords, ecc);
-  const finalBits = buildFinalBits(allCw, version);
-
-  const { matrix, isFn } = createGrids(size);
-  const setFn: SetModule = (row, col, dark) => {
-    if (row < 0 || row >= size || col < 0 || col >= size) return;
-    idx(matrix, row)[col] = dark;
-    idx(isFn, row)[col] = true;
+  const build = (mask: number) => {
+    const grid = new Grid(size);
+    drawPatterns(grid, version);
+    const order = dataModuleOrder(size, (r, c) => grid.isReserved(r, c));
+    order.forEach(([row, col], i) => {
+      const byte = codewords[i >>> 3];
+      if (byte !== undefined) grid.set(row, col, ((byte >>> (7 - (i & 7))) & 1) === 1);
+    });
+    applyMask(grid, mask);
+    drawFormat(grid, level, mask);
+    return grid;
   };
 
-  drawFunctionPatterns(size, align, setFn);
-  drawFormatInfo(size, level, 0, setFn);
-  placeDataBits({ matrix, isFn, size }, finalBits.bits);
-
-  return { size, matrix, version, level };
-}
-
-/** Builds a single SVG `<path>` `d` attribute for every dark module, one unit per module. */
-export function qrPathData(qr: QrCode): string {
-  let d = '';
-  for (let r = 0; r < qr.size; r++) {
-    const row = idx(qr.matrix, r);
-    for (let c = 0; c < qr.size; c++) {
-      if (idx(row, c)) d += `M${c} ${r}h1v1h-1z`;
+  let best = { grid: build(0), mask: 0 };
+  let bestScore = penalty(best.grid);
+  for (let mask = 1; mask < 8; mask++) {
+    const grid = build(mask);
+    const score = penalty(grid);
+    if (score < bestScore) {
+      best = { grid, mask };
+      bestScore = score;
     }
   }
+  return { size, matrix: best.grid.modules, version, level, mask: best.mask };
+}
+
+/** One SVG path `d` for every dark module, one unit per module, offset by the quiet zone. */
+export function qrPathData(qr: QrCode, offset = 0): string {
+  let d = '';
+  qr.matrix.forEach((row, r) => {
+    row.forEach((dark, c) => {
+      if (dark) d += `M${c + offset} ${r + offset}h1v1h-1z`;
+    });
+  });
   return d;
+}
+
+/** A standalone SVG file of the code: black on white, with its quiet zone. */
+export function qrSvg(qr: QrCode, title: string): string {
+  const side = qr.size + QUIET_ZONE * 2;
+  const escaped = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${side} ${side}" width="${side * 8}" height="${side * 8}" shape-rendering="crispEdges" role="img">`,
+    `<title>${escaped}</title>`,
+    `<rect width="${side}" height="${side}" fill="#ffffff"/>`,
+    `<path fill="#000000" d="${qrPathData(qr, QUIET_ZONE)}"/>`,
+    '</svg>',
+    '',
+  ].join('\n');
 }

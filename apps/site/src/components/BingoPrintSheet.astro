@@ -1,0 +1,350 @@
+---
+import { Icon } from 'astro-icon/components';
+import { BINGO_SQUARES } from '../lib/bingo';
+import { encodeQr, qrPathData, QUIET_ZONE } from '../lib/qrcode';
+
+// The paper bingo card. Both layouts are built from the same square list as
+// the card on screen, so the printed text always matches it. They are
+// hidden on screen and are the only thing on the Bingo page that prints:
+// the one-page card on US Letter paper, or the two-page large-print list
+// when "Large print (2 pages)" is ticked. /scripts/bingo-print.js switches
+// the layout and, when "Include my marks" is ticked, marks the squares.
+// Without JavaScript, the browser's own Print prints the blank card.
+
+const qr = encodeQr('https://lvwwd.org/bingo');
+const qrSide = qr.size + QUIET_ZONE * 2;
+const qrPath = qrPathData(qr, QUIET_ZONE);
+
+const DATES = 'Week Without Driving Las Vegas · October 1 to 8, 2026';
+const HOW_TO_PLAY_CARD =
+  "Mark a square with a pen when you've done it. Five in a row, down a column, or corner to corner is a bingo. The middle square is free. Every way of getting around counts: by bus, walking or rolling, biking, or getting a ride. If you still have to drive, you haven't failed.";
+const HOW_TO_PLAY_LARGE =
+  "Tick a box with a pen when you've done it. A bingo is all five squares in one row, or the same numbered square in all five rows, or a diagonal: square 1 in row 1, square 2 in row 2, and so on to square 5 in row 5, or square 5 in row 1, square 4 in row 2, and so on to square 1 in row 5. Square 3 in row 3 is free. Every way of getting around counts: by bus, walking or rolling, biking, or getting a ride. If you still have to drive, you haven't failed.";
+const QR_CAPTION = 'Scan to play on a phone: lvwwd.org/bingo';
+const FOOTER = [
+  'Share your card, find bus stops near you, and read our guides at lvwwd.org.',
+  'Giveaway: sign up free at lvwwd.org/giveaway with an email address or phone number. Share your trip to enter: post a photo of a trip you took without driving and tag @lasvegasfortransit, then send it on My week. Each day you share one is an entry, up to 8. No purchase or post necessary. No social media? You can enter by mail. Official Rules: lvwwd.org/giveaway/rules. Every square counts, prize or not.',
+  'Week Without Driving Las Vegas is run by Las Vegans for Better Transit. Questions: wwd@lasvegasfortransit.org',
+];
+const rows = [1, 2, 3, 4, 5].map((row) =>
+  BINGO_SQUARES.map((square, index) => ({ ...square, index })).filter((s) => s.row === row),
+);
+---
+
+<div class="bingo-print" data-bingo-print-sheet data-layout="card">
+  <div class="bp-card">
+    <div class="bp-head">
+      <p class="bp-title">Digital Transit Bingo</p>
+      <p class="bp-name">Name: <span class="bp-name__line"></span></p>
+    </div>
+    <p class="bp-dates">{DATES}</p>
+    <p class="bp-progress" data-print-progress></p>
+    <p class="bp-how"><strong>How to play</strong> {HOW_TO_PLAY_CARD}</p>
+    <div class="bp-grid">
+      {
+        BINGO_SQUARES.map((square, index) =>
+          square.free ? (
+            <div class="bp-cell bp-cell--free">
+              <Icon name="mdi:star" class="bp-star" />
+              <p class="bp-free-title">WEEK WITHOUT DRIVING</p>
+              <p>Free square</p>
+            </div>
+          ) : (
+            <div class="bp-cell" data-print-square={index}>
+              <Icon name="mdi:check-bold" class="bp-check" />
+              <p>{square.fullText}</p>
+            </div>
+          ),
+        )
+      }
+    </div>
+    <div class="bp-footer">
+      <figure class="bp-qr">
+        <svg viewBox={`0 0 ${qrSide} ${qrSide}`} shape-rendering="crispEdges">
+          <rect width={qrSide} height={qrSide} fill="#ffffff"></rect>
+          <path d={qrPath} fill="#000000"></path>
+        </svg>
+        <figcaption>{QR_CAPTION}</figcaption>
+      </figure>
+      <div class="bp-footer__text">
+        {FOOTER.map((line) => <p>{line}</p>)}
+      </div>
+    </div>
+  </div>
+
+  <div class="bp-large">
+    <div class="bp-head">
+      <p class="bp-title">Digital Transit Bingo</p>
+      <p class="bp-name">Name: <span class="bp-name__line"></span></p>
+    </div>
+    <p class="bp-dates">{DATES}</p>
+    <p class="bp-progress" data-print-progress></p>
+    <p class="bp-how"><strong class="bp-how__heading">How to play</strong> {HOW_TO_PLAY_LARGE}</p>
+    {
+      rows.map((squares, r) => (
+        <div class:list={['bp-row', { 'bp-row--new-page': r === 2 }]}>
+          <p class="bp-row__label">Row {r + 1}</p>
+          <ul>
+            {squares.map((square) =>
+              square.free ? (
+                <li class="bp-item" data-free>
+                  <span class="bp-box">
+                    <Icon name="mdi:check-bold" class="bp-box__check" />
+                  </span>
+                  <span>3. Week Without Driving (free square)</span>
+                </li>
+              ) : (
+                <li class="bp-item" data-print-square={square.index}>
+                  <span class="bp-box">
+                    <Icon name="mdi:check-bold" class="bp-box__check" />
+                  </span>
+                  <span>
+                    {square.col}. {square.fullText}
+                  </span>
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      ))
+    }
+    <div class="bp-footer">
+      <figure class="bp-qr">
+        <svg viewBox={`0 0 ${qrSide} ${qrSide}`} shape-rendering="crispEdges">
+          <rect width={qrSide} height={qrSide} fill="#ffffff"></rect>
+          <path d={qrPath} fill="#000000"></path>
+        </svg>
+        <figcaption>{QR_CAPTION}</figcaption>
+      </figure>
+      <div class="bp-footer__text">
+        {FOOTER.map((line) => <p>{line}</p>)}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  /* On screen the sheet is never shown; it exists only to be printed. */
+  .bingo-print {
+    display: none;
+  }
+
+  @media print {
+    @page {
+      size: letter portrait;
+      margin: 0.5in;
+    }
+
+    /* Print the sheet and nothing else: no navigation, no buttons, no
+       sign-up band, no footer. */
+    body:has(.bingo-print) > :not(:has(.bingo-print)),
+    body:has(.bingo-print) [data-site-header],
+    body:has(.bingo-print) main > :not(.bingo-print) {
+      display: none !important;
+    }
+
+    /* Specific enough to beat the sitewide print padding on main's last child. */
+    body main > .bingo-print {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .bingo-print {
+      display: block !important;
+      color: #000000 !important;
+      background: #ffffff !important;
+      font-family: 'Atkinson Hyperlegible Next', Arial, sans-serif;
+      font-size: 12pt;
+      line-height: 1.2;
+    }
+    .bingo-print p,
+    .bingo-print ul,
+    .bingo-print figure {
+      margin: 0;
+      padding: 0;
+    }
+    .bingo-print ul {
+      list-style: none;
+    }
+    .bingo-print[data-layout='card'] .bp-large,
+    .bingo-print[data-layout='large'] .bp-card {
+      display: none !important;
+    }
+
+    .bp-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.2in;
+    }
+    .bp-title {
+      font-size: 24pt;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .bp-name {
+      font-size: 12pt;
+      white-space: nowrap;
+    }
+    .bp-name__line {
+      display: inline-block;
+      width: 2.5in;
+      border-bottom: 1pt solid #000000;
+    }
+    .bp-dates,
+    .bp-progress {
+      font-size: 14pt;
+      line-height: 1.1;
+    }
+    .bp-progress {
+      display: none;
+      font-weight: 700;
+    }
+    .bingo-print[data-include-marks] .bp-progress {
+      display: block;
+    }
+    .bp-how {
+      margin-top: 0.05in !important;
+      line-height: 1.12;
+    }
+
+    /* The one-page card: a 7-inch grid of 1.4-inch squares. */
+    .bp-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1.4in);
+      grid-auto-rows: 1.4in;
+      width: 7in;
+      margin: 0.06in auto 0;
+      border-top: 1pt solid #000000;
+      border-left: 1pt solid #000000;
+    }
+    .bp-cell {
+      position: relative;
+      box-sizing: border-box;
+      padding: 0.08in;
+      border-right: 1pt solid #000000;
+      border-bottom: 1pt solid #000000;
+      font-size: 12pt;
+      line-height: 1.15;
+      overflow-wrap: normal;
+      hyphens: none;
+    }
+    .bp-cell--free {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .bp-star {
+      width: 0.4in;
+      height: 0.4in;
+    }
+    .bp-free-title {
+      font-weight: 700;
+    }
+    .bp-check,
+    .bp-box__check {
+      display: none;
+    }
+    .bingo-print[data-include-marks] .bp-cell[data-marked] {
+      outline: 3pt solid #000000;
+      outline-offset: -3pt;
+    }
+    /* The check sits in the top-right corner and the words flow around it. */
+    .bingo-print[data-include-marks] [data-marked] .bp-check {
+      display: block;
+      float: right;
+      width: 0.33in;
+      height: 0.33in;
+      margin: -0.02in -0.02in 0 0.02in;
+    }
+
+    .bp-footer {
+      display: flex;
+      gap: 0.12in;
+      margin-top: 0.06in;
+      break-inside: avoid;
+    }
+    .bp-qr {
+      flex: none;
+      width: 0.9in;
+      font-size: 10pt;
+      line-height: 1.1;
+    }
+    .bp-qr svg {
+      display: block;
+      width: 0.9in;
+      height: 0.9in;
+    }
+    .bp-footer__text {
+      font-size: 11pt;
+      line-height: 1.05;
+    }
+    .bp-footer__text p + p {
+      margin-top: 0.03in;
+    }
+
+    /* The large-print list: two pages, rows 3 to 5 on the second. */
+    .bp-large .bp-dates,
+    .bp-large .bp-progress,
+    .bp-large .bp-how {
+      font-size: 18pt;
+      line-height: 1.2;
+    }
+    .bp-large .bp-how {
+      line-height: 1.2;
+    }
+    /* The large list keeps "How to play" on a line of its own. */
+    .bp-how__heading {
+      display: block;
+    }
+    .bp-row {
+      margin-top: 0.08in;
+    }
+    .bp-row--new-page {
+      break-before: page;
+      margin-top: 0;
+    }
+    .bp-row__label {
+      font-size: 20pt;
+      font-weight: 700;
+    }
+    .bp-item {
+      display: flex;
+      gap: 0.12in;
+      margin-top: 0.03in;
+      font-size: 18pt;
+      line-height: 1.2;
+      break-inside: avoid;
+    }
+    .bp-box {
+      flex: none;
+      box-sizing: border-box;
+      width: 0.3in;
+      height: 0.3in;
+      margin-top: 0.03in;
+      border: 1.5pt solid #000000;
+    }
+    .bp-item[data-free] .bp-box__check,
+    .bingo-print[data-include-marks] .bp-item[data-marked] .bp-box__check {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .bp-large .bp-footer {
+      margin-top: 0.2in;
+    }
+    .bp-large .bp-qr {
+      width: 1.2in;
+      font-size: 14pt;
+    }
+    .bp-large .bp-qr svg {
+      width: 1.2in;
+      height: 1.2in;
+    }
+    .bp-large .bp-footer__text {
+      font-size: 14pt;
+      line-height: 1.12;
+    }
+  }
+</style>

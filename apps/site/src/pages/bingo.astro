@@ -1,21 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WinBand from '../components/WinBand.astro';
+import BingoPrintSheet from '../components/BingoPrintSheet.astro';
 import { Icon } from 'astro-icon/components';
 import { BINGO_SQUARES } from '../lib/bingo';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 
-// Digital Transit Bingo, /bingo. Copy and behavior are from the Feature
-// "Let participants mark a Digital Transit Bingo card on their phone"
-// (features/bingo/play-bingo.md) and "Let anyone print a paper bingo card"
-// (features/bingo/print-bingo-card.md). The board's interactivity — marking,
-// lines, List view, saving, printing — lives in /scripts/bingo.js because
-// the site's Content Security Policy blocks inline scripts; this page must
+// Digital Transit Bingo, /bingo. The board's interactivity (marking,
+// lines, List view, saving, sharing and printing) lives in /scripts because
+// the site's Content Security Policy blocks inline scripts; the page must
 // still be readable with JavaScript off, handled by the <noscript> block
 // below.
 //
-// The day line and the "Enter the giveaway" mentions below the card depend
-// on today's date, which this static page cannot know at build time. The
+// The day line and the "Sign up to win" link below the card depend on
+// today's date, which this static page cannot know at build time. The
 // server-rendered text below is a reasonable starting state (correct as of
 // this build); /scripts/bingo.js corrects it immediately for the visitor's
 // actual clock. This mirrors the approach in index.astro's date-derived
@@ -171,13 +169,26 @@ const description =
           <Icon name="mdi:share-variant-outline" class="size-5" aria-hidden="true" />
           Share your card
         </button>
-        <a
-          href="/bingo/print"
-          class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-4 font-bold text-on-surface no-underline hover:bg-surface-container focus-visible:bg-surface-container"
+      </div>
+
+      {/* Print section, shown by /scripts/bingo-print.js. */}
+      <div class="bingo-print-controls mt-6" data-bingo-print-controls hidden>
+        <label class="bingo-print-check" data-print-marks-field hidden>
+          <input type="checkbox" data-print-marks />
+          <span>Include my marks</span>
+        </label>
+        <label class="bingo-print-check">
+          <input type="checkbox" data-print-large />
+          <span>Large print (2 pages)</span>
+        </label>
+        <button
+          type="button"
+          class="press inline-flex items-center justify-center gap-2 border-2 border-outline bg-surface px-6 py-4 font-bold text-on-surface hover:bg-surface-container focus-visible:bg-surface-container"
+          data-print-button
         >
           <Icon name="mdi:printer-outline" class="size-5" aria-hidden="true" />
           Print a card
-        </a>
+        </button>
       </div>
       <p class="mt-4" data-bingo-giveaway-link style={showGiveawayLink ? '' : 'display:none'}>
         <a href="/sign-up" class="body-link font-semibold" data-signup-link
@@ -323,13 +334,45 @@ const description =
     </style>
   </noscript>
 
+  {/* bingo-print.js listens for bingo.js's first event, so it loads first. */}
   <script is:inline src="/scripts/participant-api.js" defer></script>
+  <script is:inline src="/scripts/bingo-print.js" defer></script>
   <script is:inline src="/scripts/bingo.js" defer></script>
   <script is:inline src="/scripts/bingo-sync.js" defer></script>
   <WinBand />
+  <BingoPrintSheet />
 </BaseLayout>
 
 <style>
+  /* ---- Print section: two native checkboxes and the button. */
+  .bingo-print-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .bingo-print-controls[hidden],
+  .bingo-print-check[hidden] {
+    display: none;
+  }
+  .bingo-print-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .bingo-print-check input {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    accent-color: var(--color-primary);
+  }
+  .bingo-print-controls [data-print-button] {
+    margin-top: 0.25rem;
+  }
+
   /* ---- The card as an object: a bingo card printed like a transit ticket.
      Card stock sits above the paper page; an ember band carries the B I N G O
      columns; perforated rules separate squares; a stub holds the tally. */

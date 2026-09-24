@@ -1,8 +1,8 @@
 // Digital Transit Bingo's one fixed card. Every visitor plays the same 25
-// squares, so this list is the single source of truth for the on-screen
-// card (/bingo) and the printed card (/bingo/print). Copy is exact from
-// the Feature "Let participants mark a Digital Transit Bingo card on their
-// phone" (bingo/play-bingo.md) — do not paraphrase.
+// squares, so this list is the single source of truth for the card on
+// screen, the paper card printed from the Bingo page, and the share
+// picture's short labels. Keep the wording exactly as it is: players on
+// paper and on phones compare cards square by square.
 //
 // Squares are listed row-major, row 1 column 1 first, so `BINGO_SQUARES[i]`
 // sits at row `Math.floor(i / 5) + 1`, column `(i % 5) + 1`. The free
