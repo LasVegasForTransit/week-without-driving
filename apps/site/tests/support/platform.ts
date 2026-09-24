@@ -9,14 +9,15 @@ import worker from '../../worker/index';
 /**
  * A local D1 database and R2 bucket from wrangler's getPlatformProxy, with
  * the real migrations applied, and a way to send requests through the real
- * Worker. Outgoing calls (Turnstile, Resend) are faked by `fakeOutbound`.
+ * Worker or run its Cron Triggers. Outgoing calls (Turnstile, Resend) are
+ * faked by `fakeOutbound`, and push services by support/push.ts.
  */
 
 const TABLES = [
   'draws',
   'volunteers',
   'checkins',
-  'reminders',
+  'push_subscriptions',
   'bingo',
   'link_tokens',
   'sessions',
@@ -58,6 +59,8 @@ export interface Platform {
   env: Env & { DB: D1Database; PHOTOS: R2Bucket };
   /** Sends a request through the Worker and waits for its background work. */
   send(request: Request, overrides?: Overrides): Promise<Response>;
+  /** Runs the Worker's scheduled handler as one Cron Trigger at one moment. */
+  cron(expression: string, at: string, overrides?: Overrides): Promise<void>;
   /** Empties every table between tests. */
   reset(): Promise<void>;
   dispose(): Promise<void>;
@@ -91,6 +94,14 @@ export async function startPlatform(): Promise<Platform> {
       const response = await worker.fetch(incoming, { ...env, ...overrides } as Env, ctx);
       await Promise.all(background);
       return response;
+    },
+    async cron(expression, at, overrides = {}) {
+      const controller = {
+        cron: expression,
+        scheduledTime: Date.parse(at),
+        noRetry: () => undefined,
+      } as unknown as ScheduledController;
+      await worker.scheduled(controller, { ...env, ...overrides } as Env);
     },
     async reset() {
       await proxy.env.DB.batch(TABLES.map((table) => proxy.env.DB.prepare(`DELETE FROM ${table}`)));

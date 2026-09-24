@@ -10,11 +10,13 @@ import {
 import { entryCard } from './entry-card';
 import { type Prefill, drawSection, mailForm, tagForm } from './forms';
 import { type Html, html, page } from './html';
+import { pushSection } from './push';
 import type { DayStats, PageData, PartnerCount } from './queries';
 
 /**
  * The /admin page: counts, the review queue, the two logging forms, the
- * draw, the CSV export, and the volunteers who can't win.
+ * draw, the CSV export, browser reminders, and the volunteers who can't
+ * win.
  */
 
 export interface Notice {
@@ -174,9 +176,9 @@ export function adminPage(
     <p class="tabs">
       <a href="#queue">Check entries</a><a href="#tag">Log a tag</a
       ><a href="#mail">Log a mailed entry</a><a href="#draw">Draw</a><a href="#counts">Counts</a
-      ><a href="/api/admin/entries.csv">Download entries (CSV)</a>
+      ><a href="#reminders">Reminders</a><a href="/api/admin/entries.csv">Download entries (CSV)</a>
     </p>
     ${queue(filters, data)} ${tagForm(prefill)} ${mailForm(prefill)} ${drawSection(c, data)}
-    ${counts(data)} ${volunteers(data.volunteers)}`;
+    ${counts(data)} ${pushSection(data.pushes)} ${volunteers(data.volunteers)}`;
   return page('Admin', body, status);
 }

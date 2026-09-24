@@ -1,8 +1,9 @@
 /**
  * My week: fills in the page for the person signed in on this phone, from
  * the Worker (GET /api/me, through /scripts/participant-api.js), and sends
- * shared trips (the giveaway entries), reminder choices and sign-out back
- * to it. /scripts/share-trip.js makes the picture people can post.
+ * shared trips (the giveaway entries) and sign-out back to it.
+ * /scripts/share-trip.js makes the picture people can post, and
+ * /scripts/reminders.js runs the daily reminders section.
  *
  * The Worker decides which day it is, in Las Vegas time, so a phone with
  * the wrong clock can't enter a trip early. The preview Worker pins the day
@@ -241,33 +242,6 @@
     });
   }
 
-  function bindReminders() {
-    const row = document.querySelector(
-      `[data-remind-row="${me.contactType === 'phone' ? 'text' : 'email'}"]`,
-    );
-    if (row) row.hidden = false;
-    document.querySelectorAll('[data-remind]').forEach((box) => {
-      if (!(box instanceof HTMLInputElement)) return;
-      const kind = box.getAttribute('data-remind');
-      box.checked = Boolean(me.reminders?.[kind]);
-      box.addEventListener('change', async () => {
-        const { ok, data } = await api.call('POST', '/api/reminders', { [kind]: box.checked });
-        if (!ok) {
-          box.checked = !box.checked;
-          setText('[data-remind-status]', data.message);
-          return;
-        }
-        me.reminders = data.reminders;
-        setText(
-          '[data-remind-status]',
-          Object.values(data.reminders).some(Boolean)
-            ? 'Reminders are on. The first one comes October 1.'
-            : 'Reminders are off.',
-        );
-      });
-    });
-  }
-
   // Signs out this phone only; other phones stay signed in.
   function bindSignOut() {
     document.querySelector('[data-signout]')?.addEventListener('click', async () => {
@@ -314,7 +288,6 @@
     window.lvwwdMe = me;
     document.dispatchEvent(new CustomEvent('lvwwd:me', { detail: me }));
     bindTrip();
-    bindReminders();
     bindSignOut();
     bindSomeoneElse();
     return undefined;

@@ -25,9 +25,14 @@
     { "pattern": "lvwwd.org/*", "zone_name": "lvwwd.org" },
     { "pattern": "www.lvwwd.org/*", "zone_name": "lvwwd.org" },
   ],
-  // Rate-limit housekeeping every day, and the deletion of all participant
-  // data from November 30, 2026 (worker/cleanup.ts).
-  "triggers": { "crons": ["0 13 * * *"] },
+  // Two jobs, one Cron Trigger each (worker/index.ts picks the job):
+  // - "0 13 * * *": rate-limit housekeeping every day, and the deletion of
+  //   all participant data from November 30, 2026 (worker/cleanup.ts).
+  // - "1-59/2 15 1-8 10 *": the daily reminder by browser notification, on
+  //   the odd minutes from 8:01 to 8:59 am Las Vegas time, October 1 to 8
+  //   (worker/push/daily.ts). A text message channel would take the even
+  //   minutes of the same hour.
+  "triggers": { "crons": ["0 13 * * *", "1-59/2 15 1-8 10 *"] },
   "observability": {
     "enabled": true,
   },
@@ -49,5 +54,9 @@
   // check stays off until the Turnstile widget exists: then add its public
   // site key here as TURNSTILE_SITE_KEY and remove BOT_CHECK. Sign-up and
   // "Get my link" keep their rate limits either way.
-  "vars": { "BOT_CHECK": "off" },
+  //
+  // VAPID_SUBJECT is the contact push services use to reach LVBT about its
+  // reminder notifications. The key that signs them, VAPID_PRIVATE_KEY, is
+  // a secret that `pnpm bootstrap --production` generates once.
+  "vars": { "BOT_CHECK": "off", "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org" },
 }

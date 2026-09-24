@@ -3,11 +3,19 @@
   // The participant API's preview: the same Worker and pages as lvwwd.org,
   // on workers.dev, with its own database and photo bucket. It shows each
   // "Open my week" link on the page instead of only sending it, and treats
-  // every day as Day 3 of the week so check-ins can be tested before
-  // October. Deploy with:
+  // every day as Day 3 of the week so shared trips and reminders can be
+  // tested before October. Deploy with:
   //   pnpm build && pnpm exec wrangler deploy -c wrangler.api-preview.jsonc
   // TURNSTILE_SECRET is a secret (`wrangler secret put -c ...`); the preview
   // uses Cloudflare's always-pass test keys.
+  //
+  // Reminders: VAPID_PRIVATE_KEY is a test key used only here
+  // (`wrangler secret put VAPID_PRIVATE_KEY -c ...`), never production's.
+  // Besides the daily cleanup, the reminder send runs every five minutes
+  // ("*/5 * * * *", worker/push/daily.ts) with the pinned day, so a
+  // browser that turns reminders on gets Day 3's notification once, within
+  // five minutes. The "Send test reminder" button in /admin sends one
+  // straight away.
   //
   // The admin views have no Cloudflare Access here. Instead the secret
   // PREVIEW_ADMIN_KEY (`wrangler secret put PREVIEW_ADMIN_KEY -c ...`) lets
@@ -42,8 +50,9 @@
     "CHECKIN_PREVIEW_DAY": "3",
     "PREVIEW_DRAW_ANYTIME": "true",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org",
   },
-  "triggers": { "crons": ["0 13 * * *"] },
+  "triggers": { "crons": ["0 13 * * *", "*/5 * * * *"] },
   "observability": {
     "enabled": true,
   },

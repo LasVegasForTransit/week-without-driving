@@ -120,6 +120,15 @@
       "patternHint": "An AUD tag is 64 lowercase letters and digits."
     },
     {
+      "name": "VAPID_PRIVATE_KEY",
+      "purpose": "Signs every daily reminder notification, so push services deliver it as coming from lvwwd.org. The Worker works out the public key from it, and a new key would stop every browser's reminders, so setup generates it only when it is missing.",
+      "use": "live",
+      "neededFor": "daily reminders by browser notification",
+      "generate": true,
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "patternHint": "A VAPID private key is 32 bytes in base64url: 43 letters, digits, - and _."
+    },
+    {
       "name": "CLOUDFLARE_API_TOKEN",
       "purpose": "Lets the Deploy workflow publish the Worker on every merge to main.",
       "use": "live",
@@ -152,6 +161,12 @@
       "purpose": "The public Turnstile site key the Worker writes into the Sign up and Get my link pages.",
       "use": "live",
       "neededFor": "the bot check on Sign up to win and Get my link"
+    },
+    {
+      "name": "VAPID_SUBJECT",
+      "purpose": "The contact push services use to reach LVBT about its reminder notifications: mailto:wwd@lasvegasfortransit.org.",
+      "use": "live",
+      "neededFor": "daily reminders by browser notification"
     }
   ],
   "github": {

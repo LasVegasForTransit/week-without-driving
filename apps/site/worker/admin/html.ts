@@ -59,6 +59,7 @@ th:first-child,td:first-child{text-align:left}
 .tabs a{margin-right:1rem}.tabs a[aria-current]{font-weight:700;color:var(--on-surface)}
 .entry{background:var(--container);border-radius:.5rem;padding:.75rem 1rem;margin:.75rem 0}
 .entry p{margin:.25rem 0}
+ul.plain{list-style:none;padding:0}
 .entry img{display:block;max-width:100%;max-height:24rem;margin:.5rem 0;border:1px solid var(--line)}
 .actions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.5rem}
 form.stack{display:grid;gap:.75rem;max-width:32rem}
