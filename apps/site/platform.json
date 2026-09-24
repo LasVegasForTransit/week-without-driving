@@ -90,6 +90,7 @@
       "name": "ACCESS_TEAM_DOMAIN",
       "purpose": "Names the Cloudflare Access team whose signed sign-in tokens the Worker accepts for the admin views.",
       "use": "live",
+      "sensitive": false,
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
@@ -104,6 +105,7 @@
       "name": "ACCESS_AUD",
       "purpose": "The audience tag of the lvwwd.org volunteer admin application, so the Worker accepts only tokens Access issued for it.",
       "use": "live",
+      "sensitive": false,
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
