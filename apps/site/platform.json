@@ -66,7 +66,7 @@
         "Open https://resend.com/domains. If lvwwd.org is not listed, click \"Add Domain\", type lvwwd.org, choose the region \"North Virginia (us-east-1)\", and click \"Add\".",
         "If lvwwd.org does not say \"Verified\", click \"Sign in to Cloudflare\" on its page and approve the request, which adds its DNS records; then click \"Verify DNS Records\" and wait until it says \"Verified\". A key for an unverified domain cannot send.",
         "Open https://resend.com/api-keys and click \"Create API Key\". Name it lvwwd.org Worker, choose the permission \"Sending access\", choose the domain lvwwd.org, and click \"Add\".",
-        "Copy the key. It starts with re_, and Resend shows it only once."
+        "Copy the key, which starts with re_ and is shown only once, and paste it at this command's prompt."
       ],
       "pattern": "^re_[A-Za-z0-9_]+$",
       "patternHint": "A Resend API key starts with re_ and has no spaces."
@@ -80,7 +80,8 @@
       "steps": [
         "Open Turnstile in the Cloudflare dashboard with the \"Las Vegans for Better Transit\" account.",
         "Click the widget named lvwwd.org. If there is none, click \"Add widget\", type the widget name lvwwd.org, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
-        "Copy the Secret Key. It is private and starts with 0x. The Site Key, which also starts with 0x, is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc through a pull request instead."
+        "Leave the Site Key alone for now: it is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc, which this command shows later.",
+        "Copy the Secret Key, which is private and starts with 0x, and paste it at this command's prompt."
       ],
       "pattern": "^0x[A-Za-z0-9_-]+$",
       "patternHint": "A Turnstile secret key starts with 0x."
@@ -93,8 +94,8 @@
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
         "Open Cloudflare One at https://one.dash.cloudflare.com/ and choose the \"Las Vegans for Better Transit\" account.",
-        "On Overview, find Account details and copy the Team domain. For LVBT it is lvbt.cloudflareaccess.com. Copy only the domain, without https://.",
-        "Do not copy the Team name (\"Las Vegans for Better Transit\") shown beside it. It is only a label; this secret needs the domain."
+        "On Overview, find Account details. It shows the Team domain (for LVBT, lvbt.cloudflareaccess.com) and the Team name (\"Las Vegans for Better Transit\"), which is only a label. This secret needs the domain.",
+        "Copy the Team domain, without https://, and paste it at this command's prompt."
       ],
       "pattern": "^[a-z0-9-]+\\.cloudflareaccess\\.com$",
       "patternHint": "A team domain looks like lvbt.cloudflareaccess.com, without https://."
@@ -113,7 +114,7 @@
         "Under \"Access policies\", pick lvwwd.org volunteer admin allow in \"Add current policies\" if it exists; otherwise click \"Create new policy\", name it exactly lvwwd.org volunteer admin allow, set the action to \"Allow\", and add the Include rule \"Google Workspace groups\" = wwd-admin@lasvegasfortransit.org. If \"Google Workspace groups\" is not offered, Google Workspace sign-in is not connected yet; use an \"Emails\" rule with the volunteers' addresses for now.",
         "Under \"Authentication\" (Identity tab), turn off \"Accept all available identity providers\", choose only \"Google Workspace\" in \"Choose available identity providers\", and turn on \"Apply instant authentication\". Leave \"Authenticate with Cloudflare One Client\" off.",
         "Under \"Details\", set Name to exactly lvwwd.org volunteer admin and keep Session Duration at \"24 hours\". Click \"Create\".",
-        "Open the application's \"Configure\" page, then the \"Additional settings\" tab, and copy \"Application Audience (AUD) Tag\". It is 64 lowercase letters and digits."
+        "Open the application's \"Configure\" page, then the \"Additional settings\" tab. Copy \"Application Audience (AUD) Tag\", 64 lowercase letters and digits, and paste it at this command's prompt."
       ],
       "pattern": "^[a-f0-9]{64}$",
       "patternHint": "An AUD tag is 64 lowercase letters and digits."
@@ -131,7 +132,7 @@
         "Name it lvwwd.org deploy (GitHub Actions).",
         "Under \"Permissions\", add three rows: \"Account\", \"Workers Scripts\", \"Edit\"; \"Account\", \"Account Settings\", \"Read\"; and \"Zone\", \"Workers Routes\", \"Edit\". The deploy applies no migrations, so it needs no D1 permission.",
         "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
-        "Leave the expiration empty, so deploys keep working. Click \"Continue to summary\", then \"Create Token\", then \"Copy\". Cloudflare shows it only once. This command stores it as the production environment secret CLOUDFLARE_API_TOKEN in GitHub; the Deploy workflow also sets CLOUDFLARE_ACCOUNT_ID, which Wrangler needs with an account API token."
+        "Leave the expiration empty, so deploys keep working. Click \"Continue to summary\", then \"Create Token\". Copy the token, which Cloudflare shows only once, and paste it at this command's prompt; it is stored as the production environment secret CLOUDFLARE_API_TOKEN in GitHub. The Deploy workflow also sets CLOUDFLARE_ACCOUNT_ID, which Wrangler needs with an account API token."
       ],
       "pattern": "^\\S{40,}$",
       "patternHint": "A Cloudflare API token is at least 40 characters with no spaces."

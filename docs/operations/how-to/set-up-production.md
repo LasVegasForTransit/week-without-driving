@@ -183,16 +183,18 @@ bottom.
    Client" off.
 7. Skip "Preview". Under "Details", type the name `lvwwd.org volunteer admin` and keep "Session
    Duration" at "24 hours". Click "Create".
-8. Click "Configure" on the application, open the "Additional settings" tab, and copy "Application
-   Audience (AUD) Tag", 64 lowercase letters and digits. It is `ACCESS_AUD`.
+8. When the command asks for `ACCESS_AUD`, click "Configure" on the application, open the
+   "Additional settings" tab, copy "Application Audience (AUD) Tag" (64 lowercase letters and
+   digits), and paste it at the prompt.
 
 ### The Turnstile widget
 
 Open Turnstile in the Cloudflare dashboard with the LVBT account. If there is no widget named
 `lvwwd.org`, click "Add widget", name it `lvwwd.org`, add the hostname `lvwwd.org` under "Hostname
-management", choose the mode "Managed", leave pre-clearance off, and click "Create". The Secret Key
-is `TURNSTILE_SECRET`, which the command stores. The Site Key is public and goes into
-`apps/site/wrangler.jsonc` as step 3 describes. Both start with `0x`.
+management", choose the mode "Managed", leave pre-clearance off, and click "Create". When the
+command asks for `TURNSTILE_SECRET`, copy the Secret Key and paste it at the prompt. After that,
+copy the Site Key and paste it into `apps/site/wrangler.jsonc` as step 3 describes. Both start with
+`0x`; only the Site Key is public.
 
 ### The setup token
 
@@ -200,8 +202,8 @@ The link the command prints opens "Create Custom Token". Name it `lvbt setup lvw
 "Permissions" has exactly three rows, each set to "Account": "Turnstile" with "Edit", "Access: Apps
 and Policies" with "Edit", and "Access: Organizations, Identity Providers, and Groups" with "Read".
 Under "Account Resources", choose "Include" and "Las Vegans for Better Transit". Set the "TTL" end
-date to tomorrow, click "Continue to summary", then "Create Token", and copy it; Cloudflare shows it
-only once.
+date to tomorrow, click "Continue to summary", then "Create Token", copy it (Cloudflare shows it
+only once), and paste it at the command's prompt.
 
 ### The deploy token
 
@@ -237,17 +239,17 @@ personal token that expires the next day, because account API tokens cannot mana
 4. Click "Verify DNS Records" and wait until the domain says "Verified", usually a few minutes.
 5. On <https://resend.com/api-keys>, click "Create API Key", name it `lvwwd.org Worker`, choose
    "Sending access" and the domain `lvwwd.org`, and click "Add". Copy the key, which starts with
-   `re_` and is shown only once. It is `RESEND_API_KEY`.
+   `re_` and is shown only once, and paste it when the command asks for `RESEND_API_KEY`.
 
 ### Cloudflare Web Analytics
 
 The site does not count visits yet. When it does, it needs the Web Analytics token at build time. In
 the Cloudflare dashboard, open Web Analytics, click "Add a site", type `lvwwd.org`, and choose
-"Enable with JS Snippet installation", not the automatic option. Open "Manage site" and copy only
-the token inside `data-cf-beacon='{"token": "..."}'`. It is public, so it is a GitHub environment
-variable, not a secret: in the repository's Settings, then Environments, then `production`, under
-"Environment variables", click "Add environment variable", name it `PUBLIC_LVBT_CWA_TOKEN`, and
-paste the token.
+"Enable with JS Snippet installation", not the automatic option. The token is public, so it is a
+GitHub environment variable, not a secret. In the repository's Settings, open Environments, then
+`production`, and under "Environment variables" click "Add environment variable" and name it
+`PUBLIC_LVBT_CWA_TOKEN`. Then, in Web Analytics, open "Manage site", copy only the token inside
+`data-cf-beacon='{"token": "..."}'`, and paste it as the variable's value.
 
 ## Further reading
 
