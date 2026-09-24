@@ -29,24 +29,48 @@ const {
   eager = false,
   sizes = '100vw',
 } = Astro.props;
-const srcset = photo?.widths.map((w) => `/photos/${photo.name}-${w}.webp ${w}w`).join(', ');
+const set = (stem: string, widths: readonly number[], format: 'avif' | 'webp') =>
+  widths.map((w) => `/photos/${stem}-${w}.${format} ${w}w`).join(', ');
 const largest = photo ? `/photos/${photo.name}-${photo.widths.at(-1)}.webp` : undefined;
+// Phones held upright get the photo's narrower phone crop, if it has one.
+// The home hero fills a tall frame there, so only the middle of the photo
+// shows either way; the crop is that middle, at a fraction of the bytes.
+const phoneMedia = '(max-width: 30rem) and (orientation: portrait)';
 ---
 
 {
   photo ? (
     <figure class:list={['photo', className]}>
-      <img
-        src={largest}
-        srcset={srcset}
-        sizes={sizes}
-        width={photo.width}
-        height={photo.height}
-        alt={photo.alt}
-        loading={eager ? 'eager' : 'lazy'}
-        fetchpriority={eager ? 'high' : 'auto'}
-        decoding="async"
-      />
+      <picture>
+        {photo.phone && (
+          <>
+            <source
+              media={phoneMedia}
+              type="image/avif"
+              srcset={set(`${photo.name}-phone`, photo.phone.widths, 'avif')}
+              sizes="100vw"
+            />
+            <source
+              media={phoneMedia}
+              type="image/webp"
+              srcset={set(`${photo.name}-phone`, photo.phone.widths, 'webp')}
+              sizes="100vw"
+            />
+          </>
+        )}
+        <source type="image/avif" srcset={set(photo.name, photo.widths, 'avif')} sizes={sizes} />
+        <img
+          src={largest}
+          srcset={set(photo.name, photo.widths, 'webp')}
+          sizes={sizes}
+          width={photo.width}
+          height={photo.height}
+          alt={photo.alt}
+          loading={eager ? 'eager' : 'lazy'}
+          fetchpriority={eager ? 'high' : 'auto'}
+          decoding="async"
+        />
+      </picture>
       <figcaption class="photo__credit">
         <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">
           Photo: {photo.credit}
@@ -76,6 +100,9 @@ const largest = photo ? `/photos/${photo.name}-${photo.widths.at(-1)}.webp` : un
     overflow: hidden;
     margin: 0;
     background: var(--color-surface-container);
+  }
+  .photo picture {
+    display: contents;
   }
   .photo img {
     display: block;
