@@ -1,8 +1,8 @@
 // Digital Transit Bingo's interactivity: marking squares, detecting lines,
 // switching between Card view and List view, saving progress on the device,
-// and the clear/share/print actions. Lives in public/scripts because the
-// site's Content Security Policy is `script-src 'self'`, which blocks
-// inline scripts — see the comment in bingo.astro. This file is served
+// clearing the card, and sharing a link to it.
+// Lives in public/scripts because the site's Content Security Policy is
+// `script-src 'self'`, which blocks inline scripts. This file is served
 // as-is (no bundler), so it can't import from src/lib/bingo.ts; the square
 // layout below (5x5, free square at index 12) must stay in sync with that
 // file if the card ever changes.
@@ -11,6 +11,11 @@
 // /scripts/bingo-sync.js also keeps the card on their sign-up, so it
 // follows them to another phone; it talks to this file through
 // window.lvwwdBingo and the lvwwd:bingo-saved event.
+//
+// After loading and after every change, this file sends a `bingochange`
+// event on the document with { marks, progress, locked }: the 25 marks, the
+// progress line's text, and whether the week is over. The Print section
+// (/scripts/bingo-print.js) listens to it, so that script loads first.
 (() => {
   const STORAGE_KEY = 'lvwwd_bingo_2026';
   const VIEW_KEY = 'lvwwd_bingo_view';
@@ -68,7 +73,6 @@
   const dialogShareBtn = document.querySelector('[data-bingo-dialog-share]');
   const confettiEl = document.querySelector('[data-bingo-confetti]');
   const viewButtons = Array.from(document.querySelectorAll('[data-bingo-view-btn]'));
-
   // --- storage -------------------------------------------------------
   function checkStorageAvailable() {
     try {
@@ -212,6 +216,11 @@
 
   function updateProgress(s) {
     if (progressEl) progressEl.textContent = progressText(s);
+    document.dispatchEvent(
+      new CustomEvent('bingochange', {
+        detail: { marks: s.slice(), progress: progressText(s), locked: isAfterWeek },
+      }),
+    );
   }
 
   function cellIndex(cell) {

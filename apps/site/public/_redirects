@@ -1,2 +1,4 @@
 # Old participant kit pages, from before sign-up replaced the pledge.
 /pledged/* /my-week 301
+# The paper bingo card moved onto the Bingo page itself.
+/bingo/print /bingo 301
