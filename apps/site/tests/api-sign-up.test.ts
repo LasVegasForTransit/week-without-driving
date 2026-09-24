@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { dailyCleanup } from '../worker/cleanup';
 import {
   type Outbound,
   type Platform,
@@ -164,16 +165,33 @@ describe('sign-up and links', () => {
     expect(other.status).toBe(503);
   });
 
-  it('allows five sign-ups an hour from one connection', async () => {
-    for (let n = 0; n < 5; n += 1) {
+  // A volunteer's table on one Wi-Fi signs people up one after another.
+  it('allows twenty sign-ups a minute from one connection, and more the next minute', async () => {
+    for (let n = 0; n < 20; n += 1) {
       expect((await signUp({ contact: `person${n}@example.com` }, '198.51.100.1')).status).toBe(
         201,
       );
     }
-    const sixth = await signUp({ contact: 'person6@example.com' }, '198.51.100.1');
-    expect(sixth.status).toBe(429);
-    expect((await sixth.json<{ message: string }>()).message).toBeTruthy();
+    const extra = await signUp({ contact: 'person20@example.com' }, '198.51.100.1');
+    expect(extra.status).toBe(429);
+    expect((await extra.json<{ message: string }>()).message).toMatch(/wait a minute/i);
     expect((await signUp({ contact: 'other@example.com' }, '198.51.100.2')).status).toBe(201);
+
+    vi.setSystemTime(new Date('2026-09-23T19:21:00Z'));
+    expect((await signUp({ contact: 'person20@example.com' }, '198.51.100.1')).status).toBe(201);
+  });
+
+  it('drops rate-limit counts older than a day in the daily cleanup', async () => {
+    await signUp({});
+    await platform.env.DB.prepare(
+      "INSERT INTO rate_limits (key, window_start, count) VALUES ('old', 1, 1)",
+    ).run();
+    await dailyCleanup(platform.env, new Date());
+    const keys = await platform.env.DB.prepare('SELECT key FROM rate_limits').all<{
+      key: string;
+    }>();
+    expect(keys.results.map((row) => row.key)).not.toContain('old');
+    expect(keys.results.length).toBeGreaterThan(0);
   });
 
   it('answers "Get my link" the same way whether or not the contact matches', async () => {

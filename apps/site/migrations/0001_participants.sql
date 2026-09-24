@@ -80,7 +80,8 @@ CREATE TABLE bingo (
 );
 
 -- Fixed-window request counters. key is the SHA-256 of the limit's name and
--- the IP address or contact; window_start counts hours since 1970.
+-- the IP address or contact; window_start is the minute (counted from 1970)
+-- the window began (worker/rate-limit.ts).
 CREATE TABLE rate_limits (
   key TEXT NOT NULL,
   window_start INTEGER NOT NULL,

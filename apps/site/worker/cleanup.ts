@@ -1,5 +1,5 @@
 import type { Env } from './env';
-import { currentWindow } from './rate-limit';
+import { currentMinute } from './rate-limit';
 import { DELETE_FROM } from './time';
 
 /**
@@ -13,6 +13,9 @@ import { DELETE_FROM } from './time';
 // Screenshots are deleted a page at a time; the Free plan allows 50 outgoing
 // calls per run. Anything left is picked up the next day.
 const PHOTO_PAGES_PER_RUN = 20;
+
+// Rate-limit windows are at most an hour; a day old is long gone.
+const DAY_MINUTES = 24 * 60;
 
 async function deleteAllPhotos(bucket: R2Bucket): Promise<void> {
   let cursor: string | undefined;
@@ -33,7 +36,7 @@ export async function dailyCleanup(env: Env, now: Date): Promise<void> {
   if (!db) return;
   await db
     .prepare('DELETE FROM rate_limits WHERE window_start < ?1')
-    .bind(currentWindow(now) - 24)
+    .bind(currentMinute(now) - DAY_MINUTES)
     .run();
   if (now < DELETE_FROM) return;
 

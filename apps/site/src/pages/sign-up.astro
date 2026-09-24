@@ -8,8 +8,10 @@ import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 // lvwwd.org: their phone stays signed in, and the link we send opens My
 // week on any other phone. Anyone can take part in Week Without Driving
 // without signing up; this form is only for the giveaway and My week. The
-// behaviour is in /scripts/sign-up.js, and /scripts/needs-connection.js
-// dims "Sign up" while the phone is offline.
+// behaviour is in /scripts/sign-up.js. A signed-in phone sees "Sign up
+// someone else" instead, for a volunteer signing people up one after
+// another on one tablet, and /scripts/needs-connection.js dims "Sign up"
+// while the phone is offline.
 const title = 'Sign up to win · Week Without Driving Las Vegas';
 const description = `Sign up to win a one-month RTC bus pass. Each day you take a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
 ---
@@ -40,12 +42,22 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
     </div>
 
     <div data-signup-already hidden class="signup__card">
-      <h2 class="signup__h2">You’re already signed up on this phone.</h2>
-      <p class="mt-2" data-signup-already-name></p>
+      <h2 class="signup__h2" data-signup-already-title>You’re signed up.</h2>
       <a href="/my-week" class="btn btn--primary btn--big mt-5">Go to My week</a>
+      {/* For a volunteer signing people up one after another on one device. */}
+      <div class="signup__someone" data-someone-else hidden>
+        <p>Signing up someone else?</p>
+        <button type="button" class="signup__someone-button body-link" data-someone-else-button>
+          Sign up someone else
+        </button>
+        <p class="form-error" data-someone-else-status aria-live="polite"></p>
+      </div>
     </div>
 
     <form data-signup-form class="signup__card" novalidate data-needs-connection="sign-up">
+      <p class="signup__ready" data-next-person tabindex="-1" hidden>
+        Ready for the next person. The last sign-up is saved.
+      </p>
       <div class="form-field">
         <label for="su-name" class="form-label">First name</label>
         <input
@@ -245,6 +257,25 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
   .signup__back {
     margin-top: 1.25rem;
     text-align: center;
+  }
+  .signup__someone {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+  }
+  /* A thumb-sized target, well apart from "Go to My week". */
+  .signup__someone-button {
+    min-height: 44px;
+    padding-block: 0.5rem;
+    font-weight: 700;
+    text-align: left;
+  }
+  .signup__ready {
+    margin-bottom: 1.5rem;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+    border: 2px solid var(--color-primary);
+    border-radius: 0.75rem;
   }
   .signup__back .arrow-link {
     margin-left: 0.25rem;

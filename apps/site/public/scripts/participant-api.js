@@ -9,6 +9,12 @@
  *   Worker writes the site key into its data-sitekey attribute.
  * - showPreviewLink(container, link) shows the "Open my week" link on the
  *   preview Worker, which returns it instead of only sending it.
+ * - whereFrom() is what the sign-up sends about where it came from: the
+ *   partner link opened in this tab (site-nav.js keeps it) and whether a
+ *   volunteer is signing people up on this device.
+ * - signUpSomeoneElse() is "Sign up someone else": it signs this device
+ *   out, clears what it kept for the last person, and remembers for this
+ *   tab that it is a shared device. It resolves to { ok, message }.
  */
 (() => {
   const OFFLINE = 'Couldn’t reach lvwwd.org. Check your connection and try again.';
@@ -145,5 +151,65 @@
     container.hidden = false;
   }
 
-  window.lvwwdApi = { call, botCheck, showPreviewLink, OFFLINE };
+  const REF_KEY = 'lvwwd_ref';
+  const SHARED_KEY = 'lvwwd_shared_device';
+  const NEXT_KEY = 'lvwwd_next_person';
+  const UNREACHABLE = 'We couldn’t reach the server. Check your connection and try again.';
+
+  // Session storage lasts as long as the tab, and a private window keeps
+  // nothing after it closes. Any of it may be refused.
+  function stored(storage, key) {
+    try {
+      return window[storage].getItem(key);
+    } catch {
+      return null;
+    }
+  }
+  function store(storage, key, value) {
+    try {
+      if (value === null) window[storage].removeItem(key);
+      else window[storage].setItem(key, value);
+    } catch {
+      // Refused: the page works the same, only without the memory.
+    }
+  }
+
+  function whereFrom() {
+    const ref = stored('sessionStorage', REF_KEY);
+    return {
+      ...(ref ? { ref } : {}),
+      sharedDevice: stored('sessionStorage', SHARED_KEY) === '1',
+    };
+  }
+
+  async function signUpSomeoneElse() {
+    const { ok, status, data } = await call('POST', '/api/signout', {});
+    // 401: the session had already ended, which is the same result.
+    if (!ok && status !== 401) return { ok: false, message: status ? data.message : UNREACHABLE };
+    // The last person's bingo marks are saved with their sign-up; the next
+    // person starts a fresh card. The key is bingo.js's STORAGE_KEY.
+    store('localStorage', 'lvwwd_bingo_2026', null);
+    store('sessionStorage', 'lvwwd_preview_link', null);
+    store('sessionStorage', SHARED_KEY, '1');
+    store('sessionStorage', NEXT_KEY, '1');
+    document.dispatchEvent(new CustomEvent('lvwwd:signed-out'));
+    return { ok: true, message: '' };
+  }
+
+  /** True once, on the first sign-up form shown after "Sign up someone else". */
+  function readyForNextPerson() {
+    const ready = stored('sessionStorage', NEXT_KEY) === '1';
+    store('sessionStorage', NEXT_KEY, null);
+    return ready;
+  }
+
+  window.lvwwdApi = {
+    call,
+    botCheck,
+    showPreviewLink,
+    whereFrom,
+    signUpSomeoneElse,
+    readyForNextPerson,
+    OFFLINE,
+  };
 })();

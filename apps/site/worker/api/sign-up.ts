@@ -1,3 +1,4 @@
+import { partnerForRef } from '../../src/lib/partners';
 import { signInCookies } from '../cookies';
 import type { ApiContext, ContactType } from '../env';
 import { MESSAGES, clientIp, json, problem, readJsonObject } from '../http';
@@ -17,7 +18,7 @@ export const REPLIES = {
   checkAnswers: 'Check the answers above, then try again.',
   alreadySignedUp: 'You’ve already signed up with that. We sent your link to it.',
   linkSent: 'If that matches a sign-up, we sent your link.',
-  tooManySignUps: 'Too many sign-ups from this connection. Try again in an hour.',
+  tooManySignUps: 'Too many tries. Wait a minute, then try again.',
   tooManyLinks: 'Too many requests from this connection. Try again in an hour.',
   botFailed: 'We couldn’t check that you’re a person. Reload the page and try again.',
   botUnavailable: 'We couldn’t check the form just now. Try again in a minute.',
@@ -45,6 +46,30 @@ function owner(row: OwnerRow) {
     contact: row.contact,
     contactType: row.contact_type,
   };
+}
+
+/**
+ * Where a new sign-up came from: the partner whose link brought the person
+ * (the page sends the ?ref= it kept for this tab), and whether a volunteer
+ * signed them up on a shared device. It is written after the sign-up and
+ * never blocks it: a slug that names no partner is dropped, and a database
+ * still waiting for migration 0005 takes the sign-up without the credit.
+ */
+async function recordWhereFrom(
+  c: ApiContext,
+  id: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const partner = partnerForRef(body.ref)?.slug ?? null;
+  const sharedDevice = body.sharedDevice === true;
+  if (!partner && !sharedDevice) return;
+  try {
+    await c.env.DB.prepare('UPDATE participants SET partner = ?1, shared_device = ?2 WHERE id = ?3')
+      .bind(partner, sharedDevice ? 1 : 0, id)
+      .run();
+  } catch (error) {
+    console.error('Recording where a sign-up came from failed', error);
+  }
 }
 
 function botProblem(check: Exclude<BotCheck, 'pass'>): Response {
@@ -106,6 +131,7 @@ export async function signUp(c: ApiContext): Promise<Response> {
     if (winner) return alreadySignedUp(c, winner);
     throw error;
   }
+  await recordWhereFrom(c, id, body);
 
   const preview = await deliverLink(
     c,

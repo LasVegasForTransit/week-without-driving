@@ -180,10 +180,16 @@ export const SIGN_UP = {
   turnstileToken: 'token-from-the-widget',
 };
 
+/** What the sign-up form sends besides the fields: where it came from. */
+export interface WhereFrom {
+  ref?: string;
+  sharedDevice?: boolean;
+}
+
 /** Signs someone up and returns the cookies that sign their phone in. */
 export async function signUpAs(
   platform: Platform,
-  changes: Partial<typeof SIGN_UP> = {},
+  changes: Partial<typeof SIGN_UP> & WhereFrom = {},
 ): Promise<string> {
   const response = await platform.send(
     apiRequest('POST', '/api/signup', { body: { ...SIGN_UP, ...changes } }),
