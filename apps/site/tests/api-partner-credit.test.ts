@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type * as WwdModule from '../src/lib/wwd';
+import type * as PartnersDataModule from '../src/data/partners';
 
 import {
   ACCESS_ENV,
@@ -20,9 +20,9 @@ import {
 
 // Two partners on the roster, for these tests only; the real roster fills
 // in as LVBT confirms each group.
-vi.mock('../src/lib/wwd', async (importOriginal) => {
-  const real = await importOriginal<typeof WwdModule>();
-  const partners = [
+vi.mock('../src/data/partners', async (importOriginal) => {
+  const real = await importOriginal<typeof PartnersDataModule>();
+  const roster = [
     {
       name: 'East Las Vegas Neighbors',
       slug: 'east-las-vegas-neighbors',
@@ -36,7 +36,7 @@ vi.mock('../src/lib/wwd', async (importOriginal) => {
       sentence: 'Students who ride.',
     },
   ];
-  return { ...real, wwd: { ...real.wwd, partners } };
+  return { ...real, roster };
 });
 
 const EAST = 'east-las-vegas-neighbors';

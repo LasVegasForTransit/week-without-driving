@@ -12,6 +12,7 @@ for), and `security`. Every document is listed here so it can be found.
 ## How-to guides
 
 - [Set up lvwwd.org's production](operations/how-to/set-up-production.md)
+- [Add a partner organization](operations/how-to/add-a-partner.md)
 
 ## Reference
 

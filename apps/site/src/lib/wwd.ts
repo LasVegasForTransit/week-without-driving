@@ -1,6 +1,6 @@
-// Week Without Driving campaign data. One place for the dates, hashtag,
-// giveaway rules, and partner roster that /wwd renders, so the yearly
-// update is a few values here rather than a copy-edit of the page. Dates
+// Week Without Driving campaign data. One place for the dates, hashtag and
+// giveaway rules, so the yearly update is a few values here rather than a
+// copy-edit of the pages. The partner roster is src/data/partners.ts. Dates
 // come from weekwithoutdriving.org and change every year.
 export const wwd = {
   year: 2026,
@@ -15,9 +15,6 @@ export const wwd = {
   rtcTripPlannerUrl: 'https://www.rtcsnv.com/ways-to-travel/trip-planner/',
   hashtag: '#WeekWithoutDriving',
   maxEntries: 8,
-  // Organizations that have committed to take part. Rendered as a roster
-  // once non-empty; hidden until then so the page never shows an empty box.
-  partners: [] as Array<{ name: string; url?: string }>,
 } as const;
 
 // Links out to the national campaign and local tools, grouped by who they

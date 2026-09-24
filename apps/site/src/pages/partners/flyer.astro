@@ -3,15 +3,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { encodeQr, qrPathData } from '../../lib/qrcode';
 import { contactEmail } from '../../lib/partners';
 
-// The printable flyer's real print view (see "Give each partner a
-// printable flyer with its QR code"). This is LVBT's general-materials
-// flyer — no partner slug, so no "Shared by" line — since the roster has
-// no confirmed partners yet. It is a normal page styled to print as one
-// US Letter sheet, not a generated PDF: /partners.astro links here as its
-// "View the printable flyer" download-link placeholder. Real per-partner
-// PDF downloads (full-page and 4-per-page handout, with the partner's own
-// QR code) are built by "Publish partner banners and an embed snippet"
-//.
+// LVBT's printable flyer: a normal page styled to print as one US Letter
+// sheet, not a generated PDF. The partner kit on /partners links here. Its
+// QR code opens lvwwd.org, so it credits no organization.
 
 const title = 'Printable flyer · Week Without Driving Las Vegas';
 const description = 'A printable Week Without Driving Las Vegas flyer with a QR code to lvwwd.org.';
