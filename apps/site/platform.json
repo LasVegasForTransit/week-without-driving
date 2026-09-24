@@ -4,12 +4,26 @@
   "name": "lvwwd.org",
   "cloudflare": {
     "accountId": "2557b5c2e166292ded0f8425b73075e9",
-    "zone": { "name": "lvwwd.org", "id": "751ddce97e99d625448ddcf0a325d032" },
+    "zone": {
+      "name": "lvwwd.org",
+      "id": "751ddce97e99d625448ddcf0a325d032"
+    },
     "worker": "lvwwd",
     "wranglerConfig": "wrangler.jsonc"
   },
-  "d1": [{ "binding": "DB", "name": "lvwwd", "migrations": "migrations" }],
-  "r2": [{ "binding": "PHOTOS", "name": "lvwwd-photos" }],
+  "d1": [
+    {
+      "binding": "DB",
+      "name": "lvwwd",
+      "migrations": "migrations"
+    }
+  ],
+  "r2": [
+    {
+      "binding": "PHOTOS",
+      "name": "lvwwd-photos"
+    }
+  ],
   "turnstile": [
     {
       "name": "lvwwd.org",
@@ -25,7 +39,9 @@
       "destinations": ["lvwwd.org/admin", "lvwwd.org/admin/*", "lvwwd.org/api/admin/*"],
       "sessionDuration": "24h",
       "identityProvider": "google-apps",
-      "allow": { "googleGroup": "wwd-admin@lasvegasfortransit.org" },
+      "allow": {
+        "googleGroup": "wwd-admin@lasvegasfortransit.org"
+      },
       "teamDomainSecret": "ACCESS_TEAM_DOMAIN",
       "audienceSecret": "ACCESS_AUD"
     }
@@ -46,10 +62,10 @@
       "neededFor": "emailing \"Open my week\" links",
       "url": "https://resend.com/api-keys",
       "steps": [
-        "Sign in to Resend with the LVBT account. Ask a maintainer to invite you if you have no access.",
-        "Check that lvwwd.org says \"Verified\" on https://resend.com/domains. If it does not, finish the Email items of this setup first, because a key for an unverified domain cannot send.",
-        "On the API Keys page, click \"Create API Key\".",
-        "Name it \"lvwwd.org Worker\", set Permission to \"Sending access\", set Domain to lvwwd.org, and click \"Add\".",
+        "Sign in to Resend at https://resend.com/login. If you have no account, sign up at https://resend.com/signup with your @lasvegasfortransit.org address and ask a maintainer to invite you to the LVBT team.",
+        "Open https://resend.com/domains. If lvwwd.org is not listed, click \"Add Domain\", type lvwwd.org, choose the region \"North Virginia (us-east-1)\", and click \"Add\".",
+        "If lvwwd.org does not say \"Verified\", click \"Sign in to Cloudflare\" on its page and approve the request, which adds its DNS records; then click \"Verify DNS Records\" and wait until it says \"Verified\". A key for an unverified domain cannot send.",
+        "Open https://resend.com/api-keys and click \"Create API Key\". Name it lvwwd.org Worker, choose the permission \"Sending access\", choose the domain lvwwd.org, and click \"Add\".",
         "Copy the key. It starts with re_, and Resend shows it only once."
       ],
       "pattern": "^re_[A-Za-z0-9_]+$",
@@ -62,9 +78,9 @@
       "neededFor": "the bot check on Sign up to win and Get my link",
       "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/turnstile",
       "steps": [
-        "Open Turnstile in the Cloudflare dashboard with your LVBT account.",
-        "Click the widget named lvwwd.org. If there is none, click \"Add widget\", name it lvwwd.org, add the hostname lvwwd.org, keep the mode \"Managed\", and click \"Create\".",
-        "Copy the Secret Key. The Site Key is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc instead."
+        "Open Turnstile in the Cloudflare dashboard with the \"Las Vegas for Better Transit\" account.",
+        "Click the widget named lvwwd.org. If there is none, click \"Add widget\", type the widget name lvwwd.org, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
+        "Copy the Secret Key. It is private and starts with 0x. The Site Key, which also starts with 0x, is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc through a pull request instead."
       ],
       "pattern": "^0x[A-Za-z0-9_-]+$",
       "patternHint": "A Turnstile secret key starts with 0x."
@@ -76,12 +92,12 @@
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
-        "Open Cloudflare Zero Trust and choose the LVBT account.",
-        "Go to Settings and find \"Team name and domain\".",
-        "Copy the team domain. It looks like lasvegasfortransit.cloudflareaccess.com."
+        "Open Cloudflare One at https://one.dash.cloudflare.com/ and choose the \"Las Vegas for Better Transit\" account.",
+        "On Overview, find Account details and copy the Team domain. For LVBT it is lvbt.cloudflareaccess.com. Copy only the domain, without https://.",
+        "Do not copy the Team name (\"Las Vegans for Better Transit\") shown beside it. It is only a label; this secret needs the domain."
       ],
       "pattern": "^[a-z0-9-]+\\.cloudflareaccess\\.com$",
-      "patternHint": "A team domain looks like <team>.cloudflareaccess.com, without https://."
+      "patternHint": "A team domain looks like lvbt.cloudflareaccess.com, without https://."
     },
     {
       "name": "ACCESS_AUD",
@@ -90,9 +106,14 @@
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
-        "Open Cloudflare Zero Trust and choose the LVBT account.",
-        "Go to Access controls → Applications and click \"lvwwd.org volunteer admin\".",
-        "On the Overview tab, copy \"Application Audience (AUD) Tag\". It is 64 letters and digits."
+        "First, the Google Group that decides who gets in. At https://admin.google.com, go to Menu → Directory → Groups. If wwd-admin@lasvegasfortransit.org is listed, go on. Otherwise click \"Create group\": Group name lvwwd.org volunteer admin, Group email wwd-admin (domain lasvegasfortransit.org), Description \"Volunteers who can open the lvwwd.org admin pages\", Group owner yourself. Click \"Next\", tick \"Security\", click \"Next\", choose \"Restricted\", set \"Who can join the group\" to \"Only invited users\", leave external members off, and click \"Create Group\". Then \"Add members\" with each volunteer's @lasvegasfortransit.org address. Personal Gmail addresses cannot sign in, even in the group.",
+        "Open Cloudflare One at https://one.dash.cloudflare.com/ with the \"Las Vegas for Better Transit\" account and go to Access controls → Applications. If \"lvwwd.org volunteer admin\" is listed, skip to the last step.",
+        "Click \"Create new application\". In the \"Add an application\" dialog, under \"Self-hosted and private\", choose the \"Public DNS\" tab (not \"Private destinations\"), then \"Continue with Self-hosted and private\".",
+        "Under \"Destinations\", fill in three public hostname rows (\"+ Add public hostname\" adds a row), each with Subdomain empty and lvwwd.org chosen in the Domain dropdown, and the paths admin, admin/* and api/admin/*. A path does not cover the paths under it, so all three are needed. If you see a \"Private IPs\" row instead, click \"+ Add public hostname\" and remove the empty private row. Leave \"Allow access through browser-based RDP, SSH, or VNC sessions\" off.",
+        "Under \"Access policies\", pick lvwwd.org volunteer admin allow in \"Add current policies\" if it exists; otherwise click \"Create new policy\", name it exactly lvwwd.org volunteer admin allow, set the action to \"Allow\", and add the Include rule \"Google Workspace groups\" = wwd-admin@lasvegasfortransit.org. If \"Google Workspace groups\" is not offered, Google Workspace sign-in is not connected yet; use an \"Emails\" rule with the volunteers' addresses for now.",
+        "Under \"Authentication\" (Identity tab), turn off \"Accept all available identity providers\", choose only \"Google Workspace\" in \"Choose available identity providers\", and turn on \"Apply instant authentication\". Leave \"Authenticate with Cloudflare One Client\" off.",
+        "Under \"Details\", set Name to exactly lvwwd.org volunteer admin and keep Session Duration at \"24 hours\". Click \"Create\".",
+        "Open the application's \"Configure\" page, then the \"Additional settings\" tab, and copy \"Application Audience (AUD) Tag\". It is 64 lowercase letters and digits."
       ],
       "pattern": "^[a-f0-9]{64}$",
       "patternHint": "An AUD tag is 64 lowercase letters and digits."
@@ -105,12 +126,12 @@
       "targets": ["github:production"],
       "url": "https://dash.cloudflare.com/profile/api-tokens",
       "steps": [
-        "Sign in to Cloudflare with your LVBT account and click \"Create Token\".",
-        "Next to \"Edit Cloudflare Workers\", click \"Use template\".",
-        "Under \"Account Resources\", choose Include and the LVBT account (Las Vegas for Better Transit).",
-        "Under \"Zone Resources\", choose Include, then Specific zone, then lvwwd.org.",
-        "Rename the token to \"lvwwd.org deploy (GitHub Actions)\", click \"Continue to summary\", then \"Create Token\".",
-        "Copy the token. Cloudflare shows it only once."
+        "Open https://dash.cloudflare.com/profile/api-tokens with your LVBT Cloudflare account and click \"Create Token\".",
+        "Next to \"Edit Cloudflare Workers\", click \"Use template\". It grants what a deploy needs: Workers Scripts, Workers KV Storage, and Workers R2 Storage with Edit, Workers Tail and Account Settings with Read, Workers Routes on the zone with Edit, and User Details and Memberships with Read.",
+        "Under \"Account Resources\", choose \"Include\" and \"Las Vegas for Better Transit\", not \"All accounts\".",
+        "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
+        "Rename the token to lvwwd.org deploy (GitHub Actions) and leave \"TTL\" empty, so deploys keep working.",
+        "Click \"Continue to summary\", then \"Create Token\", then \"Copy\". Cloudflare shows it only once. This command stores it as the production environment secret CLOUDFLARE_API_TOKEN in GitHub."
       ],
       "pattern": "^\\S{40,}$",
       "patternHint": "A Cloudflare API token is at least 40 characters with no spaces."
@@ -132,7 +153,9 @@
       "neededFor": "the bot check on Sign up to win and Get my link"
     }
   ],
-  "github": { "repository": "LasVegasForTransit/week-without-driving" },
+  "github": {
+    "repository": "LasVegasForTransit/week-without-driving"
+  },
   "forbidden": [
     {
       "name": "PREVIEW_ADMIN_KEY",
