@@ -127,6 +127,7 @@
     if (navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file], text });
+        window.lvbt?.track('trip_picture_shared', { method: 'share_sheet' });
         return;
       } catch {
         return; // The person closed the share sheet.
@@ -143,6 +144,7 @@
     document.body.append(link);
     link.click();
     link.remove();
+    window.lvbt?.track('trip_picture_shared', { method: 'download' });
     setStatus(root, 'Picture saved to your downloads.');
   }
 

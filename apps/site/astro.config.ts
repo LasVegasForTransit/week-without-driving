@@ -1,4 +1,5 @@
 import sitemap from '@astrojs/sitemap';
+import lvbtAnalytics from '@lasvegasfortransit/analytics/astro';
 import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
 import { defineConfig } from 'astro/config';
@@ -21,20 +22,13 @@ export default defineConfig({
   // offline precache list into dist/sw.js (in that order, so the list
   // fingerprints the files phones download).
   //
-  // Analytics are not wired yet. @lasvegasfortransit/analytics 0.1.0 is
-  // published, but its event list has no lvwwd.org events, and lvwwd.org
-  // has no Cloudflare Web Analytics token. Once both exist: add
-  // `lvbtAnalytics({ site: 'lvwwd.org', exclude: ['^/admin'] })` from
-  // '@lasvegasfortransit/analytics/astro' to this list, set
-  // PUBLIC_LVBT_CWA_TOKEN for production builds only, and add the
-  // analytics origins to the Content-Security-Policy in public/_headers.
-  //
   // The sitemap leaves out the pages that ask search engines not to list
   // them (BaseLayout's `noindex`): My week, Get my link and the offline page.
   integrations: [
     reminderCheck(),
     sitemap({ filter: (page) => !/\/(?:my-week|offline)(?:\/|$)/.test(new URL(page).pathname) }),
     icon(),
+    lvbtAnalytics({ site: 'lvwwd.org', exclude: ['^/admin'] }),
     minifyScripts(),
     serviceWorker(),
   ],

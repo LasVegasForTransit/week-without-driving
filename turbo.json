@@ -1,12 +1,22 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["CI"],
+  "globalEnv": [
+    "CI",
+    "LVBT_REQUIRE_ANALYTICS",
+    "PUBLIC_LVBT_ANALYTICS_COLLECTOR",
+    "PUBLIC_LVBT_CWA_TOKEN"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
+    },
+    "build:e2e": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist-e2e/**"]
     },
     "sync": {
       "outputs": [".astro/**"]
@@ -24,7 +34,7 @@
       "dependsOn": ["^build"]
     },
     "test:e2e": {
-      "dependsOn": ["build"],
+      "dependsOn": ["build:e2e"],
       "cache": false,
       "outputs": ["playwright-report/**", "test-results/**"]
     },

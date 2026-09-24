@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "astro build",
+    "build:e2e": "PUBLIC_LVBT_CWA_TOKEN=e2e-stand-in-token astro build --outDir dist-e2e",
     "dev": "astro dev --host 127.0.0.1 --port 4321",
     "preview": "astro preview --host 127.0.0.1 --port 4321",
+    "preview:e2e": "astro preview --outDir dist-e2e --host 127.0.0.1 --port 4322 --allowed-hosts lvwwd.org",
     "lint": "eslint . --max-warnings 0",
     "sync": "astro sync",
     "stops": "node scripts/build-stops.mjs --download",
@@ -15,11 +17,13 @@
     "check-types": "astro check",
     "check-types:worker": "tsc --project worker",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "validate": "lvbt-analytics csp --check public/_headers"
   },
   "dependencies": {
     "@astrojs/sitemap": "catalog:",
     "@iconify-json/mdi": "catalog:",
+    "@lasvegasfortransit/analytics": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "astro": "catalog:",

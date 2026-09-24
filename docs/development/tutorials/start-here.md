@@ -11,6 +11,16 @@ terminal; nothing else is assumed.
 - git, and a GitHub account with access to this repository.
 - The GitHub CLI (`gh`), signed in with `gh auth login`. Issues and pull requests are created
   through it.
+- Read access to LVBT's packages on [GitHub Packages](../reference/glossary.md#github-packages),
+  which `pnpm install` needs for `@lasvegasfortransit/analytics`. Set it up once:
+
+  ```bash
+  gh auth refresh --scopes read:packages
+  npm config set '//npm.pkg.github.com/:_authToken' '${NODE_AUTH_TOKEN}'
+  ```
+
+  The second line tells pnpm to read the token from `NODE_AUTH_TOKEN` rather than storing it. Then
+  start installs with `NODE_AUTH_TOKEN=$(gh auth token)`, as in step 1.
 
 pnpm (the package manager, see the [glossary](../reference/glossary.md#pnpm)) installs itself from
 the version pinned in `package.json` the first time you run it, through Corepack. If
@@ -21,7 +31,7 @@ the version pinned in `package.json` the first time you run it, through Corepack
 ```bash
 git clone git@github.com:LasVegasForTransit/<this-repository>.git
 cd <this-repository>
-pnpm bootstrap
+NODE_AUTH_TOKEN=$(gh auth token) pnpm bootstrap
 ```
 
 `bootstrap` installs dependencies, points git at the repository's hooks, and runs preflight, which

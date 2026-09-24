@@ -13,6 +13,10 @@ allowBuilds:
 # that is compromised and yanked the same day never reaches a repository.
 minimumReleaseAge: 1440
 
+# The campaign analytics release is verified locally and needed before its 24-hour age window.
+minimumReleaseAgeExclude:
+  - '@lasvegasfortransit/analytics@0.2.0'
+
 # Temporary transitive pins for published security fixes not yet selected by
 # their direct dependents.
 overrides:
@@ -25,6 +29,7 @@ overrides:
 # onto different versions of one tool without it showing up as a change here.
 # Renovate keeps it current.
 catalog:
+  '@lasvegasfortransit/analytics': 0.2.0
   '@axe-core/playwright': 4.13.0
   '@iconify-json/mdi': 1.2.3
   '@tailwindcss/typography': 0.5.20

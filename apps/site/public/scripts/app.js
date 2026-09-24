@@ -11,10 +11,27 @@
  *   steps in other phone browsers. The iPhone sheet also opens by itself
  *   on My week after signing up, until it has been closed once.
  *
+ * Campaign analytics events are listed in docs/operations/reference/analytics.md.
  * Without JavaScript the button stays hidden and every page still works.
  */
 (() => {
   const DISMISSED = 'wwd-ios-install-dismissed';
+  // Holds only "1" after an install has been counted on this phone.
+  const INSTALL_COUNTED = 'wwd-install-counted';
+
+  function countInstall(method) {
+    if (!window.lvbt) return;
+    let counted;
+    try {
+      counted = Boolean(localStorage.getItem(INSTALL_COUNTED));
+      localStorage.setItem(INSTALL_COUNTED, '1');
+    } catch {
+      // Without storage every opening would look like the first, so only
+      // the browser's own install report counts.
+      counted = method === 'home_screen';
+    }
+    if (!counted) window.lvbt?.track('app_installed', { method });
+  }
 
   function offerUpdate(worker, state) {
     const bar = document.querySelector('[data-update-bar]');
@@ -133,9 +150,10 @@
     const sheet = document.querySelector('[data-install-sheet]');
     if (!button || !(sheet instanceof HTMLDialogElement) || !sheet.showModal) return;
     const { standalone, iosSafari, phone } = browser();
-    // Analytics: the `install` event, method "ios-standalone", is sent here
-    // once LVBT's analytics allow lvwwd.org's events. They don't yet.
-    if (standalone) return;
+    if (standalone) {
+      countInstall('home_screen');
+      return;
+    }
 
     const open = installSheet(sheet);
     let offer = null;
@@ -148,7 +166,7 @@
     window.addEventListener('appinstalled', () => {
       offer = null;
       button.hidden = true;
-      // Analytics: the `install` event, method "prompt", is sent here.
+      countInstall('browser');
     });
     button.addEventListener('click', () => {
       // The browser's install box can be shown once per offer.
@@ -167,6 +185,33 @@
     if (iosSafari && signedIn && myWeek && !dismissed()) open('ios', true);
   }
 
+  function countPrints() {
+    const item = document.querySelector('[data-print-item]')?.getAttribute('data-print-item');
+    if (item)
+      window.addEventListener('beforeprint', () =>
+        window.lvbt?.track('material_printed', { item }),
+      );
+  }
+
+  function countSeen() {
+    const sections = document.querySelectorAll('[data-seen-event]');
+    if (sections.length === 0 || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          const name = entry.target.getAttribute('data-seen-event');
+          if (name) window.lvbt?.track(name);
+        });
+      },
+      { threshold: 0.5 },
+    );
+    sections.forEach((section) => observer.observe(section));
+  }
+
   registerServiceWorker();
   setUpInstall();
+  countPrints();
+  countSeen();
 })();

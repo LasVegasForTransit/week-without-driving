@@ -70,6 +70,7 @@
       if (status) status.textContent = data.message;
       return;
     }
+    window.lvbt?.track('week_link_requested', { method: 'link_form' });
     form.hidden = true;
     sent.hidden = false;
     api.showPreviewLink(sent.querySelector('[data-preview-link]'), data.previewLink);

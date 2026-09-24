@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: read
+  # Installs @lasvegasfortransit packages from GitHub Packages.
+  packages: read
 
 concurrency:
   group: ci-${{ github.ref }}
