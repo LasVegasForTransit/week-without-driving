@@ -10,7 +10,7 @@ import {
 import { entryCard } from './entry-card';
 import { type Prefill, drawSection, mailForm, tagForm } from './forms';
 import { type Html, html, page } from './html';
-import type { DayStats, PageData } from './queries';
+import type { DayStats, PageData, PartnerCount } from './queries';
 
 /**
  * The /admin page: counts, the review queue, the two logging forms, the
@@ -32,6 +32,31 @@ const MODES = ['bus', 'walk', 'bike', 'ride'] as const;
 
 function sum(rows: DayStats[], column: keyof DayStats): number {
   return rows.reduce((total, row) => total + row[column], 0);
+}
+
+function partnerTable(rows: PartnerCount[] | null): Html {
+  if (!rows) {
+    return html`<p class="muted">
+      Sign-ups by partner aren’t ready yet. Ask a maintainer to update the database.
+    </p>`;
+  }
+  if (rows.length === 0) return html`<p class="muted">Sign-ups by partner: no partners yet.</p>`;
+  return html`<table id="partners">
+    <caption class="muted">
+      Sign-ups that came through each partner’s link
+    </caption>
+    <tr>
+      <th>Partner</th>
+      <th>Sign-ups</th>
+    </tr>
+    ${rows.map(
+      (row) =>
+        html`<tr>
+          <td>${row.name}</td>
+          <td>${row.signUps}</td>
+        </tr>`,
+    )}
+  </table>`;
 }
 
 function counts(data: PageData): Html {
@@ -75,6 +100,7 @@ function counts(data: PageData): Html {
         ${MODES.map((mode) => html`<th>${sum(stats, mode)}</th>`)}
       </tr>
     </table>
+    ${partnerTable(data.partners)}
   </section>`;
 }
 

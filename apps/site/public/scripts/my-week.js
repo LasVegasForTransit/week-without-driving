@@ -18,6 +18,8 @@
   const MAX_ENTRIES = 8;
   const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
   const PREVIEW_KEY = 'lvwwd_preview_link';
+  // 12:00 am on October 9, 2026, in Las Vegas.
+  const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
   const params = new URLSearchParams(window.location.search);
   let me = null;
 
@@ -275,6 +277,22 @@
     });
   }
 
+  // "Sign up someone else", for a volunteer signing people up on one
+  // tablet: signs this device out and opens the empty sign-up form. The
+  // sign-up that was open stays saved. Gone once sign-up closes.
+  function bindSomeoneElse() {
+    const block = document.querySelector('[data-someone-else]');
+    const button = document.querySelector('[data-someone-else-button]');
+    if (!block || !button || Date.now() >= SIGN_UP_ENDS) return;
+    block.hidden = false;
+    button.addEventListener('click', async () => {
+      setText('[data-someone-else-status]', '');
+      const { ok, message } = await api.signUpSomeoneElse();
+      if (ok) window.location.href = '/sign-up';
+      else setText('[data-someone-else-status]', message);
+    });
+  }
+
   async function start() {
     // Without the flag cookie this phone isn't signed in; don't ask.
     if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) return showSignedOut();
@@ -295,6 +313,7 @@
     bindTrip();
     bindReminders();
     bindSignOut();
+    bindSomeoneElse();
     return undefined;
   }
 

@@ -1,10 +1,11 @@
+import { partners } from '../../src/lib/partners';
 import type { ContactType } from '../env';
 import type { AdminContext, Filters, Source, View } from './common';
 import { ELIGIBLE_COUNT_SQL } from './pick';
 
 /**
- * Everything /admin shows, read in one batch: one round trip and five
- * queries, well within the Workers Free plan.
+ * Everything /admin shows, read in one batch of five queries, then the
+ * partner counts: two round trips, well within the Workers Free plan.
  */
 
 export const PAGE_SIZE = 50;
@@ -75,6 +76,11 @@ export interface DrawRow {
   entries: number;
 }
 
+export interface PartnerCount {
+  name: string;
+  signUps: number;
+}
+
 export interface PageData {
   stats: DayStats[];
   totals: Totals;
@@ -82,6 +88,8 @@ export interface PageData {
   more: boolean;
   draws: DrawRow[];
   volunteers: string[];
+  /** Every partner on the roster, or null while the database lacks migration 0005. */
+  partners: PartnerCount[] | null;
 }
 
 const VIEW_WHERE: Record<View, string> = {
@@ -134,6 +142,28 @@ const DRAWS_SQL = `
   LEFT JOIN participants p ON p.id = d.entrant
   ORDER BY d.round DESC`;
 
+/**
+ * Sign-ups credited to each partner on the roster, by name, including
+ * partners with none yet. Read on its own, so a database still waiting for
+ * migration 0005 shows the rest of the page.
+ */
+async function partnerCounts(db: D1Database): Promise<PartnerCount[] | null> {
+  try {
+    const { results } = await db
+      .prepare(
+        'SELECT partner, count(*) AS n FROM participants WHERE partner IS NOT NULL GROUP BY partner',
+      )
+      .all<{ partner: string; n: number }>();
+    const counted = new Map(results.map((row) => [row.partner, row.n]));
+    return partners
+      .map((partner) => ({ name: partner.name, signUps: counted.get(partner.slug) ?? 0 }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error('Counting sign-ups by partner failed', error);
+    return null;
+  }
+}
+
 export async function loadPage(c: AdminContext, filters: Filters): Promise<PageData> {
   const db = c.env.DB;
   const [stats, totals, entries, draws, volunteers] = await db.batch<Record<string, unknown>>([
@@ -151,5 +181,6 @@ export async function loadPage(c: AdminContext, filters: Filters): Promise<PageD
     more: rows.length > PAGE_SIZE,
     draws: (draws?.results ?? []) as unknown as DrawRow[],
     volunteers: (volunteers?.results ?? []).map((row) => String(row.email)),
+    partners: await partnerCounts(db),
   };
 }

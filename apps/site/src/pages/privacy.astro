@@ -2,15 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { wwd } from '../lib/wwd';
 
-// The Privacy page.
-// Anyone can take part without giving us anything; signing up is only for
-// LVBT's giveaway, at /sign-up, and asks for a first name, an email address
-// or phone number, a ZIP code, an age group and (optionally) an Instagram
-// handle. Entries come from sharing trips without driving on /my-week, or
-// by mail.
-// "Finalize the Privacy policy wording"
-// replaces this draft later — the whole block between the two DRAFT NOTICE
-// comments below is what to delete once that happens.
+// The Privacy page. Anyone can take part without giving us anything;
+// signing up is only for LVBT's giveaway, at /sign-up, and asks for a
+// first name, an email address or phone number, a ZIP code, an age group
+// and (optionally) an Instagram handle. Entries come from sharing trips
+// without driving on /my-week, or by mail. This wording is a draft: once
+// the final wording is approved, it replaces this text and the block
+// between the two DRAFT NOTICE comments below is deleted.
 
 const title = 'Privacy · Week Without Driving Las Vegas';
 const description = 'What Week Without Driving Las Vegas collects, why, and when it is deleted.';
@@ -21,17 +19,14 @@ const contactMailto = `mailto:${contactEmail}`;
 <BaseLayout title={title} description={description}>
   <section class="container-page page-top reading">
     {
-      /* DRAFT NOTICE — remove this block, and this comment, once
-        "Finalize the Privacy policy wording" is approved. */
+      /* DRAFT NOTICE — remove this block, and this comment, once the final
+        wording is approved. */
     }
     <div
       class="mb-10 flex items-start gap-3 border border-primary bg-primary-container px-5 py-4 text-on-primary-container"
     >
       <span class="mt-0.5 font-bold" aria-hidden="true">&#9888;</span>
-      <p class="text-sm font-semibold leading-relaxed">
-        Draft: final wording pending review. This page holds the wording from "Build the Privacy
-        page" until "Finalize the Privacy policy wording" is approved.
-      </p>
+      <p class="text-sm font-semibold leading-relaxed">Draft: final wording pending review.</p>
     </div>
     {/* END DRAFT NOTICE */}
 
@@ -83,6 +78,8 @@ const contactMailto = `mailto:${contactEmail}`;
           giveaway's Official Rules
         </li>
         <li>Whether you'd like LVBT's newsletter (a box we never check for you)</li>
+        <li>Which partner group's link you signed up from, if you used one</li>
+        <li>Whether a volunteer signed you up on their tablet or phone at an event</li>
         <li>
           The trips you share, October 1 to 8: the day, how you got around, the link to your post or
           a screenshot of it, and anything you tell us was hard
@@ -98,6 +95,12 @@ const contactMailto = `mailto:${contactEmail}`;
         that day's log. Signing up means agreeing to the Official Rules. If you also tick "Also send
         me LVBT's newsletter" (it's never checked for you), we pass your email address to LVBT's
         newsletter. See "LVBT's newsletter" below.
+      </p>
+      <p>
+        Where you signed up. If a partner group's link or QR code brought you to lvwwd.org, we note
+        that group with your sign-up, so volunteers can tell each group how many people it brought.
+        If a volunteer signed you up on their own tablet or phone at an event, we note that too. We
+        never show either one on the site.
       </p>
       <p>
         Your trips. Each day you share a trip without driving, we record the day, how you got
@@ -126,6 +129,14 @@ const contactMailto = `mailto:${contactEmail}`;
           A sign-in session, so My week remembers you're signed up. One cookie holds a session code;
           a second just says whether this browser is signed in. Neither one is your name or contact
           information by itself. They last until November 30, 2026, or until you sign out.
+        </li>
+        <li>
+          The partner group's link you opened, if any. Only this browser tab keeps it, until you
+          close the tab, so a sign-up made in that tab counts for the group.
+        </li>
+        <li>
+          After a volunteer taps "Sign up someone else", that the tab is on a shared device, until
+          the tab is closed. Tapping it also clears the last person's bingo card from the device.
         </li>
         <li>
           Your bingo card: which squares you marked, and whether you chose the grid or the list. If

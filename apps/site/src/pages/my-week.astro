@@ -7,12 +7,14 @@ import { wwd } from '../lib/wwd';
 
 // My week: the page a signed-up person comes back to. It shows their
 // entries as the eight days of the week, the form that sends today's
-// shared trip, reminders and their details. The page is the same for
-// everyone; /scripts/my-week.js fills it in from the Worker's API for the
-// person signed in on this phone, or shows the signed-out state.
-// /scripts/needs-connection.js says so, and grays out the buttons that
-// send something, while the phone is offline. Opening an "Open my week"
-// link (/my-week?t=...) is handled by the Worker before this page loads.
+// shared trip, reminders, their details, and, at the foot, "Sign up
+// someone else" for a volunteer signing people up on one tablet. The page
+// is the same for everyone; /scripts/my-week.js fills it in from the
+// Worker's API for the person signed in on this phone, or shows the
+// signed-out state. /scripts/needs-connection.js says so, and grays out
+// the buttons that send something, while the phone is offline. Opening an
+// "Open my week" link (/my-week?t=...) is handled by the Worker before
+// this page loads.
 const title = 'My week · Week Without Driving Las Vegas';
 
 // How someone got around without driving. Any one of them makes the day a
@@ -308,6 +310,13 @@ const shortcuts = [
         >
       </p>
       <p class="form-error" data-signout-status aria-live="polite"></p>
+      {/* For a volunteer signing people up one after another on one device. */}
+      <div data-someone-else hidden>
+        <button type="button" class="myweek__someone body-link font-bold" data-someone-else-button
+          >Sign up someone else</button
+        >
+        <p class="form-error" data-someone-else-status aria-live="polite"></p>
+      </div>
     </div>
 
     <noscript>
@@ -374,6 +383,14 @@ const shortcuts = [
   .myweek__signout {
     margin-top: 3rem;
     color: var(--color-on-surface-variant);
+  }
+  /* Thumb-sized targets that don't touch each other. */
+  .myweek__signout button,
+  .myweek__someone {
+    min-height: 44px;
+  }
+  .myweek__someone {
+    margin-top: 0.75rem;
   }
 
   /* Entries: a ticket-like card with the eight days. */

@@ -7,6 +7,12 @@
  * not signed in here; the Worker sends that person their link instead,
  * and the page says so. Add ?edit=1 to change the details of the person
  * signed in on this phone (PATCH /api/me); the contact can't be changed.
+ *
+ * A phone that is signed in sees "You're signed up" in place of the form.
+ * Until sign-up closes, it also offers "Sign up someone else", for a
+ * volunteer signing people up one after another on one tablet: it signs
+ * the device out and shows the empty form, ready for the next person.
+ * Each sign-up sends the partner link this tab was opened with, if any.
  */
 (() => {
   const api = window.lvwwdApi;
@@ -16,6 +22,9 @@
 
   const FIELDS = ['firstName', 'contact', 'zip', 'instagram', 'age'];
   const PREVIEW_KEY = 'lvwwd_preview_link';
+  // 12:00 am on October 9, 2026, in Las Vegas.
+  const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
+  const nextPerson = form.querySelector('[data-next-person]');
   const statusLine = form.querySelector('[data-signup-status]');
   const submit = form.querySelector('[data-signup-submit]');
   const submitLabel = submit?.textContent ?? 'Sign up';
@@ -139,6 +148,7 @@
     }
     const { ok, status, data } = await api.call('POST', '/api/signup', {
       ...details,
+      ...api.whereFrom(),
       turnstileToken,
     });
     bot.reset();
@@ -195,15 +205,52 @@
     form.hidden = false;
   }
 
+  // The empty form for the next person, with the line that says the last
+  // sign-up is saved. Focus goes to that line, so a screen reader reads it
+  // and the next Tab reaches "First name".
+  function showReadyForNext() {
+    form.reset();
+    showErrors({});
+    setStatus('');
+    startSignUp();
+    if (!(nextPerson instanceof HTMLElement)) return;
+    nextPerson.hidden = false;
+    nextPerson.focus();
+  }
+
+  function offerSomeoneElse() {
+    const block = already.querySelector('[data-someone-else]');
+    const button = already.querySelector('[data-someone-else-button]');
+    const status = already.querySelector('[data-someone-else-status]');
+    if (!block || !button || Date.now() >= SIGN_UP_ENDS) return;
+    block.hidden = false;
+    button.addEventListener('click', async () => {
+      if (status) status.textContent = '';
+      const { ok, message } = await api.signUpSomeoneElse();
+      if (!ok) {
+        if (status) status.textContent = message;
+        return;
+      }
+      api.readyForNextPerson();
+      already.hidden = true;
+      showReadyForNext();
+    });
+  }
+
   function showAlready(me) {
-    const nameLine = already.querySelector('[data-signup-already-name]');
-    if (nameLine) nameLine.textContent = `You signed up as ${me.firstName}.`;
+    const title = already.querySelector('[data-signup-already-title]');
+    if (title) title.textContent = `You’re signed up, ${me.firstName}.`;
+    offerSomeoneElse();
     already.hidden = false;
   }
 
   // Someone signed in on this phone sees who they are, or edits with ?edit=1.
   async function start() {
-    if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) return startSignUp();
+    if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) {
+      // Just after "Sign up someone else" on My week.
+      if (api.readyForNextPerson()) return showReadyForNext();
+      return startSignUp();
+    }
     form.hidden = true;
     const { ok, status, data } = await api.call('GET', '/api/me');
     if (!ok) {
