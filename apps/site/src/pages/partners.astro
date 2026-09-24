@@ -1,65 +1,21 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
-import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
-import { site, lvbt } from '../lib/site';
-import { handleFromUrl } from '../lib/social';
 import { partners, contactEmail, joinMailto } from '../lib/partners';
 
-// Partners page: the roster (from "Show the organizations taking part on
-// the Partners page"), the "Bring your organization" invitation, a
-// simplified banners-and-embed section, and a link to the printable flyer
-// at /partners/flyer. The full partner kit — an organization picker, per-
-// partner QR codes and download buttons for real banner image files — is
-// out of scope until the roster has its first confirmed partner; see the
-// build report for the decisions made to reach this simplified version.
+// Partners, /partners: the organizations taking part, and how another
+// group can join. Every partner comes from the roster in
+// src/data/partners.ts; with none yet, the roster is left out entirely and
+// the page opens with "Bring your organization".
+//
+// After the week ends (12:00 am October 9, 2026, Las Vegas time, by the
+// phone's clock), /scripts/partners.js changes the roster heading to "Took
+// part in 2026" and swaps "Bring your organization" for a note about next
+// year. Without JavaScript the page keeps its during-the-week text.
 
 const title = 'Partners · Week Without Driving Las Vegas';
 const description =
   'Organizations across the Las Vegas Valley taking part in Week Without Driving, and how your group can join.';
-
-const roster = partners.slice().sort((a, b) => a.name.localeCompare(b.name));
-const hasRoster = roster.length > 0;
-
-// The week ends 2026-10-09T07:00:00Z (12:00 am October 9, Las Vegas time);
-// `wwd.end` already carries that instant.
-const campaignOver = Date.now() > wwd.end.getTime();
-
-// Groups taking part: a logo wall, not the detailed writeup below it. It
-// appears once the roster has its first confirmed partner.
-
-const siteHost = site.url.replace(/^https?:\/\//, '');
-const igHandle = handleFromUrl(lvbt.instagramUrl) ?? '@lasvegasfortransit';
-const dateRangeWithYear = `${WWD_DATE_RANGE}, ${wwd.year}`;
-
-// Partner toolkit — sample social posts, ready to copy. Each includes the
-// hashtag, the Instagram handle, and the site so a partner can post it
-// as-is. Copy behavior reuses public/scripts/partners.js's existing
-// data-copy-target handling.
-const samplePosts = [
-  `We're taking part in Week Without Driving, ${dateRangeWithYear}. Get around by bus, walking or rolling, biking, or getting a ride. Sign up to win a free month of bus rides at ${siteHost}. Tag ${igHandle} and use ${wwd.hashtag}.`,
-  `How would you get around Las Vegas without a car? Find out with us during Week Without Driving, ${dateRangeWithYear}. Sign up to win a free month of bus rides at ${siteHost}. ${wwd.hashtag} ${igHandle}`,
-  `Anyone can take part: Week Without Driving is ${dateRangeWithYear} in Las Vegas. Join us and sign up to win at ${siteHost}. ${wwd.hashtag} ${igHandle}`,
-];
-
-const staffEmailSubject = `Join us for Week Without Driving, ${dateRangeWithYear}`;
-const staffEmailBody = [
-  'Hi everyone,',
-  '',
-  `Our group is taking part in Week Without Driving, ${dateRangeWithYear}. Try getting around without driving: by bus, walking or rolling, biking, or getting a ride. Anyone can take part, no sign-up needed.`,
-  '',
-  `Sign up to win a free month of bus rides at ${siteHost}.`,
-  '',
-  'Thanks,',
-  '[Your name]',
-].join('\n');
-const staffEmailTemplate = `Subject: ${staffEmailSubject}\n\n${staffEmailBody}`;
-
-const logoMailto = `mailto:${contactEmail}?subject=${encodeURIComponent(
-  'Partner logo: [your group]',
-)}&body=${encodeURIComponent(
-  ['Group name:', 'Website:', 'Logo attached as PNG or SVG? (yes/no):'].join('\n'),
-)}`;
 
 const weWantToHear = [
   'Disability and senior advocates',
@@ -76,106 +32,26 @@ const whatPartnersDo = [
   "Co-host a group walk, roll or ride during the week. We'll help plan the route.",
   'Hand out flyers or paper bingo cards at your meetings and events.',
 ];
-
-// Three of the four fixed banner sizes from "Give each partner banners, a
-// link and an embed snippet" — the build brief asks for three simple
-// mockups rather than the full four-banner, per-partner kit.
-const banners = [
-  {
-    name: 'Square post',
-    dims: '1080 × 1080',
-    purpose: 'For Instagram and Facebook posts.',
-    aspect: '1 / 1',
-  },
-  {
-    name: 'Story',
-    dims: '1080 × 1920',
-    purpose: 'For Instagram and Facebook stories and WhatsApp status.',
-    aspect: '9 / 16',
-  },
-  {
-    name: 'Website box',
-    dims: '300 × 250',
-    purpose: 'For a website sidebar or newsletter.',
-    aspect: '300 / 250',
-  },
-];
-
-const embedSnippet = `<a href="https://lvwwd.org/">
-  <img src="https://lvwwd.org/partners/banners/300x250.png" width="300" height="250" style="max-width:100%;height:auto" alt="Week Without Driving Las Vegas, October 1 to 8, 2026. Get around by bus, walking or rolling, biking, or getting a ride. Sign up to win at lvwwd.org.">
-</a>`;
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="container-page page-header pb-0">
+  <section class="container-page page-header pb-16">
     <h1 class="page-title">Partners</h1>
 
-    <div>
-      <p class="page-lede">
-        {
-          hasRoster
-            ? 'Groups across the Las Vegas Valley are bringing Week Without Driving to their members, neighbors, students and staff.'
-            : 'Workplaces, schools, churches, clubs and neighborhood groups can bring the week to their people. Join, and your logo goes on this wall.'
-        }
-      </p>
-      {
-        hasRoster && (
-          <>
-            <h2 class="section-title mt-10">
-              {hasRoster
-                ? campaignOver
-                  ? 'Took part in 2026'
-                  : 'Taking part in 2026'
-                : 'Groups taking part'}
-            </h2>
-            <ul class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
-              {roster.map((partner) =>
-                partner.url ? (
-                  <li>
-                    <a
-                      href={partner.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold no-underline transition-colors hover:border-primary focus-visible:border-primary"
-                    >
-                      {partner.logoUrl ? (
-                        <img
-                          src={partner.logoUrl}
-                          alt={partner.name}
-                          class="max-h-full max-w-full object-contain"
-                        />
-                      ) : (
-                        <span class="text-sm leading-snug">{partner.name}</span>
-                      )}
-                    </a>
-                  </li>
-                ) : (
-                  <li>
-                    <div class="reveal flex aspect-square min-h-11 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-container p-3 text-center font-bold">
-                      {partner.logoUrl ? (
-                        <img
-                          src={partner.logoUrl}
-                          alt={partner.name}
-                          class="max-h-full max-w-full object-contain"
-                        />
-                      ) : (
-                        <span class="text-sm leading-snug">{partner.name}</span>
-                      )}
-                    </div>
-                  </li>
-                ),
-              )}
-            </ul>
-          </>
-        )
-      }
-
-      {
-        hasRoster && (
-          <ul class="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
-            {roster.map((partner) => (
+    {
+      partners.length > 0 && (
+        <div>
+          <p class="page-lede">
+            Groups across the Las Vegas Valley are bringing Week Without Driving to their members,
+            neighbors, students and staff.
+          </p>
+          <h2 class="section-title mt-10" data-partners-roster-heading>
+            Taking part in 2026
+          </h2>
+          <ul class="partner-roster">
+            {partners.map((partner) => (
               <li>
-                <p class="text-title-md">
+                <h3 class="partner-roster__name">
                   {partner.url ? (
                     <a href={partner.url} class="body-link">
                       {partner.name}
@@ -183,305 +59,124 @@ const embedSnippet = `<a href="https://lvwwd.org/">
                   ) : (
                     partner.name
                   )}
-                </p>
-                <p class="mt-1 text-sm font-semibold text-on-surface-variant">{partner.type}</p>
-                <p class="mt-1 leading-relaxed text-pretty">{partner.sentence}</p>
+                </h3>
+                <p class="partner-roster__type">{partner.type}</p>
+                <p class="partner-roster__sentence">{partner.sentence}</p>
               </li>
             ))}
           </ul>
-        )
-      }
+        </div>
+      )
+    }
+
+    <div class="section mt-12" data-partners-ended hidden>
+      <p class="section-intro">
+        Week Without Driving 2026 has ended. Want to take part next year? Email <a
+          href={`mailto:${contactEmail}`}
+          data-print-url={contactEmail}
+          class="body-link font-semibold">{contactEmail}</a
+        > and we'll let you know when planning starts.
+      </p>
     </div>
 
-    {
-      campaignOver ? (
-        <div class="section mt-12">
-          <h2 class="section-title">Bring your organization</h2>
-          <p class="section-intro">
-            Week Without Driving 2026 has ended. Want to take part next year? Email{' '}
-            <a
-              href={`mailto:${contactEmail}`}
-              data-print-url={contactEmail}
-              class="body-link font-semibold"
-            >
-              {contactEmail}
-            </a>{' '}
-            and we'll let you know when planning starts.
-          </p>
-        </div>
-      ) : (
-        <div class="section mt-12">
-          <h2 class="section-title">Bring your organization</h2>
-          <p class="section-intro">
-            Week Without Driving is for everyone who gets around Las Vegas without driving, and for
-            the groups that stand with them. Partnering is free, and any size of group can join,
-            from a block club to a big employer.
-          </p>
+    <div class="section mt-12" data-partners-join>
+      <h2 class="section-title">Bring your organization</h2>
+      <p class="section-intro">
+        Week Without Driving is for everyone who gets around Las Vegas without driving, and for the
+        groups that stand with them. Partnering is free, and any size of group can join, from a
+        block club to a big employer.
+      </p>
 
-          <div class="mt-10 grid gap-10 md:grid-cols-2 md:gap-16">
-            <div>
-              <h3 class="text-title-lg">We'd love to hear from:</h3>
-              <ul class="prose-doc mt-3">
-                {weWantToHear.map((item) => (
-                  <li>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 class="text-title-lg">
-                What partners do. Pick any of these. There's no minimum.
-              </h3>
-              <ul class="prose-doc mt-3">
-                {whatPartnersDo.map((item) => (
-                  <li>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <p class="mt-10 max-w-2xl leading-relaxed text-pretty">
-            You get your group's name on this page, your own link and QR code, banners and flyers to
-            print, and an email after the week telling you how many people signed up through your
-            link.
-          </p>
-
-          <div class="mt-10 max-w-2xl overflow-hidden rounded-2xl bg-surface-container p-6 md:p-8">
-            <h3 class="text-title-lg">How to join</h3>
-            <p class="mt-3 leading-relaxed text-pretty">
-              Email {contactEmail} with your group's name, a link to your website or social media
-              page if you have one, which kind of group you are, and one sentence on how you'll take
-              part. We reply within 3 days and add you to this page.
-            </p>
-            <div class="mt-6 flex flex-wrap items-center gap-4">
-              <a
-                href={joinMailto}
-                data-print-url={contactEmail}
-                class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-              >
-                <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
-                Email us to join
-              </a>
-              <div class="flex flex-wrap items-center gap-2 text-sm">
-                <span class="font-semibold">{contactEmail}</span>
-                {/* Progressive enhancement: hidden until public/scripts/partners.js
-                    confirms the clipboard API can run; the address above always
-                    stays visible as plain text either way. */}
-                <button
-                  type="button"
-                  class="press inline-flex min-h-11 items-center gap-1.5 border border-outline px-3 py-2 text-sm font-semibold"
-                  data-copy-text={contactEmail}
-                  aria-describedby="join-copy-status"
-                  hidden
-                >
-                  <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
-                  Copy email address
-                </button>
-              </div>
-            </div>
-            <p id="join-copy-status" class="mt-2 text-sm text-on-surface-variant" role="status" />
-          </div>
-        </div>
-      )
-    }
-
-    {
-      !campaignOver && (
-        <div class="section mt-12">
-          <h2 class="section-title">Partner toolkit</h2>
-          <p class="section-intro">
-            Ready-to-use posts, an email for your staff or members, and how to send us your logo.
-          </p>
-
-          <div class="mt-10">
-            <h3 class="text-title-lg">Sample posts</h3>
-            <p class="mt-3 max-w-2xl leading-relaxed text-pretty">
-              Copy one and post it on Instagram or Facebook, as is or in your own words.
-            </p>
-            <ul class="mt-6 grid gap-6 md:grid-cols-3">
-              {samplePosts.map((post, index) => (
-                <li class="flex flex-col border border-outline bg-surface-container p-6">
-                  <p id={`sample-post-${index + 1}`} class="flex-1 leading-relaxed text-pretty">
-                    {post}
-                  </p>
-                  <div class="mt-4 flex flex-wrap items-center gap-4">
-                    <button
-                      type="button"
-                      class="press inline-flex min-h-11 items-center gap-2 border border-outline px-4 py-2 text-sm font-semibold"
-                      data-copy-target={`#sample-post-${index + 1}`}
-                      aria-describedby={`sample-post-${index + 1}-status`}
-                      hidden
-                    >
-                      <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
-                      Copy
-                    </button>
-                  </div>
-                  <p
-                    id={`sample-post-${index + 1}-status`}
-                    class="mt-2 text-sm text-on-surface-variant"
-                    role="status"
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div class="mt-12">
-            <h3 class="text-title-lg">Email to your staff or members</h3>
-            <p class="mt-3 max-w-2xl leading-relaxed text-pretty">
-              Copy this and paste it into an email, or edit it first.
-            </p>
-            <div class="mt-6 border border-outline bg-surface-container p-6 md:max-w-2xl">
-              <p id="staff-email-template" class="whitespace-pre-line leading-relaxed text-pretty">
-                {staffEmailTemplate}
-              </p>
-              <div class="mt-4 flex flex-wrap items-center gap-4">
-                <button
-                  type="button"
-                  class="press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-3 font-semibold"
-                  data-copy-target="#staff-email-template"
-                  aria-describedby="staff-email-status"
-                  hidden
-                >
-                  <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
-                  Copy email
-                </button>
-              </div>
-              <p
-                id="staff-email-status"
-                class="mt-2 text-sm text-on-surface-variant"
-                role="status"
-              />
-            </div>
-          </div>
-
-          <div class="mt-12">
-            <h3 class="text-title-lg">Send us your logo</h3>
-            <div class="mt-6 max-w-2xl border border-outline bg-surface-container p-6">
-              <p class="leading-relaxed text-pretty">
-                Partner groups appear on lvwwd.org with their logo. For now, email us your group's
-                name, website, and your logo attached as a PNG or SVG, and we'll add it.
-              </p>
-              <div class="mt-4 flex flex-wrap items-center gap-3">
-                <a
-                  href={logoMailto}
-                  data-print-url={contactEmail}
-                  class="press inline-flex items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
-                >
-                  <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
-                  Email us your logo
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    {
-      !campaignOver && (
-        <div class="section mt-12">
-          <h2 class="section-title">Banners and embed</h2>
-          <p class="section-intro">
-            These are LVBT's general materials, for now. These don't credit any organization — once
-            your group joins as a partner, we'll set you up with your own link, QR code and banners
-            that credit it instead.
-          </p>
-
-          <ul class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {banners.map((banner) => (
-              <li>
-                <div
-                  class="wwd-banner-mock flex flex-col items-center justify-center gap-2 bg-slab p-4 text-center text-on-slab"
-                  style={`aspect-ratio:${banner.aspect}`}
-                  role="img"
-                  aria-label={`Week Without Driving Las Vegas, October 1 to 8, 2026. Get around by bus, walking or rolling, biking, or getting a ride. Sign up to win at lvwwd.org.`}
-                >
-                  <p class="text-title-sm font-bold uppercase tracking-wide text-primary-soft">
-                    Week Without Driving
-                  </p>
-                  <p class="text-title-md font-bold">Las Vegas</p>
-                  <p class="text-sm text-on-slab/85">October 1 to 8, 2026</p>
-                  <p class="mt-1 text-xs leading-snug text-on-slab/70">
-                    By bus, walking or rolling, biking, or getting a ride.
-                  </p>
-                  <p class="mt-1 text-xs font-semibold text-primary-soft">
-                    Sign up to win at lvwwd.org
-                  </p>
-                </div>
-                <p class="mt-3 text-sm font-semibold">
-                  {banner.name}, {banner.dims}
-                </p>
-                <p class="text-sm text-on-surface-variant">{banner.purpose}</p>
-              </li>
-            ))}
+      <div class="mt-10 grid gap-10 md:grid-cols-2 md:gap-16">
+        <div>
+          <h3 class="text-title-lg">We'd love to hear from:</h3>
+          <ul class="prose-doc mt-3">
+            {weWantToHear.map((item) => <li>{item}</li>)}
           </ul>
-
-          <div class="mt-12 max-w-2xl">
-            <h3 class="text-title-lg">Embed snippet</h3>
-            <p class="mt-3 leading-relaxed text-pretty">
-              For your website. Copy this and paste it into your site's HTML where you want the
-              banner. It shows the banner with its image description built in, links to lvwwd.org,
-              and loads no scripts or cookies.
-            </p>
-            <pre class="mt-4 overflow-x-auto border border-outline bg-surface-container p-4 text-xs leading-relaxed">
-              <code id="embed-snippet">{embedSnippet}</code>
-            </pre>
-            <div class="mt-4 flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                class="press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-3 font-semibold"
-                data-copy-target="#embed-snippet"
-                aria-describedby="snippet-copy-status"
-                hidden
-              >
-                <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
-                Copy snippet
-              </button>
-            </div>
-            <p
-              id="snippet-copy-status"
-              class="mt-2 text-sm text-on-surface-variant"
-              role="status"
-            />
-          </div>
         </div>
-      )
-    }
+        <div>
+          <h3 class="text-title-lg">What partners do. Pick any of these. There's no minimum.</h3>
+          <ul class="prose-doc mt-3">
+            {whatPartnersDo.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
 
-    {
-      !campaignOver && (
-        <div class="section mt-12">
-          <h2 class="section-title">Flyers</h2>
-          <p class="section-intro">
-            Print these for tables, meetings and noticeboards. They work in black and white, and
-            they carry a QR code and link so anyone without a smartphone can still get to lvwwd.org.
-          </p>
-          <div class="mt-8 flex flex-wrap items-center gap-4">
-            <a
-              href="/partners/flyer"
-              class="press inline-flex items-center gap-2 bg-on-surface px-6 py-3 font-bold text-surface no-underline hover:bg-primary hover:text-on-primary focus-visible:bg-primary focus-visible:text-on-primary"
+      <p class="mt-10 max-w-2xl leading-relaxed text-pretty">
+        You get your group's name on this page, your own link and QR code, banners and flyers to
+        print, and an email after the week telling you how many people signed up through your link.
+      </p>
+
+      <div class="mt-10 max-w-2xl overflow-hidden rounded-2xl bg-surface-container p-6 md:p-8">
+        <h3 class="text-title-lg">How to join</h3>
+        <p class="mt-3 leading-relaxed text-pretty">
+          Email {contactEmail} with your group's name, a link to your website or social media page if
+          you have one, which kind of group you are, and one sentence on how you'll take part. We reply
+          within 3 days and add you to this page.
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-4">
+          <a
+            href={joinMailto}
+            data-print-url={contactEmail}
+            class="press inline-flex min-h-11 items-center gap-2 bg-primary px-6 py-3 font-bold text-on-primary no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface"
+          >
+            <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
+            Email us to join
+          </a>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-semibold">{contactEmail}</span>
+            {/* Shown by /scripts/partners.js; the address stays visible as text without it. */}
+            <button
+              type="button"
+              class="press inline-flex min-h-11 min-w-11 items-center gap-1.5 border border-outline px-3 py-2 text-sm font-semibold"
+              data-copy-text={contactEmail}
+              aria-describedby="join-copy-status"
+              hidden
             >
-              <Icon name="mdi:file-outline" class="size-5" aria-hidden="true" />
-              View the printable flyer
-            </a>
-            <p class="text-sm text-on-surface-variant">
-              Print on US Letter paper at actual size (100%). Color or black and white both work.
-            </p>
+              <Icon name="mdi:content-copy" class="size-4" aria-hidden="true" />
+              <span data-copy-label>Copy email address</span>
+            </button>
           </div>
-          {/* A one-page, print-ready flyer at /partners/flyer, built with the
-              site's own print styles — a real page, not a generated PDF. Real
-              per-partner PDF downloads (full-page and 4-per-page handout) are
-              built by "Publish partner banners and an embed snippet". */}
         </div>
-      )
-    }
+        <p id="join-copy-status" class="mt-2 text-sm font-semibold" role="status"></p>
+      </div>
+    </div>
   </section>
 
   <script is:inline src="/scripts/partners.js" defer></script>
 </BaseLayout>
 
 <style>
-  .wwd-banner-mock {
-    border: 1px solid var(--color-outline-variant);
+  .partner-roster {
+    display: grid;
+    gap: 2rem 2.5rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .partner-roster {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .partner-roster__name {
+    font-size: var(--text-title-lg);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .partner-roster__type {
+    margin-top: 0.25rem;
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    color: var(--color-on-surface-variant);
+  }
+  .partner-roster__sentence {
+    margin-top: 0.25rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+  [data-partners-ended][hidden],
+  [data-partners-join][hidden] {
+    display: none;
   }
 </style>
