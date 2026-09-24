@@ -1,16 +1,8 @@
 ---
-// "Pay your bus fare" (build-brief.md section 5.4). Content lives in
-// src/content/guides/pay-your-fare.md; this file only wires it into the
-// shared GuideLayout.
-//
-// Unverified RTC facts: this guide deliberately does not state pass
-// prices, the Deuce pass price, ticket vending machine or sales office
-// locations, whether cash fare needs exact change, or reduced-fare
-// eligibility rules as fact, because nobody has checked them against
-// RTC's current fares page for this rewrite. Each price/rule mention
-// instead points to "Check current fares at rtcsnv.com". Before launch,
-// check https://www.rtcsnv.com/ways-to-travel/fares-passes/ and fill
-// those specifics into the Markdown file.
+// "Pay your bus fare". Content lives in src/content/guides/pay-your-fare.md;
+// this file only wires it into the shared GuideLayout. The Markdown file's
+// closing comment says which fares were checked against RTC's fares page,
+// when, and what is still left to confirm.
 import { getEntry } from 'astro:content';
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import { getNextGuide, getSortedGuides } from '../../lib/guides';
