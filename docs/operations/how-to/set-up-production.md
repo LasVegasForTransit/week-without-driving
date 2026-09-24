@@ -291,10 +291,23 @@ works with Wrangler because the workflow also sets `CLOUDFLARE_ACCOUNT_ID`.
    needs no D1 permission.
 4. Under "Zone Resources", choose "Include", then "Specific zone", then `lvwwd.org`.
 5. Leave the expiration empty, click "Continue to summary", then "Create Token", and copy it;
-   Cloudflare shows it only once. Paste it when the command asks for `CLOUDFLARE_API_TOKEN`.
+   Cloudflare shows it only once.
 
-The command copies `CLOUDFLARE_ACCOUNT_ID` into the same environment itself. The setup token stays a
-personal token that expires the next day, because account API tokens cannot manage Turnstile.
+Store it in the repository's `production` GitHub environment one of two ways:
+
+- Paste it when `pnpm bootstrap --production` asks for `CLOUDFLARE_API_TOKEN`; the command stores it
+  and `CLOUDFLARE_ACCOUNT_ID` itself.
+- Or, without running the command, store both directly. In the repository, run
+  `gh secret set CLOUDFLARE_API_TOKEN --env production`, then paste the token and press Enter (it is
+  read from standard input, so it never appears as a command argument or in your shell history).
+  Then run `gh secret set CLOUDFLARE_ACCOUNT_ID --env production` and give it
+  `2557b5c2e166292ded0f8425b73075e9`; that value is not secret, so it is fine to see it on screen or
+  paste it into a script. Only a repository admin can set environment secrets.
+
+The Deploy workflow (`.github/workflows/deploy.yml`) cannot publish lvwwd.org until both secrets
+exist in the `production` environment; a push to `main` fails at the Deploy step until they do. The
+setup token stays a personal token that expires the next day, because account API tokens cannot
+manage Turnstile.
 
 ### Resend
 
