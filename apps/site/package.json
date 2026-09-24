@@ -9,6 +9,7 @@
     "preview": "astro preview --host 127.0.0.1 --port 4321",
     "lint": "eslint . --max-warnings 0",
     "sync": "astro sync",
+    "stops": "node scripts/build-stops.mjs --download",
     "check-types": "astro check",
     "check-types:worker": "tsc --project worker",
     "test": "vitest run",
