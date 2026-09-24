@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "catalog:",
+    "@axe-core/playwright": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@lasvegasfortransit/eslint-config": "file:../../.lvbt/web-platform/packages/eslint-config",
     "@lasvegasfortransit/playwright-config": "file:../../.lvbt/web-platform/packages/playwright-config",
