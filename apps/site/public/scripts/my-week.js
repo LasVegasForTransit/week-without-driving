@@ -24,6 +24,12 @@
   const params = new URLSearchParams(window.location.search);
   let me = null;
 
+  /** How an entry came in, for the count: never the link or the picture itself. */
+  function entryMethod(body) {
+    if (body.has('link')) return body.has('screenshot') ? 'link_and_screenshot' : 'link';
+    return 'screenshot';
+  }
+
   function setText(selector, text) {
     const el = document.querySelector(selector);
     if (el) el.textContent = text;
@@ -226,6 +232,7 @@
         return undefined;
       }
       setText('[data-trip-error]', '');
+      const day = String(me.today);
       const button = form.querySelector('[data-trip-submit]');
       if (button instanceof HTMLButtonElement) button.disabled = true;
       const { ok, status, data } = await api.call('POST', '/api/checkin', body);
@@ -235,6 +242,7 @@
         setText('[data-trip-error]', data.message);
         return undefined;
       }
+      window.lvbt?.track('trip_entry_submitted', { day, method: entryMethod(body) });
       me.days = data.days;
       me.trips = data.trips;
       renderEntries();

@@ -342,6 +342,11 @@
 
     if (!input.checked) return; // Unmarking never opens a celebration.
 
+    // Counts, not squares: how far the card has come, never which square.
+    const lines = completedLines(state).length;
+    window.lvbt?.track('bingo_square_marked', { marked: String(markedCount(state)) });
+    if (lines > before.length) window.lvbt?.track('bingo_completed', { lines: String(lines) });
+
     if (markedCount(state) === 24 && !wasFull) {
       celebrateWholeCard();
       return;

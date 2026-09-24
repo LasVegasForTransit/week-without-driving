@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# The analytics end-to-end build (apps/site build:e2e).
+dist-e2e/
 coverage/
 .turbo/
 .wrangler/

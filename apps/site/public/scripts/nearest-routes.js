@@ -214,6 +214,8 @@
       async (position) => {
         if (!(await ready)) return;
         searchFrom(position.coords.latitude, position.coords.longitude, 'Stops near you', 'you');
+        // Counts how Find a bus was used, never where the phone is.
+        window.lvbt?.track('bus_finder_used', { method: 'my_location' });
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
@@ -235,6 +237,7 @@
     const label = option.textContent.trim();
     if (!(await ensureData())) return;
     searchFrom(lat, lng, `Stops near ${label}`, label);
+    window.lvbt?.track('bus_finder_used', { method: 'place' });
   }
 
   function indexRoutes(routes) {

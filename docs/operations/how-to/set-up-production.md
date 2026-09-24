@@ -11,8 +11,8 @@ sets up what is missing, so you do not need to remember any of it.
 
 - `pnpm bootstrap` passes on your machine, which means the GitHub CLI and Wrangler are signed in. If
   Wrangler is not, run `pnpm exec wrangler login` and sign in with your LVBT account.
-- Your Cloudflare user can administer the LVBT account (ID `2557b5c2e166292ded0f8425b73075e9`),
-  including Cloudflare One, which Cloudflare used to call Zero Trust.
+- Your Cloudflare user can administer the Las Vegans for Better Transit account, including
+  Cloudflare One, which Cloudflare used to call Zero Trust.
 - Your GitHub user is an admin of `LasVegasForTransit/week-without-driving`.
 - You can sign in to the LVBT Resend account.
 - Only if Google Workspace is not yet connected to Cloudflare One (it is today), a Google Workspace
@@ -111,7 +111,23 @@ an iPhone, add lvwwd.org to the Home Screen and open it from there first. Then o
 <https://lvwwd.org/admin>, find "Browser reminders" and press "Send test reminder" on the newest
 browser. Day 1's notification shows within a minute, and tapping it opens My week.
 
-## 6. Confirm lvwwd.org is ready
+## 6. Turn on analytics
+
+The analytics integration stays off until the production build has a Cloudflare Web Analytics token.
+
+1. Open the [Cloudflare dashboard](https://dash.cloudflare.com/), choose the Las Vegans for Better
+   Transit account, then open **Web Analytics**. If `lvwwd.org` is absent, click **Add a site**,
+   choose `lvwwd.org`, then click **Done**.
+2. Click **Manage site** for `lvwwd.org` and choose **Enable with JS Snippet installation**. Leave
+   Cloudflare's automatic setup off so it does not bypass the site's privacy check or count twice.
+   The build adds the snippet; do not paste it into a page.
+3. Copy the token from the snippet: the 32 letters and digits after `"token":`, without quotes.
+4. In GitHub, open the `week-without-driving` repository's Settings → Environments → `production`.
+   Add an **environment variable** named `PUBLIC_LVBT_CWA_TOKEN` and paste the token.
+5. Redeploy from `main`, then verify the live site and collector as described in
+   [Analytics](../reference/analytics.md#check-it).
+
+## 7. Confirm lvwwd.org is ready
 
 ```bash
 pnpm preflight --production
@@ -300,9 +316,9 @@ Store it in the repository's `production` GitHub environment one of two ways:
 - Or, without running the command, store both directly. In the repository, run
   `gh secret set CLOUDFLARE_API_TOKEN --env production`, then paste the token and press Enter (it is
   read from standard input, so it never appears as a command argument or in your shell history).
-  Then run `gh secret set CLOUDFLARE_ACCOUNT_ID --env production` and give it
-  `2557b5c2e166292ded0f8425b73075e9`; that value is not secret, so it is fine to see it on screen or
-  paste it into a script. Only a repository admin can set environment secrets.
+  Then run `gh secret set CLOUDFLARE_ACCOUNT_ID --env production` and paste the Account ID shown on
+  the account's Cloudflare dashboard at the prompt. Only a repository admin can set environment
+  secrets.
 
 The Deploy workflow (`.github/workflows/deploy.yml`) cannot publish lvwwd.org until both secrets
 exist in the `production` environment; a push to `main` fails at the Deploy step until they do. The

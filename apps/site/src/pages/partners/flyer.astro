@@ -28,7 +28,11 @@ const qrViewBox = qr.size + qrQuiet * 2;
       <a href="/partners" class="body-link font-semibold">&#8592; Back to Partners</a>
     </p>
 
-    <div class="flyer mt-10 max-w-xl border border-outline bg-surface p-8 sm:p-10">
+    {/* data-print-item: printing this page counts as a printed flyer (app.js). */}
+    <div
+      class="flyer mt-10 max-w-xl border border-outline bg-surface p-8 sm:p-10"
+      data-print-item="partner_flyer"
+    >
       <p class="flyer-headline text-2xl font-bold uppercase tracking-tight">
         Week Without Driving Las Vegas
       </p>

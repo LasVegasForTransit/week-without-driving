@@ -76,7 +76,7 @@
       "purpose": "Lets the Worker ask Turnstile whether a sign-up or a \"Get my link\" request came from a person.",
       "use": "live",
       "neededFor": "the bot check on Sign up to win and Get my link",
-      "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/turnstile",
+      "url": "https://dash.cloudflare.com/",
       "steps": [
         "Open Turnstile in the Cloudflare dashboard with the \"Las Vegans for Better Transit\" account.",
         "Click the widget named lvwwd.org. If there is none, click \"Add widget\", type the widget name lvwwd.org, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
@@ -136,7 +136,7 @@
       "use": "live",
       "neededFor": "deploying lvwwd.org from GitHub",
       "targets": ["github:production"],
-      "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/api-tokens",
+      "url": "https://dash.cloudflare.com/",
       "steps": [
         "Make it an account API token, which belongs to the LVBT account rather than to you, so deploys keep working after you leave. Creating one needs the Super Administrator role on the account.",
         "In the Cloudflare dashboard, choose the \"Las Vegans for Better Transit\" account and go to Manage Account → \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",

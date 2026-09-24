@@ -17,4 +17,5 @@ for), and `security`. Every document is listed here so it can be found.
 
 ## Reference
 
+- [Analytics](operations/reference/analytics.md)
 - [Glossary](development/reference/glossary.md)

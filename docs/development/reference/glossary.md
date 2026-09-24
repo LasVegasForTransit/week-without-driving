@@ -32,6 +32,10 @@ discussed in review. The settings come from `@lasvegasfortransit/prettier-config
 <a id="wrangler"></a>**Wrangler**: Cloudflare's command line for deploying Workers.
 `pnpm run deploy` calls it.
 
+<a id="github-packages"></a>**GitHub Packages**: the registry LVBT publishes its own packages to,
+such as `@lasvegasfortransit/analytics`. Installing from it needs a GitHub token even for reading;
+see [Start here](../tutorials/start-here.md#before-you-start).
+
 <a id="gh"></a>**gh**: the GitHub command line. Signing in with `gh auth login` lets the
 repository's helper create issues and pull requests for you.
 
@@ -49,6 +53,14 @@ request. The required status is named `Validate`.
 
 <a id="preflight"></a>**Preflight**: `pnpm preflight`, the check that your machine can build and
 deploy this repository, with a fix printed for anything missing.
+
+<a id="web-analytics"></a>**Web Analytics**: Cloudflare Web Analytics, which counts page visits,
+where visitors came from, and how fast pages load, without cookies. See
+[Analytics](../../operations/reference/analytics.md).
+
+<a id="collector"></a>**Collector**: LVBT's own small service at `events.lasvegasfortransit.org`
+that counts the campaign events LVBT's analytics allow, such as a sign-up or a trip entry, without
+recording who sent them.
 
 <a id="platform-manifest"></a>**Platform manifest**: `platform.json`, next to an app's production
 `wrangler.jsonc`, which lists everything the app needs in production: its database, bucket, bot

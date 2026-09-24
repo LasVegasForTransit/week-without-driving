@@ -153,13 +153,18 @@
     });
     bot.reset();
     if (status === 201) {
+      window.lvbt?.track('campaign_signup');
       rememberPreviewLink(data.previewLink);
       window.location.href = data.redirect ?? '/my-week?welcome=1';
       return true;
     }
     if (data.errors) showErrors(data.errors);
     setStatus(data.message, !ok);
-    if (ok) api.showPreviewLink(document.querySelector('[data-preview-link]'), data.previewLink);
+    if (ok) {
+      // Already signed up: the Worker sent this person's link instead.
+      window.lvbt?.track('week_link_requested', { method: 'signup_form' });
+      api.showPreviewLink(document.querySelector('[data-preview-link]'), data.previewLink);
+    }
     return false;
   }
 
