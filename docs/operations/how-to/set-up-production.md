@@ -133,14 +133,20 @@ lasvegasfortransit.org does the Google steps.
    LVBT's Google Cloud project, "LVBT Core", and click "Enable" on "Admin SDK API" (it says "Manage"
    if it is already on). Access uses it to read group membership. If Google shows a Free Trial
    banner, dismiss it; none of this needs billing.
-2. Open <https://console.cloud.google.com/auth/overview?project=lvbt-core>. If Google says the app
-   is not configured, click "Get started": app name `LVBT volunteer sign-in`, your
-   @lasvegasfortransit.org address as the support and contact email, audience "Internal", then
-   "Create".
+2. Open <https://console.cloud.google.com/auth/overview?project=lvbt-core>. If the Clients page says
+   "Google Auth Platform not configured yet", click "Get started" and complete the four steps: App
+   Information — App name `Las Vegans for Better Transit`, User support email
+   `tech@lasvegasfortransit.org` (a shared LVBT address, never a person's), then "Next"; Audience —
+   "Internal", then "Next"; Contact Information — `tech@lasvegasfortransit.org`, then "Next"; Finish
+   — tick the box agreeing to the Google API Services: User Data Policy, click "Continue", then
+   "Create". Optional: under "Branding", upload the square LVBT logo from the "Marketing &
+   Communications" shared drive as the App logo. Then open "Clients" again.
 3. Open <https://admin.google.com/ac/owl> (Security, then Access and data control, then API
    controls), click "Settings", turn on "Trust internal apps", and save.
-4. In a new browser tab, open Cloudflare One, go to Integrations, then Identity providers, and click
-   "Add new identity provider", then "Google Workspace". Keep this tab open.
+4. In a new browser tab, open Cloudflare One, go to Integrations, then Identity providers — not
+   "Cloud & SaaS" just above it: that is a different feature that asks for a service account, so
+   leave it alone — and click "Add new identity provider", then "Google Workspace". Keep this tab
+   open; it shows the callback URL the Google client uses next.
 5. Back in Google Cloud, open <https://console.cloud.google.com/auth/clients?project=lvbt-core>. If
    a client named "Cloudflare Access" is listed, open it and under "Client secrets" click "Add
    secret"; otherwise click "Create client", choose "Web application", and name it
@@ -148,12 +154,23 @@ lasvegasfortransit.org does the Google steps.
 6. Under "Authorized JavaScript origins", add exactly `https://lvbt.cloudflareaccess.com`. Under
    "Authorized redirect URIs", add exactly
    `https://lvbt.cloudflareaccess.com/cdn-cgi/access/callback`. Click "Create" (or "Save").
-7. Copy the Client ID and paste it into the field labelled "App ID" in the Cloudflare tab.
+7. Copy the Client ID and paste it into the field labelled "Client ID" in the Cloudflare tab (an
+   older Cloudflare UI calls this "App ID").
 8. Copy the Client secret and paste it into "Client secret" in the Cloudflare tab.
-9. Type `lasvegasfortransit.org` as the Google Workspace domain and click "Save". Open the link
+9. Type `lasvegasfortransit.org` as the Google Workspace domain. Leave "Proof Key for Code Exchange
+   (PKCE)" on. Leave "Enable SCIM" off, along with "Enable user deprovisioning" and "Remove user
+   seat on deprovision", and leave the SCIM identity update behavior as "No action" — Google
+   Workspace only sends SCIM to a handful of apps in its own catalog, and Cloudflare does not
+   document SCIM support for Google Workspace at all; Access re-checks group membership every
+   sign-in instead. Leave the email claim and OIDC Claims fields empty. Click "Save". Open the link
    Cloudflare shows, signed in as the super admin, and approve it.
 10. Add yourself to `wwd-admin@lasvegasfortransit.org` (the next section), then click "Test" next to
     Google Workspace. It should show your name and that group.
+
+MFA belongs in Google, not Cloudflare: a Workspace admin enforces it under Security → Authentication
+→ 2-step verification in the Google Admin console, with Enforcement "On". Do not add a Cloudflare
+"Authentication method" MFA rule to the volunteer admin policy below; Google does not reliably send
+that signal, and it can lock everyone out.
 
 ### The volunteer admin group
 
@@ -196,19 +213,22 @@ bottom.
 4. Leave "Allow access through browser-based RDP, SSH, or VNC sessions" off.
 5. Under "Access policies", choose `lvwwd.org volunteer admin allow` in "Add current policies" if it
    is there. Otherwise click "Create new policy", name it exactly `lvwwd.org volunteer admin allow`,
-   set the action to "Allow", and add one Include rule: "Google Workspace groups" with
-   `wwd-admin@lasvegasfortransit.org`. If that selector is not offered, Google Workspace sign-in is
-   not connected; use an "Emails" rule listing the volunteers' addresses until it is, and the
-   command switches it to the group later.
+   set the action to "Allow", leave "Policy session duration" at "Same as application session
+   duration", and add one Include rule: "Google Groups" (an older Cloudflare UI calls this "Google
+   Workspace groups") with `wwd-admin@lasvegasfortransit.org`. If that selector is not offered,
+   Google Workspace sign-in is not connected; use an "Emails" rule listing the volunteers' addresses
+   until it is, and the command switches it to the group later. Leave "Override global multi-factor
+   authentication settings (MFA)" and "Just-in-time access" off.
 6. Skip "Policy tester". Under "Authentication", on the "Identity" tab, turn off "Accept all
    available identity providers", choose only "Google Workspace" in "Choose available identity
    providers", and turn on "Apply instant authentication". Leave "Authenticate with Cloudflare One
    Client" off.
 7. Skip "Preview". Under "Details", type the name `lvwwd.org volunteer admin` and keep "Session
    Duration" at "24 hours". Click "Create".
-8. When the command asks for `ACCESS_AUD`, click "Configure" on the application, open the
-   "Additional settings" tab, copy "Application Audience (AUD) Tag" (64 lowercase letters and
-   digits), and paste it at the prompt.
+8. Open the application's "Configure" page, then "Additional settings" → "Cookie settings", and turn
+   on "Enable Binding Cookie". Leave "HTTP Only" on and "SameSite" set to "Lax".
+9. When the command asks for `ACCESS_AUD`, still under "Additional settings", copy "Application
+   Audience (AUD) Tag" (64 lowercase letters and digits), and paste it at the prompt.
 
 ### The Turnstile widget
 
