@@ -64,9 +64,9 @@ storage after an install is counted. It holds nothing else.
 The package comes from GitHub Packages, where it is private to the organization. CI and the Deploy
 workflow install it with the workflow's own token, which works only while the package grants this
 repository read access. If an install fails with `ERR_PNPM_FETCH_403`, a maintainer opens the
-[package settings](https://github.com/orgs/LasVegasForTransit/packages/npm/package/analytics/settings),
-clicks **Add Repository** under **Manage Actions access**, chooses `week-without-driving`, and keeps
-the role **Read**. Contributors install it with their own token, as
+[organization's packages](https://github.com/orgs/LasVegasForTransit/packages), selects `analytics`,
+opens **Package settings**, and adds the consuming repository under **Manage Actions access** with
+the **Read** role. Contributors install it with their own token, as
 [Start here](../../development/tutorials/start-here.md#before-you-start) shows.
 
 ## Check it
