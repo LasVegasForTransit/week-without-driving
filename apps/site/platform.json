@@ -78,7 +78,7 @@
       "neededFor": "the bot check on Sign up to win and Get my link",
       "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/turnstile",
       "steps": [
-        "Open Turnstile in the Cloudflare dashboard with the \"Las Vegas for Better Transit\" account.",
+        "Open Turnstile in the Cloudflare dashboard with the \"Las Vegans for Better Transit\" account.",
         "Click the widget named lvwwd.org. If there is none, click \"Add widget\", type the widget name lvwwd.org, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
         "Copy the Secret Key. It is private and starts with 0x. The Site Key, which also starts with 0x, is public and goes into TURNSTILE_SITE_KEY in apps/site/wrangler.jsonc through a pull request instead."
       ],
@@ -92,7 +92,7 @@
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
-        "Open Cloudflare One at https://one.dash.cloudflare.com/ and choose the \"Las Vegas for Better Transit\" account.",
+        "Open Cloudflare One at https://one.dash.cloudflare.com/ and choose the \"Las Vegans for Better Transit\" account.",
         "On Overview, find Account details and copy the Team domain. For LVBT it is lvbt.cloudflareaccess.com. Copy only the domain, without https://.",
         "Do not copy the Team name (\"Las Vegans for Better Transit\") shown beside it. It is only a label; this secret needs the domain."
       ],
@@ -107,7 +107,7 @@
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
         "First, the Google Group that decides who gets in. At https://admin.google.com, go to Menu → Directory → Groups. If wwd-admin@lasvegasfortransit.org is listed, go on. Otherwise click \"Create group\": Group name lvwwd.org volunteer admin, Group email wwd-admin (domain lasvegasfortransit.org), Description \"Volunteers who can open the lvwwd.org admin pages\", Group owner yourself. Click \"Next\", tick \"Security\", click \"Next\", choose \"Restricted\", set \"Who can join the group\" to \"Only invited users\", leave external members off, and click \"Create Group\". Then \"Add members\" with each volunteer's @lasvegasfortransit.org address. Personal Gmail addresses cannot sign in, even in the group.",
-        "Open Cloudflare One at https://one.dash.cloudflare.com/ with the \"Las Vegas for Better Transit\" account and go to Access controls → Applications. If \"lvwwd.org volunteer admin\" is listed, skip to the last step.",
+        "Open Cloudflare One at https://one.dash.cloudflare.com/ with the \"Las Vegans for Better Transit\" account and go to Access controls → Applications. If \"lvwwd.org volunteer admin\" is listed, skip to the last step.",
         "Click \"Create new application\". In the \"Add an application\" dialog, under \"Self-hosted and private\", choose the \"Public DNS\" tab (not \"Private destinations\"), then \"Continue with Self-hosted and private\".",
         "Under \"Destinations\", fill in three public hostname rows (\"+ Add public hostname\" adds a row), each with Subdomain empty and lvwwd.org chosen in the Domain dropdown, and the paths admin, admin/* and api/admin/*. A path does not cover the paths under it, so all three are needed. If you see a \"Private IPs\" row instead, click \"+ Add public hostname\" and remove the empty private row. Leave \"Allow access through browser-based RDP, SSH, or VNC sessions\" off.",
         "Under \"Access policies\", pick lvwwd.org volunteer admin allow in \"Add current policies\" if it exists; otherwise click \"Create new policy\", name it exactly lvwwd.org volunteer admin allow, set the action to \"Allow\", and add the Include rule \"Google Workspace groups\" = wwd-admin@lasvegasfortransit.org. If \"Google Workspace groups\" is not offered, Google Workspace sign-in is not connected yet; use an \"Emails\" rule with the volunteers' addresses for now.",
@@ -127,7 +127,7 @@
       "url": "https://dash.cloudflare.com/2557b5c2e166292ded0f8425b73075e9/api-tokens",
       "steps": [
         "Make it an account API token, which belongs to the LVBT account rather than to you, so deploys keep working after you leave. Creating one needs the Super Administrator role on the account.",
-        "In the Cloudflare dashboard, choose the \"Las Vegas for Better Transit\" account and go to Manage Account → \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
+        "In the Cloudflare dashboard, choose the \"Las Vegans for Better Transit\" account and go to Manage Account → \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
         "Name it lvwwd.org deploy (GitHub Actions).",
         "Under \"Permissions\", add three rows: \"Account\", \"Workers Scripts\", \"Edit\"; \"Account\", \"Account Settings\", \"Read\"; and \"Zone\", \"Workers Routes\", \"Edit\". The deploy applies no migrations, so it needs no D1 permission.",
         "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
