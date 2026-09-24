@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 
 import { describe, expect, it } from 'vitest';
 
+import { BANNER_HEADERS, serveBanner } from '../worker/banners';
+import type { Env } from '../worker/env';
+import { BANNER_TEXT_PAIRS, BANNERS } from '../src/lib/banners';
 import {
   checkRoster,
   GENERAL,
@@ -135,5 +139,73 @@ describe('the QR code PNG files', () => {
         );
       }
     }
+  });
+});
+
+describe('the partner banners', () => {
+  it.each(BANNERS)('$file is a PNG of exactly its size, within its file size', (banner) => {
+    const file = readFileSync(
+      new URL(`../public/partners/banners/${banner.file}`, import.meta.url),
+    );
+    const view = new DataView(file.buffer, file.byteOffset, file.byteLength);
+    expect(new TextDecoder().decode(file.subarray(1, 4))).toBe('PNG');
+    expect([view.getUint32(16), view.getUint32(20)]).toEqual([banner.width, banner.height]);
+    expect(file.length).toBeLessThanOrEqual(banner.maxBytes);
+  });
+
+  it('keeps every text color at 4.5 to 1 or more against its background', () => {
+    const channel = (value: number) => {
+      const c = value / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (hex: string) => {
+      const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) =>
+        channel(parseInt(hex.slice(i, i + 2), 16)),
+      );
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    for (const [name, text, background] of BANNER_TEXT_PAIRS) {
+      const [light = 0, dark = 0] = [luminance(text), luminance(background)].sort((a, b) => b - a);
+      expect((light + 0.05) / (dark + 0.05), name).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('go out with headers that let any website show them', async () => {
+    const env = {
+      ASSETS: {
+        fetch: () =>
+          Promise.resolve(
+            new Response(new Uint8Array([137, 80, 78, 71]), {
+              headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=60' },
+            }),
+          ),
+      },
+    } as unknown as Env;
+    const response = await serveBanner(
+      new Request('https://lvwwd.org/partners/banners/300x250.png'),
+      env,
+    );
+    expect(response.status).toBe(200);
+    for (const [name, value] of Object.entries(BANNER_HEADERS)) {
+      expect(response.headers.get(name), name).toBe(value);
+    }
+    expect(BANNER_HEADERS).toEqual({
+      'Content-Type': 'image/png',
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cache-Control': 'public, max-age=86400',
+    });
+  });
+
+  it('leave a missing banner as the not-found page', async () => {
+    const env = {
+      ASSETS: { fetch: () => Promise.resolve(new Response('Not found', { status: 404 })) },
+    } as unknown as Env;
+    const response = await serveBanner(
+      new Request('https://lvwwd.org/partners/banners/9x9.png'),
+      env,
+    );
+    expect(response.status).toBe(404);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
   });
 });
