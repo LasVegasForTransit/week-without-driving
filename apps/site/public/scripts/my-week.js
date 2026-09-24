@@ -310,6 +310,9 @@
     renderBanners();
     renderEntries();
     inside.hidden = false;
+    // For the "Keep going after the week" card (/scripts/keep-going.js).
+    window.lvwwdMe = me;
+    document.dispatchEvent(new CustomEvent('lvwwd:me', { detail: me }));
     bindTrip();
     bindReminders();
     bindSignOut();
