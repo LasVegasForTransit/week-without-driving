@@ -12,15 +12,15 @@ steps:
     icon: 'mdi:ticket-confirmation-outline'
     body:
       - >-
-        RTC sells passes that cover a single ride or unlimited rides over a set number of days, so
-        you can pick the length that matches your trip.
+        A single ride costs $2. If you ride more than once, a pass can cost less: $3 for 2 hours of
+        rides, or $5 for 24 hours. There are also 7-day, 15-day and 30-day passes, for $20, $34 and
+        $65.
       - >-
-        The Deuce, RTC's route along the Las Vegas Strip, has its own higher-priced pass. A Deuce
-        pass also works on every other RTC route, so it's the one to buy if the Strip is part of
-        your trip.
+        Every RTC pass works on every route, including the Deuce, RTC's route along the Las Vegas
+        Strip. The only fare that costs more is a single ride bought on the Deuce.
       - >-
-        Making a round trip, or several trips in one day? A day pass can cost less than paying for
-        each ride on its own. Compare the two before you buy.
+        Changing buses on a round trip? That's four single rides, $8, but a 24-hour pass covers them
+        all for $5.
   - heading: 'Choose how to pay'
     icon: 'mdi:credit-card-wireless-outline'
     body:
@@ -30,7 +30,8 @@ steps:
         driver as you board.
       - >-
         You don't need the app or a bank card to ride. You can buy a pass with cash at a ticket
-        vending machine or an RTC customer sales office, or pay your fare in cash as you board.
+        vending machine or an RTC customer sales office, or pay your fare in cash as you board, with
+        exact change.
       - >-
         Either way, have your pass or your fare ready before you board. The driver and the riders
         behind you are waiting.
@@ -45,19 +46,21 @@ steps:
       - >-
         Use a wheelchair, walker or other mobility aid? The guide "Ride with a wheelchair, walker or
         stroller" also covers RTC Paratransit.
-    note: 'Fares, passes and reduced-fare rules change.'
+    note:
+      'Fares checked on rtcsnv.com on September 23, 2026. Fares and reduced-fare rules can change.'
     links:
       - label: 'Check current fares at rtcsnv.com'
         href: 'https://www.rtcsnv.com/ways-to-travel/fares-passes/'
 ---
 
 <!--
-  Facts nobody on this team has verified against RTC's own pages yet
-  (see build-brief.md's instruction not to state unverified numbers as
-  fact). Confirm before launch and add real figures:
-  - Current single-ride, day, and multi-day pass prices.
-  - The Deuce pass price and which shorter trips it beats.
+  Checked against RTC's fares page (https://www.rtcsnv.com/ways-to-travel/fares-passes/) on
+  September 23, 2026: the regular fares for residential routes ($2 single ride, $3 for 2 hours, $5
+  for 24 hours, $20, $34 and $65 for 7, 15 and 30 days), "All passes are valid on all routes", and
+  exact change for cash on board. Only a single ride bought on the Deuce costs more; the Strip and
+  All Access passes RTC lists at higher prices are what visitors buy, and residents do not need them.
+
+  Not yet checked, so the guide does not state them. Confirm before adding:
   - Where ticket vending machines and customer sales offices are.
-  - Whether exact change is required to pay cash on board.
-  - Reduced-fare eligibility rules and the RTC ID card application process.
+  - Reduced-fare eligibility rules and how to apply for an RTC reduced-fare ID card.
 -->
