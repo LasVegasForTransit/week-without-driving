@@ -126,15 +126,20 @@
         longName: '',
         color: '#6B6E75',
       };
-      if (index > 0) routesLine.append(document.createTextNode(', '));
+      // Each route's square, name and comma stay together, so the line
+      // wraps between routes rather than inside one.
+      const item = document.createElement('span');
+      item.className = 'inline-flex items-center';
       const swatch = document.createElement('span');
-      swatch.className = 'mr-1 inline-block size-3 shrink-0 align-middle';
+      swatch.className = 'mr-1 inline-block size-3 shrink-0';
       swatch.style.backgroundColor = route.color;
       swatch.setAttribute('aria-hidden', 'true');
       const label = document.createElement('span');
-      label.className = 'align-middle text-on-surface';
-      label.textContent = routeDisplayText(route);
-      routesLine.append(swatch, label);
+      label.className = 'text-on-surface';
+      const last = index === stop.routes.length - 1;
+      label.textContent = `${routeDisplayText(route)}${last ? '' : ','}`;
+      item.append(swatch, label);
+      routesLine.append(item);
     });
 
     const buttons = document.createElement('div');
