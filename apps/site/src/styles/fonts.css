@@ -1,0 +1,67 @@
+/* Written by scripts/build-fonts.mjs; run `pnpm fonts` rather than editing
+   it. Each font is split in two: the core file has the letters the site's
+   own text uses, and the rest file, which a page downloads only when it
+   needs one of its letters, has everything else. */
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/atkinson-next-400-core.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0, U+00B0, U+00B7, U+00BA, U+00D7, U+2009, U+2013-2014, U+2018-201A,
+    U+201C-201E, U+2022, U+2026, U+2039-203A, U+20AC;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/atkinson-next-400-rest.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+  unicode-range:
+    U+00A1-00AF, U+00B1-00B6, U+00B8-00B9, U+00BB-00D6, U+00D8-024F, U+02B0-036F, U+2000-2008,
+    U+200A-2012, U+2015-2017, U+201B, U+201F-2021, U+2023-2025, U+2027-2038, U+203B-206F,
+    U+20A0-20AB, U+20AD-20CF, U+2100-214F;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/atkinson-next-700-core.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0, U+00B0, U+00B7, U+00BA, U+00D7, U+2009, U+2013-2014, U+2018-201A,
+    U+201C-201E, U+2022, U+2026, U+2039-203A, U+20AC;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/atkinson-next-700-rest.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+  unicode-range:
+    U+00A1-00AF, U+00B1-00B6, U+00B8-00B9, U+00BB-00D6, U+00D8-024F, U+02B0-036F, U+2000-2008,
+    U+200A-2012, U+2015-2017, U+201B, U+201F-2021, U+2023-2025, U+2027-2038, U+203B-206F,
+    U+20A0-20AB, U+20AD-20CF, U+2100-214F;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/fraunces-600-core.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0, U+00B0, U+00B7, U+00BA, U+00D7, U+2009, U+2013-2014, U+2018-201A,
+    U+201C-201E, U+2022, U+2026, U+2039-203A, U+20AC;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/fraunces-600-rest.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+  unicode-range:
+    U+00A1-00AF, U+00B1-00B6, U+00B8-00B9, U+00BB-00D6, U+00D8-024F, U+02B0-036F, U+2000-2008,
+    U+200A-2012, U+2015-2017, U+201B, U+201F-2021, U+2023-2025, U+2027-2038, U+203B-206F,
+    U+20A0-20AB, U+20AD-20CF, U+2100-214F;
+}

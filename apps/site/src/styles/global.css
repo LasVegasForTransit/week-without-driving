@@ -1,9 +1,10 @@
 @import 'tailwindcss';
+@import './fonts.css';
 @plugin '@tailwindcss/typography';
 
 /* ── File map ────────────────────────────────────────────────────────────
    1. .prose re-point + footnote styling (unlayered, see comment below)
-   2. @font-face — vendored Public Sans variable
+   2. Fonts — src/styles/fonts.css, made by scripts/build-fonts.mjs
    3. :root — page padding, z-ladder, chrome recipe, brand primitives
    4. @theme — semantic color roles + MD3 type scale (generates utilities)
    5. Dark theme — prefers-color-scheme re-point of the role tokens
@@ -98,24 +99,6 @@
 .prose .data-footnote-backref {
   color: var(--color-on-surface-variant);
   text-decoration-color: color-mix(in srgb, var(--color-on-surface-variant) 50%, transparent);
-}
-
-/* Public Sans (variable) — vendored from @fontsource-variable/public-sans@5.2.7,
-   latin subset only (files/public-sans-latin-wght-normal.woff2). Served from the
-   stable /fonts/ path (immutable-cached in public/_headers) so BaseLayout can
-   preload it without Astro's content-hash rotating the URL. `optional` renders
-   the fallback and never swaps if the font misses the first-paint window — the
-   preload almost always lets it make the window. To trade zero-shift for always
-   showing the brand font, change `optional` to `swap`. */
-@font-face {
-  font-family: 'Public Sans Variable';
-  font-style: normal;
-  font-display: optional;
-  font-weight: 100 900;
-  src: url('/fonts/public-sans-latin.woff2') format('woff2-variations');
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
-    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* ── Brand primitives ───────────────────────────────────────────────────
@@ -1307,19 +1290,8 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
 }
 
 /* Body face: Atkinson Hyperlegible Next (SIL Open Font License 1.1), made
-   by the Braille Institute for low-vision readers. */
-@font-face {
-  font-family: 'Atkinson Hyperlegible Next';
-  src: url('/fonts/atkinson-next-400.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Atkinson Hyperlegible Next';
-  src: url('/fonts/atkinson-next-700.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-}
+   by the Braille Institute for low-vision readers. Its @font-face rules are
+   in fonts.css. */
 body {
   font-family: var(--font-sans);
 }
@@ -1580,13 +1552,8 @@ body {
 }
 
 /* Headline face: Fraunces (SIL Open Font License 1.1), a warm serif that
-   gives the campaign a voice of its own, apart from LVBT's Public Sans. */
-@font-face {
-  font-family: 'Fraunces';
-  src: url('/fonts/fraunces-600.woff2') format('woff2');
-  font-weight: 600;
-  font-display: swap;
-}
+   gives the campaign a voice of its own, apart from LVBT's Public Sans. Its
+   @font-face rules are in fonts.css. */
 :is(h1, h2) {
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
