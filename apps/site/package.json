@@ -10,6 +10,7 @@
     "lint": "eslint . --max-warnings 0",
     "sync": "astro sync",
     "stops": "node scripts/build-stops.mjs --download",
+    "photos": "node scripts/build-photos.mjs",
     "check-types": "astro check",
     "check-types:worker": "tsc --project worker",
     "test": "vitest run",
