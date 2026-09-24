@@ -22,7 +22,9 @@
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "drop-trailing-slash",
-    "run_worker_first": ["/api/*", "/admin*", "/my-week*", "/sign-up*"],
+    // As on lvwwd.org, the Worker sees every request first, so the old-address
+    // redirects (worker/redirect.ts) can be tried here too.
+    "run_worker_first": true,
   },
   "workers_dev": true,
   "preview_urls": false,
