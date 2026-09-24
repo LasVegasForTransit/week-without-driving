@@ -1,0 +1,146 @@
+---
+// The share screen: a full-screen panel that shows a picture made on the
+// phone, a button to share or save it, and its written description, ready
+// to paste as alt text. /scripts/share-screen.js fills it in and opens it;
+// the page's own script decides which picture to show.
+---
+
+<dialog class="share-screen" data-share-screen aria-labelledby="share-screen-heading">
+  <div class="share-screen__bar">
+    <h2
+      id="share-screen-heading"
+      class="share-screen__heading"
+      tabindex="-1"
+      data-share-screen-heading
+    >
+    </h2>
+    <button type="button" class="share-screen__close" data-share-screen-close>Close</button>
+  </div>
+  <div class="share-screen__preview">
+    <p class="share-screen__making" data-share-screen-making>Making your image…</p>
+    <img class="share-screen__image" data-share-screen-image alt="" hidden />
+  </div>
+  <div class="share-screen__actions">
+    <button type="button" class="btn btn--primary" data-share-screen-share disabled>
+      Share image
+    </button>
+    <p class="share-screen__message" aria-live="polite" data-share-screen-saved></p>
+    <button type="button" class="btn btn--outline" data-share-screen-copy disabled>
+      Copy image description
+    </button>
+    <p class="share-screen__message" aria-live="polite" data-share-screen-copied></p>
+  </div>
+  <p class="share-screen__label">Image description</p>
+  <p class="share-screen__description" data-share-screen-description></p>
+  <p class="share-screen__line">The image is made on your phone. Nothing is uploaded.</p>
+  <p class="share-screen__line" data-share-screen-note></p>
+</dialog>
+
+<style>
+  .share-screen {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 30rem;
+    height: 100%;
+    max-height: 100dvh;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 2rem;
+    overflow-y: auto;
+    border: none;
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+  }
+  .share-screen[open] {
+    animation: share-screen-up 200ms ease-out;
+  }
+  .share-screen::backdrop {
+    background: rgb(0 0 0 / 0.55);
+  }
+  @keyframes share-screen-up {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .share-screen[open] {
+      animation: none;
+    }
+  }
+  .share-screen__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .share-screen__heading {
+    font-size: var(--text-headline-sm);
+    line-height: 1.15;
+  }
+  .share-screen__heading:focus {
+    outline: none;
+  }
+  .share-screen__heading:focus-visible {
+    outline: 3px solid var(--color-on-surface);
+    outline-offset: 3px;
+  }
+  .share-screen__close {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--color-outline);
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .share-screen__preview {
+    display: grid;
+    place-items: center;
+    min-height: 12rem;
+    margin-top: 1rem;
+  }
+  .share-screen__making {
+    color: var(--color-on-surface-variant);
+  }
+  .share-screen__image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 55dvh;
+    border: 1px solid var(--color-outline);
+  }
+  .share-screen__image[hidden] {
+    display: none;
+  }
+  .share-screen__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+  .share-screen__actions .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+  /* Kept in place while empty, so screen readers hear each new message. */
+  .share-screen__message:empty {
+    margin: 0;
+  }
+  .share-screen__message {
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+  }
+  .share-screen__label {
+    margin-top: 1.25rem;
+    font-size: var(--text-body-sm);
+    font-weight: 700;
+  }
+  .share-screen__description {
+    margin-top: 0.25rem;
+    line-height: 1.5;
+    user-select: text;
+  }
+  .share-screen__line {
+    margin-top: 1rem;
+    font-size: var(--text-body-sm);
+    color: var(--color-on-surface-variant);
+  }
+</style>

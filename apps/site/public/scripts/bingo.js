@@ -1,6 +1,6 @@
 // Digital Transit Bingo's interactivity: marking squares, detecting lines,
 // switching between Card view and List view, saving progress on the device,
-// clearing the card, and sharing a link to it.
+// clearing the card, and opening the share screen with the card's picture.
 // Lives in public/scripts because the site's Content Security Policy is
 // `script-src 'self'`, which blocks inline scripts. This file is served
 // as-is (no bundler), so it can't import from src/lib/bingo.ts; the square
@@ -73,6 +73,16 @@
   const dialogShareBtn = document.querySelector('[data-bingo-dialog-share]');
   const confettiEl = document.querySelector('[data-bingo-confetti]');
   const viewButtons = Array.from(document.querySelectorAll('[data-bingo-view-btn]'));
+  // The squares' short labels, for the share picture, written into the page
+  // from src/lib/bingo.ts as a JSON data block.
+  const squares = (() => {
+    try {
+      return JSON.parse(document.getElementById('bingo-squares')?.textContent ?? '[]');
+    } catch {
+      return [];
+    }
+  })();
+
   // --- storage -------------------------------------------------------
   function checkStorageAvailable() {
     try {
@@ -263,36 +273,16 @@
   }
 
   // --- share ----------------------------------------------------------
-  async function tryNativeShare(shareData) {
-    if (!navigator.share) return false;
-    try {
-      await navigator.share(shareData);
-      return true;
-    } catch {
-      return false; // Also covers a canceled share.
-    }
-  }
-
-  async function tryClipboardShare(url) {
-    if (!navigator.clipboard || !navigator.clipboard.writeText) return false;
-    try {
-      await navigator.clipboard.writeText(url);
-      window.alert('Link copied. Paste it anywhere to share your card.');
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async function shareCard() {
-    const shareData = {
-      title: 'Digital Transit Bingo · Week Without Driving Las Vegas',
-      text: 'I’m playing Digital Transit Bingo for Week Without Driving Las Vegas.',
-      url: window.location.href,
-    };
-    if (await tryNativeShare(shareData)) return;
-    if (await tryClipboardShare(shareData.url)) return;
-    window.prompt('Copy this link to share your card:', shareData.url);
+  // Opens the share screen (/scripts/share-screen.js) with a picture of the
+  // card as it is now (/scripts/bingo-picture.js). Focus comes back to the
+  // "Share your card" button below the card, even when the "Bingo!"
+  // message's own button opened it.
+  function shareCard() {
+    const picture = window.lvwwdBingoPicture;
+    const screen = window.lvwwdShareScreen;
+    if (!picture || !screen || squares.length !== SQUARE_COUNT) return;
+    closeLineDialog();
+    screen.open(picture.make(state, squares), shareBtn);
   }
 
   shareBtn?.addEventListener('click', shareCard);

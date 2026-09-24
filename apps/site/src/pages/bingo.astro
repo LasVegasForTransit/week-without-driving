@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WinBand from '../components/WinBand.astro';
 import BingoPrintSheet from '../components/BingoPrintSheet.astro';
+import ShareScreen from '../components/ShareScreen.astro';
 import { Icon } from 'astro-icon/components';
 import { BINGO_SQUARES } from '../lib/bingo';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
@@ -32,6 +33,11 @@ const showGiveawayLink = !isBeforeWeek && !isAfterWeek;
 // Printed bingo numbers, like a real card: B 1-15, I 16-30, N 31-45,
 // G 46-60, O 61-75. (7 * row) mod 15 is distinct for rows 1-5.
 const bingoNumber = (row: number, col: number) => (col - 1) * 15 + ((row * 7 + col * 3) % 15) + 1;
+
+// The short labels the share picture draws, in card order.
+const squaresJson = JSON.stringify(
+  BINGO_SQUARES.map((square) => ({ label: square.label, free: Boolean(square.free) })),
+);
 
 const title = 'Digital Transit Bingo · Week Without Driving Las Vegas';
 const description =
@@ -334,8 +340,12 @@ const description =
     </style>
   </noscript>
 
+  <ShareScreen />
+  <script is:inline type="application/json" id="bingo-squares" set:html={squaresJson} />
   {/* bingo-print.js listens for bingo.js's first event, so it loads first. */}
   <script is:inline src="/scripts/participant-api.js" defer></script>
+  <script is:inline src="/scripts/share-screen.js" defer></script>
+  <script is:inline src="/scripts/bingo-picture.js" defer></script>
   <script is:inline src="/scripts/bingo-print.js" defer></script>
   <script is:inline src="/scripts/bingo.js" defer></script>
   <script is:inline src="/scripts/bingo-sync.js" defer></script>
