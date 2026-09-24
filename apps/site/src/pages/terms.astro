@@ -1,13 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// The Terms of Use page ("Build the Terms of Use page",
-//. Wording is the draft Copy
-// table from "Let visitors read the site's Terms of Use"
-//, word for word. "Finalize the
-// Terms of Use wording"
-// replaces it later — the whole block between the two DRAFT NOTICE comments
-// below is what to delete once that happens.
+// The Terms of Use page. This wording is a draft: once the final wording is
+// approved, it replaces this text and the block between the two DRAFT
+// NOTICE comments below is deleted.
 
 const title = 'Terms of Use · Week Without Driving Las Vegas';
 const description =
@@ -19,17 +15,14 @@ const contactMailto = `mailto:${contactEmail}`;
 <BaseLayout title={title} description={description}>
   <section class="container-page page-top reading">
     {
-      /* DRAFT NOTICE — remove this block, and this comment, once
-        "Finalize the Terms of Use wording" is approved. */
+      /* DRAFT NOTICE — remove this block, and this comment, once the final
+        wording is approved. */
     }
     <div
       class="mb-10 flex items-start gap-3 border border-primary bg-primary-container px-5 py-4 text-on-primary-container"
     >
       <span class="mt-0.5 font-bold" aria-hidden="true">&#9888;</span>
-      <p class="text-sm font-semibold leading-relaxed">
-        Draft: final wording pending review. This page holds the wording from "Let visitors read the
-        site's Terms of Use" until "Finalize the Terms of Use wording" is approved.
-      </p>
+      <p class="text-sm font-semibold leading-relaxed">Draft: final wording pending review.</p>
     </div>
     {/* END DRAFT NOTICE */}
 
