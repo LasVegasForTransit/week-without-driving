@@ -127,9 +127,9 @@ details even for the Free plan but does not charge for it.
 
 This is already done for LVBT. On a new account, a Google Workspace super admin follows the steps
 the command prints. In short: create an OAuth client of type "Web application" in the Google Cloud
-project "LVBT Access", with the JavaScript origin `https://lvbt.cloudflareaccess.com` and the
-redirect URI `https://lvbt.cloudflareaccess.com/cdn-cgi/access/callback`; enable the Admin SDK API;
-turn on "Trust internal apps" in the Google Admin console; then in Cloudflare One, under
+project "LVBT Core" (ID `lvbt-core`), with the JavaScript origin `https://lvbt.cloudflareaccess.com`
+and the redirect URI `https://lvbt.cloudflareaccess.com/cdn-cgi/access/callback`; enable the Admin
+SDK API; turn on "Trust internal apps" in the Google Admin console; then in Cloudflare One, under
 Integrations, then Identity providers, add "Google Workspace" with the client's ID as "App ID", its
 secret, and the domain `lasvegasfortransit.org`, approve the link it shows, and click "Test". The
 standard's guide below has every step.
