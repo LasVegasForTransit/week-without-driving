@@ -4,6 +4,7 @@ import icon from 'astro-icon';
 import { defineConfig } from 'astro/config';
 
 import { minifyScripts } from './src/integrations/minify-scripts';
+import { reminderCheck } from './src/integrations/reminder-check';
 import { serviceWorker } from './src/integrations/service-worker';
 
 export default defineConfig({
@@ -13,10 +14,12 @@ export default defineConfig({
   // the site's links and the Worker's html_handling in wrangler.jsonc.
   trailingSlash: 'never',
   output: 'static',
-  // Iconify-backed icons, tree-shaken to the names the page references.
-  // After the build, minifyScripts() shrinks dist/scripts, then
-  // serviceWorker() writes the offline precache list into dist/sw.js
-  // (in that order, so the list fingerprints the files phones download).
+  // reminderCheck() stops the build when a daily reminder in
+  // src/data/reminders.json breaks one of its rules. Iconify-backed icons
+  // are tree-shaken to the names the page references. After the build,
+  // minifyScripts() shrinks dist/scripts, then serviceWorker() writes the
+  // offline precache list into dist/sw.js (in that order, so the list
+  // fingerprints the files phones download).
   //
   // Analytics are not wired yet. @lasvegasfortransit/analytics 0.1.0 is
   // published, but its event list has no lvwwd.org events, and lvwwd.org
@@ -29,6 +32,7 @@ export default defineConfig({
   // The sitemap leaves out the pages that ask search engines not to list
   // them (BaseLayout's `noindex`): My week, Get my link and the offline page.
   integrations: [
+    reminderCheck(),
     sitemap({ filter: (page) => !/\/(?:my-week|offline)(?:\/|$)/.test(new URL(page).pathname) }),
     icon(),
     minifyScripts(),
