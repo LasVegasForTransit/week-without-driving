@@ -1,27 +1,29 @@
 #!/usr/bin/env node
-// Turns RTC's GTFS feed into the two small files the "Find routes near you"
-// finder on /go reads at runtime: public/data/stops.json and
-// public/data/routes.json. See the plan "Build the
-// nearest-route finder" for the full field
-// list and the acceptance criteria this script is written to satisfy.
+// Turns RTC's GTFS feed into the two small files the "Find a bus" finder on
+// /go reads in the browser: public/data/stops.json (every stop a scheduled
+// trip serves, with its name, position and routes) and
+// public/data/routes.json (every route's short name, long name and color).
+// Both files carry the feed's version, which the finder shows under its
+// results as "Stop and route data from RTC (<version>)."
 //
 // RTC (the Regional Transportation Commission of Southern Nevada) publishes
 // its schedule as a GTFS feed (General Transit Feed Specification): a zip of
 // comma-separated text files describing stops, routes, trips and stop
 // times. This script reads those files, keeps only the fields the finder
-// needs, and writes them out as compact JSON.
+// needs, and writes them out as compact JSON. The files are checked in, so
+// a build never depends on RTC's server; docs/operations/how-to/
+// update-stop-data.md says when and how to refresh them.
 //
-// Usage:
-//   node scripts/build-stops.mjs                 read local GTFS files (see
-//                                                 DEFAULT_SOURCE_DIRS below)
-//   node scripts/build-stops.mjs --source <dir>   read GTFS files from <dir>
-//   node scripts/build-stops.mjs --download       download RTC's published
-//                                                 feed and read that instead
+// Usage (from apps/site):
+//   pnpm stops                                   download RTC's current feed
+//                                                 and rewrite public/data
+//   node scripts/build-stops.mjs --source <dir>   read unzipped GTFS files
+//                                                 from <dir> instead
 //   node scripts/build-stops.mjs --out <dir>      write the JSON somewhere
 //                                                 other than public/data
 //
-// --download needs the `unzip` command on PATH (present on macOS and most
-// Linux CI images) because Node has no built-in zip reader.
+// Downloading needs `curl` and `unzip` on PATH (present on macOS and most
+// Linux images) because Node has no built-in zip reader.
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -37,15 +39,6 @@ const SITE_ROOT = join(__dirname, '..');
 // RTC's "For Developers" page (https://www.rtcsnv.com/ways-to-travel/transit-services/for-developers/)
 // links its published GTFS feed here.
 const FEED_URL = 'https://developer.rtcsnv.com/transitData/google_transit.zip';
-
-// Without a flag, the script reads GTFS text files from this directory.
-// It is the one-time snapshot of RTC's August 2026 feed used to produce
-// the stops.json/routes.json checked into this repo; it will not exist on
-// another machine or after the scratchpad is cleared. Regenerating later
-// should pass --download (to fetch RTC's current feed) or --source <dir>
-// (to point at a fresh local copy) rather than editing this constant.
-const DEFAULT_SOURCE_DIR =
-  '/private/tmp/claude-501/-Users-williecubed-Projects-LasVegasForTransit/2589e7c9-9610-436c-9ca8-90ff519d32a6/scratchpad/gtfs';
 
 const REQUIRED_FILES = ['stops.txt', 'routes.txt', 'trips.txt', 'stop_times.txt', 'feed_info.txt'];
 
@@ -131,14 +124,11 @@ function compareRouteShortNames(a, b) {
   return a.localeCompare(b);
 }
 
-function findSourceDir(explicitSource) {
-  const dir = explicitSource ?? DEFAULT_SOURCE_DIR;
-  if (!existsSync(dir)) {
-    throw new Error(
-      `GTFS source directory does not exist: ${dir}. Pass --source <dir> or --download.`,
-    );
+function findSourceDir(source) {
+  if (!existsSync(source)) {
+    throw new Error(`GTFS source directory does not exist: ${source}.`);
   }
-  return dir;
+  return source;
 }
 
 function downloadAndExtractFeed() {
@@ -164,7 +154,7 @@ function downloadAndExtractFeed() {
 
 // A small synchronous wrapper so the rest of the script (and its error
 // handling) does not need to be async. The feed is ~6 MB; buffering the
-// whole download is fine for a build step that runs once per deploy. curl
+// whole download is fine for a script that runs a few times a year. curl
 // is present on every platform this build runs on (macOS dev machines,
 // Linux CI) and writes straight to a buffer without adding a dependency
 // for a one-shot download.
@@ -275,7 +265,10 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const outDir = args.out ? args.out : join(SITE_ROOT, 'public', 'data');
 
-  const sourceDir = args.download ? downloadAndExtractFeed() : findSourceDir(args.source);
+  if (!args.download && !args.source) {
+    throw new Error("Pass --download to fetch RTC's current feed, or --source <dir>.");
+  }
+  const sourceDir = args.source ? findSourceDir(args.source) : downloadAndExtractFeed();
   console.log(`Reading GTFS files from ${sourceDir}`);
   assertRequiredFiles(sourceDir);
 
