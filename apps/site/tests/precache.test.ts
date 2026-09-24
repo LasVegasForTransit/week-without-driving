@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -7,7 +7,9 @@ import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  DATA_FILES,
   PRECACHE_LIMIT,
+  PRECACHE_PAGES,
   buildManifest,
   bytesOf,
   injectBuild,
@@ -166,5 +168,18 @@ describe('the precache manifest', () => {
     const logger = { info: () => undefined, warn: () => undefined };
     hook({ dir: pathToFileURL(`${dist}/`), logger });
     expect(readFileSync(join(dist, 'sw.js'), 'utf8')).toMatch(/"url":"\/guides"/);
+  });
+});
+
+describe('what the phone keeps', () => {
+  it('keeps every rider guide, Find a bus with its stop data, and Bingo', () => {
+    const guides = readdirSync(new URL('../src/content/guides/', import.meta.url))
+      .filter((file) => file.endsWith('.md'))
+      .map((file) => `/guides/${file.replace(/\.md$/, '')}`);
+    const pages: readonly string[] = PRECACHE_PAGES;
+    for (const page of ['/guides', ...guides, '/go', '/bingo']) {
+      expect(pages, page).toContain(page);
+    }
+    expect(DATA_FILES).toEqual(expect.arrayContaining(['/data/stops.json', '/data/routes.json']));
   });
 });

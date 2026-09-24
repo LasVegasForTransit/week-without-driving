@@ -22,35 +22,3 @@ export function getNextGuide(guides: Guide[], currentId: string): Guide {
   }
   return next;
 }
-
-export interface TextSegment {
-  text: string;
-  href?: string;
-}
-
-const INLINE_LINK_PATTERN = /\[([^\]]+)\]\(([^)]+)\)/g;
-
-// A minimal "[label](url)" parser for the one or two guide sentences that
-// need an inline link (the sidewalk audit guide's email and Instagram
-// mentions). Every guide's body text comes from our own Markdown files
-// under src/content/guides, never from a visitor, so this is safe without
-// `set:html`: it only ever turns our own trusted text into real anchor
-// elements, word by word, with no HTML parsing involved.
-export function parseInlineLinks(text: string): TextSegment[] {
-  const segments: TextSegment[] = [];
-  let lastIndex = 0;
-  for (const match of text.matchAll(INLINE_LINK_PATTERN)) {
-    const [full, label, href] = match;
-    if (label === undefined || href === undefined) continue;
-    const index = match.index;
-    if (index > lastIndex) {
-      segments.push({ text: text.slice(lastIndex, index) });
-    }
-    segments.push({ text: label, href });
-    lastIndex = index + full.length;
-  }
-  if (lastIndex < text.length) {
-    segments.push({ text: text.slice(lastIndex) });
-  }
-  return segments;
-}

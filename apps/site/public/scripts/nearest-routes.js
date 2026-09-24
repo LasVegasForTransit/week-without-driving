@@ -1,18 +1,14 @@
-/* "Find routes near you" — the nearest-route finder on /go. Loaded as a
- * classic <script src> under the site's `script-src 'self'` Content
- * Security Policy (see public/_headers); map-links.js must load first,
- * since this file calls window.LVWWD_MAP_LINKS.buildMapLinks().
+/* "Find a bus", the nearest-route finder on /go. Loaded as a classic
+ * <script src> under the site's `script-src 'self'` Content Security
+ * Policy (see public/_headers); map-links.js must load first, since this
+ * file calls window.LVWWD_MAP_LINKS.buildMapLinks().
  *
- * Behavior is written to the plan "Build the
- * nearest-route finder" and the Features
- * "Show the bus stops and routes nearest the visitor" and "Show stops near
- * a chosen place without sharing location". The short version: get a
- * position from the phone or from a fixed list of seven places, measure
- * the straight-line (haversine) distance to every stop in stops.json on
- * the visitor's own phone, and show the five nearest within one mile. The
- * position never leaves the phone — it is held in memory for this
- * calculation only, never sent in a network request, and never written to
- * storage, a cookie or the address bar.
+ * It gets a position from the phone or from a fixed list of seven places,
+ * measures the straight-line (haversine) distance to every stop in
+ * stops.json on the visitor's own phone, and shows the five nearest within
+ * one mile. The position never leaves the phone: it is held in memory for
+ * this calculation only, never sent in a network request, and never
+ * written to storage, a cookie or the address bar.
  */
 (() => {
   const root = document.querySelector('[data-finder]');
