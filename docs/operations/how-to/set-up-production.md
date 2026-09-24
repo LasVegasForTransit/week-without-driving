@@ -160,7 +160,7 @@ The command creates it when it has the setup token. To create it by hand, use ex
 so the command recognizes it instead of creating a second one. The steps follow the page from top to
 bottom.
 
-1. In Cloudflare One, with the "Las Vegas for Better Transit" account, go to Access controls, then
+1. In Cloudflare One, with the "Las Vegans for Better Transit" account, go to Access controls, then
    Applications. If "lvwwd.org volunteer admin" is listed, skip to step 8.
 2. Click "Create new application" (some screens say "Add an application"). In the dialog, under
    "Self-hosted and private", choose the "Public DNS" tab, not "Private destinations", then click
@@ -199,7 +199,7 @@ is `TURNSTILE_SECRET`, which the command stores. The Site Key is public and goes
 The link the command prints opens "Create Custom Token". Name it `lvbt setup lvwwd.org`. Check that
 "Permissions" has exactly three rows, each set to "Account": "Turnstile" with "Edit", "Access: Apps
 and Policies" with "Edit", and "Access: Organizations, Identity Providers, and Groups" with "Read".
-Under "Account Resources", choose "Include" and "Las Vegas for Better Transit". Set the "TTL" end
+Under "Account Resources", choose "Include" and "Las Vegans for Better Transit". Set the "TTL" end
 date to tomorrow, click "Continue to summary", then "Create Token", and copy it; Cloudflare shows it
 only once.
 
@@ -210,8 +210,8 @@ Deploy workflow uses. Make it an account API token, which belongs to the LVBT ac
 you, so deploys keep working after you leave; creating one needs the Super Administrator role. It
 works with Wrangler because the workflow also sets `CLOUDFLARE_ACCOUNT_ID`.
 
-1. In the Cloudflare dashboard, choose "Las Vegas for Better Transit" and go to Manage Account, then
-   "Account API Tokens". Click "Create Token", then "Create Custom Token".
+1. In the Cloudflare dashboard, choose "Las Vegans for Better Transit" and go to Manage Account,
+   then "Account API Tokens". Click "Create Token", then "Create Custom Token".
 2. Name it `lvwwd.org deploy (GitHub Actions)`.
 3. Under "Permissions", add three rows: "Account", "Workers Scripts", "Edit"; "Account", "Account
    Settings", "Read"; and "Zone", "Workers Routes", "Edit". The deploy applies no migrations, so it
