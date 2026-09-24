@@ -125,14 +125,35 @@ details even for the Free plan but does not charge for it.
 
 ### Google Workspace sign-in
 
-This is already done for LVBT. On a new account, a Google Workspace super admin follows the steps
-the command prints. In short: create an OAuth client of type "Web application" in the Google Cloud
-project "LVBT Core" (ID `lvbt-core`), with the JavaScript origin `https://lvbt.cloudflareaccess.com`
-and the redirect URI `https://lvbt.cloudflareaccess.com/cdn-cgi/access/callback`; enable the Admin
-SDK API; turn on "Trust internal apps" in the Google Admin console; then in Cloudflare One, under
-Integrations, then Identity providers, add "Google Workspace" with the client's ID as "App ID", its
-secret, and the domain `lasvegasfortransit.org`, approve the link it shows, and click "Test". The
-standard's guide below has every step.
+This is already done for LVBT; skip it unless Cloudflare One's Integrations, then Identity
+providers, does not list "Google Workspace". A Google Workspace super admin for
+lasvegasfortransit.org does the Google steps.
+
+1. Open <https://console.cloud.google.com/apis/library/admin.googleapis.com?project=lvbt-core> in
+   LVBT's Google Cloud project, "LVBT Core", and click "Enable" on "Admin SDK API" (it says "Manage"
+   if it is already on). Access uses it to read group membership. If Google shows a Free Trial
+   banner, dismiss it; none of this needs billing.
+2. Open <https://console.cloud.google.com/auth/overview?project=lvbt-core>. If Google says the app
+   is not configured, click "Get started": app name `LVBT volunteer sign-in`, your
+   @lasvegasfortransit.org address as the support and contact email, audience "Internal", then
+   "Create".
+3. Open <https://admin.google.com/ac/owl> (Security, then Access and data control, then API
+   controls), click "Settings", turn on "Trust internal apps", and save.
+4. In a new browser tab, open Cloudflare One, go to Integrations, then Identity providers, and click
+   "Add new identity provider", then "Google Workspace". Keep this tab open.
+5. Back in Google Cloud, open <https://console.cloud.google.com/auth/clients?project=lvbt-core>. If
+   a client named "Cloudflare Access" is listed, open it and under "Client secrets" click "Add
+   secret"; otherwise click "Create client", choose "Web application", and name it
+   `Cloudflare Access`.
+6. Under "Authorized JavaScript origins", add exactly `https://lvbt.cloudflareaccess.com`. Under
+   "Authorized redirect URIs", add exactly
+   `https://lvbt.cloudflareaccess.com/cdn-cgi/access/callback`. Click "Create" (or "Save").
+7. Copy the Client ID and paste it into the field labelled "App ID" in the Cloudflare tab.
+8. Copy the Client secret and paste it into "Client secret" in the Cloudflare tab.
+9. Type `lasvegasfortransit.org` as the Google Workspace domain and click "Save". Open the link
+   Cloudflare shows, signed in as the super admin, and approve it.
+10. Add yourself to `wwd-admin@lasvegasfortransit.org` (the next section), then click "Test" next to
+    Google Workspace. It should show your name and that group.
 
 ### The volunteer admin group
 
@@ -150,7 +171,8 @@ the Groups administrator privilege.
 4. Set Access type to "Restricted" and "Who can join the group" to "Only invited users". Leave
    "Allow external members in the group" off. Click "Create Group".
 5. Open the group, click "Members", then "Add members", type each volunteer's
-   @lasvegasfortransit.org address, and click "Add To Group".
+   @lasvegasfortransit.org address and your own (so you can test the sign-in), and click "Add To
+   Group".
 
 Step 4 below says how to add and remove volunteers later.
 
@@ -162,9 +184,10 @@ bottom.
 
 1. In Cloudflare One, with the "Las Vegans for Better Transit" account, go to Access controls, then
    Applications. If "lvwwd.org volunteer admin" is listed, skip to step 8.
-2. Click "Create new application" (some screens say "Add an application"). In the dialog, under
-   "Self-hosted and private", choose the "Public DNS" tab, not "Private destinations", then click
-   "Continue with Self-hosted and private".
+2. Click "Create new application" at the top right (some screens say "Add an application"); an
+   account with no applications shows only a list of prerequisites, with the button still at the top
+   right. In the dialog, under "Self-hosted and private", choose the "Public DNS" tab, not "Private
+   destinations", then click "Continue with Self-hosted and private".
 3. Under "Destinations", fill in three public hostname rows ("+ Add public hostname" adds a row).
    Each has Subdomain empty and `lvwwd.org` chosen in the Domain dropdown; the paths are `admin`,
    `admin/*`, and `api/admin/*`. A path does not cover the paths under it, and a wildcard does not
