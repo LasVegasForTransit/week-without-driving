@@ -178,6 +178,8 @@
 
   function startEditing(me) {
     editing = true;
+    // Offline, needs-connection.js says saving waits, not signing up.
+    form.setAttribute('data-needs-connection', 'edit-details');
     field('firstName').value = me.firstName ?? '';
     const contact = field('contact');
     contact.value = me.contactMasked ?? '';

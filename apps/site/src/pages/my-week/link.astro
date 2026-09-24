@@ -23,7 +23,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       this phone.
     </p>
 
-    <form data-link-form class="getlink__card" novalidate>
+    <form data-link-form class="getlink__card" novalidate data-needs-connection="get-link">
       <div class="form-field">
         <label for="gl-contact" class="form-label">Phone number or email</label>
         <input
@@ -40,7 +40,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </div>
       {/* Turnstile, the bot check. The Worker writes the site key into data-sitekey. */}
       <div class="bot-check" data-turnstile data-sitekey=""></div>
-      <button type="submit" class="btn btn--primary btn--big btn--block mt-6" data-link-submit>
+      <button
+        type="submit"
+        class="btn btn--primary btn--big btn--block mt-6"
+        data-link-submit
+        data-needs-connection-button
+      >
         Send my link
       </button>
       <p class="form-error mt-3 text-center" data-link-status aria-live="polite"></p>
@@ -67,6 +72,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/my-week-link.js" defer></script>
+  <script is:inline src="/scripts/needs-connection.js" defer></script>
 </BaseLayout>
 
 <style>
