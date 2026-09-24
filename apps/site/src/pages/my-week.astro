@@ -6,12 +6,13 @@ import { lvbt } from '../lib/site';
 import { wwd } from '../lib/wwd';
 
 // My week: the page a signed-up person comes back to. It shows their
-// entries as the eight days of the week, the one button that checks them
-// in for today, an optional photo, reminders, and their details. The page
-// is the same for everyone; /scripts/my-week.js fills it in from the
-// Worker's API for the person signed in on this phone, or shows the
-// signed-out state. Opening an "Open my week" link (/my-week?t=...) is
-// handled by the Worker before this page loads.
+// entries as the eight days of the week, the form that sends today's
+// shared trip, reminders and their details. The page is the same for
+// everyone; /scripts/my-week.js fills it in from the Worker's API for the
+// person signed in on this phone, or shows the signed-out state.
+// /scripts/needs-connection.js says so, and grays out the buttons that
+// send something, while the phone is offline. Opening an "Open my week"
+// link (/my-week?t=...) is handled by the Worker before this page loads.
 const title = 'My week · Week Without Driving Las Vegas';
 
 // How someone got around without driving. Any one of them makes the day a
@@ -88,7 +89,7 @@ const shortcuts = [
         </ol>
 
         {/* Today's trip, in three steps: how, the post, and sending it in. */}
-        <form data-trip-form hidden class="trip" novalidate>
+        <form data-trip-form hidden class="trip" novalidate data-needs-connection="trip">
           <fieldset class="trip__step" aria-describedby="trip-error">
             <legend class="trip__q"
               ><span class="trip__n" aria-hidden="true">1</span> How did you get around today without
@@ -192,7 +193,12 @@ const shortcuts = [
             </p>
           </fieldset>
 
-          <button type="submit" class="btn btn--primary btn--big btn--block" data-trip-submit>
+          <button
+            type="submit"
+            class="btn btn--primary btn--big btn--block"
+            data-trip-submit
+            data-needs-connection-button
+          >
             Enter today’s trip
           </button>
           <p id="trip-error" class="log__error" data-trip-error aria-live="polite"></p>
@@ -236,22 +242,26 @@ const shortcuts = [
       </section>
 
       {/* REMINDERS */}
-      <section class="myweek__card" aria-labelledby="remind-heading">
+      <section
+        class="myweek__card"
+        aria-labelledby="remind-heading"
+        data-needs-connection="reminders"
+      >
         <h2 id="remind-heading" class="myweek__h2">Remind me to share my trip</h2>
         <p class="myweek__p">One reminder a day, October 1 to 8, at about 8 am. Stop anytime.</p>
         <label class="check-row" data-remind-row="push">
-          <input type="checkbox" data-remind="push" />
+          <input type="checkbox" data-remind="push" data-needs-connection-button />
           <span>Send a notification to this phone.</span>
         </label>
         <label class="check-row" data-remind-row="text" hidden>
-          <input type="checkbox" data-remind="text" />
+          <input type="checkbox" data-remind="text" data-needs-connection-button />
           <span>
             Text me one reminder a day, October 1 to 8, 2026, from Week Without Driving Las Vegas.
             Up to 8 texts. Message and data rates may apply. Reply STOP to end, HELP for help.
           </span>
         </label>
         <label class="check-row" data-remind-row="email" hidden>
-          <input type="checkbox" data-remind="email" />
+          <input type="checkbox" data-remind="email" data-needs-connection-button />
           <span>Email me one reminder a day, October 1 to 8.</span>
         </label>
         <p class="entries__status" data-remind-status aria-live="polite"></p>
@@ -269,12 +279,18 @@ const shortcuts = [
         <a href="/sign-up?edit=1" class="arrow-link mt-4">Change my details</a>
       </section>
 
-      <section class="myweek__card" aria-labelledby="phones-heading">
+      <section
+        class="myweek__card"
+        aria-labelledby="phones-heading"
+        data-needs-connection="send-link"
+      >
         <h2 id="phones-heading" class="myweek__h2">Open My week on another phone</h2>
         <p class="myweek__p" data-me-link-line>
           We sent you a link. Open it on any phone to come back here.
         </p>
-        <a href="/my-week/link" class="arrow-link mt-3">Send my link again</a>
+        <a href="/my-week/link" class="arrow-link mt-3" data-needs-connection-button
+          >Send my link again</a
+        >
       </section>
 
       <section class="myweek__section" aria-labelledby="after-heading">
@@ -302,6 +318,7 @@ const shortcuts = [
   <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/share-trip.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
+  <script is:inline src="/scripts/needs-connection.js" defer></script>
 </BaseLayout>
 
 <style>
@@ -455,7 +472,7 @@ const shortcuts = [
     color: var(--color-on-primary-warm);
     background: var(--color-primary-warm);
   }
-  .entries .btn--primary:not(:disabled):hover,
+  .entries .btn--primary:not(:disabled, [aria-disabled='true']):hover,
   .entries .btn--primary:focus-visible {
     background: var(--color-on-slab);
   }

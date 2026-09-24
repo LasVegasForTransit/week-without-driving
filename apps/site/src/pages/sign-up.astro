@@ -3,11 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 
-// Sign up to win. Signing up enters the Las Vegas giveaway and becomes the
-// person's identity on lvwwd.org: their phone stays signed in, and the
-// link we send opens My week on any other phone. Anyone can take part in
-// Week Without Driving without signing up; this form is only for the
-// giveaway and My week. The behaviour is in /scripts/sign-up.js.
+// Sign up to win. Signing up makes someone eligible for LVBT's giveaway
+// (each shared trip is then an entry) and becomes their identity on
+// lvwwd.org: their phone stays signed in, and the link we send opens My
+// week on any other phone. Anyone can take part in Week Without Driving
+// without signing up; this form is only for the giveaway and My week. The
+// behaviour is in /scripts/sign-up.js, and /scripts/needs-connection.js
+// dims "Sign up" while the phone is offline.
 const title = 'Sign up to win · Week Without Driving Las Vegas';
 const description = `Sign up to win a one-month RTC bus pass. Each day you take a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
 ---
@@ -43,7 +45,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       <a href="/my-week" class="btn btn--primary btn--big mt-5">Go to My week</a>
     </div>
 
-    <form data-signup-form class="signup__card" novalidate>
+    <form data-signup-form class="signup__card" novalidate data-needs-connection="sign-up">
       <div class="form-field">
         <label for="su-name" class="form-label">First name</label>
         <input
@@ -152,7 +154,12 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       {/* Turnstile, the bot check. The Worker writes the site key into data-sitekey. */}
       <div class="bot-check" data-turnstile data-sitekey=""></div>
 
-      <button type="submit" class="btn btn--primary btn--big btn--block" data-signup-submit>
+      <button
+        type="submit"
+        class="btn btn--primary btn--big btn--block"
+        data-signup-submit
+        data-needs-connection-button
+      >
         Sign up
       </button>
       <p class="form-error mt-3 text-center" data-signup-status aria-live="polite"></p>
@@ -174,6 +181,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
 
   <script is:inline src="/scripts/participant-api.js" defer></script>
   <script is:inline src="/scripts/sign-up.js" defer></script>
+  <script is:inline src="/scripts/needs-connection.js" defer></script>
 </BaseLayout>
 
 <style>

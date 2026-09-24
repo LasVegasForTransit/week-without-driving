@@ -6,7 +6,9 @@ import { getSortedGuides } from '../lib/guides';
 // The offline page. The service worker (public/sw.js) shows it, at the
 // address the visitor asked for, when there is no connection and that page
 // isn't saved on the phone. /scripts/offline-page.js keeps only the pages
-// in this list that are saved, and says so when none are yet.
+// in this list that are saved, and says so when none are yet. For a
+// personal "Open my week" link it says to open the link again, and opens
+// it by itself once the phone is back online.
 const guides = await getSortedGuides();
 const saved = [
   { href: '/guides', label: 'Rider guides', icon: 'mdi:book-open-variant-outline' },
@@ -30,6 +32,9 @@ const saved = [
     <p class="page-lede" data-offline-private hidden>
       My week and Sign up need a connection, because they show your own details. These pages are
       saved and work without a connection:
+    </p>
+    <p class="page-lede" data-offline-open-link hidden>
+      You’re offline. Open this link again when you’re back online.
     </p>
     <p class="page-lede" data-offline-none hidden>
       No pages are saved on this phone yet. Open a page once with a connection, and it will work

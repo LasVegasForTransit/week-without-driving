@@ -1610,7 +1610,11 @@ body {
     text-decoration: none;
     cursor: pointer;
   }
-  .btn:disabled {
+  /* Dimmed: disabled, or aria-disabled while offline (still reachable by Tab). */
+  .btn:disabled,
+  .btn[aria-disabled='true'],
+  .arrow-link[aria-disabled='true'],
+  .check-row:has(input[aria-disabled='true']) {
     cursor: not-allowed;
     opacity: 0.5;
   }
@@ -1626,7 +1630,7 @@ body {
     color: var(--color-on-primary);
     background: var(--color-primary);
   }
-  .btn--primary:not(:disabled):hover,
+  .btn--primary:not(:disabled, [aria-disabled='true']):hover,
   .btn--primary:focus-visible {
     background: var(--color-primary-ink);
   }
@@ -1749,6 +1753,32 @@ body {
     height: 1.4rem;
     margin-top: 0.05rem;
     accent-color: var(--color-primary);
+  }
+
+  /* The notice above a form's buttons while the phone is offline
+     (public/scripts/needs-connection.js). It wraps at any text size. */
+  .offline-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-block: 1.25rem 1rem;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    border: 2px solid var(--color-error);
+    border-radius: 0.75rem;
+  }
+  .offline-notice__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-weight: 700;
+    color: var(--color-surface);
+    background: var(--color-error);
+    border-radius: 50%;
   }
 
   /* The bot check (Turnstile). It takes space only when it needs a tap. */
