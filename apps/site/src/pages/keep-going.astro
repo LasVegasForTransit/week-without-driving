@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { lvbt } from '../lib/site';
+
+// One address that reaches "Keep going after the week" from anywhere. On a
+// phone signed in to My week, /scripts/keep-going-redirect.js opens My week
+// at that card; on any other phone it opens LVBT's join page. Both replace
+// this page, so Back doesn't bounce into it again. Without JavaScript, the
+// page offers both links.
+---
+
+<BaseLayout
+  title="Keep going after the week · Week Without Driving Las Vegas"
+  description="Stay involved with Las Vegans for Better Transit after Week Without Driving."
+  noindex
+>
+  <section class="container-page page-top narrow" aria-labelledby="keep-going-heading">
+    <h1 id="keep-going-heading" class="page-title">Keep going after the week</h1>
+    <p class="page-lede">
+      Week Without Driving is over, but the work isn’t. Stay involved with LVBT.
+    </p>
+    <p class="mt-6 flex flex-wrap gap-3">
+      <a href={lvbt.joinUrl} class="btn btn--primary" data-keep-going-join>Join LVBT</a>
+      <a href="/my-week" class="btn btn--outline">Signed up? Go to My week</a>
+    </p>
+  </section>
+  <script is:inline src="/scripts/keep-going-redirect.js" defer></script>
+</BaseLayout>
