@@ -29,8 +29,8 @@ export interface Env {
   /** A day number (0–9) the preview Worker treats as today, for testing. */
   CHECKIN_PREVIEW_DAY?: string;
   /**
-   * The Cloudflare Access team domain in front of /admin, such as
-   * lasvegasfortransit.cloudflareaccess.com. Without it and ACCESS_AUD,
+   * The Cloudflare Access team domain in front of /admin:
+   * lvbt.cloudflareaccess.com. Without it and ACCESS_AUD,
    * every admin request is refused.
    */
   ACCESS_TEAM_DOMAIN?: string;
