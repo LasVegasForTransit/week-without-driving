@@ -190,6 +190,7 @@ const bannerCards = BANNERS.map((banner) => ({
     padding: clamp(1.25rem, 3vw, 2.5rem);
     border: 1px solid var(--color-outline);
     background: var(--color-surface);
+    border-radius: 0.75rem;
   }
   .kit > .section-intro {
     margin-top: 0.75rem;
@@ -204,6 +205,7 @@ const bannerCards = BANNERS.map((banner) => ({
     margin-top: 1.5rem;
     padding: clamp(1.25rem, 2.5vw, 2rem);
     background: var(--color-surface-container);
+    border-radius: 0.75rem;
   }
   .kit__label {
     display: block;
@@ -219,6 +221,7 @@ const bannerCards = BANNERS.map((banner) => ({
     background: var(--color-field);
     color: var(--color-on-surface);
     font-size: 1rem;
+    border-radius: 0.5rem;
   }
   .kit__hint {
     margin-top: 0.75rem;
@@ -234,6 +237,7 @@ const bannerCards = BANNERS.map((banner) => ({
     padding: clamp(1.25rem, 2.5vw, 2rem);
     border: 1px solid var(--color-outline);
     background: var(--color-surface-container);
+    border-radius: 0.75rem;
   }
   @media (min-width: 48rem) {
     .kit__materials {
@@ -314,6 +318,7 @@ const bannerCards = BANNERS.map((banner) => ({
     color: var(--color-on-surface);
     font-weight: 700;
     text-decoration: none;
+    border-radius: 0.5rem;
   }
   .kit__actions .kit__button {
     margin-top: 0;
@@ -357,12 +362,14 @@ const bannerCards = BANNERS.map((banner) => ({
     max-height: 22rem;
     height: auto;
     border: 1px solid var(--color-outline);
+    border-radius: 0.5rem;
   }
   .kit__banner {
     min-width: 0;
     padding: 1.25rem;
     border: 1px solid var(--color-outline);
     background: var(--color-surface);
+    border-radius: 0.75rem;
   }
   .kit__banner-name {
     margin-top: 0.75rem;
@@ -403,6 +410,14 @@ const bannerCards = BANNERS.map((banner) => ({
     line-height: 1.5;
     white-space: pre;
     resize: vertical;
+    border-radius: 0.5rem;
+  }
+  @media (max-width: 47.999rem) {
+    .partner-kit-section {
+      padding-inline: 0;
+      border: 0;
+      background: transparent;
+    }
   }
   .kit__preview-label {
     margin-top: 1.5rem;
