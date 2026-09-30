@@ -324,7 +324,13 @@
         setText('[data-trip-error]', data.message);
         return undefined;
       }
-      window.lvbt?.track('trip_entry_submitted', { day, method: entryMethod(body) });
+      // Counting must never interrupt a successful trip entry. The shared
+      // event catalog does not yet accept text-only entries.
+      try {
+        window.lvbt?.track('trip_entry_submitted', { day, method: entryMethod(body) });
+      } catch {
+        // The entry is already saved and remains visible below.
+      }
       const planId = form.querySelector('[data-trip-plan-id]');
       const selectedPlanId =
         planId instanceof HTMLInputElement && !planId.disabled ? String(planId.value) : '';
