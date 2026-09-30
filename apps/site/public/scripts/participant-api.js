@@ -1,5 +1,5 @@
 /**
- * The participant API, from the browser. Sign up, My week, Get my link and
+ * The participant API, from the browser. Sign up, My Week, email sign-in links and
  * Bingo load this before their own script and use window.lvwwdApi:
  *
  * - call(method, path, body) talks to the Worker and always resolves, to

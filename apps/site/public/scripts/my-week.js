@@ -183,7 +183,7 @@
     setText(
       '[data-me-link-line]',
       me.contactType === 'email'
-        ? `When email delivery is available, Get my link can send a sign-in link to ${me.contactMasked}.`
+        ? `We can email a sign-in link to ${me.contactMasked}.`
         : 'Email wwd@lasvegasfortransit.org for help with an older phone sign-up.',
     );
   }
@@ -198,7 +198,7 @@
         saved
           ? 'Your details are saved.'
           : params.get('email') === 'failed'
-            ? 'You’re signed up on this phone, but we couldn’t email your link. Keep this phone signed in and try Get my link later.'
+            ? 'You’re signed up on this phone, but we couldn’t email a sign-in link. Keep using this phone and try again later.'
             : params.get('email') === 'unavailable'
               ? 'You’re signed up. Email links are unavailable right now; keep using this phone.'
               : 'You’re signed up to win.',
