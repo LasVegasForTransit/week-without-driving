@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
+import { lvbt } from '../lib/site';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 
 // Sign up to win. Signing up makes someone eligible for LVBT's giveaway
@@ -198,9 +199,8 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
         >.
       </p>
       <p class="signup__legal">
-        Want to keep improving transit after the week? <a
-          href="https://lasvegasfortransit.org/join/member/?from=wwd"
-          class="body-link">Join LVBT</a
+        Want to keep improving transit after the week? <a href={lvbt.joinUrl} class="body-link"
+          >Join LVBT</a
         > separately. Joining the giveaway does not make you an LVBT member.
       </p>
 
