@@ -1,5 +1,5 @@
 /**
- * /keep-going: opens the "Keep going after the week" card on My week when
+ * /get-involved: opens the "Keep going after the week" card on My week when
  * this phone is signed in (the lvwwd_signed_in cookie), and LVBT's join
  * page otherwise. It replaces the page rather than adding a step, so the
  * Back button doesn't come back here.

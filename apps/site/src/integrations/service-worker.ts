@@ -18,6 +18,7 @@ import type { AstroIntegration } from 'astro';
 export const PRECACHE_PAGES = [
   '/',
   '/offline',
+  '/how-it-works',
   '/guides',
   '/guides/pay-your-fare',
   '/guides/accessible-riding',

@@ -7,6 +7,7 @@ export const APEX = 'lvwwd.org';
  * - www.lvwwd.org, on any path, goes to the same path and query on the apex.
  *   Workers serve a custom domain as-is, so this has to live here.
  * - /wwd and /wwd/, the campaign's old address, go to Home.
+ * - /take-part and /keep-going use the clearer public addresses.
  * - A page address that ends in a slash goes to the same address without
  *   it, which is the address in the page's canonical link. The API and the
  *   volunteer admin views answer their own addresses as they are.
@@ -29,6 +30,8 @@ export function redirectFor(request: Request): Response | undefined {
 /** Where an old path now lives, or the path itself when nothing moved. */
 function legacyPath(method: string, path: string): string {
   if (/^\/wwd\/?$/i.test(path)) return '/';
+  if (/^\/take-part\/?$/i.test(path)) return '/how-it-works';
+  if (/^\/keep-going\/?$/i.test(path)) return '/get-involved';
   const readable = method === 'GET' || method === 'HEAD';
   const own = path.startsWith('/api/') || path.startsWith('/admin/');
   if (!readable || own || path === '/' || !path.endsWith('/')) return path;

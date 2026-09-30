@@ -4,7 +4,7 @@
 // there, in plain words, rather than naming the page.
 export const mainNav = [
   {
-    href: '/take-part',
+    href: '/how-it-works',
     label: 'How it works',
     help: 'What the week is, and how to win.',
     icon: 'mdi:hand-heart-outline',
