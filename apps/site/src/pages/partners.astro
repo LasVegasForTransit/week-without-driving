@@ -36,7 +36,17 @@ const whatPartnersDo = [
 
 <BaseLayout title={title} description={description}>
   <section class="container-page page-header pb-16">
-    <h1 class="page-title">Partners</h1>
+    <div class="partners-hero">
+      <p class="partners-hero__eyebrow">Week Without Driving Las Vegas</p>
+      <h1 class="page-title">Partners</h1>
+      <p class="partners-hero__lede">
+        Bring Week Without Driving to your members, neighbors, students and staff.
+      </p>
+      <div class="partners-hero__actions">
+        <a href="#partner-kit" class="partners-hero__primary">Get ready-to-share materials</a>
+        <a href={joinMailto} class="partners-hero__secondary">Join as a partner</a>
+      </div>
+    </div>
 
     {
       partners.length > 0 && (
@@ -79,7 +89,7 @@ const whatPartnersDo = [
       </p>
     </div>
 
-    <div class="section mt-12" data-partners-join>
+    <div class="section mt-12 partners-join" data-partners-join>
       <h2 class="section-title">Bring your organization</h2>
       <p class="section-intro">
         Week Without Driving is for everyone who gets around Las Vegas without driving, and for the
@@ -88,13 +98,13 @@ const whatPartnersDo = [
       </p>
 
       <div class="mt-10 grid gap-10 md:grid-cols-2 md:gap-16">
-        <div>
+        <div class="partners-join__card">
           <h3 class="text-title-lg">We'd love to hear from:</h3>
           <ul class="prose-doc mt-3">
             {weWantToHear.map((item) => <li>{item}</li>)}
           </ul>
         </div>
-        <div>
+        <div class="partners-join__card">
           <h3 class="text-title-lg">What partners do. Pick any of these. There's no minimum.</h3>
           <ul class="prose-doc mt-3">
             {whatPartnersDo.map((item) => <li>{item}</li>)}
@@ -149,6 +159,92 @@ const whatPartnersDo = [
 </BaseLayout>
 
 <style>
+  .partners-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--color-slab);
+    color: var(--color-on-slab);
+  }
+  .partners-hero::before,
+  .partners-hero::after {
+    position: absolute;
+    z-index: -1;
+    width: clamp(9rem, 26vw, 19rem);
+    aspect-ratio: 1;
+    content: '';
+    background: var(--color-primary-warm);
+    transform: rotate(34deg);
+  }
+  .partners-hero::before {
+    top: -68%;
+    right: -8%;
+  }
+  .partners-hero::after {
+    right: 13%;
+    bottom: -88%;
+    opacity: 0.5;
+  }
+  .partners-hero__eyebrow {
+    font-size: var(--text-label-lg);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-on-slab-accent);
+  }
+  .partners-hero .page-title {
+    max-width: 12ch;
+    margin-top: 0.35rem;
+  }
+  .partners-hero__lede {
+    max-width: 42rem;
+    margin-top: 1rem;
+    font-size: var(--text-body-lg);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .partners-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .partners-hero__primary,
+  .partners-hero__secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .partners-hero__primary {
+    background: var(--color-primary-warm);
+    color: var(--color-on-primary-warm);
+  }
+  .partners-hero__secondary {
+    border: 2px solid currentcolor;
+    color: var(--color-on-slab);
+  }
+  .partners-hero__primary:hover,
+  .partners-hero__primary:focus-visible,
+  .partners-hero__secondary:hover,
+  .partners-hero__secondary:focus-visible {
+    outline: 3px solid var(--color-on-slab);
+    outline-offset: 3px;
+  }
+  .partners-join {
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-top: 0.5rem solid var(--color-primary-warm);
+    background: var(--color-surface-container);
+  }
+  .partners-join__card {
+    padding: 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-on-surface) 22%, transparent);
+    background: var(--color-surface);
+  }
   .partner-roster {
     display: grid;
     gap: 2rem 2.5rem;

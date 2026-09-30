@@ -2,8 +2,8 @@
  * The partner kit on the Partners page. Picking an organization shows its
  * giveaway link, its QR code files, the banners and an embed snippet that
  * links to it, and puts #kit-<slug> in the page address so the choice can
- * be bookmarked or sent to a colleague. "None (general materials)" gives
- * LVBT's own link, which credits no one.
+ * be bookmarked or sent to a colleague. General LVBT materials are ready
+ * immediately and credit no organization.
  *
  * From 12:00 am October 9, 2026, Las Vegas time, by the phone's clock, the
  * kit shows only its closing message. The copy buttons are run by
@@ -92,7 +92,7 @@
 
   function fromAddress() {
     const slug = /^#kit-([a-z0-9-]+)$/.exec(window.location.hash)?.[1] ?? '';
-    picker.value = slugs.has(slug) ? slug : '';
+    picker.value = slugs.has(slug) ? slug : GENERAL;
     show(picker.value);
   }
 

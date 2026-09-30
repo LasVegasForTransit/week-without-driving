@@ -21,7 +21,7 @@ const PAIRS: Pair[] = [
   { name: 'text on cards', fg: 'on-surface', bg: 'surface-container', min: 4.5 },
   { name: 'secondary text on cards', fg: 'on-surface-variant', bg: 'surface-container', min: 4.5 },
   { name: 'links on the page', fg: 'link', bg: 'surface', min: 4.5 },
-  { name: 'teal text on cards', fg: 'primary-ink', bg: 'surface-container', min: 4.5 },
+  { name: 'plum text on cards', fg: 'primary-ink', bg: 'surface-container', min: 4.5 },
   { name: 'text on the slab', fg: 'on-slab', bg: 'slab', min: 4.5 },
   { name: 'secondary text on the slab', fg: 'on-slab-variant', bg: 'slab', min: 4.5 },
   { name: 'large accent text on the slab', fg: 'on-slab-accent', bg: 'slab', min: 3 },

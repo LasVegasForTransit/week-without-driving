@@ -11,11 +11,11 @@
   const WIDTH = 1080;
   const HEIGHT = 1350;
   const COLORS = {
-    slab: '#0e5f66',
-    sand: '#fbf4e6',
-    mist: '#cfe7e4',
-    coral: '#ff6b4a',
-    onCoral: '#1a1210',
+    slab: '#431a28',
+    sand: '#f4ece7',
+    mist: '#f0d7ca',
+    coral: '#f2532d',
+    onCoral: '#35121b',
   };
   const MODE_SHORT = { bus: 'Bus', walk: 'Walk', bike: 'Bike', ride: 'Ride' };
   const MODE_WORDS = {

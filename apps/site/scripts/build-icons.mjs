@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const sharp = createRequire(import.meta.resolve('astro'))('sharp');
 
-const SAND = '#fbf4e6';
+const SAND = '#f4ece7';
 const site = new URL('../', import.meta.url);
 const out = fileURLToPath(new URL('public/icons/', site));
 

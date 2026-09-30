@@ -156,34 +156,34 @@
   --ember-container: #47210f; /* primary-container surface on dark */
   --on-ember-container-dark: #ffd9c7;
 
-  /* lvwwd.org's own palette, "desert": sand and adobe neutrals, a transit
-     teal, and coral as the one warm accent. The site's roles below point at
-     these; the LVBT primitives above stay only for print.css. */
+  /* lvwwd.org's campaign palette: cream paper, dark plum, and transit orange.
+     The site's semantic roles below point at these; the LVBT primitives above
+     stay only for print.css. */
   --white: #ffffff;
-  --sand: #fbf4e6;
-  --sand-raised: #f2e4c8;
-  --adobe: #3b2a20;
-  --adobe-muted: #6b5646;
-  --teal: #0e7c86;
-  --teal-ink: #0a5e66;
-  --teal-deep: #0e5f66;
-  --teal-mist: #cdebe8;
-  --teal-night: #0b3f44;
-  --slab-mist: #cfe7e4;
-  --coral-bright: #ff6b4a;
-  --on-coral: #1a1210;
+  --sand: #f4ece7;
+  --sand-raised: #eadbd3;
+  --adobe: #4b2130;
+  --adobe-muted: #765360;
+  --plum: #542432;
+  --plum-ink: #3d1925;
+  --plum-deep: #431a28;
+  --plum-mist: #f1d8ca;
+  --plum-night: #32131e;
+  --slab-mist: #f0d7ca;
+  --orange: #f2532d;
+  --on-orange: #35121b;
   --error: #b3261e;
   /* "Desert at night": warm near-black surfaces (never pure black), tonal
-     elevation instead of shadows, and teal that brightens when it is text. */
+     elevation instead of shadows, and plum that brightens when it is text. */
   --night-1: #17130f; /* page */
   --night-2: #221c16; /* cards and panels */
   --night-field: #1d1813; /* form fields */
-  --night-slab: #10363a; /* the slab: deep teal, dark in both themes */
+  --night-slab: #391723; /* the slab: dark plum in both themes */
   --night-line: #7f7164; /* outlines, 3:1 or better on night-1 */
   --sand-muted: #c9bba9;
-  --teal-bright: #6fd3db; /* teal as text on dark */
-  --teal-container-night: #123f44;
-  --teal-on-container-night: #bdeee9;
+  --plum-bright: #f4b6a1; /* plum as text on dark */
+  --plum-container-night: #4b2431;
+  --plum-on-container-night: #f7d9cd;
   --error-night: #ffb4ab;
 }
 
@@ -204,26 +204,26 @@
   --color-on-surface-variant: var(--adobe-muted);
   --color-surface-container: var(--sand-raised);
   /* The slab (the "why" band, My week's entries card, the giveaway band):
-     deep teal, dark in both themes, with sand text on it in both. */
-  --color-slab: var(--teal-deep);
+     dark plum, dark in both themes, with sand text on it in both. */
+  --color-slab: var(--plum-deep);
   --color-on-slab: var(--sand);
   --color-on-slab-variant: var(--slab-mist);
-  /* Coral lightened enough to read as large text on the slab (4:1 or better). */
-  --color-on-slab-accent: color-mix(in srgb, var(--coral-bright) 55%, var(--white));
+  /* Orange lightened enough to read as large text on the slab (4:1 or better). */
+  --color-on-slab-accent: color-mix(in srgb, var(--orange) 55%, var(--white));
   --color-outline: var(--adobe);
   --color-outline-variant: var(--adobe);
 
-  /* Accent. The teal fill stays the same in both themes; teal as text
-     (primary-ink) and the container pair brighten in dark. Coral is the
+  /* Accent. The plum fill stays the same in both themes; plum as text
+     (primary-ink) and the container pair brighten in dark. Orange is the
      warm fill for dates, prizes and entries, always with dark text. */
-  --color-primary: var(--teal);
+  --color-primary: var(--plum);
   --color-on-primary: var(--white);
-  --color-primary-container: var(--teal-mist);
-  --color-on-primary-container: var(--teal-night);
-  --color-primary-warm: var(--coral-bright);
-  --color-on-primary-warm: var(--on-coral);
-  --color-primary-ink: var(--teal-ink);
-  --color-primary-soft: var(--teal-mist);
+  --color-primary-container: var(--plum-mist);
+  --color-on-primary-container: var(--plum-night);
+  --color-primary-warm: var(--orange);
+  --color-on-primary-warm: var(--on-orange);
+  --color-primary-ink: var(--plum-ink);
+  --color-primary-soft: var(--plum-mist);
   --color-link: var(--color-primary-ink);
 
   /* Form fields and error text. */
@@ -329,12 +329,12 @@
     --color-outline: var(--night-line);
     --color-outline-variant: var(--sand);
 
-    --color-primary: var(--teal);
+    --color-primary: var(--plum);
     --color-on-primary: var(--white);
-    --color-primary-container: var(--teal-container-night);
-    --color-on-primary-container: var(--teal-on-container-night);
-    --color-primary-ink: var(--teal-bright);
-    --color-primary-soft: var(--teal-container-night);
+    --color-primary-container: var(--plum-container-night);
+    --color-on-primary-container: var(--plum-on-container-night);
+    --color-primary-ink: var(--plum-bright);
+    --color-primary-soft: var(--plum-container-night);
     --color-link: var(--color-primary-ink);
 
     --color-field: var(--night-field);

@@ -28,11 +28,9 @@ async function withExamplePartner(page: Page) {
 // rewritten page; the Partners page is never saved for offline use anyway.
 test.use({ serviceWorkers: 'block' });
 
-const picker = (page: Page) => page.getByRole('combobox', { name: 'Your organization' });
+const picker = (page: Page) => page.getByRole('combobox', { name: 'Use materials for' });
 
-test('before the first partner, the page has no roster and the kit offers only general materials', async ({
-  page,
-}) => {
+test('before the first partner, the page has no roster and ready materials', async ({ page }) => {
   await page.goto('/partners');
   await expect(page.getByRole('heading', { level: 1, name: 'Partners' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Taking part in 2026' })).toHaveCount(0);
@@ -40,11 +38,11 @@ test('before the first partner, the page has no roster and the kit offers only g
   await expect(page.getByText('Partnering is free, and any size of group can join')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Partner kit' })).toBeVisible();
   const options = await picker(page).locator('option').allTextContents();
-  expect(options.filter((text) => text.trim() !== '')).toEqual(['General materials']);
+  expect(options.filter((text) => text.trim() !== '')).toEqual(['General LVBT materials']);
   await expect(
-    page.getByText('Choose General materials to get a link and files you can share today.'),
+    page.getByText('Start with the ready-to-share link, QR code, banners and flyer below.'),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Your link' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Your link' })).toBeVisible();
 });
 
 test('"Email us to join" opens an email with the subject and the five lines', async ({ page }) => {
@@ -78,7 +76,7 @@ test('general materials: the link, QR code, banners and snippet credit no one', 
   page,
 }) => {
   await page.goto('/partners');
-  await picker(page).selectOption({ label: 'General materials' });
+  await picker(page).selectOption({ label: 'General LVBT materials' });
   expect(new URL(page.url()).hash).toBe('#kit-general');
   await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway');
   await expect(
@@ -165,12 +163,12 @@ test('a partner gets its own link and snippet, and the address picks it again', 
   );
 });
 
-test('an address with an unknown organization picks nothing', async ({ page }) => {
+test('an address with an unknown organization uses the ready general materials', async ({
+  page,
+}) => {
   await page.goto('/partners#kit-nobody');
-  await expect(picker(page)).toHaveValue('');
-  await expect(
-    page.getByText('Choose General materials to get a link and files you can share today.'),
-  ).toBeVisible();
+  await expect(picker(page)).toHaveValue('general');
+  await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway');
 });
 
 test('"Copy image description" copies the banner description exactly', async ({
@@ -273,7 +271,7 @@ test.describe('with JavaScript off', () => {
       .evaluate((el) => el.textContent);
     expect(message).toContain('The partner kit needs JavaScript turned on.');
     await expect(page.locator('[data-kit-body]')).toBeHidden();
-    await expect(page.getByRole('combobox', { name: 'Your organization' })).toBeHidden();
+    await expect(page.getByRole('combobox', { name: 'Use materials for' })).toBeHidden();
     await expect(page.getByRole('button', { name: 'Copy email address' })).toBeHidden();
     await expect(
       page.locator('[data-partners-join]').getByText('wwd@lasvegasfortransit.org', { exact: true }),
