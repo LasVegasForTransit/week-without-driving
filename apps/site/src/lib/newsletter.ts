@@ -1,5 +1,5 @@
-// LVBT's newsletter, as the "Keep going after the week" card on My week and
-// Home's "Stay involved with LVBT" section offer it.
+// LVBT's separate membership invitation, shown after campaign sign-up and
+// in the "Keep going after the week" cards.
 
 /**
  * Whether the card can add someone to LVBT's newsletter in one tap, through
@@ -10,8 +10,8 @@
  */
 export const ONE_TAP_NEWSLETTER = false;
 
-/** LVBT's newsletter sign-up page, for anyone the one-tap sign-up can't serve. */
-export const NEWSLETTER_PAGE = 'https://mail.lasvegasfortransit.org/';
+/** LVBT's membership page, carrying the campaign referral for onboarding. */
+export const NEWSLETTER_PAGE = 'https://lasvegasfortransit.org/join/member/?from=wwd';
 
 /** 12:00 am October 9, 2026, Las Vegas time: the giveaway closes and Home changes. */
 export const GIVEAWAY_CLOSES = '2026-10-09T07:00:00Z';

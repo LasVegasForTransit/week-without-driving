@@ -12,6 +12,7 @@ const RESEND = 'https://api.resend.com/emails';
 const FROM = 'Week Without Driving Las Vegas <hello@lvwwd.org>';
 const REPLY_TO = 'wwd@lasvegasfortransit.org';
 const SUBJECT = 'Your Week Without Driving link';
+const LVBT_JOIN = 'https://lasvegasfortransit.org/join/member/?from=wwd';
 
 type Recipient = Pick<Participant, 'firstName' | 'contact' | 'contactType'>;
 
@@ -35,6 +36,9 @@ function plainText(to: Recipient, link: string): string {
     '',
     'The link works on any phone until November 30, 2026. Don’t share it: anyone who has it can open your week.',
     '',
+    'Want to keep improving transit after the week? Join Las Vegans for Better Transit separately:',
+    LVBT_JOIN,
+    '',
     'Week Without Driving Las Vegas',
     'Las Vegans for Better Transit',
   ].join('\n');
@@ -48,6 +52,7 @@ function html(to: Recipient, link: string): string {
 <p>Describe a trip without driving there each day, October 1 to 8. A post is optional. Each day is one entry to win a 30-day RTC bus pass.</p>
 <p>The link works on any phone until November 30, 2026. Don’t share it: anyone who has it can open your week.</p>
 <p>If the button doesn’t work, copy this address into your browser:<br>${href}</p>
+<p>Want to keep improving transit after the week? <a href="${LVBT_JOIN}">Join Las Vegans for Better Transit</a> separately.</p>
 <p>Week Without Driving Las Vegas<br>Las Vegans for Better Transit</p>
 </body></html>`;
 }
