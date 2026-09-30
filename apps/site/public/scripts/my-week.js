@@ -23,6 +23,7 @@
   const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
   const params = new URLSearchParams(window.location.search);
   let me = null;
+  let planCards = null;
 
   /** How an entry came in, for the count: never the link or the picture itself. */
   function entryMethod(body) {
@@ -47,10 +48,17 @@
   }
 
   const DAY_STATUS = {
-    done: 'Trip shared',
-    today: 'Today, no trip shared yet',
-    missed: 'No trip shared',
+    done: 'Trip logged',
+    today: 'Today · ready to log',
+    missed: 'No trip logged',
     future: 'Coming up',
+  };
+  const PLAN_MODE_LABELS = {
+    bus: 'bus',
+    walk: 'walk or roll',
+    bike: 'bike',
+    scooter: 'scooter',
+    ride: 'ride',
   };
 
   // Public posts can come from these apps; the Worker checks the same list.
@@ -132,15 +140,36 @@
 
   function renderEntries() {
     const done = new Set(me.days);
-    setText('[data-me-count]', String(Math.min(done.size, MAX_ENTRIES)));
+    const count = Math.min(done.size, MAX_ENTRIES);
+    setText('[data-me-count]', String(count));
+    setText(
+      '[data-me-progress-line]',
+      count === 0
+        ? 'Your eight days start October 1. Each day you describe a trip can be one entry.'
+        : `${count} ${count === 1 ? 'day' : 'days'} with a trip logged. One entry can count for each day after volunteer review.`,
+    );
+    const progress = document.querySelector('[data-me-progress]');
+    if (progress) progress.setAttribute('aria-valuenow', String(count));
+    const fill = document.querySelector('[data-me-progress-fill]');
+    if (fill instanceof HTMLElement) fill.style.width = `${(count / MAX_ENTRIES) * 100}%`;
+    const tripByDay = new Map((me.trips ?? []).map((trip) => [trip.day, trip]));
     document.querySelectorAll('[data-day]').forEach((box) => {
-      const state = dayState(Number(box.getAttribute('data-day')), me.today, done);
+      const day = Number(box.getAttribute('data-day'));
+      const state = dayState(day, me.today, done);
       box.setAttribute('data-state', state);
-      const sr = box.querySelector('[data-day-status]');
-      if (sr) sr.textContent = DAY_STATUS[state];
+      const status = box.querySelector('[data-day-status]');
+      if (status) status.textContent = DAY_STATUS[state];
+      const modes = box.querySelector('[data-day-modes]');
+      const trip = tripByDay.get(day);
+      if (modes) {
+        const used = (trip?.modes ?? []).map((mode) => PLAN_MODE_LABELS[mode] ?? mode);
+        modes.textContent = used.length ? `By ${used.join(', ')}` : '';
+        modes.hidden = used.length === 0;
+      }
       if (state === 'today') box.setAttribute('aria-current', 'date');
       else box.removeAttribute('aria-current');
     });
+    planCards?.render(me, done);
     renderToday(me.today, done);
   }
 
@@ -242,9 +271,16 @@
     if (hard instanceof HTMLTextAreaElement) body.set('hard', hard.value.trim());
     if (link) body.set('link', link);
     if (file) body.set('screenshot', file);
+    appendPlanId(form, body);
     const share = form.elements.namedItem('share');
     if (share instanceof HTMLInputElement && share.checked) body.set('share', '1');
     return body;
+  }
+
+  function appendPlanId(form, body) {
+    const planId = form.querySelector('[data-trip-plan-id]');
+    if (planId instanceof HTMLInputElement && !planId.disabled && planId.value)
+      body.set('planId', planId.value);
   }
 
   function bindTrip() {
@@ -273,8 +309,22 @@
         return undefined;
       }
       window.lvbt?.track('trip_entry_submitted', { day, method: entryMethod(body) });
+      const planId = form.querySelector('[data-trip-plan-id]');
+      const selectedPlanId =
+        planId instanceof HTMLInputElement && !planId.disabled ? String(planId.value) : '';
       me.days = data.days;
       me.trips = data.trips;
+      const plan = (me.plans ?? []).find((saved) => String(saved.id) === selectedPlanId);
+      if (plan) plan.loggedEntryId = selectedPlanId;
+      if (planId instanceof HTMLInputElement) {
+        planId.value = '';
+        planId.disabled = true;
+      }
+      const selected = form.querySelector('[data-trip-plan-selected]');
+      if (selected) {
+        selected.textContent = '';
+        selected.hidden = true;
+      }
       renderEntries();
       return undefined;
     });
@@ -318,6 +368,7 @@
       return undefined;
     }
     me = data;
+    planCards = window.lvwwdPlanCards?.({ api, showSignedOut, renderEntries });
     renderDetails();
     renderBanners();
     renderEntries();
@@ -326,6 +377,7 @@
     window.lvwwdMe = me;
     document.dispatchEvent(new CustomEvent('lvwwd:me', { detail: me }));
     bindTrip();
+    window.lvwwdPlanner?.({ api, me, showSignedOut, renderEntries });
     bindSignOut();
     bindSomeoneElse();
     return undefined;

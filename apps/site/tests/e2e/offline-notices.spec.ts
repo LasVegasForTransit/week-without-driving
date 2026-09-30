@@ -129,9 +129,10 @@ test('My week says which of its parts need a connection', async ({ page, context
   await page.goto('/my-week');
   await expect(page.getByRole('heading', { name: /Hi, Luz/ })).toBeVisible();
   // The keyboard, as the page's sticky header can sit over a box on a phone.
-  await page.getByLabel('Bus').focus();
+  const bus = page.locator('[data-trip-form]').getByLabel('Bus');
+  await bus.focus();
   await page.keyboard.press('Space');
-  await expect(page.getByLabel('Bus')).toBeChecked();
+  await expect(bus).toBeChecked();
 
   await goOffline(context);
   await expect(page.getByText(TRIP_NOTICE)).toBeVisible();
@@ -142,7 +143,7 @@ test('My week says which of its parts need a connection', async ({ page, context
   await expect(send).toHaveAttribute('aria-disabled', 'true');
   await send.focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByLabel('Bus')).toBeChecked();
+  await expect(bus).toBeChecked();
 
   const again = page.getByRole('link', { name: 'Send my link again' });
   await again.focus();

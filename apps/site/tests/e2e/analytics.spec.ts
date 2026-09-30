@@ -61,7 +61,11 @@ test('a saved trip sends only its day and entry method', async ({ page }) => {
   });
 
   await page.goto('/my-week');
-  await page.locator('label', { has: page.locator('input[value="bus"]') }).click();
+  await page
+    .locator('[data-trip-form] label', {
+      has: page.locator('input[name="mode"][value="bus"]'),
+    })
+    .click();
   await page
     .getByLabel('Where did you go, and how did you get there?')
     .fill('I took the bus to the grocery store.');
