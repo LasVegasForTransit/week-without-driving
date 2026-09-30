@@ -84,11 +84,17 @@ export async function withSiteKey(request: Request, env: Env): Promise<Response>
       .transform(page);
   }
 
-  return new HTMLRewriter()
-    .on('[data-turnstile]', {
+  const rewriter = new HTMLRewriter().on('[data-turnstile]', {
+    element(element) {
+      element.setAttribute('data-sitekey', key ?? '');
+    },
+  });
+  if (path === '/sign-up' && !env.RESEND_API_KEY?.trim()) {
+    rewriter.on('[data-email-unavailable]', {
       element(element) {
-        element.setAttribute('data-sitekey', key ?? '');
+        element.removeAttribute('hidden');
       },
-    })
-    .transform(page);
+    });
+  }
+  return rewriter.transform(page);
 }

@@ -140,5 +140,14 @@ describe('Turnstile pages', () => {
 
     expect(changed('[data-turnstile]').get('data-sitekey')).toBe('public-test-key');
     expect(FakeHTMLRewriter.latest?.handlers.has('[data-signup-form]')).toBe(false);
+    expect(changed('[data-email-unavailable]', { hidden: '' }).has('hidden')).toBe(false);
+  });
+
+  it('does not warn about unavailable email after delivery is configured', async () => {
+    vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);
+    const { env } = page('public-test-key', 'server-secret', 'resend');
+    await withSiteKey(new Request('https://lvwwd.org/sign-up'), env);
+
+    expect(FakeHTMLRewriter.latest?.handlers.has('[data-email-unavailable]')).toBe(false);
   });
 });

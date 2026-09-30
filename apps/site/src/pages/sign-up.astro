@@ -76,6 +76,10 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
       <p class="signup__ready" data-next-person tabindex="-1" hidden>
         Ready for the next person. The last sign-up is saved.
       </p>
+      <p data-email-unavailable hidden class="signup__delivery-note" role="status">
+        You can sign up on this phone now. Email links to open My week on another phone are
+        temporarily unavailable, so keep this phone signed in.
+      </p>
       <div class="form-field">
         <label for="su-name" class="form-label">First name</label>
         <input
@@ -287,6 +291,12 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
   }
   .signup__unavailable .arrow-link + .arrow-link {
     margin-left: 1.25rem;
+  }
+  .signup__delivery-note {
+    margin-bottom: 1.5rem;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--color-primary);
+    border-radius: 0.75rem;
   }
   .signup__zip {
     max-width: 10rem;
