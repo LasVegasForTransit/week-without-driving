@@ -31,6 +31,12 @@ export default defineConfig({
       triggers.scheduled({
         schedule: '1-59/2 15 1-8 10 *',
       }),
+      triggers.scheduled({
+        schedule: '*/5 * 30 9 *',
+      }),
+      triggers.scheduled({
+        schedule: '*/5 * 1-9 10 *',
+      }),
     ],
     env: {
       VAPID_SUBJECT: bindings.text('mailto:wwd@lasvegasfortransit.org'),

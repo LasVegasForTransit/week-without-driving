@@ -57,8 +57,10 @@ const PRIVATE_PAGES = [/^\/my-week(?:\/|$)/, /^\/sign-up(?:\/|$)/];
 // Past this, a page on a weak connection is shown from the phone instead.
 const NETWORK_WAIT_MS = 4000;
 
-// Every reminder opens My week; a new one replaces the one before.
+// Every reminder opens My week. Daily reminders replace earlier daily ones;
+// each outing keeps its own notification until it is opened or dismissed.
 const REMINDER = { url: '/my-week', tag: 'wwd-reminder', icon: '/icons/icon-192.png' };
+const PLAN_TAG = /^wwd-plan-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 
 // Shown only if a reminder arrives without its words, which the Worker
 // never sends; the browser needs something to show for every push.
@@ -144,16 +146,20 @@ function staleKeys(keys, wanted) {
 }
 
 /**
- * The title and body of a reminder from its push message.
+ * The title, body and optional plan tag of a reminder from its push message.
  *
  * @param {{ json(): unknown } | null | undefined} data
- * @returns {{ title: string, body: string }}
+ * @returns {{ title: string, body: string, tag?: string }}
  */
 function reminderFrom(data) {
   try {
-    const message = /** @type {{ title?: unknown, body?: unknown }} */ (data?.json());
+    const message = /** @type {{ title?: unknown, body?: unknown, tag?: unknown }} */ (
+      data?.json()
+    );
     if (typeof message.title === 'string' && typeof message.body === 'string' && message.title) {
-      return { title: message.title, body: message.body };
+      const tag =
+        typeof message.tag === 'string' && PLAN_TAG.test(message.tag) ? message.tag : REMINDER.tag;
+      return { title: message.title, body: message.body, tag };
     }
   } catch {
     // Not JSON: fall through.
@@ -177,12 +183,12 @@ async function openMyWeek() {
 }
 
 self.addEventListener('push', (event) => {
-  const { title, body } = reminderFrom(event.data);
+  const { title, body, tag = REMINDER.tag } = reminderFrom(event.data);
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
       icon: REMINDER.icon,
-      tag: REMINDER.tag,
+      tag,
       // A new day's reminder still sounds, even while yesterday's is shown.
       renotify: true,
       data: { url: REMINDER.url },
