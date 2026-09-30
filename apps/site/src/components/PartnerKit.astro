@@ -18,7 +18,7 @@ const bannerCards = BANNERS.map((banner) => ({
 
 <section
   id="partner-kit"
-  class="section mt-12"
+  class="partner-kit-section"
   aria-labelledby="kit-heading"
   data-partner-kit
   data-description={DESCRIPTION}
@@ -42,24 +42,21 @@ const bannerCards = BANNERS.map((banner) => ({
 
   <div class="kit" data-kit-body hidden>
     <p class="section-intro">
-      Start with the ready-to-share link, QR code, banners and flyer below. A listed organization
-      can switch to its tracked link.
+      Copy a link, download a graphic or print a flyer. Choose a listed partner to use its link.
     </p>
 
     <div class="kit__picker">
-      <label for="kit-organization" class="kit__label">Use materials for</label>
+      <label for="kit-organization" class="kit__label">Choose a sharing link</label>
       <select id="kit-organization" class="kit__select" data-kit-picker>
-        <option value={GENERAL}>General LVBT materials</option>
+        <option value={GENERAL}>General Week Without Driving link</option>
         {partners.map((partner) => <option value={partner.slug}>{partner.name}</option>)}
       </select>
-      <p class="kit__hint" data-kit-hint>
-        Choose a listed organization only after LVBT gives it a tracked link.
-      </p>
+      <p class="kit__hint" data-kit-hint>Choose a listed partner to use its link.</p>
     </div>
 
     <div class="kit__materials" data-kit-materials hidden>
-      <div class="kit__part">
-        <h3 class="kit__h3">Your link</h3>
+      <div class="kit__part kit__part--link">
+        <h3 class="kit__h3">Share a link</h3>
         <p class="kit__link" id="kit-link" data-kit-link></p>
         <button
           type="button"
@@ -71,13 +68,11 @@ const bannerCards = BANNERS.map((banner) => ({
           <span data-copy-label>Copy link</span>
         </button>
         <p id="kit-link-status" class="kit__status" role="status"></p>
-        <p class="kit__note" data-kit-general hidden>
-          These don't credit any organization. LVBT uses them for its own outreach.
-        </p>
+        <p class="kit__note" data-kit-general hidden>The general link does not credit a partner.</p>
       </div>
 
-      <div class="kit__part">
-        <h3 class="kit__h3">Your QR code</h3>
+      <div class="kit__part kit__part--qr">
+        <h3 class="kit__h3">Print a QR code</h3>
         <img class="kit__qr" data-kit-qr width="200" height="200" alt="" />
         <div class="kit__actions">
           <a class="kit__button" data-kit-qr-png download>Download PNG</a>
@@ -89,8 +84,8 @@ const bannerCards = BANNERS.map((banner) => ({
         </p>
       </div>
 
-      <div class="kit__part">
-        <h3 class="kit__h3">Banners</h3>
+      <div class="kit__part kit__part--banners">
+        <h3 class="kit__h3">Social and website graphics</h3>
         <ul class="kit__banners">
           {
             bannerCards.map((card) => (
@@ -133,7 +128,7 @@ const bannerCards = BANNERS.map((banner) => ({
         </p>
       </div>
 
-      <div class="kit__part">
+      <div class="kit__part kit__part--embed">
         <h3 class="kit__h3">Embed snippet</h3>
         <p class="kit__note">
           For your website. Copy this and paste it into your site's HTML where you want the banner.
@@ -174,8 +169,8 @@ const bannerCards = BANNERS.map((banner) => ({
         <div class="kit__preview" data-kit-preview></div>
       </div>
 
-      <div class="kit__part">
-        <h3 class="kit__h3">Flyers</h3>
+      <div class="kit__part kit__part--flyers">
+        <h3 class="kit__h3">Print a flyer</h3>
         <p class="kit__note">
           Print these for tables, meetings and noticeboards. They work in black and white, and they
           carry a QR code and link so anyone without a smartphone can still get to lvwwd.org.
@@ -190,6 +185,15 @@ const bannerCards = BANNERS.map((banner) => ({
 </section>
 
 <style>
+  .partner-kit-section {
+    margin-top: 1.5rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface);
+  }
+  .kit > .section-intro {
+    margin-top: 0.75rem;
+  }
   .kit[hidden],
   .kit__materials[hidden],
   .kit__hint[hidden],
@@ -198,7 +202,8 @@ const bannerCards = BANNERS.map((banner) => ({
   }
   .kit__picker {
     margin-top: 1.5rem;
-    max-width: 32rem;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    background: var(--color-surface-container);
   }
   .kit__label {
     display: block;
@@ -206,6 +211,7 @@ const bannerCards = BANNERS.map((banner) => ({
   }
   .kit__select {
     width: 100%;
+    max-width: 32rem;
     min-height: 48px;
     margin-top: 0.5rem;
     padding: 0.5rem 0.75rem;
@@ -218,9 +224,61 @@ const bannerCards = BANNERS.map((banner) => ({
     margin-top: 0.75rem;
     color: var(--color-on-surface-variant);
   }
+  .kit__materials {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
   .kit__part {
-    margin-top: 2.5rem;
-    max-width: 48rem;
+    min-width: 0;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface-container);
+  }
+  @media (min-width: 48rem) {
+    .kit__materials {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .kit__part--banners,
+    .kit__part--embed,
+    .kit__part--flyers {
+      grid-column: 1 / -1;
+    }
+    .kit__part--qr {
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      column-gap: 1.5rem;
+      align-content: start;
+    }
+    .kit__part--qr .kit__h3 {
+      grid-column: 1 / -1;
+    }
+    .kit__part--qr .kit__qr {
+      grid-column: 1;
+      grid-row: 2 / span 2;
+    }
+    .kit__part--qr .kit__actions,
+    .kit__part--qr .kit__note {
+      grid-column: 2;
+    }
+    .kit__part--qr .kit__actions {
+      align-content: start;
+      margin-top: 0.75rem;
+    }
+    .kit__part--flyers {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 1.5rem;
+    }
+    .kit__part--flyers .kit__note {
+      grid-column: 1;
+    }
+    .kit__part--flyers > .kit__button {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+      margin-top: 0;
+    }
   }
   .kit__h3 {
     font-size: var(--text-title-lg);
@@ -282,7 +340,7 @@ const bannerCards = BANNERS.map((banner) => ({
   }
   .kit__banners {
     display: grid;
-    gap: 2rem;
+    gap: 1rem;
     margin-top: 1rem;
     padding: 0;
     list-style: none;
@@ -299,6 +357,12 @@ const bannerCards = BANNERS.map((banner) => ({
     max-height: 22rem;
     height: auto;
     border: 1px solid var(--color-outline);
+  }
+  .kit__banner {
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface);
   }
   .kit__banner-name {
     margin-top: 0.75rem;

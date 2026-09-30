@@ -23,7 +23,7 @@ const weWantToHear = [
   'Neighborhood and community groups',
   'Environmental and justice groups',
   'Employers and businesses',
-  'Public agencies, including the RTC',
+  'Public agencies',
 ];
 
 const whatPartnersDo = [
@@ -35,11 +35,11 @@ const whatPartnersDo = [
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="container-page page-header pb-16">
+  <div class="container-page page-header partners-page pb-16">
     <div class="partners-hero">
       <h1 class="page-title">Partners</h1>
       <p class="partners-hero__lede">
-        Meet the groups taking part in Las Vegas. Find flyers, posts and links to share.
+        Meet local partners and find materials to share Week Without Driving.
       </p>
       <div class="partners-hero__actions">
         <a href="#partner-kit" class="partners-hero__primary">Get materials</a>
@@ -49,12 +49,8 @@ const whatPartnersDo = [
 
     {
       partners.length > 0 && (
-        <div>
-          <p class="page-lede">
-            Groups across the Las Vegas Valley are bringing Week Without Driving to their members,
-            neighbors, students and staff.
-          </p>
-          <h2 class="section-title mt-10" data-partners-roster-heading>
+        <section class="partner-roster-section" aria-labelledby="roster-heading">
+          <h2 id="roster-heading" class="section-title" data-partners-roster-heading>
             Taking part in 2026
           </h2>
           <ul class="partner-roster">
@@ -63,9 +59,11 @@ const whatPartnersDo = [
                 <h3 class="partner-roster__name">
                   {partner.url ? <a href={partner.url}>{partner.name}</a> : partner.name}
                 </h3>
-                {partner.logo && (
-                  <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
-                )}
+                <div class="partner-roster__mark">
+                  {partner.logo && (
+                    <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
+                  )}
+                </div>
                 <p class="partner-roster__type">{partner.type}</p>
                 <p class="partner-roster__sentence">{partner.sentence}</p>
               </li>
@@ -75,7 +73,7 @@ const whatPartnersDo = [
             RTC and its logo are trademarks of the Regional Transportation Commission of Southern
             Nevada.
           </p>
-        </div>
+        </section>
       )
     }
 
@@ -91,39 +89,30 @@ const whatPartnersDo = [
 
     <div class="section mt-12 partners-join" data-partners-join>
       <h2 class="section-title">Bring your organization</h2>
-      <p class="section-intro">
-        Week Without Driving is for everyone who gets around Las Vegas without driving, and for the
-        groups that stand with them. Partnering is free, and any size of group can join, from a
-        block club to a big employer.
-      </p>
+      <p class="section-intro">Organizations of any size can join. There is no fee.</p>
 
-      <div class="mt-10 grid gap-10 md:grid-cols-2 md:gap-16">
+      <div class="partners-join__grid">
         <div class="partners-join__card">
-          <h3 class="text-title-lg">We'd love to hear from:</h3>
-          <ul class="prose-doc mt-3">
+          <h3 class="text-title-lg">Who can join</h3>
+          <ul class="partners-join__list">
             {weWantToHear.map((item) => <li>{item}</li>)}
           </ul>
         </div>
         <div class="partners-join__card">
-          <h3 class="text-title-lg">What partners do. Pick any of these. There's no minimum.</h3>
-          <ul class="prose-doc mt-3">
+          <h3 class="text-title-lg">Ways to take part</h3>
+          <ul class="partners-join__list">
             {whatPartnersDo.map((item) => <li>{item}</li>)}
           </ul>
         </div>
       </div>
 
-      <p class="mt-10 max-w-2xl leading-relaxed text-pretty">
-        The general link, QR code, banners and flyer are ready to share. Contact LVBT to add your
-        group to the roster and make a link that credits sign-ups to your outreach.
-      </p>
-
-      <div class="mt-10 max-w-2xl overflow-hidden rounded-2xl bg-surface-container p-6 md:p-8">
+      <div class="partners-join__contact">
         <h3 class="text-title-lg">How to join</h3>
-        <p class="mt-3 leading-relaxed text-pretty">
-          Email {contactEmail} with your group's name, a link to your website or social media page if
-          you have one, which kind of group you are, and one sentence on how you'll take part.
+        <p class="partners-join__instructions">
+          Include your group's name, type, a website or social link if you have one, and how you'll
+          take part.
         </p>
-        <div class="mt-6 flex flex-wrap items-center gap-4">
+        <div class="partners-join__actions">
           <a
             href={joinMailto}
             data-print-url={contactEmail}
@@ -152,7 +141,7 @@ const whatPartnersDo = [
     </div>
 
     <PartnerKit />
-  </section>
+  </div>
 
   <script is:inline src="/scripts/partners.js" defer></script>
   <script is:inline src="/scripts/partner-kit.js" defer></script>
@@ -160,36 +149,19 @@ const whatPartnersDo = [
 
 <style>
   .partners-hero {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 2rem;
     padding: clamp(1.5rem, 4vw, 3rem);
+    border-top: 0.5rem solid var(--color-primary-warm);
     background: var(--color-slab);
     color: var(--color-on-slab);
-  }
-  .partners-hero::before,
-  .partners-hero::after {
-    position: absolute;
-    z-index: -1;
-    width: clamp(9rem, 26vw, 19rem);
-    aspect-ratio: 1;
-    content: '';
-    background: var(--color-primary-warm);
-    transform: rotate(34deg);
-  }
-  .partners-hero::before {
-    top: -68%;
-    right: -8%;
-  }
-  .partners-hero::after {
-    right: 13%;
-    bottom: -88%;
-    opacity: 0.5;
   }
   .partners-hero .page-title {
     max-width: 12ch;
   }
   .partners-hero__lede {
+    grid-column: 1;
     max-width: 42rem;
     margin-top: 1rem;
     font-size: var(--text-body-lg);
@@ -199,8 +171,10 @@ const whatPartnersDo = [
   .partners-hero__actions {
     display: flex;
     flex-wrap: wrap;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
     gap: 0.75rem;
-    margin-top: 1.5rem;
   }
   .partners-hero__primary,
   .partners-hero__secondary {
@@ -229,23 +203,73 @@ const whatPartnersDo = [
   }
   .partners-join {
     padding: clamp(1.25rem, 3vw, 2.5rem);
-    border-top: 0.5rem solid var(--color-primary-warm);
+    margin-top: 1.5rem;
+    border-top: 0.375rem solid var(--color-primary-warm);
     background: var(--color-surface-container);
   }
+  .partners-join > .section-intro {
+    margin-top: 0.75rem;
+  }
+  .partners-join__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
   .partners-join__card {
-    padding: 1.25rem;
-    border: 1px solid color-mix(in srgb, var(--color-on-surface) 22%, transparent);
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface);
+  }
+  .partners-join__list {
+    margin-top: 1rem;
+    padding-left: 1.4rem;
+    list-style: disc;
+    line-height: 1.5;
+  }
+  .partners-join__list li + li {
+    margin-top: 0.55rem;
+  }
+  .partners-join__contact {
+    margin-top: 1rem;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface);
+  }
+  .partners-join__instructions {
+    max-width: 56rem;
+    margin-top: 0.75rem;
+    line-height: 1.55;
+  }
+  .partners-join__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .partner-roster-section {
+    margin-top: 1.5rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border: 1px solid var(--color-outline);
     background: var(--color-surface);
   }
   .partner-roster {
     display: grid;
-    gap: 2rem 2.5rem;
+    gap: 1rem;
     margin-top: 1.5rem;
     padding: 0;
     list-style: none;
   }
+  .partner-roster > li {
+    min-width: 0;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    background: var(--color-surface-container);
+  }
   @media (min-width: 48rem) {
     .partner-roster {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .partners-join__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -264,16 +288,24 @@ const whatPartnersDo = [
     outline: 2px solid currentcolor;
     outline-offset: 3px;
   }
+  .partner-roster__mark {
+    display: flex;
+    align-items: center;
+    min-height: 8rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-surface);
+  }
   .partner-roster__logo {
     display: block;
-    width: min(100%, 16rem);
-    max-height: 7rem;
-    margin-block: 0.75rem;
+    width: auto;
+    max-width: 100%;
+    max-height: 6rem;
     object-fit: contain;
     object-position: left center;
   }
   .partner-roster__type {
-    margin-top: 0.25rem;
+    margin-top: 1rem;
     font-size: var(--text-body-sm);
     font-weight: 600;
     color: var(--color-on-surface-variant);
@@ -287,6 +319,14 @@ const whatPartnersDo = [
     margin-top: 1.5rem;
     font-size: var(--text-body-sm);
     color: var(--color-on-surface-variant);
+  }
+  @media (max-width: 47.999rem) {
+    .partners-hero {
+      display: block;
+    }
+    .partners-hero__actions {
+      margin-top: 1.5rem;
+    }
   }
   [data-partners-ended][hidden],
   [data-partners-join][hidden] {
