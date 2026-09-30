@@ -245,13 +245,8 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   {/* PARTNERS */}
   <section class="home-section home-partners" aria-labelledby="partners-heading">
     <div class="container-page">
-      <div class="home-split">
-        <div>
-          <h2 id="partners-heading" class="home-h2">Partners</h2>
-          <p class="home-intro">Meet the groups taking part in Week Without Driving.</p>
-        </div>
-        <a href="/partners" class="btn btn--primary self-start">Meet our partners</a>
-      </div>
+      <h2 id="partners-heading" class="home-h2">Partners</h2>
+      <p class="home-intro">Meet the groups taking part in Week Without Driving.</p>
       {
         partners.length > 0 && (
           <ul
@@ -268,6 +263,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
           </ul>
         )
       }
+      <div class="home-partners__action">
+        <a href="/partners" class="btn btn--primary">Meet our partners</a>
+      </div>
     </div>
   </section>
 
@@ -594,6 +592,11 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     background: var(--color-surface-container);
     padding-block: clamp(3rem, 6vw, 4.5rem);
   }
+  .home-partners__action {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
   .logo-wall {
     display: flex;
     gap: 1rem;
@@ -641,6 +644,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     outline-offset: 3px;
   }
   @media (max-width: 40rem) {
+    .home-partners__action .btn {
+      width: 100%;
+    }
     .logo-wall {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
