@@ -63,5 +63,6 @@
   "vars": {
     "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAFJwyZWXSScAitjH",
+    "EVENT_REMINDERS_ENABLED": "false",
   },
 }
