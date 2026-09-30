@@ -12,7 +12,7 @@ export default defineConfig({
   // The canonical URL. The sitemap and absolute links are built from it.
   site: 'https://lvwwd.org',
   // Page addresses have no trailing slash (/guides, not /guides/), matching
-  // the site's links and the Worker's html_handling in wrangler.jsonc.
+  // the site's links and the Worker's htmlHandling in apps/deploy/cloudflare.config.ts.
   trailingSlash: 'never',
   output: 'static',
   // reminderCheck() stops the build when a daily reminder in

@@ -5,6 +5,7 @@ dist-e2e/
 coverage/
 .turbo/
 .wrangler/
+.cloudflare/
 .env
 .env.*
 !.env.example

@@ -59,6 +59,7 @@ catalog:
   markdownlint-cli2: 0.23.2
   markdownlint-rule-relative-links: 5.1.2
   playwright-core: 1.62.1
+  cf: 1.0.0-beta.5
   prettier: 3.9.6
   prettier-plugin-astro: 0.14.1
   react: 19.2.8
@@ -70,5 +71,5 @@ catalog:
   typescript-eslint: 8.69.0
   vite: 8.2.2
   vitest: 4.1.11
-  wrangler: 4.127.1
+  wrangler: 4.141.0
   zod: 4.5.4

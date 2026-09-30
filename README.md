@@ -39,8 +39,10 @@ including how to let volunteers into the admin views.
 - `apps/site/worker/` is the Worker in front of the assets. It sends `www.lvwwd.org` to the apex and
   runs the participant API behind "Sign up to win" and "My week" under `/api/`; its D1 database
   schema is in `apps/site/migrations/`
-- `apps/site/wrangler.jsonc` names the Worker, its two custom domains, its daily cleanup, which
-  deletes all participant data from November 30, 2026, and the morning send of the daily reminders
+- `apps/deploy/cloudflare.config.ts` names the production Worker, its two routes, its daily cleanup,
+  which deletes all participant data from November 30, 2026, and its morning reminder schedule.
+  `apps/site/wrangler.jsonc` mirrors production settings for Wrangler commands that `cf` cannot run
+  yet; `apps/deploy/wrangler.config.ts` tells `cf` to bundle the Astro build in `apps/site/dist`
 - `apps/site/src/data/reminders.json` holds the eight daily reminder messages. Every build checks
   them, and the Worker sends each morning's by browser notification (`apps/site/worker/push/`)
 - `apps/site/wrangler.api-preview.jsonc` is the API preview on workers.dev. It has its own database,
@@ -48,8 +50,8 @@ including how to let volunteers into the admin views.
   3's reminder to each browser that turns reminders on. Deploy it with
   `pnpm build && pnpm exec wrangler deploy -c wrangler.api-preview.jsonc` from `apps/site`
 
-`pnpm run deploy` builds and runs `wrangler deploy`; `.github/workflows/deploy.yml` does the same on
-every push to `main` with the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets of the
+`pnpm run deploy` builds and runs `cf deploy`; `.github/workflows/deploy.yml` does the same on every
+push to `main` with the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets of the
 `production` environment, which `pnpm bootstrap --production` sets.
 
 Lint, format, TypeScript, and test settings extend the `@lasvegasfortransit/*` packages from
