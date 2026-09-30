@@ -33,26 +33,63 @@
     if (!counted) window.lvbt?.track('app_installed', { method });
   }
 
-  function offerUpdate(worker, state) {
+  function offerUpdate(registration, state) {
     const bar = document.querySelector('[data-update-bar]');
-    if (!bar || bar.childElementCount) return;
+    if (!bar || bar.childElementCount || state.dismissed) return;
     const text = document.createElement('p');
-    text.textContent = 'A new version of lvwwd.org is ready.';
+    text.textContent = 'A site update is ready.';
     const refresh = document.createElement('button');
     refresh.type = 'button';
     refresh.className = 'update-bar__button';
     refresh.textContent = 'Refresh';
-    refresh.addEventListener('click', () => {
+    refresh.addEventListener('click', async () => {
+      // A later update can replace the worker that first displayed this card.
+      // Look up the current waiting worker when the visitor taps the button.
+      let worker = registration.waiting;
+      if (!worker) {
+        try {
+          await registration.update();
+          worker = registration.waiting;
+        } catch {
+          refresh.textContent = 'Try again';
+          return;
+        }
+      }
+      if (!worker) {
+        window.location.reload();
+        return;
+      }
       state.refreshing = true;
-      worker.postMessage({ type: 'SKIP_WAITING' });
+      refresh.disabled = true;
+      refresh.textContent = 'Updating…';
+      try {
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      } catch {
+        state.refreshing = false;
+        refresh.disabled = false;
+        refresh.textContent = 'Try again';
+        return;
+      }
+      // A browser may miss controllerchange after resuming a suspended tab.
+      window.setTimeout(() => {
+        if (state.refreshing) window.location.reload();
+      }, 3000);
     });
-    bar.append(text, refresh);
+    const later = document.createElement('button');
+    later.type = 'button';
+    later.className = 'update-bar__later';
+    later.textContent = 'Later';
+    later.addEventListener('click', () => {
+      state.dismissed = true;
+      bar.replaceChildren();
+    });
+    bar.append(text, refresh, later);
   }
 
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     const sw = navigator.serviceWorker;
-    const state = { refreshing: false };
+    const state = { refreshing: false, dismissed: false };
     // The first version takes control without a reload; only a new
     // version the visitor asked for reloads the page, once.
     sw.addEventListener('controllerchange', () => {
@@ -62,11 +99,11 @@
     const register = () => {
       sw.register('/sw.js')
         .then((registration) => {
-          if (registration.waiting && sw.controller) offerUpdate(registration.waiting, state);
+          if (registration.waiting && sw.controller) offerUpdate(registration, state);
           registration.addEventListener('updatefound', () => {
             const worker = registration.installing;
             worker?.addEventListener('statechange', () => {
-              if (worker.state === 'installed' && sw.controller) offerUpdate(worker, state);
+              if (worker.state === 'installed' && sw.controller) offerUpdate(registration, state);
             });
           });
         })

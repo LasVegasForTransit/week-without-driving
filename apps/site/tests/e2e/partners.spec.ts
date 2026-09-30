@@ -50,6 +50,19 @@ test('the current partners and sharing materials are visible', async ({ page }) 
   await expect(page.getByRole('heading', { name: 'Share a link' })).toBeVisible();
 });
 
+test('the full partner card opens its organization from the logo', async ({ page }) => {
+  await page.route('https://www.rtcsnv.com/', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: '<h1>RTC</h1>' }),
+  );
+  await page.goto('/partners');
+  const card = page.locator('#partner-rtc-southern-nevada');
+  const link = card.getByRole('link', { name: 'RTC of Southern Nevada' });
+  await expect(link).toHaveAttribute('href', 'https://www.rtcsnv.com/');
+  await expect(card.locator('a')).toHaveCount(1);
+  await link.locator('.partner-roster__mark').click();
+  await expect(page).toHaveURL('https://www.rtcsnv.com/');
+});
+
 test('"Email us to join" opens an email with the subject and the five lines', async ({ page }) => {
   await page.goto('/partners');
   const href = await page.getByRole('link', { name: 'Email us to join' }).getAttribute('href');
