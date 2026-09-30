@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 // Section links of the old one-page lvwwd.org open the page each section
 // became, without leaving Home in the history.
 const MOVED = [
-  ['#how-to-participate', '/take-part'],
+  ['#how-to-participate', '/how-it-works'],
   ['#giveaway', '/giveaway'],
   ['#resources', '/resources'],
   ['#partners', '/partners'],

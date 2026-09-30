@@ -26,7 +26,9 @@ export default defineConfig({
   // them (BaseLayout's `noindex`): My week, Get my link and the offline page.
   integrations: [
     reminderCheck(),
-    sitemap({ filter: (page) => !/\/(?:my-week|offline)(?:\/|$)/.test(new URL(page).pathname) }),
+    sitemap({
+      filter: (page) => !/\/(?:my-week|offline|get-involved)(?:\/|$)/.test(new URL(page).pathname),
+    }),
     icon(),
     lvbtAnalytics({ site: 'lvwwd.org', exclude: ['^/admin'] }),
     minifyScripts(),

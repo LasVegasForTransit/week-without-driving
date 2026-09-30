@@ -31,6 +31,16 @@ describe('redirectFor', () => {
     }
   });
 
+  it('sends old page names to their clear addresses in one step', () => {
+    expect(destination('https://lvwwd.org/take-part?ref=flyer')).toEqual({
+      status: 301,
+      location: 'https://lvwwd.org/how-it-works?ref=flyer',
+    });
+    expect(destination('https://www.lvwwd.org/keep-going/')?.location).toBe(
+      'https://lvwwd.org/get-involved',
+    );
+  });
+
   it('drops the slash at the end of a page address, keeping the query', () => {
     expect(destination('https://lvwwd.org/bingo/')).toEqual({
       status: 301,

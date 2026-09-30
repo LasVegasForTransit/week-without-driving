@@ -51,7 +51,7 @@ for (const path of ['/go', '/guides', '/guides/heat', '/bingo', '/sign-up', '/my
 }
 
 // Photos: AVIF, and never wider than the phone's screen can show.
-for (const path of ['/', '/take-part', '/giveaway']) {
+for (const path of ['/', '/how-it-works', '/giveaway']) {
   test(`${path} sends photos sized for the phone`, async ({ page }) => {
     const screenPixels =
       (page.viewportSize()?.width ?? 0) * (await page.evaluate(() => devicePixelRatio));

@@ -8,7 +8,7 @@ import { expectNoAccessibilityViolations } from '@lasvegasfortransit/playwright-
 
 const PAGES = [
   '/',
-  '/take-part',
+  '/how-it-works',
   '/go',
   '/guides',
   '/guides/pay-your-fare',

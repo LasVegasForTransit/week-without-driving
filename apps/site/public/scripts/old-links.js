@@ -8,7 +8,7 @@
  */
 (() => {
   const MOVED = {
-    '#how-to-participate': '/take-part',
+    '#how-to-participate': '/how-it-works',
     '#giveaway': '/giveaway',
     '#resources': '/resources',
     '#partners': '/partners',

@@ -44,6 +44,7 @@ function site() {
     `<link rel="stylesheet" href="/_astro/site.css"><img src="/icons/fare.svg" alt="">
      <img src="/photos/bus-960.webp" srcset="/photos/bus-480.webp 480w, /photos/bus-960.webp 960w" alt="">`,
   );
+  write('how-it-works/index.html', '<h1>How it works</h1>');
   write('go/index.html', '<script src="/scripts/finder.js"></script>');
   write(
     '_astro/site.css',
@@ -122,6 +123,7 @@ describe('the precache manifest', () => {
       '/fonts/home.woff2',
       '/go',
       '/guides',
+      '/how-it-works',
       '/icons/fare.svg',
       '/icons/home.svg',
       '/offline',
@@ -143,6 +145,7 @@ describe('the precache manifest', () => {
     expect(byUrl['/fonts/body.woff2']?.core).toBe(true);
     expect(byUrl['/fonts/head.woff2']?.core).toBe(true);
     expect(byUrl['/guides']?.core).toBe(true);
+    expect(byUrl['/how-it-works']).toBeDefined();
     expect(byUrl['/scripts/app.js']?.revision).toBe(
       revisionOf(new TextEncoder().encode('console.log(1)')),
     );
