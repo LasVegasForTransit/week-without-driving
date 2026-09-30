@@ -23,7 +23,7 @@ import { buildMapLinks } from '../lib/map-links';
 // a real latitude and longitude.
 
 const description =
-  'Find the bus stops nearest you, or a chosen place, and get plain directions to seven places across the Las Vegas Valley.';
+  'Compare a trip by car and without one, find nearby bus stops, and choose a place to go in Las Vegas.';
 
 function slugify(label: string): string {
   return label
@@ -36,14 +36,45 @@ const mapButtonClass =
   'press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-2.5 font-semibold no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface';
 ---
 
-<BaseLayout title="Find a bus · Week Without Driving Las Vegas" description={description}>
+<BaseLayout title="Plan a trip · Week Without Driving Las Vegas" description={description}>
+  <section class="container-page page-top" aria-labelledby="plan-heading">
+    <p class="text-sm font-bold uppercase tracking-widest text-primary">Get moving</p>
+    <h1 id="plan-heading" class="page-title">Plan a trip</h1>
+    <p class="page-lede">Where would you go without a car?</p>
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+      <a
+        href="/go/compare"
+        class="group border-2 border-primary bg-surface-container p-6 no-underline hover:bg-primary hover:text-on-primary focus-visible:bg-primary focus-visible:text-on-primary"
+      >
+        <span class="text-3xl font-black">01</span>
+        <h2 class="mt-4 text-title-lg font-black">Compare ways to go →</h2>
+        <p class="mt-2 leading-relaxed">See driving next to bus, walking, biking, or scooter.</p>
+      </a>
+      <a
+        href="#find-routes"
+        class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
+      >
+        <span class="text-3xl font-black">02</span>
+        <h2 class="mt-4 text-title-lg font-black">Find a bus →</h2>
+        <p class="mt-2 leading-relaxed">See nearby stops and the routes that serve them.</p>
+      </a>
+      <a
+        href="#places-to-go"
+        class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
+      >
+        <span class="text-3xl font-black">03</span>
+        <h2 class="mt-4 text-title-lg font-black">Pick a place →</h2>
+        <p class="mt-2 leading-relaxed">Try one of seven places across the valley.</p>
+      </a>
+    </div>
+  </section>
   {/* FIND A BUS — the nearest-route finder, straight under the title */}
   <section
     id="find-routes"
-    class="container-page page-top scroll-mt-24"
+    class="container-page py-16 scroll-mt-24"
     aria-labelledby="find-routes-heading"
   >
-    <h1 id="find-routes-heading" class="page-title">Find a bus</h1>
+    <h2 id="find-routes-heading" class="text-headline-lg">Find a bus</h2>
     <p class="page-lede">
       See the five bus stops closest to you and the routes that stop there. Or pick a place you
       already know.

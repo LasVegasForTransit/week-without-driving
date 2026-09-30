@@ -26,6 +26,7 @@ export const PRECACHE_PAGES = [
   '/guides/bike-rack',
   '/guides/sidewalk-audit',
   '/go',
+  '/go/compare',
   '/bingo',
   '/giveaway',
 ] as const;
@@ -202,6 +203,11 @@ class PrecacheList {
       for (const asset of referencedByCss(text(content))) {
         if (this.exists(asset)) this.add(asset, this.read(asset), core);
       }
+    }
+    // The comparison script imports its estimate module; HTML does not name it.
+    if (url === '/go/compare') {
+      const estimates = '/scripts/compare-estimates.js';
+      if (this.exists(estimates)) this.add(estimates, this.read(estimates), core);
     }
   }
 }

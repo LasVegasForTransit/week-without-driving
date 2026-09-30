@@ -17,6 +17,8 @@ export const LIMITS = {
   signupPerIp: { scope: 'signup-ip', max: 20, minutes: 1 },
   linkPerIp: { scope: 'link-ip', max: 10, minutes: 60 },
   linkPerContact: { scope: 'link-contact', max: 3, minutes: 60 },
+  comparePerIp: { scope: 'compare-ip', max: 30, minutes: 60 },
+  routesPerDay: { scope: 'google-routes-day', max: 1000, minutes: 1440 },
 } as const;
 
 export type Limit = (typeof LIMITS)[keyof typeof LIMITS];

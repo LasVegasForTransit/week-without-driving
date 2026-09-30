@@ -56,6 +56,8 @@ export interface Env {
   VAPID_SUBJECT?: string;
   /** Explicit release switch; event reminders remain off until a phone test succeeds. */
   EVENT_REMINDERS_ENABLED?: string;
+  /** Server-only Google Routes key. Never sent to the browser. */
+  GOOGLE_ROUTES_API_KEY?: string;
 }
 
 /** The environment once the API has checked the database is there. */

@@ -11,9 +11,9 @@ export const mainNav = [
   },
   {
     href: '/go',
-    label: 'Find a bus',
-    help: 'See the bus stops closest to you.',
-    icon: 'mdi:bus',
+    label: 'Plan a trip',
+    help: 'Compare ways to go, find a bus, or pick a place.',
+    icon: 'mdi:routes',
   },
   {
     href: '/guides',
