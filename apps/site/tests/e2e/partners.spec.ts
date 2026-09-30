@@ -40,9 +40,9 @@ test('before the first partner, the page has no roster and the kit offers only g
   await expect(page.getByText('Partnering is free, and any size of group can join')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Partner kit' })).toBeVisible();
   const options = await picker(page).locator('option').allTextContents();
-  expect(options.filter((text) => text.trim() !== '')).toEqual(['None (general materials)']);
+  expect(options.filter((text) => text.trim() !== '')).toEqual(['General materials']);
   await expect(
-    page.getByText('Pick your organization to see your link and materials.'),
+    page.getByText('Choose General materials to get a link and files you can share today.'),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your link' })).toBeHidden();
 });
@@ -78,7 +78,7 @@ test('general materials: the link, QR code, banners and snippet credit no one', 
   page,
 }) => {
   await page.goto('/partners');
-  await picker(page).selectOption({ label: 'None (general materials)' });
+  await picker(page).selectOption({ label: 'General materials' });
   expect(new URL(page.url()).hash).toBe('#kit-general');
   await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway');
   await expect(
@@ -169,7 +169,7 @@ test('an address with an unknown organization picks nothing', async ({ page }) =
   await page.goto('/partners#kit-nobody');
   await expect(picker(page)).toHaveValue('');
   await expect(
-    page.getByText('Pick your organization to see your link and materials.'),
+    page.getByText('Choose General materials to get a link and files you can share today.'),
   ).toBeVisible();
 });
 

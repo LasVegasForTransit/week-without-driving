@@ -142,7 +142,7 @@ describe('the precache manifest', () => {
     expect(byUrl['/_astro/site.css']?.core).toBe(true);
     expect(byUrl['/fonts/body.woff2']?.core).toBe(true);
     expect(byUrl['/fonts/head.woff2']?.core).toBe(true);
-    expect(byUrl['/guides']?.core).toBe(false);
+    expect(byUrl['/guides']?.core).toBe(true);
     expect(byUrl['/scripts/app.js']?.revision).toBe(
       revisionOf(new TextEncoder().encode('console.log(1)')),
     );

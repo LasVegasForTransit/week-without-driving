@@ -7,8 +7,7 @@ import { type BrowserContext, expect, test } from '@playwright/test';
 const SIGN_UP_NOTICE = 'You’re offline. You can sign up as soon as you’re back online.';
 const GET_LINK_NOTICE = 'You’re offline. You can get your link as soon as you’re back online.';
 const TRIP_NOTICE =
-  'You’re offline. My week needs a connection to show your entries and send your post.';
-const REMINDERS_NOTICE = 'You’re offline. You can sign up for reminders when you’re back online.';
+  'You’re offline. My week needs a connection to show entries and submit your trip.';
 const SEND_LINK_NOTICE = 'You’re offline. You can send your link as soon as you’re back online.';
 
 let offline = false;
@@ -72,19 +71,19 @@ test('Sign up says it needs a connection, and works again when back online', asy
   await expect(backOnline).toHaveCount(0, { timeout: 5000 });
 });
 
-test('Get my link says it needs a connection, and keeps the typed number', async ({
+test('Get my link says it needs a connection, and keeps the typed email', async ({
   page,
   context,
 }) => {
   await page.goto('/my-week/link');
-  await page.getByLabel('Phone number or email').fill('702-555-0123');
+  await page.getByLabel('Email address').fill('luz@example.com');
   await goOffline(context);
   await expect(page.getByText(GET_LINK_NOTICE)).toBeVisible();
   const button = page.getByRole('button', { name: 'Send my link' });
   await expect(button).toHaveAttribute('aria-disabled', 'true');
   await button.click({ force: true });
-  await expect(page.getByLabel('Phone number or email')).toHaveValue('702-555-0123');
-  await expect(page.getByText('Check your texts or email.')).toBeHidden();
+  await expect(page.getByLabel('Email address')).toHaveValue('luz@example.com');
+  await expect(page.getByText('Check your email.')).toBeHidden();
 });
 
 test('a page opened while offline shows its notice at once', async ({ page }) => {
@@ -117,16 +116,15 @@ test('My week says which of its parts need a connection', async ({ page, context
     route.fulfill({
       json: {
         firstName: 'Luz',
-        contactMasked: '(•••) •••-0123',
-        contactType: 'phone',
+        contactMasked: 'l•••@example.com',
+        contactType: 'email',
         zip: '89101',
+        county: 'Clark',
         instagram: null,
         age: 'adult',
-        newsletter: false,
         days: [1],
         trips: [],
         today: 3,
-        reminders: { push: false, text: false, email: false },
       },
     }),
   );
@@ -139,7 +137,7 @@ test('My week says which of its parts need a connection', async ({ page, context
 
   await goOffline(context);
   await expect(page.getByText(TRIP_NOTICE)).toBeVisible();
-  await expect(page.getByText(REMINDERS_NOTICE)).toBeVisible();
+  await expect(page.locator('[data-remind]')).toBeHidden();
   await expect(page.getByText(SEND_LINK_NOTICE)).toBeVisible();
 
   const send = page.getByRole('button', { name: 'Enter today’s trip' });
@@ -147,20 +145,6 @@ test('My week says which of its parts need a connection', async ({ page, context
   await send.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByLabel('Bus')).toBeChecked();
-
-  // A reminder box doesn't change while it can't be saved.
-  const text = page.getByRole('checkbox', { name: /Text me one reminder a day/ });
-  await expect(text).toHaveAttribute('aria-disabled', 'true');
-  await text.focus();
-  await page.keyboard.press('Space');
-  await expect(text).not.toBeChecked();
-
-  // The reminders notice comes before any box in its section.
-  const section = page.locator('[data-needs-connection="reminders"]');
-  const order = await section.evaluate((element) =>
-    [...element.querySelectorAll('[data-offline-notice], input')].map((node) => node.tagName),
-  );
-  expect(order[0]).toBe('P');
 
   const again = page.getByRole('link', { name: 'Send my link again' });
   await again.focus();

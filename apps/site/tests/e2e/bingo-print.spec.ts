@@ -129,7 +129,9 @@ test('no word of any square is cut off, and every square prints its full text', 
     "Took the bus somewhere you'd usually drive.",
   );
   await expect(page.locator('.bp-card')).toContainText('Scan to play on a phone: lvwwd.org/bingo');
-  await expect(page.locator('.bp-card')).toContainText('No purchase or post necessary.');
+  await expect(page.locator('.bp-card')).toContainText(
+    'A post or photo is optional. No purchase necessary. Prize: one 30-day RTC bus pass.',
+  );
 });
 
 test('printing shows only the paper card', async ({ page }) => {

@@ -49,7 +49,7 @@ export interface PrecacheEntry {
   url: string;
   revision: string;
   bytes: number;
-  /** Part of Home or the offline page, so saved even under Save Data. */
+  /** Needed by an offline public page, so saved even under Save Data. */
   core: boolean;
 }
 
@@ -186,11 +186,11 @@ class PrecacheList {
   }
 
   /**
-   * Adds a page and the files its HTML asks for. Home and the offline
-   * page, including their stylesheets' assets, are saved under Save Data.
+   * Adds a public page and the files its HTML asks for. They are small
+   * enough to save under Save Data, so all public tools work offline.
    */
   addPage(url: string, html: Uint8Array): void {
-    const core = REQUIRED_PAGES.has(url);
+    const core = true;
     this.add(url, html, core);
     for (const file of referencedByHtml(text(html)).filter((f) => this.exists(f))) {
       const content = this.read(file);
