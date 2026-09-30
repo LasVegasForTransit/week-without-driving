@@ -15,27 +15,36 @@ import { TOKEN_PATTERN, newToken, sha256 } from './tokens';
 
 type LinkOwner = Pick<Participant, 'id' | 'firstName' | 'contact' | 'contactType'>;
 
-/** Makes a new link for someone, sends it, records it, and returns it. */
+/** Stores a usable link before handing it to the email provider. */
 async function issueLink(
   c: ApiContext,
   owner: LinkOwner,
 ): Promise<{ link: string; delivery: Delivery }> {
   const token = newToken();
   const link = `${c.url.origin}/my-week?t=${token}`;
-  const delivery = await sendLink(c.env, owner, link);
+  const tokenHash = await sha256(token);
   await c.env.DB.prepare(
     `INSERT INTO link_tokens (token_hash, participant_id, channel, delivery, created_at, expires_at)
      VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
   )
     .bind(
-      await sha256(token),
+      tokenHash,
       owner.id,
       owner.contactType,
-      delivery,
+      'pending',
       c.now.toISOString(),
       SIGNED_IN_UNTIL.toISOString(),
     )
     .run();
+  const delivery = await sendLink(c.env, owner, link);
+  try {
+    await c.env.DB.prepare('UPDATE link_tokens SET delivery = ?1 WHERE token_hash = ?2')
+      .bind(delivery, tokenHash)
+      .run();
+  } catch (error) {
+    // The link is already stored and works even if its delivery status lags.
+    console.error('Recording link delivery failed', error);
+  }
   return { link, delivery };
 }
 
@@ -59,12 +68,18 @@ export async function deliverLink(
     return issueLink(c, owner);
   })();
   if (c.env.PREVIEW_SHOW_LINKS === 'true' || awaitDelivery) {
-    const result = await work;
-    if (!result) return {};
-    return {
-      ...(c.env.PREVIEW_SHOW_LINKS === 'true' ? { previewLink: result.link } : {}),
-      delivery: result.delivery,
-    };
+    try {
+      const result = await work;
+      if (!result) return {};
+      return {
+        ...(c.env.PREVIEW_SHOW_LINKS === 'true' ? { previewLink: result.link } : {}),
+        delivery: result.delivery,
+      };
+    } catch (error) {
+      // The signup and its session were committed before link issuance.
+      console.error('Issuing a link failed', error);
+      return { delivery: 'failed' };
+    }
   }
   c.ctx.waitUntil(
     work.catch((error: unknown) => {

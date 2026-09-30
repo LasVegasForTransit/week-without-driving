@@ -105,6 +105,20 @@ test('"Sign up someone else" at the foot of My week opens the empty form', async
   await expect(page.getByText(READY)).toBeHidden();
 });
 
+test('My week explains a failed signup email while keeping this phone signed in', async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await standInApi(page, context);
+  await signInTablet(context, baseURL);
+  await page.goto('/my-week?welcome=1&email=failed');
+  await expect(page.getByRole('heading', { name: /Hi, Luz/ })).toBeVisible();
+  await expect(page.locator('[data-me-welcome-text]')).toHaveText(
+    'You’re signed up on this phone, but we couldn’t email your link. Keep this phone signed in and try Get my link later.',
+  );
+});
+
 test('without a connection the tablet stays signed in and says so', async ({
   page,
   context,
