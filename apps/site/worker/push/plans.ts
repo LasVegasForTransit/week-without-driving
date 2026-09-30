@@ -3,8 +3,11 @@ import { eachLimited, PUSHES_AT_ONCE, PUSHES_PER_RUN } from './daily';
 import { TTL_SECONDS, type StoredSubscription, authorizer, pushHost, sendPush } from './send';
 import { loadVapid } from './vapid';
 
-/** Five-minute checks from the earliest lead time through October 8 in Las Vegas. */
-export const PLAN_PUSH_CRONS = ['*/5 * 30 9 *', '*/5 * 1-9 10 *'] as const;
+/** One five-minute clock, limited in code to the campaign's reminder window. */
+export const PLAN_PUSH_CRONS = ['2-59/5 * * * *'] as const;
+
+const CAMPAIGN_REMINDERS_START = Date.parse('2026-09-30T00:00:00.000Z');
+const CAMPAIGN_REMINDERS_END = Date.parse('2026-10-09T07:00:00.000Z');
 
 interface DuePlan extends StoredSubscription {
   plan_id: string;
@@ -75,6 +78,7 @@ function currentTime(runStarted: Date): Date {
 /** Sends only explicitly requested plan notifications after the release switch is enabled. */
 export async function sendPlanReminders(env: Env, now: Date): Promise<void> {
   if (env.EVENT_REMINDERS_ENABLED !== 'true' || !env.DB) return;
+  if (now.getTime() < CAMPAIGN_REMINDERS_START || now.getTime() >= CAMPAIGN_REMINDERS_END) return;
   const vapid = await loadVapid(env);
   if (!vapid) return;
   const db = env.DB;
