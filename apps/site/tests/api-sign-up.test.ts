@@ -165,6 +165,22 @@ describe('sign-up and links', () => {
     );
   });
 
+  it('does not promise a link for a repeat sign-up when email delivery is unavailable', async () => {
+    await signUp({});
+    outbound.emails.length = 0;
+    const response = await platform.send(apiRequest('POST', '/api/signup', { body: SIGN_UP }), {
+      RESEND_API_KEY: '',
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.getSetCookie()).toHaveLength(0);
+    expect(await response.json()).toMatchObject({
+      emailStatus: 'unavailable',
+      message: 'Email links are unavailable right now. Please try again later.',
+    });
+    expect(outbound.emails).toHaveLength(0);
+    expect(await count('participants')).toBe(1);
+  });
+
   it('never signs a phone in with someone else’s contact, and sends them their link', async () => {
     await signUp({});
     outbound.emails.length = 0;
@@ -177,7 +193,7 @@ describe('sign-up and links', () => {
     expect(response.headers.getSetCookie()).toHaveLength(0);
     const body: { status: string; message: string } = await response.json();
     expect(body.status).toBe('existing');
-    expect(body.message).toMatch(/already signed up/i);
+    expect(body.message).toMatch(/if that email matches a sign-up/i);
     expect(outbound.emails.map((email) => email.to)).toEqual([['rosa@example.com']]);
     const stored = await platform.env.DB.prepare(
       'SELECT first_name, zip FROM participants',

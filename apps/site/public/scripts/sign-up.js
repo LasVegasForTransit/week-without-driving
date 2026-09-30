@@ -158,10 +158,16 @@
       return true;
     }
     if (data.errors) showErrors(data.errors);
-    setStatus(data.message, !ok);
+    const emailUnavailable = data.emailStatus === 'unavailable';
+    setStatus(
+      emailUnavailable
+        ? 'Email links are unavailable right now. Please try again later.'
+        : data.message,
+      !ok || emailUnavailable,
+    );
     if (ok) {
-      // Already signed up: the Worker sent this person's link instead.
-      window.lvbt?.track('week_link_requested', { method: 'signup_form' });
+      // A repeat sign-up can request an email only while delivery is available.
+      if (!emailUnavailable) window.lvbt?.track('week_link_requested', { method: 'signup_form' });
       api.showPreviewLink(document.querySelector('[data-preview-link]'), data.previewLink);
     }
     return false;
