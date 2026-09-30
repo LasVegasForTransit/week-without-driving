@@ -33,7 +33,7 @@ interface WranglerMirror {
 
 interface SetupInventory {
   cloudflare: { worker: string };
-  secrets: { name: string; targets?: string[] }[];
+  secrets: { name: string; targets?: string[]; use?: 'live' | 'future' }[];
   vars: { name: string }[];
 }
 
@@ -116,7 +116,7 @@ void test('production secret declarations cover the Worker secrets in the setup 
       .map(([name]) => name)
       .sort(),
     inventory.secrets
-      .filter((secret) => !secret.targets)
+      .filter((secret) => !secret.targets && secret.use !== 'future')
       .map((secret) => secret.name)
       .sort(),
   );

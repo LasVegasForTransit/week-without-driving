@@ -60,7 +60,7 @@
     {
       "name": "GOOGLE_ROUTES_API_KEY",
       "purpose": "Lets the Worker compare driving with bus, walking, biking, or scooter routes. The key stays server-side and never appears in a page.",
-      "use": "live",
+      "use": "future",
       "neededFor": "live route comparisons on /go/compare",
       "url": "https://console.cloud.google.com/apis/credentials",
       "steps": [
