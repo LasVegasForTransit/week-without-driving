@@ -1,5 +1,5 @@
 /**
- * Get my link: checks the phone number or email, runs the bot check, and
+ * Get my link: checks the email address, runs the bot check, and
  * asks the Worker to send the "Open my week" link (POST /api/link, through
  * /scripts/participant-api.js). The Worker answers the same whether or not
  * the contact matches a sign-up, so the page does too.
@@ -21,12 +21,7 @@
   const bot = api.botCheck(form.querySelector('[data-turnstile]'), 'link');
 
   function looksLikeContact(text) {
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text)) return true;
-    const digits = text.replace(/\D/g, '');
-    return (
-      /^[\d\s().+-]+$/.test(text) &&
-      (digits.length === 10 || (digits.length === 11 && digits.startsWith('1')))
-    );
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text);
   }
 
   function setBusy(busy) {
@@ -54,8 +49,7 @@
     const value = input.value.trim();
     if (status) status.textContent = '';
     if (!looksLikeContact(value)) {
-      error.textContent =
-        'Enter a phone number, like 702-555-0123, or an email, like name@example.com.';
+      error.textContent = 'Enter an email address, like name@example.com.';
       input.setAttribute('aria-invalid', 'true');
       input.focus();
       return;

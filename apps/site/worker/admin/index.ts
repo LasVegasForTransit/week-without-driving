@@ -4,7 +4,7 @@ import { drawWinner } from './draw';
 import { entriesCsv, screenshot } from './files';
 import { forbiddenPage, previewLogin, volunteerFor } from './gate';
 import { messagePage } from './html';
-import { logMail, logTag } from './log';
+import { logTag } from './log';
 import { sendTestReminder } from './push';
 import { showAdmin } from './respond';
 import { markChecked, removeEntry, restoreEntry } from './review';
@@ -29,7 +29,6 @@ const ROUTES: Record<string, Handler> = {
   '/admin/entries/remove': { method: 'POST', run: removeEntry },
   '/admin/entries/restore': { method: 'POST', run: restoreEntry },
   '/admin/tags': { method: 'POST', run: logTag },
-  '/admin/mail': { method: 'POST', run: logMail },
   '/admin/draw': { method: 'POST', run: drawWinner },
   '/admin/push/test': { method: 'POST', run: sendTestReminder },
   '/api/admin/entries.csv': { method: 'GET', run: entriesCsv },

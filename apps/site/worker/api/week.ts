@@ -40,13 +40,17 @@ export function isPostLink(text: string): boolean {
   }
 }
 export const MAX_NOTE_LENGTH = 280;
+export const MAX_DESCRIPTION_LENGTH = 500;
 
 export const WEEK_REPLIES = {
   notYet: 'Logging trips opens October 1.',
   over: 'Logging trips is closed. The week is over.',
   noModes: 'Pick how you got around, in step 1.',
+  noDescription: 'Describe the trip you took without driving.',
+  descriptionTooLong: `Keep the trip description under ${MAX_DESCRIPTION_LENGTH} characters.`,
+  county: 'Add your county in your details before entering.',
+  email: 'Online entries need an email sign-up. Contact wwd@lasvegasfortransit.org for help.',
   noteTooLong: `Keep the note under ${MAX_NOTE_LENGTH} characters.`,
-  noPost: 'Paste the link to your post, or add a screenshot of it.',
   alreadyChecked: 'A volunteer already checked today’s entry, so it can’t be changed.',
   badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
   bingoTooBig: 'That bingo card is too big to save.',
@@ -54,6 +58,7 @@ export const WEEK_REPLIES = {
 
 interface TripInput {
   modes: string;
+  description: string;
   hard: string | null;
   link: string | null;
   screenshot: File | null;
@@ -81,15 +86,18 @@ export function readModes(form: FormData): string | null {
 function readTrip(form: FormData): TripInput | string {
   const modes = readModes(form);
   if (!modes) return WEEK_REPLIES.noModes;
+  const description = textField(form, 'description');
+  if (!description) return WEEK_REPLIES.noDescription;
+  if (description.length > MAX_DESCRIPTION_LENGTH) return WEEK_REPLIES.descriptionTooLong;
   const hard = textField(form, 'hard');
   if (hard.length > MAX_NOTE_LENGTH) return WEEK_REPLIES.noteTooLong;
   const link = textField(form, 'link');
   const file = form.get('screenshot');
   const screenshot = file instanceof File && file.size > 0 ? file : null;
-  if (!link && !screenshot) return WEEK_REPLIES.noPost;
   if (link && !isPostLink(link)) return WEEK_REPLIES.badLink;
   return {
     modes,
+    description,
     hard: hard || null,
     link: link || null,
     screenshot,
@@ -111,8 +119,8 @@ async function readForm(request: Request): Promise<FormData | null> {
 
 /**
  * The person's entries that count, oldest first, as { day, modes }. An
- * entry a volunteer removed doesn't count, and the person can send another
- * post that day.
+ * entry a volunteer removed doesn't count, and the person can submit
+ * another trip that day.
  */
 export async function listTrips(
   c: ApiContext,
@@ -157,11 +165,11 @@ async function saveTrip(
 ): Promise<boolean> {
   const saved = await c.env.DB.prepare(
     `INSERT INTO checkins
-       (participant_id, day, source, created_at, modes, hard, post_url, screenshot_key, share)
-     VALUES (?1, ?2, 'post', ?3, ?4, ?5, ?6, ?7, ?8)
+       (participant_id, day, source, created_at, modes, description, hard, post_url, screenshot_key, share)
+     VALUES (?1, ?2, 'post', ?3, ?4, ?5, ?6, ?7, ?8, ?9)
      ON CONFLICT (participant_id, day) DO UPDATE SET
-       source = 'post', created_at = ?3, modes = ?4, hard = ?5, post_url = ?6,
-       screenshot_key = ?7, share = ?8, received_on = NULL, logged_by = NULL,
+       source = 'post', created_at = ?3, modes = ?4, description = ?5, hard = ?6, post_url = ?7,
+       screenshot_key = ?8, share = ?9, received_on = NULL, logged_by = NULL,
        checked_at = NULL, checked_by = NULL,
        removed_at = NULL, removed_by = NULL, removal_reason = NULL
      WHERE checkins.checked_at IS NULL OR checkins.removed_at IS NOT NULL
@@ -172,6 +180,7 @@ async function saveTrip(
       day,
       c.now.toISOString(),
       trip.modes,
+      trip.description,
       trip.hard,
       trip.link,
       trip.key,
@@ -188,15 +197,22 @@ function dayOpenForTrips(c: ApiContext): number | Response {
   return problem(409, today === 0 ? WEEK_REPLIES.notYet : WEEK_REPLIES.over);
 }
 
+function entryEligibility(me: Participant): string | null {
+  if (!me.county) return WEEK_REPLIES.county;
+  if (me.contactType !== 'email') return WEEK_REPLIES.email;
+  return null;
+}
+
 /**
  * Enters today's shared trip, where "today" is the server's Las Vegas date,
- * never the phone's. It needs how the person got around and the post: a
- * link to a public post, or a screenshot from a private account. Entering
- * again the same day replaces the trip until a volunteer checks it; it is
- * still one entry for that day. Volunteers check every post before the
- * draw.
+ * never the phone's. It needs how the person got around and a description
+ * of the trip. A link or screenshot is optional. Entering again the same
+ * day replaces the trip until a volunteer checks it; it is still one
+ * entry for that day. Volunteers check entries before the draw.
  */
 export async function checkIn(c: ApiContext, me: Participant): Promise<Response> {
+  const eligibilityProblem = entryEligibility(me);
+  if (eligibilityProblem) return problem(403, eligibilityProblem);
   const today = dayOpenForTrips(c);
   if (today instanceof Response) return today;
   const form = await readForm(c.request);

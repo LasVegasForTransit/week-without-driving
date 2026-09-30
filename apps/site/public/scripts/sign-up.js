@@ -3,7 +3,7 @@
  * (POST /api/signup, through /scripts/participant-api.js).
  *
  * A new sign-up is signed in on this phone by the Worker's cookies and
- * goes to My week. A phone number or email that already has a sign-up is
+ * goes to My week. An email that already has a sign-up is
  * not signed in here; the Worker sends that person their link instead,
  * and the page says so. Add ?edit=1 to change the details of the person
  * signed in on this phone (PATCH /api/me); the contact can't be changed.
@@ -20,7 +20,7 @@
   const already = document.querySelector('[data-signup-already]');
   if (!api || !(form instanceof HTMLFormElement) || !already) return;
 
-  const FIELDS = ['firstName', 'contact', 'zip', 'instagram', 'age'];
+  const FIELDS = ['firstName', 'contact', 'zip', 'county', 'instagram', 'age'];
   const PREVIEW_KEY = 'lvwwd_preview_link';
   // 12:00 am on October 9, 2026, in Las Vegas.
   const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
@@ -31,17 +31,11 @@
   let editing = false;
   let bot = null;
 
-  // Returns { type, value } for a US phone number or an email address, or null.
+  // Web sign-up uses email; phone delivery is not available for this launch.
   function parseContact(raw) {
     const text = raw.trim();
     if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text))
       return { type: 'email', value: text.toLowerCase() };
-    const digits = text.replace(/\D/g, '');
-    if (/^[\d\s().+-]+$/.test(text)) {
-      if (digits.length === 10) return { type: 'phone', value: `+1${digits}` };
-      if (digits.length === 11 && digits.startsWith('1'))
-        return { type: 'phone', value: `+${digits}` };
-    }
     return null;
   }
 
@@ -62,7 +56,7 @@
     const error = form.querySelector(`[data-error-for="${name}"]`);
     if (error) error.textContent = message;
     const input = field(name);
-    if (input instanceof HTMLInputElement) {
+    if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) {
       if (message) input.setAttribute('aria-invalid', 'true');
       else input.removeAttribute('aria-invalid');
     }
@@ -98,9 +92,9 @@
       firstName: field('firstName').value.trim(),
       contact: field('contact').value.trim(),
       zip: field('zip').value.trim(),
+      county: field('county').value,
       instagram: cleanHandle(field('instagram').value),
       age: age instanceof HTMLInputElement ? age.value : '',
-      newsletter: field('newsletter').checked,
     };
   }
 
@@ -109,16 +103,15 @@
     const errors = {};
     if (!details.firstName) errors.firstName = 'Enter your first name.';
     if (!editing && !details.contact) {
-      errors.contact = 'Enter a phone number or an email address.';
+      errors.contact = 'Enter your email address.';
     } else if (!editing && !parseContact(details.contact)) {
-      errors.contact =
-        'Enter a phone number, like 702-555-0123, or an email, like name@example.com.';
+      errors.contact = 'Enter an email address, like name@example.com.';
     }
     if (!/^\d{5}$/.test(details.zip)) {
       errors.zip = 'Enter a 5-digit ZIP code.';
-    } else if (!/^89[01]\d\d$/.test(details.zip)) {
-      errors.zip =
-        'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.';
+    }
+    if (!['Clark', 'Esmeralda', 'Lincoln', 'Nye'].includes(details.county)) {
+      errors.county = 'Choose the county where you live.';
     }
     if (details.instagram && !/^[a-z0-9._]{1,30}$/.test(details.instagram)) {
       errors.instagram = 'Instagram names use only letters, numbers, periods and underscores.';
@@ -169,13 +162,13 @@
   }
 
   async function saveDetails(details) {
-    const { firstName, zip, instagram, age, newsletter } = details;
+    const { firstName, zip, county, instagram, age } = details;
     const { ok, data } = await api.call('PATCH', '/api/me', {
       firstName,
       zip,
+      county,
       instagram,
       age,
-      newsletter,
     });
     if (ok) {
       window.location.href = '/my-week?saved=1';
@@ -202,10 +195,10 @@
     const help = form.querySelector('[data-contact-help]');
     if (help) help.textContent = 'To change it, email wwd@lasvegasfortransit.org.';
     field('zip').value = me.zip ?? '';
+    field('county').value = me.county ?? '';
     field('instagram').value = me.instagram ?? '';
     const age = form.querySelector(`input[name="age"][value="${me.age}"]`);
     if (age instanceof HTMLInputElement) age.checked = true;
-    field('newsletter').checked = Boolean(me.newsletter);
     if (submit) submit.textContent = 'Save my details';
     form.hidden = false;
   }

@@ -101,13 +101,16 @@ export const page = (body: string, headers: Record<string, string> = {}) =>
 
 export const BUILD: Build = {
   precache: [
+    { url: '/', revision: 'hom1', bytes: 10, core: true },
     { url: '/offline', revision: 'off1', bytes: 10, core: true },
     { url: '/_astro/site.css', revision: 'css1', bytes: 10, core: true },
+    { url: '/scripts/home.js', revision: 'hjs1', bytes: 10, core: true },
     { url: '/guides', revision: 'gui1', bytes: 10, core: false },
     { url: '/fonts/body.woff2', revision: 'fon1', bytes: 10, core: false },
   ],
   files: {
     '/_astro/site.css': 'css1',
+    '/scripts/home.js': 'hjs1',
     '/fonts/body.woff2': 'fon1',
     '/scripts/app.js': 'app1',
     '/photos/bus.webp': 'pho1',
@@ -128,8 +131,10 @@ export function network(routes: Record<string, () => Response | Promise<Response
 }
 
 export const SITE: Record<string, () => Response | Promise<Response>> = {
+  '/': () => page('<h1>Try a week without driving</h1>'),
   '/offline': () => page('<h1>You’re offline</h1>'),
   '/_astro/site.css': () => new Response('body{}'),
+  '/scripts/home.js': () => new Response('home()'),
   '/guides': () => page('<h1>Rider guides</h1>'),
   '/fonts/body.woff2': () => new Response('font'),
   '/data/stops.json': () => new Response('{"stops":[]}'),

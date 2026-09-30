@@ -29,7 +29,8 @@ function who(entry: EntryRow): Html {
   if (entry.handle) return html`<strong>@${entry.handle}</strong> · no sign-up (handle-only)`;
   const contact =
     entry.contact && entry.contact_type ? maskContact(entry.contact, entry.contact_type) : '';
-  return html`<strong>${entry.first_name ?? ''}</strong> · ${contact} · ZIP
+  return html`<strong>${entry.first_name ?? ''}</strong> · ${contact} ·
+    ${entry.county ?? 'County missing'} County · ZIP
     ${entry.zip ?? ''}${entry.instagram ? ` · @${entry.instagram}` : ''}`;
 }
 
@@ -54,9 +55,6 @@ function post(entry: EntryRow): Html {
         </p>
         <img src="${path}" alt="Screenshot of the post" loading="lazy" />`,
     );
-  }
-  if (entry.received_on) {
-    parts.push(html`<p>Postmarked ${dayLabel(entry.day)}, received ${entry.received_on}</p>`);
   }
   return html`${parts}`;
 }
@@ -119,6 +117,7 @@ export function entryCard(entry: EntryRow, back: string): Html {
       ${SOURCE_LABELS[entry.source]}${logged} · sent ${timeLabel(entry.created_at)}
     </p>
     ${entry.modes ? html`<p>Got around: ${modesLabel(entry.modes)}</p>` : ''}
+    ${entry.description ? html`<p>Trip: ${entry.description}</p>` : ''}
     ${entry.hard ? html`<p>What was hard: ${entry.hard}</p>` : ''} ${post(entry)}
     ${entry.source === 'post' ? html`<p>May LVBT share it: ${entry.share ? 'Yes' : 'No'}</p>` : ''}
     ${state(entry)} ${actions(entry, back)}

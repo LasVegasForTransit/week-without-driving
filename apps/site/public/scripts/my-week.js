@@ -22,12 +22,17 @@
   // 12:00 am on October 9, 2026, in Las Vegas.
   const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
   const params = new URLSearchParams(window.location.search);
+  // Keep reminders out of the public flow until a real production phone proves delivery.
+  if (params.get('reminders-test') === '1') {
+    const reminderSection = document.querySelector('[data-remind]');
+    if (reminderSection) reminderSection.hidden = false;
+  }
   let me = null;
 
   /** How an entry came in, for the count: never the link or the picture itself. */
   function entryMethod(body) {
     if (body.has('link')) return body.has('screenshot') ? 'link_and_screenshot' : 'link';
-    return 'screenshot';
+    return body.has('screenshot') ? 'screenshot' : 'text';
   }
 
   function setText(selector, text) {
@@ -82,7 +87,7 @@
   function showClosed(today) {
     const text =
       today === 0
-        ? 'Sharing trips opens October 1. Turn on a reminder so you don’t miss it.'
+        ? 'Sharing trips opens October 1.'
         : 'The week is over. We’ll draw the winner by October 15, 2026.';
     setText('[data-me-phase]', text);
     const closed = document.querySelector('[data-log-closed]');
@@ -100,6 +105,22 @@
       if (el) el.hidden = true;
     });
     if (today === 0 || today > 8) return showClosed(today);
+    if (me.contactType !== 'email') {
+      setText('[data-me-phase]', 'Entries need an email sign-up. Contact us for help.');
+      if (closed) {
+        closed.hidden = false;
+        closed.textContent = 'Email wwd@lasvegasfortransit.org to use an older phone sign-up.';
+      }
+      return undefined;
+    }
+    if (!me.county) {
+      setText('[data-me-phase]', 'Add your county in Your details before entering.');
+      if (closed) {
+        closed.hidden = false;
+        closed.textContent = 'Change my details below to add your county before entering.';
+      }
+      return undefined;
+    }
     if (done.has(today)) {
       setText('[data-me-phase]', `Day ${today} of 8. Nice work.`);
       setText(
@@ -133,10 +154,13 @@
     setText('[data-me-field="firstName"]', me.firstName);
     setText('[data-me-field="contact"]', me.contactMasked);
     setText('[data-me-field="zip"]', me.zip);
+    setText('[data-me-field="county"]', me.county || 'Add your county');
     setText('[data-me-field="instagram"]', me.instagram ? `@${me.instagram}` : 'Not added');
     setText(
       '[data-me-link-line]',
-      `We sent your link to ${me.contactMasked}. Open it on any phone to come back here.`,
+      me.contactType === 'email'
+        ? `Use Get my link to request a sign-in email at ${me.contactMasked}.`
+        : 'Email wwd@lasvegasfortransit.org for help with an older phone sign-up.',
     );
   }
 
@@ -147,7 +171,11 @@
       welcome.hidden = false;
       setText(
         '[data-me-welcome-text]',
-        saved ? 'Your details are saved.' : 'You’re signed up to win.',
+        saved
+          ? 'Your details are saved.'
+          : params.get('email') === 'unavailable'
+            ? 'You’re signed up. Email links are unavailable right now; keep using this phone.'
+            : 'You’re signed up to win.',
       );
     }
     // The preview Worker hands back the link it would have sent; show it once.
@@ -198,16 +226,21 @@
   function tripForm(form) {
     const modes = chosenModes(form);
     if (modes.length === 0) return 'Pick how you got around, in step 1.';
+    const descriptionField = form.elements.namedItem('description');
+    const description =
+      descriptionField instanceof HTMLTextAreaElement ? descriptionField.value.trim() : '';
+    if (!description) return 'Describe the trip you took without driving.';
+    if (description.length > 500) return 'Keep the trip description under 500 characters.';
     const linkField = form.elements.namedItem('link');
     const link = linkField instanceof HTMLInputElement ? linkField.value.trim() : '';
     const shot = form.querySelector('[data-screenshot-input]');
     const file = shot instanceof HTMLInputElement ? shot.files?.[0] : undefined;
-    if (!link && !file) return 'Paste the link to your post, or add a screenshot of it.';
     if (link && !isPostLink(link)) {
       return 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.';
     }
     const body = new FormData();
     modes.forEach((mode) => body.append('mode', mode));
+    body.set('description', description);
     const hard = form.elements.namedItem('hard');
     if (hard instanceof HTMLTextAreaElement) body.set('hard', hard.value.trim());
     if (link) body.set('link', link);

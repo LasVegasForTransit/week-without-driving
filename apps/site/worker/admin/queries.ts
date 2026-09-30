@@ -18,6 +18,7 @@ export interface EntryRow {
   source: Source;
   created_at: string;
   modes: string;
+  description: string | null;
   hard: string | null;
   post_url: string | null;
   screenshot_key: string | null;
@@ -35,6 +36,7 @@ export interface EntryRow {
   contact: string | null;
   contact_type: ContactType | null;
   zip: string | null;
+  county: string | null;
   instagram: string | null;
 }
 
@@ -123,10 +125,10 @@ const TOTALS_SQL = `
   FROM (${ELIGIBLE_COUNT_SQL}) AS eligible`;
 
 export const ENTRY_COLUMNS = `
-  c.id, c.day, c.source, c.created_at, c.modes, c.hard, c.post_url, c.screenshot_key, c.share,
+  c.id, c.day, c.source, c.created_at, c.modes, c.description, c.hard, c.post_url, c.screenshot_key, c.share,
   c.received_on, c.logged_by, c.checked_at, c.checked_by, c.removed_at, c.removed_by,
   c.removal_reason, c.instagram AS handle,
-  p.first_name, p.contact, p.contact_type, p.zip, p.instagram`;
+  p.first_name, p.contact, p.contact_type, p.zip, p.county, p.instagram`;
 
 function queueSql(view: View): string {
   return `

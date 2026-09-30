@@ -15,9 +15,9 @@ interface ParticipantRow {
   contact: string;
   contact_type: ContactType;
   zip: string;
+  county: Participant['county'];
   instagram: string | null;
   age: AgeGroup;
-  newsletter: number;
 }
 
 export function toParticipant(row: ParticipantRow): Participant {
@@ -27,9 +27,9 @@ export function toParticipant(row: ParticipantRow): Participant {
     contact: row.contact,
     contactType: row.contact_type,
     zip: row.zip,
+    county: row.county,
     instagram: row.instagram,
     age: row.age,
-    newsletter: row.newsletter === 1,
   };
 }
 
@@ -68,7 +68,7 @@ export async function signedInParticipant(
   if (!hash) return null;
   const row = await db
     .prepare(
-      `SELECT p.id, p.first_name, p.contact, p.contact_type, p.zip, p.instagram, p.age, p.newsletter
+      `SELECT p.id, p.first_name, p.contact, p.contact_type, p.zip, p.county, p.instagram, p.age
        FROM sessions s JOIN participants p ON p.id = s.participant_id
        WHERE s.token_hash = ?1 AND s.expires_at > ?2`,
     )

@@ -30,6 +30,11 @@ function write(path: string, content: string | Uint8Array) {
 function site() {
   dist = mkdtempSync(join(tmpdir(), 'lvwwd-precache-'));
   write(
+    'index.html',
+    `<link rel="stylesheet" href="/_astro/home.css"><script src="/scripts/home.js" defer></script>
+     <img src="/icons/home.svg" alt="">`,
+  );
+  write(
     'offline/index.html',
     `<link rel="stylesheet" href="/_astro/site.css"><link rel="preload" href="/fonts/body.woff2" as="font">
      <script src="/scripts/app.js" defer></script>`,
@@ -46,6 +51,10 @@ function site() {
   );
   write('fonts/body.woff2', 'body font');
   write('fonts/head.woff2', 'heading font');
+  write('_astro/home.css', '@font-face{src:url(/fonts/home.woff2)}');
+  write('fonts/home.woff2', 'home font');
+  write('scripts/home.js', 'console.log("home")');
+  write('icons/home.svg', '<svg/>');
   write('scripts/app.js', 'console.log(1)');
   write('scripts/finder.js', 'console.log(2)');
   write('icons/fare.svg', '<svg/>');
@@ -99,26 +108,40 @@ describe('what a page references', () => {
 });
 
 describe('the precache manifest', () => {
-  it('lists the pages and their files with revisions, and marks the offline page’s own files', () => {
+  it('saves Home and its assets even under Save Data', () => {
     site();
     const { build, missing, total } = buildManifest(dist);
     const byUrl = Object.fromEntries(build.precache.map((entry) => [entry.url, entry]));
 
     expect(Object.keys(byUrl).sort()).toEqual([
+      '/',
+      '/_astro/home.css',
       '/_astro/site.css',
       '/fonts/body.woff2',
       '/fonts/head.woff2',
+      '/fonts/home.woff2',
       '/go',
       '/guides',
       '/icons/fare.svg',
+      '/icons/home.svg',
       '/offline',
       '/scripts/app.js',
       '/scripts/finder.js',
+      '/scripts/home.js',
     ]);
+    for (const url of [
+      '/',
+      '/_astro/home.css',
+      '/fonts/home.woff2',
+      '/scripts/home.js',
+      '/icons/home.svg',
+    ]) {
+      expect(byUrl[url]?.core, url).toBe(true);
+    }
     expect(byUrl['/offline']?.core).toBe(true);
     expect(byUrl['/_astro/site.css']?.core).toBe(true);
     expect(byUrl['/fonts/body.woff2']?.core).toBe(true);
-    expect(byUrl['/fonts/head.woff2']?.core).toBe(false);
+    expect(byUrl['/fonts/head.woff2']?.core).toBe(true);
     expect(byUrl['/guides']?.core).toBe(false);
     expect(byUrl['/scripts/app.js']?.revision).toBe(
       revisionOf(new TextEncoder().encode('console.log(1)')),
@@ -162,6 +185,21 @@ describe('the precache manifest', () => {
     );
   });
 
+  it.each(['index.html', 'offline/index.html'])(
+    'stops the build when required page %s is missing',
+    (missingPage) => {
+      site();
+      rmSync(join(dist, missingPage));
+      const hook = serviceWorker().hooks['astro:build:done'] as unknown as (
+        options: object,
+      ) => void;
+      const logger = { info: () => undefined, warn: () => undefined };
+      expect(() => hook({ dir: pathToFileURL(`${dist}/`), logger })).toThrow(
+        /required offline launch page/,
+      );
+    },
+  );
+
   it('writes the list into dist/sw.js when the build fits', () => {
     site();
     const hook = serviceWorker().hooks['astro:build:done'] as unknown as (options: object) => void;
@@ -172,12 +210,12 @@ describe('the precache manifest', () => {
 });
 
 describe('what the phone keeps', () => {
-  it('keeps every rider guide, Find a bus with its stop data, and Bingo', () => {
+  it('keeps Home, every rider guide, Find a bus with its stop data, and Bingo', () => {
     const guides = readdirSync(new URL('../src/content/guides/', import.meta.url))
       .filter((file) => file.endsWith('.md'))
       .map((file) => `/guides/${file.replace(/\.md$/, '')}`);
     const pages: readonly string[] = PRECACHE_PAGES;
-    for (const page of ['/guides', ...guides, '/go', '/bingo']) {
+    for (const page of ['/', '/guides', ...guides, '/go', '/bingo']) {
       expect(pages, page).toContain(page);
     }
     expect(DATA_FILES).toEqual(expect.arrayContaining(['/data/stops.json', '/data/routes.json']));

@@ -193,8 +193,8 @@
     },
     {
       "name": "BOT_CHECK",
-      "severity": "warning",
-      "reason": "BOT_CHECK=off turns off the Turnstile bot check on Sign up to win and Get my link. Remove it from vars once the widget, TURNSTILE_SITE_KEY, and TURNSTILE_SECRET are in place."
+      "severity": "error",
+      "reason": "BOT_CHECK=off disables the Turnstile check on public sign-up and link requests and must never be deployed to production."
     }
   ]
 }

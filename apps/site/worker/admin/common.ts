@@ -13,9 +13,9 @@ export interface AdminContext extends ApiContext {
 export type Source = 'post' | 'tag' | 'mail';
 
 export const SOURCE_LABELS: Record<Source, string> = {
-  post: 'Shared post',
+  post: 'My week trip',
   tag: 'Instagram tag',
-  mail: 'Mailed card or letter',
+  mail: 'Legacy entry',
 };
 
 export const MODE_LABELS = {
@@ -34,7 +34,7 @@ const SHORT_MODES: Record<string, string> = {
 
 export const REMOVAL_REASONS = {
   'no-trip': 'Not a trip without driving',
-  'our-picture': 'Only our picture, no photo of the trip',
+  'our-picture': 'Post does not show the trip',
   'not-theirs': 'Not their post',
   duplicate: 'Duplicate',
   other: 'Other',

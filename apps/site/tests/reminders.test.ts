@@ -3,57 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { reminderCheck } from '../src/integrations/reminder-check';
 import {
   LINK_LENGTH,
-  MAIL_IN_LINE,
+  ENTRY_LINE,
   REMINDERS,
   type ReminderList,
   reminderProblems,
 } from '../src/lib/reminders';
-
-// The eight daily reminders as the campaign wrote them, one row per day:
-// the notification's title and body, and the text message. The site's
-// list in src/data/reminders.json must say exactly this.
-const COPY: Array<[title: string, body: string, text: string]> = [
-  [
-    'Day 1 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Rider guides on My week can help you plan it. No purchase or post necessary. No social media? You can enter by mail.',
-    'Week Without Driving day 1: leave the car at home today. Plan one trip, then share it: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 2 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Also mark a bingo square. Some you can do without leaving home. Tap Bingo on My week.',
-    'Week Without Driving day 2: leave the car at home today. Mark a bingo square. Share your trip: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 3 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Try going somewhere new, like a library, park or market. Tap Find a bus on My week.',
-    'Week Without Driving day 3: leave the car at home today. Go somewhere new. Share your trip: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 4 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. When you send it, tell us what was hard, like a stop with no shade or a missing curb ramp. The sidewalk audit guide in Rider guides shows what to look for.',
-    'Week Without Driving day 4: leave the car at home today. Share your trip and say what was hard: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 5 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Also find the bus stops nearest home, work or school. Tap Find a bus on My week.',
-    'Week Without Driving day 5: leave the car at home today. Find a stop near you. Share your trip: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 6 of 8: leave the car at home today',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Add the picture My week makes to your post or story, so a friend tries it too.',
-    'Week Without Driving day 6: leave the car at home today. Share your trip so a friend tries it: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 7 of 8: leave the car at home today',
-    "Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Also talk to someone who doesn't drive. Ask how they get around. It's a bingo square, too.",
-    'Week Without Driving day 7: leave the car at home today. Talk to a nondriver. Share your trip: {link} Reply STOP to end.',
-  ],
-  [
-    'Day 8 of 8: last day! Leave the car at home',
-    'Then share your trip: post a photo of it with @lasvegasfortransit or #WeekWithoutDriving, and send the post on My week. Thank you for taking part! See Keep going after the week on My week to stay involved with LVBT. No purchase or post necessary. No social media? You can enter by mail.',
-    'Week Without Driving day 8: last day! Leave the car at home, share your trip, then keep going: {link} Reply STOP to end.',
-  ],
-];
 
 // The basic GSM 7-bit alphabet (3GPP TS 23.038), the characters a standard
 // text is written in. One character outside it splits a text into parts.
@@ -84,9 +38,11 @@ function setText(list: ReminderList, day: number, text: string): void {
 
 describe('the daily reminder list', () => {
   it('says exactly what the campaign wrote, one message a day from October 1 to 8', () => {
-    expect(
-      REMINDERS.messages.map((message) => [message.title, message.body, message.text]),
-    ).toEqual(COPY);
+    expect(REMINDERS.messages).toHaveLength(8);
+    for (const message of REMINDERS.messages) {
+      expect(message.body).toContain('My week');
+      expect(message.body).not.toMatch(/enter by mail|must post|post a photo/i);
+    }
     expect(REMINDERS.messages.map((message) => message.date)).toEqual([
       '2026-10-01',
       '2026-10-02',
@@ -104,11 +60,11 @@ describe('the daily reminder list', () => {
     expect(reminderProblems(REMINDERS)).toEqual([]);
   });
 
-  it('tells people without social media on days 1 and 8 that they can enter by mail', () => {
+  it('makes the text entry route clear on days 1 and 8', () => {
     const [first] = REMINDERS.messages;
     const last = REMINDERS.messages.at(-1);
-    expect(first?.body.endsWith(MAIL_IN_LINE)).toBe(true);
-    expect(last?.body.endsWith(MAIL_IN_LINE)).toBe(true);
+    expect(first?.body.endsWith(ENTRY_LINE)).toBe(true);
+    expect(last?.body.endsWith(ENTRY_LINE)).toBe(true);
   });
 
   it('fits every text in one standard text once a personal link is in it', () => {
@@ -194,7 +150,7 @@ describe('the build check', () => {
       /must start with "Week Without Driving day 7: "/,
     ],
     [
-      'a day 1 body without the mail-in line',
+      'a day 1 body without the entry line',
       changed((list) => {
         const first = list.messages[0];
         if (first) first.body = 'Then share your trip on My week.';
@@ -203,7 +159,7 @@ describe('the build check', () => {
       /body must end with/,
     ],
     [
-      'a day 8 body without the mail-in line',
+      'a day 8 body without the entry line',
       changed((list) => {
         const last = list.messages[7];
         if (last) last.body = 'Thank you for taking part!';

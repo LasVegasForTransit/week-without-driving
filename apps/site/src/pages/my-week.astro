@@ -49,7 +49,7 @@ const shortcuts = [
         <a href="/sign-up" class="btn btn--outline">Sign up to win</a>
       </div>
       <p class="myweek__note">
-        Signed up on another phone? We’ll send your link to the phone number or email you used.
+        Signed up on another phone? Request a link by email when delivery is available.
       </p>
     </section>
 
@@ -63,7 +63,9 @@ const shortcuts = [
         <h1 id="hello-heading" class="page-title">
           Hi, <span data-me-name>there</span>.
         </h1>
-        <p class="myweek__lede" data-me-phase>Share each day you skip the car, October 1 to 8.</p>
+        <p class="myweek__lede" data-me-phase>
+          Describe a trip each day you skip the car, October 1 to 8.
+        </p>
         <div class="preview-link" data-preview-link hidden></div>
       </section>
 
@@ -92,7 +94,7 @@ const shortcuts = [
           }
         </ol>
 
-        {/* Today's trip, in three steps: how, the post, and sending it in. */}
+        {/* Today's trip: how they traveled, a description, and optional media. */}
         <form data-trip-form hidden class="trip" novalidate data-needs-connection="trip">
           <fieldset class="trip__step" aria-describedby="trip-error">
             <legend class="trip__q"
@@ -110,9 +112,28 @@ const shortcuts = [
                 ))
               }
             </div>
-            <label for="trip-hard" class="log__hard-label">
-              Was anything hard? <span class="log__optional">(optional)</span>
-            </label>
+          </fieldset>
+
+          <fieldset class="trip__step">
+            <legend class="trip__q"
+              ><span class="trip__n" aria-hidden="true">2</span> Tell us about the trip.</legend
+            >
+            <label for="trip-description" class="log__hard-label"
+              >Where did you go, and how did you get there?</label
+            >
+            <textarea
+              id="trip-description"
+              name="description"
+              rows="3"
+              maxlength="500"
+              required
+              class="log__hard"
+              placeholder="I took the bus to the grocery store and walked home."></textarea>
+            <label for="trip-hard" class="log__hard-label"
+              >Was anything hard? <span class="log__optional"
+                >(optional, separate from your entry)</span
+              ></label
+            >
             <textarea
               id="trip-hard"
               name="hard"
@@ -124,11 +145,11 @@ const shortcuts = [
 
           <div class="trip__step" data-share-step>
             <p class="trip__q">
-              <span class="trip__n" aria-hidden="true">2</span> Post a photo or video of your trip.
+              <span class="trip__n" aria-hidden="true">3</span> Add a post, if you want.
             </p>
             <p class="trip__help">
-              Use one you took on the way. Tag @lasvegasfortransit on Instagram, or post anywhere
-              public with #WeekWithoutDriving. You can add our picture to your post too.
+              A post is optional. If you share one, tag @lasvegasfortransit on Instagram or use
+              #WeekWithoutDriving. You can add our picture to your post.
             </p>
             <button type="button" class="btn shared__save mt-3" data-make-picture>
               <Icon name="mdi:image-outline" class="size-5" aria-hidden="true" />
@@ -161,10 +182,10 @@ const shortcuts = [
           </div>
 
           <fieldset class="trip__step">
-            <legend class="trip__q"
-              ><span class="trip__n" aria-hidden="true">3</span> Send us your post.</legend
+            <legend class="sr-only">Optional post details</legend>
+            <label for="trip-link" class="log__hard-label"
+              >Link to your post <span class="log__optional">(optional)</span></label
             >
-            <label for="trip-link" class="log__hard-label">Link to your post</label>
             <input
               id="trip-link"
               name="link"
@@ -184,7 +205,7 @@ const shortcuts = [
               />
               <Icon name="mdi:cellphone-screenshot" class="size-6" aria-hidden="true" />
               <span data-screenshot-label
-                >Private account? Add a screenshot of your post instead.</span
+                >Private account? You can add a screenshot of your post.</span
               >
             </label>
             <label class="trip__consent">
@@ -215,16 +236,14 @@ const shortcuts = [
         <div data-trip-done hidden class="shared">
           <p class="shared__title" data-trip-done-title aria-live="polite"></p>
           <p class="shared__ask">
-            We check every post before the draw. Come back tomorrow for another entry.
+            We check every trip before the draw. Come back tomorrow for another entry.
           </p>
         </div>
 
         <p class="entries__status" data-log-closed hidden></p>
         <p class="entries__fine">
-          One entry for each day you share a trip without driving, up to 8. We check every post
-          before the draw. No social media? <a href="/giveaway#by-mail" class="body-link"
-            >Enter by mail</a
-          >. See the <a href="/giveaway/rules" class="body-link">Official Rules</a>.
+          One entry for each day you describe a trip without driving, up to 8. A post is optional.
+          See the <a href="/giveaway/rules" class="body-link">Official Rules</a>.
         </p>
       </section>
 
@@ -253,6 +272,7 @@ const shortcuts = [
       */
       }
       <section
+        hidden
         class="myweek__card"
         aria-labelledby="remind-heading"
         data-remind
@@ -330,6 +350,7 @@ const shortcuts = [
           <div><dt>Name</dt><dd data-me-field="firstName"></dd></div>
           <div><dt>Contact</dt><dd data-me-field="contact"></dd></div>
           <div><dt>ZIP code</dt><dd data-me-field="zip"></dd></div>
+          <div><dt>County</dt><dd data-me-field="county"></dd></div>
           <div><dt>Instagram</dt><dd data-me-field="instagram"></dd></div>
         </dl>
         <a href="/sign-up?edit=1" class="arrow-link mt-4">Change my details</a>
@@ -342,7 +363,7 @@ const shortcuts = [
       >
         <h2 id="phones-heading" class="myweek__h2">Open My week on another phone</h2>
         <p class="myweek__p" data-me-link-line>
-          We sent you a link. Open it on any phone to come back here.
+          Request a link by email to open My week on another phone.
         </p>
         <a href="/my-week/link" class="arrow-link mt-3" data-needs-connection-button
           >Send my link again</a

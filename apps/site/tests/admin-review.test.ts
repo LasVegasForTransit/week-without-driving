@@ -52,6 +52,7 @@ describe('admin review', () => {
     const form = new FormData();
     form.append('mode', 'bus');
     form.append('mode', 'walk');
+    form.set('description', 'I took the bus and walked to the store.');
     if (fields.hard) form.set('hard', fields.hard);
     if (fields.screenshot) form.set('screenshot', new File([PNG], 'post.png'));
     else form.set('link', POST);

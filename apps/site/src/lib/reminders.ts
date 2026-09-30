@@ -46,8 +46,7 @@ export const MAX_TEXT_LENGTH = 160;
 
 export const SIGNUP_CLOSES_AT = '2026-10-08T15:00:00Z';
 
-export const MAIL_IN_LINE =
-  'No purchase or post necessary. No social media? You can enter by mail.';
+export const ENTRY_LINE = 'A post is optional. Enter by describing your trip in My week.';
 
 const TEXT_END = `${LINK_PLACEHOLDER} Reply STOP to end.`;
 
@@ -91,8 +90,11 @@ function messageProblems(message: ReminderMessage, index: number): string[] {
     problems.push(`the title must start with "Day ${day} of 8: "`);
   }
   if (!message.body.trim()) problems.push('the body is empty');
-  if ((day === 1 || day === 8) && !message.body.endsWith(MAIL_IN_LINE)) {
-    problems.push(`the body must end with "${MAIL_IN_LINE}"`);
+  if ((day === 1 || day === 8) && !message.body.endsWith(ENTRY_LINE)) {
+    problems.push(`the body must end with "${ENTRY_LINE}"`);
+  }
+  if (/enter by mail|must post|post a photo/i.test(`${message.body} ${message.text}`)) {
+    problems.push('the reminder must not require a post or offer mail entry');
   }
   return [...problems, ...textProblems(message)];
 }

@@ -2,10 +2,8 @@ import { photos, type Photo } from './photos';
 import { wwd } from './wwd';
 
 // Campaign content that LVBT fills in as it is confirmed: the daily
-// Instagram hosts, the proclamations, and the prizes. Each entry starts
-// empty (null) and the page shows a clearly marked "to come" slot for it,
-// so the page has a place for every piece before the piece exists. Fill
-// these in as each one is confirmed; never guess a name.
+// Instagram hosts and proclamations are shown when confirmed. Prize
+// information describes only the committed RTC bus pass.
 
 const dayFormat = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
@@ -40,26 +38,20 @@ export const prizes: Array<{
   icon: string;
 }> = [
   {
-    name: 'A one-month RTC bus pass',
-    body: 'Ride any RTC bus as much as you want for a month.',
-    photo: 'An RTC 30-day pass in someone’s hand at a bus stop',
+    name: 'A 30-day RTC bus pass',
+    body: 'One 30-day pass for RTC buses.',
+    photo: 'An RTC bus traveling through Las Vegas',
     image: photos.rtcBusMlk,
     icon: 'mdi:card-account-details-outline',
   },
-  {
-    name: 'An LVBT sticker pack',
-    body: 'Stickers for your water bottle, laptop or bike.',
-    photo: 'LVBT stickers spread out on a table',
-    icon: 'mdi:sticker-emoji',
-  },
 ];
 
-/** The three steps to win, shown the same way on How it works and Win prizes. */
+/** The three steps to win, shown on How it works and the giveaway page. */
 export const winSteps = [
   {
     icon: 'mdi:account-plus-outline',
     title: 'Sign up',
-    body: 'It takes a minute: your first name, a phone number or email, and your ZIP code.',
+    body: 'Use your first name, email address, ZIP code and county.',
     cta: 'Sign up to win',
     href: '/sign-up',
   },
@@ -71,8 +63,8 @@ export const winSteps = [
     href: '/go',
   },
   {
-    icon: 'mdi:share-variant-outline',
-    title: 'Share it to enter',
-    body: 'Post a photo of your trip and tag @lasvegasfortransit. Each day you share one is an entry, up to 8.',
+    icon: 'mdi:note-text-outline',
+    title: 'Tell us about your trip',
+    body: 'Describe it on My week. A post or photo is optional. One entry per day, up to 8.',
   },
 ] as const;

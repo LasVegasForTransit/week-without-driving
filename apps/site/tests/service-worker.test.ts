@@ -71,36 +71,48 @@ describe('installing', () => {
     expect(caches.everything().sort()).toEqual([
       'wwd-data-v1: /data/routes.json',
       'wwd-data-v1: /data/stops.json',
+      'wwd-precache-v1: /?__rev=hom1',
       'wwd-precache-v1: /_astro/site.css?__rev=css1',
       'wwd-precache-v1: /fonts/body.woff2?__rev=fon1',
       'wwd-precache-v1: /guides?__rev=gui1',
       'wwd-precache-v1: /offline?__rev=off1',
+      'wwd-precache-v1: /scripts/home.js?__rev=hjs1',
     ]);
     expect(self.skipWaiting).toHaveBeenCalledOnce();
   });
 
-  it('downloads only what changed, and waits for Refresh when a version is already running', async () => {
+  it('updates Home for offline launch and waits for Refresh when a version is already running', async () => {
     const first = load(BUILD);
     await first.extendable('install');
 
     const changed: Build = {
       ...BUILD,
       precache: BUILD.precache.map((entry) =>
-        entry.url === '/guides' ? { ...entry, revision: 'gui2' } : entry,
+        entry.url === '/' ? { ...entry, revision: 'hom2' } : entry,
       ),
     };
-    const next = load(changed, { caches: first.caches, running: true });
+    const next = load(changed, {
+      caches: first.caches,
+      running: true,
+      routes: { '/': () => page('<h1>Updated Home</h1>') },
+    });
     await next.extendable('install');
-    expect(next.net.state.calls).toEqual(['/guides']);
+    expect(next.net.state.calls).toEqual(['/']);
     expect(next.self.skipWaiting).not.toHaveBeenCalled();
+    next.net.state.offline = true;
+    expect(await (await next.request('/', navigate).settled())?.text()).toBe(
+      '<h1>Updated Home</h1>',
+    );
   });
 
-  it('saves only the offline page and its own files when the phone asks to save data', async () => {
+  it('saves Home, the offline page, and their assets when the phone asks to save data', async () => {
     const { caches, extendable } = load(BUILD, { saveData: true });
     await extendable('install');
     expect(caches.everything().sort()).toEqual([
+      'wwd-precache-v1: /?__rev=hom1',
       'wwd-precache-v1: /_astro/site.css?__rev=css1',
       'wwd-precache-v1: /offline?__rev=off1',
+      'wwd-precache-v1: /scripts/home.js?__rev=hjs1',
     ]);
   });
 
@@ -143,6 +155,16 @@ describe('activating', () => {
 });
 
 describe('answering pages', () => {
+  it.each([false, true])('opens Home offline after install with Save Data %s', async (saveData) => {
+    const { extendable, net, request } = load(BUILD, { saveData });
+    await extendable('install');
+    net.state.offline = true;
+    for (const path of ['/', '/?ref=partner']) {
+      const response = await request(path, navigate).settled();
+      expect(await response?.text()).toBe('<h1>Try a week without driving</h1>');
+    }
+  });
+
   it('shows the network copy and stores it without the query string', async () => {
     const { caches, request } = load(BUILD, {
       routes: { '/giveaway': () => page('<h1>Win prizes</h1>') },

@@ -185,9 +185,9 @@ export const SIGN_UP = {
   firstName: 'Rosa',
   contact: 'Rosa@Example.com',
   zip: '89101',
+  county: 'Clark',
   instagram: '@Rosa.Rides',
   age: 'adult',
-  newsletter: false,
   turnstileToken: 'token-from-the-widget',
 };
 

@@ -23,7 +23,7 @@
 (() => {
   const NOTICES = {
     'sign-up': 'You’re offline. You can sign up as soon as you’re back online.',
-    trip: 'You’re offline. My week needs a connection to show your entries and send your post.',
+    trip: 'You’re offline. My week needs a connection to show entries and submit your trip.',
     'edit-details': 'You’re offline. You can save your details as soon as you’re back online.',
     'send-link': 'You’re offline. You can send your link as soon as you’re back online.',
     'get-link': 'You’re offline. You can get your link as soon as you’re back online.',

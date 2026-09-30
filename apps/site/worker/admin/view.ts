@@ -8,13 +8,13 @@ import {
   filterQuery,
 } from './common';
 import { entryCard } from './entry-card';
-import { type Prefill, drawSection, mailForm, tagForm } from './forms';
+import { type Prefill, drawSection, tagForm } from './forms';
 import { type Html, html, page } from './html';
 import { pushSection } from './push';
 import type { DayStats, PageData, PartnerCount } from './queries';
 
 /**
- * The /admin page: counts, the review queue, the two logging forms, the
+ * The /admin page: counts, the review queue, the tag form, the
  * draw, the CSV export, browser reminders, and the volunteers who can't
  * win.
  */
@@ -142,8 +142,8 @@ function queue(filters: Filters, data: PageData): Html {
   return html`<section id="queue">
     <h2>Check entries</h2>
     <p>
-      Keep an entry when it shows or describes a trip without driving that day. A post needs the
-      person’s own photo or video of the trip; our share picture alone doesn’t count.
+      Keep an entry when the participant describes a trip without driving that day. A social post is
+      optional; when supplied, check that it belongs to the participant.
     </p>
     ${tabs(filters, data)} ${cards.length > 0 ? cards : html`<p class="muted">No entries here.</p>`}
     ${pager(filters, data.more)}
@@ -174,11 +174,11 @@ export function adminPage(
     <p class="muted">Signed in as ${c.volunteer}</p>
     ${notice ? html`<p class="notice ${notice.problem ? 'problem' : ''}" role="status">${notice.text}</p>` : ''}
     <p class="tabs">
-      <a href="#queue">Check entries</a><a href="#tag">Log a tag</a
-      ><a href="#mail">Log a mailed entry</a><a href="#draw">Draw</a><a href="#counts">Counts</a
-      ><a href="#reminders">Reminders</a><a href="/api/admin/entries.csv">Download entries (CSV)</a>
+      <a href="#queue">Check entries</a><a href="#tag">Log a tag</a><a href="#draw">Draw</a
+      ><a href="#counts">Counts</a><a href="#reminders">Reminders</a
+      ><a href="/api/admin/entries.csv">Download entries (CSV)</a>
     </p>
-    ${queue(filters, data)} ${tagForm(prefill)} ${mailForm(prefill)} ${drawSection(c, data)}
-    ${counts(data)} ${pushSection(data.pushes)} ${volunteers(data.volunteers)}`;
+    ${queue(filters, data)} ${tagForm(prefill)} ${drawSection(c, data)} ${counts(data)}
+    ${pushSection(data.pushes)} ${volunteers(data.volunteers)}`;
   return page('Admin', body, status);
 }

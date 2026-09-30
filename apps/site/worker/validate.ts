@@ -8,16 +8,16 @@ import type { AgeGroup, ContactType } from './env';
 export const FIELD_MESSAGES = {
   firstName: 'Enter your first name.',
   firstNameLong: 'Use 40 characters or fewer for your first name.',
-  contactMissing: 'Enter a phone number or an email address.',
-  contact: 'Enter a phone number, like 702-555-0123, or an email, like name@example.com.',
+  contactMissing: 'Enter your email address.',
+  contact: 'Enter an email address, like name@example.com.',
   zip: 'Enter a 5-digit ZIP code.',
-  zipOutside:
-    'The giveaway is only for people who live in Southern Nevada. You can still take part in the week.',
+  county:
+    'Choose your county. The giveaway is open to Clark, Esmeralda, Lincoln, and Nye residents.',
   instagram: 'Instagram names use only letters, numbers, periods and underscores.',
   age: 'Pick one. You need to be 13 or older to sign up.',
 } as const;
 
-export type Field = 'firstName' | 'contact' | 'zip' | 'instagram' | 'age';
+export type Field = 'firstName' | 'contact' | 'zip' | 'county' | 'instagram' | 'age';
 export type FieldErrors = Partial<Record<Field, string>>;
 
 export interface Contact {
@@ -30,15 +30,17 @@ export interface Contact {
 export interface Details {
   firstName: string;
   zip: string;
+  county: County;
   instagram: string | null;
   age: AgeGroup;
-  newsletter: boolean;
 }
+
+export const COUNTIES = ['Clark', 'Esmeralda', 'Lincoln', 'Nye'] as const;
+export type County = (typeof COUNTIES)[number];
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_CHARACTERS = /^[\d\s().+-]+$/;
 const HANDLE = /^[a-z0-9._]{1,30}$/;
-const SOUTHERN_NEVADA_ZIP = /^89[01]\d\d$/;
 
 function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
@@ -85,7 +87,9 @@ export function checkDetails(
 
   const zip = text(input.zip);
   if (!/^\d{5}$/.test(zip)) errors.zip = FIELD_MESSAGES.zip;
-  else if (!SOUTHERN_NEVADA_ZIP.test(zip)) errors.zip = FIELD_MESSAGES.zipOutside;
+
+  const county = COUNTIES.find((candidate) => candidate === input.county);
+  if (!county) errors.county = FIELD_MESSAGES.county;
 
   const instagram = cleanHandle(text(input.instagram));
   if (instagram && !isHandle(instagram)) errors.instagram = FIELD_MESSAGES.instagram;
@@ -94,14 +98,14 @@ export function checkDetails(
   const age = input.age === 'adult' || input.age === 'teen' ? input.age : null;
   if (!age) errors.age = FIELD_MESSAGES.age;
 
-  if (!age || Object.keys(errors).length > 0) return { errors };
+  if (!age || !county || Object.keys(errors).length > 0) return { errors };
   return {
     details: {
       firstName,
       zip,
+      county,
       instagram: instagram || null,
       age,
-      newsletter: input.newsletter === true,
     },
   };
 }
@@ -115,8 +119,8 @@ export function checkSignUp(
   const raw = text(input.contact);
   const contact = parseContact(raw);
   if (!raw) errors.contact = FIELD_MESSAGES.contactMissing;
-  else if (!contact) errors.contact = FIELD_MESSAGES.contact;
-  if ('errors' in checked || !contact) return { errors };
+  else if (contact?.type !== 'email') errors.contact = FIELD_MESSAGES.contact;
+  if ('errors' in checked || contact?.type !== 'email') return { errors };
   return { details: checked.details, contact };
 }
 

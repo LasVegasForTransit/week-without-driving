@@ -1,7 +1,6 @@
 import { maskContact } from '../validate';
 import {
   type AdminContext,
-  MODE_LABELS,
   SOURCE_LABELS,
   counted,
   dayLabel,
@@ -15,13 +14,13 @@ import { drawOpen } from './pick';
 import type { DrawRow, PageData } from './queries';
 
 /**
- * The forms volunteers fill in: log an Instagram tag, log a mailed card
- * or letter, and draw the winner. A form that was refused comes back with
+ * The forms volunteers fill in: log a registered Instagram tag and draw.
+ * A form that was refused comes back with
  * what the volunteer typed, so nothing has to be typed twice.
  */
 
 export interface Prefill {
-  form: 'tag' | 'mail';
+  form: 'tag';
   values: FormData;
 }
 
@@ -44,8 +43,7 @@ export function tagForm(prefill?: Prefill): Html {
     <h2>Log an Instagram tag</h2>
     <p>
       For an Instagram post or story that tags @lasvegasfortransit. It counts as that day’s entry
-      for the person who saved the handle when they signed up. A handle nobody saved becomes a
-      handle-only entry.
+      for the eligible person who saved the handle when they signed up. Reject unmatched handles.
     </p>
     <form method="post" action="/admin/tags" class="stack">
       <label
@@ -59,96 +57,14 @@ export function tagForm(prefill?: Prefill): Html {
         </select></label
       >
       <label
-        >Link to the post
+        >Link to the post (if available)
         <input
           name="link"
           type="url"
-          required
           placeholder="https://www.instagram.com/p/…"
           value="${value('link')}"
       /></label>
       <button type="submit">Log the tag</button>
-    </form>
-  </section>`;
-}
-
-function modeBoxes(prefill?: Prefill): Html[] {
-  const chosen = prefill?.form === 'mail' ? prefill.values.getAll('mode').map(String) : [];
-  return Object.entries(MODE_LABELS).map(
-    ([mode, label]) =>
-      html`<label
-        ><input
-          type="checkbox"
-          name="mode"
-          value="${mode}"
-          ${chosen.includes(mode) ? html`checked` : ''}
-        />
-        ${label}</label
-      >`,
-  );
-}
-
-export function mailForm(prefill?: Prefill): Html {
-  const value = (name: string) => valueOf(prefill, 'mail', name);
-  const teen = value('age') === 'teen' ? html`selected` : '';
-  return html`<section id="mail">
-    <h2>Log a mailed entry</h2>
-    <p>
-      For a handwritten postcard or letter, postmarked October 1 to 8 and received by October 13. It
-      counts for its postmark day. If the phone number or email has no sign-up, one is made for
-      them, with no account.
-    </p>
-    <form method="post" action="/admin/mail" class="stack">
-      <label
-        >Phone number or email on the card
-        <input
-          name="contact"
-          required
-          maxlength="254"
-          autocomplete="off"
-          value="${value('contact')}"
-      /></label>
-      <label
-        >Postmark date (the day of the trip)
-        <select name="day" required>
-          ${dayOptions(value('day'))}
-        </select></label
-      >
-      <label
-        >Date received
-        <input
-          type="date"
-          name="received"
-          required
-          min="2026-10-01"
-          max="2026-10-13"
-          value="${value('received')}"
-      /></label>
-      <fieldset>
-        <legend>How they got around</legend>
-        ${modeBoxes(prefill)}
-      </fieldset>
-      <label
-        >What was hard, if they wrote it
-        <textarea name="note" maxlength="280" rows="2">${value('note')}</textarea>
-      </label>
-      <fieldset>
-        <legend>Only when they haven’t signed up</legend>
-        <label
-          >First name <input name="firstName" maxlength="40" value="${value('firstName')}"
-        /></label>
-        <label
-          >ZIP code <input name="zip" inputmode="numeric" maxlength="5" value="${value('zip')}"
-        /></label>
-        <label
-          >Age
-          <select name="age">
-            <option value="adult">18 or older, or not written</option>
-            <option value="teen" ${teen}>13 to 17</option>
-          </select></label
-        >
-      </fieldset>
-      <button type="submit">Log the mailed entry</button>
     </form>
   </section>`;
 }
@@ -162,8 +78,7 @@ function winnerContact(draw: DrawRow): Html {
     </p>`;
   }
   return html`<p class="winner">
-    <strong>@${draw.instagram ?? ''}</strong> (no sign-up). Message them on Instagram from
-    @lasvegasfortransit.
+    No registered email for this entry. Check eligibility before fulfillment.
   </p>`;
 }
 
@@ -217,8 +132,7 @@ export function drawSection(c: AdminContext, data: PageData): Html {
   const [latest, ...earlier] = draws;
   const open = drawOpen(c.env, c.now);
   let action: Html;
-  if (!open)
-    action = html`<p>The draw opens October 14, 2026, after the last mailed cards arrive.</p>`;
+  if (!open) action = html`<p>The draw opens October 14, 2026.</p>`;
   else if (totals.to_check > 0) {
     action = html`<p>
       Check or remove the ${counted(totals.to_check, 'entry', 'entries')} still waiting before the

@@ -1,7 +1,7 @@
 /**
- * lvwwd.org's service worker. After one visit it keeps the rider guides,
- * Find a bus with its stop data, Bingo, the Giveaway page and an offline
- * page on the phone, so they open at a bus stop with no signal.
+ * lvwwd.org's service worker. After one visit it keeps Home, the rider
+ * guides, Find a bus with its stop data, Bingo, the Giveaway page and an
+ * offline page on the phone, so they open at a bus stop with no signal.
  *
  * What it never keeps: anything under /api/ or /admin, and My week, Get my
  * link and Sign up, which show a person's own details or need a connection
@@ -13,8 +13,8 @@
  * file changes this script, the browser installs the new version in the
  * background, and only files whose revision changed are downloaded again.
  * When the phone asks sites to save data (Save-Data), the background save
- * is only the offline page and what it needs; everything else is saved as
- * the visitor opens it.
+ * keeps Home and the offline page with their essential assets; everything
+ * else is saved as the visitor opens it.
  *
  * It also shows the daily reminders. Each one arrives as a push message,
  * encrypted by the Worker for this browser alone, with the day's title and
@@ -63,7 +63,7 @@ const REMINDER = { url: '/my-week', tag: 'wwd-reminder', icon: '/icons/icon-192.
 // never sends; the browser needs something to show for every push.
 const REMINDER_FALLBACK = {
   title: 'Week Without Driving Las Vegas',
-  body: 'Leave the car at home today, then share your trip on My week.',
+  body: 'Leave the car at home today, then describe your trip in My week.',
 };
 
 /**

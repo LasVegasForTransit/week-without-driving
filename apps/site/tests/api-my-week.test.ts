@@ -14,6 +14,7 @@ interface Me {
   firstName: string;
   contactMasked: string;
   contactType: string;
+  county: string | null;
   instagram: string | null;
   days: number[];
   trips: { day: number; modes: string[] }[];
@@ -22,6 +23,7 @@ interface Me {
 
 interface Trip {
   modes?: string[];
+  description?: string;
   hard?: string;
   link?: string;
   screenshot?: File;
@@ -61,11 +63,12 @@ describe('my week', () => {
   // Enters a shared trip the way My week does, as a multipart form.
   const logTrip = (
     previewDay?: string,
-    trip: Trip = { modes: ['bus'], link: POST },
+    trip: Trip = { modes: ['bus'], description: 'I rode the bus to work.', link: POST },
     env: Record<string, unknown> = {},
   ) => {
     const form = new FormData();
     for (const mode of trip.modes ?? []) form.append('mode', mode);
+    form.set('description', trip.description ?? 'I took a trip without driving.');
     if (trip.hard !== undefined) form.set('hard', trip.hard);
     if (trip.link !== undefined) form.set('link', trip.link);
     if (trip.screenshot) form.set('screenshot', trip.screenshot);
@@ -88,6 +91,7 @@ describe('my week', () => {
     expect(mine.contactMasked).not.toContain('rosa@');
     expect(mine.contactMasked).toMatch(/@example\.com$/);
     expect(mine.instagram).toBe('rosa.rides');
+    expect(mine.county).toBe('Clark');
     expect(mine.days).toEqual([]);
   });
 
@@ -128,9 +132,9 @@ describe('my week', () => {
 
   it('asks how the person got around before logging a trip', async () => {
     const noModes: Trip[] = [
-      { link: POST },
-      { modes: ['car'], link: POST },
-      { modes: ['bus', 'bus'], link: POST },
+      { description: 'Bus ride', link: POST },
+      { modes: ['car'], description: 'Bus ride', link: POST },
+      { modes: ['bus', 'bus'], description: 'Bus ride', link: POST },
     ];
     for (const trip of noModes) {
       const response = await logTrip('3', trip);
@@ -141,7 +145,12 @@ describe('my week', () => {
   });
 
   it('turns away a note that is too long', async () => {
-    const response = await logTrip('3', { modes: ['walk'], hard: 'x'.repeat(281), link: POST });
+    const response = await logTrip('3', {
+      modes: ['walk'],
+      description: 'I walked',
+      hard: 'x'.repeat(281),
+      link: POST,
+    });
     expect(response.status).toBe(400);
     expect((await me()).days).toEqual([]);
   });
@@ -165,13 +174,15 @@ describe('my week', () => {
   it('changes details but never the contact', async () => {
     const change = (body: object) =>
       platform.send(apiRequest('PATCH', '/api/me', { cookie, body }));
-    const saved = await change({ firstName: 'Rosalind', instagram: '', newsletter: true });
+    const saved = await change({ firstName: 'Rosalind', instagram: '', county: 'Nye' });
     expect(saved.status).toBe(200);
     const mine = await me();
     expect(mine.firstName).toBe('Rosalind');
     expect(mine.instagram).toBeNull();
+    expect(mine.county).toBe('Nye');
 
-    expect((await change({ zip: '10001' })).status).toBe(400);
+    expect((await change({ zip: '10001' })).status).toBe(200);
+    expect((await change({ county: 'Washoe' })).status).toBe(400);
     const contact = await change({ contact: 'someone@else.com' });
     expect(contact.status).toBe(400);
     expect((await me()).contactMasked).toMatch(/@example\.com$/);
@@ -186,20 +197,42 @@ describe('my week', () => {
     expect((await put({ big: 'x'.repeat(5000) })).status).toBe(413);
   });
 
-  it('enters a trip only with the post that shares it', async () => {
-    const noPost = await logTrip('3', { modes: ['bus'] });
-    expect(noPost.status).toBe(400);
-    const notSocial = await logTrip('3', { modes: ['bus'], link: 'https://example.com/me' });
-    expect(notSocial.status).toBe(400);
-    expect((await me()).days).toEqual([]);
-
-    const tiktok = await logTrip('3', {
+  it('enters a text trip without a post and keeps the hardship note separate', async () => {
+    const missing = await logTrip('3', { modes: ['bus'], description: '' });
+    expect(missing.status).toBe(400);
+    const textOnly = await logTrip('3', {
       modes: ['bus'],
+      description: 'I rode Route 109 to work.',
+      hard: 'No shade at the stop.',
+    });
+    expect(textOnly.status).toBe(200);
+    const row = await platform.env.DB.prepare(
+      'SELECT description, hard, post_url, screenshot_key FROM checkins',
+    ).first();
+    expect(row).toEqual({
+      description: 'I rode Route 109 to work.',
+      hard: 'No shade at the stop.',
+      post_url: null,
+      screenshot_key: null,
+    });
+    const notSocial = await logTrip('4', {
+      modes: ['bus'],
+      description: 'I rode again.',
+      link: 'https://example.com/me',
+    });
+    expect(notSocial.status).toBe(400);
+    expect((await me()).days).toEqual([3]);
+
+    const tiktok = await logTrip('4', {
+      modes: ['bus'],
+      description: 'I took the bus to the store.',
       link: 'https://www.tiktok.com/@a/video/1',
     });
     expect(tiktok.status).toBe(200);
-    const row = await platform.env.DB.prepare('SELECT post_url FROM checkins').first();
-    expect(row).toEqual({ post_url: 'https://www.tiktok.com/@a/video/1' });
+    const post = await platform.env.DB.prepare(
+      'SELECT post_url FROM checkins WHERE day = 4',
+    ).first();
+    expect(post).toEqual({ post_url: 'https://www.tiktok.com/@a/video/1' });
   });
 
   it('takes a screenshot from a private account, checking what the file really is', async () => {
