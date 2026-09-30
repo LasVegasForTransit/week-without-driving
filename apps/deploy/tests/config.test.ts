@@ -32,7 +32,7 @@ interface WranglerMirror {
 }
 
 interface SetupInventory {
-  cloudflare: { accountId: string; worker: string };
+  cloudflare: { worker: string };
   secrets: { name: string; targets?: string[] }[];
   vars: { name: string }[];
 }
@@ -108,7 +108,7 @@ void test('production secret declarations cover the Worker secrets in the setup 
   const inventory = JSON.parse(
     await readFile(path.join(siteDir, 'platform.json'), 'utf8'),
   ) as SetupInventory;
-  assert.equal(cloudflare.accountId, inventory.cloudflare.accountId);
+  assert.equal('accountId' in cloudflare, false);
   assert.equal(cloudflare.worker.name, inventory.cloudflare.worker);
   assert.deepEqual(
     Object.entries(cloudflare.worker.env)
