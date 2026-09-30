@@ -13,7 +13,7 @@ import { photos } from '../lib/photos';
 
 const title = 'How it works · Week Without Driving Las Vegas';
 const description =
-  'Anyone can take part in Week Without Driving, October 1 to 8. Sign up with us to win prizes.';
+  'Anyone can take part in Week Without Driving, October 1 to 8. Sign up with us for a chance to win a 30-day RTC bus pass.';
 
 const ways = [
   {
@@ -48,28 +48,28 @@ const fields = [
     why: 'So we know who to congratulate.',
   },
   {
-    field: 'Email address or phone number',
-    why: 'One or the other. To reach you if you win, and to send your “Open my week” link.',
+    field: 'Email address',
+    why: 'To reach you if you win, and to send your “Open my week” link.',
   },
   {
     field: 'ZIP code',
-    why: 'To confirm you live in Southern Nevada, and to show where people took part.',
+    why: 'To help confirm where you live.',
+  },
+  {
+    field: 'County',
+    why: 'The giveaway is open to people in Clark, Esmeralda, Lincoln and Nye counties.',
   },
   {
     field: 'Instagram handle (optional)',
-    why: 'So we can count the trips you post that tag @lasvegasfortransit.',
+    why: 'If you post a trip and tag @lasvegasfortransit, we can count it for you.',
   },
   {
     field: 'Age',
     why: 'The giveaway is open to people 13 and older. If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.',
   },
   {
-    field: 'The trips you share',
-    why: 'The link or screenshot of your post, how you got around, and what was hard if you tell us. It’s how we count trips without driving and show the RTC what to fix.',
-  },
-  {
-    field: 'LVBT newsletter (optional, never checked for you)',
-    why: 'Only if you want transit news and easy ways to help from LVBT.',
+    field: 'The trips you describe',
+    why: 'How you got around, with an optional post or screenshot. You can also tell us what was hard, separately.',
   },
 ] as const;
 ---
@@ -77,7 +77,7 @@ const fields = [
 <BaseLayout title={title} description={description}>
   <PageHeader
     title="How it works"
-    lede="Anyone can take part in Week Without Driving, October 1–8. You don’t need to sign up. Sign up with us to win prizes."
+    lede="Anyone can take part in Week Without Driving, October 1–8. You don’t need to sign up. Sign up with us for a chance to win a 30-day RTC bus pass."
   />
 
   {/* TAKE PART YOUR WAY */}
@@ -105,16 +105,15 @@ const fields = [
     </ul>
   </section>
 
-  {/* WIN PRIZES: the same three steps as the Win prizes page. */}
+  {/* GIVEAWAY: the same three steps as the giveaway page. */}
   <section
     id="how-it-works"
     class="container-page section scroll-mt-24"
     aria-labelledby="win-heading"
   >
-    <h2 id="win-heading" class="section-title">Win prizes</h2>
+    <h2 id="win-heading" class="section-title">Win a bus pass</h2>
     <p class="section-intro">
-      Signing up is free. Do these three things for a chance to win a one-month RTC bus pass and an
-      LVBT sticker pack.
+      Signing up is free. Do these three things for a chance to win a 30-day RTC bus pass.
     </p>
     <Steps steps={winSteps} class="section-body" />
   </section>
@@ -148,14 +147,15 @@ const fields = [
         <summary class="faq-item__summary">Do I have to sign up to take part?</summary>
         <p class="faq-item__body">
           No. Anyone can take part in Week Without Driving without signing up. The guides, the bus
-          finder and bingo are open to everyone. Sign up only if you want a chance to win prizes.
+          finder and bingo are open to everyone. Sign up only if you want a chance to win the bus
+          pass.
         </p>
       </details>
       <details class="faq-item">
         <summary class="faq-item__summary">Does it cost anything?</summary>
         <p class="faq-item__body">
-          No. Taking part is free, and so is entering. You enter by sharing your trips, or by mail
-          if you don’t use social media.
+          No. Taking part and entering are free. Describe a trip without driving on My week. You
+          never need to post it.
         </p>
       </details>
       <details class="faq-item">
@@ -168,8 +168,7 @@ const fields = [
       <details class="faq-item">
         <summary class="faq-item__summary">What if I don’t use Instagram?</summary>
         <p class="faq-item__body">
-          Post your trip on any public social media account with #WeekWithoutDriving, and paste the
-          link on My week. No social media at all? You can enter by mail.
+          You don’t need Instagram or any social media account. Describe your trip on My week.
         </p>
       </details>
       <details class="faq-item">

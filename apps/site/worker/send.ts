@@ -3,10 +3,8 @@ import type { Env, Participant } from './env';
 /**
  * The one place that sends an "Open my week" link.
  *
- * Email goes through Resend when RESEND_API_KEY is set. Texts have no
- * provider yet, so a phone's link is recorded as "pending": we keep only
- * the token's hash, so whatever sends texts later issues a fresh link to
- * each participant with a pending one.
+ * Email goes through Resend when RESEND_API_KEY is set. Earlier phone
+ * accounts have no delivery channel and cannot be created by web signup.
  */
 export type Delivery = 'sent' | 'pending' | 'failed' | 'unconfigured';
 
@@ -33,7 +31,7 @@ function plainText(to: Recipient, link: string): string {
     'Open My week with this link:',
     link,
     '',
-    'Check in there each day, October 1 to 8. Each day you check in is one entry to win a one-month RTC bus pass.',
+    'Describe a trip without driving there each day, October 1 to 8. A post is optional. Each day is one entry to win a 30-day RTC bus pass.',
     '',
     'The link works on any phone until November 30, 2026. Don’t share it: anyone who has it can open your week.',
     '',
@@ -47,7 +45,7 @@ function html(to: Recipient, link: string): string {
   return `<!doctype html><html><body style="font-family:Arial,sans-serif;font-size:17px;line-height:1.5;color:#111">
 <p>Hi ${escapeHtml(to.firstName)},</p>
 <p><a href="${href}" style="display:inline-block;padding:12px 20px;background:#111;color:#fff;border-radius:999px;font-weight:bold;text-decoration:none">Open my week</a></p>
-<p>Check in there each day, October 1 to 8. Each day you check in is one entry to win a one-month RTC bus pass.</p>
+<p>Describe a trip without driving there each day, October 1 to 8. A post is optional. Each day is one entry to win a 30-day RTC bus pass.</p>
 <p>The link works on any phone until November 30, 2026. Don’t share it: anyone who has it can open your week.</p>
 <p>If the button doesn’t work, copy this address into your browser:<br>${href}</p>
 <p>Week Without Driving Las Vegas<br>Las Vegans for Better Transit</p>

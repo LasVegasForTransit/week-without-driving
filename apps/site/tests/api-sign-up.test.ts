@@ -56,7 +56,7 @@ describe('sign-up and links', () => {
     const response = await signUp({});
     expect(response.status).toBe(201);
     const body: { redirect: string; previewLink?: string } = await response.json();
-    expect(body.redirect).toBe('/my-week?welcome=1');
+    expect(body.redirect).toBe('/my-week?welcome=1&email=queued');
     expect(body.previewLink).toBeUndefined();
 
     const [session, flag] = response.headers.getSetCookie();
@@ -75,9 +75,14 @@ describe('sign-up and links', () => {
     expect(outbound.emails[0]?.text).toContain('https://lvwwd.test/my-week?t=');
 
     const stored = await platform.env.DB.prepare(
-      'SELECT contact, instagram FROM participants',
+      'SELECT contact, instagram, county, newsletter FROM participants',
     ).first();
-    expect(stored).toEqual({ contact: 'rosa@example.com', instagram: 'rosa.rides' });
+    expect(stored).toEqual({
+      contact: 'rosa@example.com',
+      instagram: 'rosa.rides',
+      county: 'Clark',
+      newsletter: 0,
+    });
   });
 
   it('stores only hashes of session and link tokens', async () => {
@@ -101,14 +106,51 @@ describe('sign-up and links', () => {
     expect(body.previewLink).toMatch(/^https:\/\/lvwwd\.test\/my-week\?t=[\w-]{43}$/);
   });
 
-  it('records a phone sign-up’s link as pending, with no email', async () => {
+  it('rejects phone signup and recovery while accepting an eligible county', async () => {
     const response = await signUp({ contact: '(702) 555-0123' });
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(400);
+    expect((await response.json<{ errors: { contact: string } }>()).errors.contact).toMatch(
+      /email/i,
+    );
+    expect((await askForLink('(702) 555-0123')).status).toBe(400);
     expect(outbound.emails).toHaveLength(0);
-    const row = await platform.env.DB.prepare(
-      'SELECT p.contact, l.delivery FROM participants p JOIN link_tokens l ON l.participant_id = p.id',
-    ).first();
-    expect(row).toEqual({ contact: '+17025550123', delivery: 'pending' });
+    expect(await count('participants')).toBe(0);
+  });
+
+  it.each(['Clark', 'Esmeralda', 'Lincoln', 'Nye'])(
+    'accepts an email sign-up declaring %s County',
+    async (county) => {
+      expect((await signUp({ county })).status).toBe(201);
+      const row = await platform.env.DB.prepare('SELECT county FROM participants').first();
+      expect(row).toEqual({ county });
+    },
+  );
+
+  it('accepts the 13–17 group with guardian agreement and rejects an under-13 group', async () => {
+    expect((await signUp({ age: 'under13' })).status).toBe(400);
+    expect(await count('participants')).toBe(0);
+    expect((await signUp({ age: 'teen' })).status).toBe(201);
+    expect(await platform.env.DB.prepare('SELECT age FROM participants').first()).toEqual({
+      age: 'teen',
+    });
+  });
+
+  it('reports when email delivery is not configured without claiming it sent a link', async () => {
+    const response = await platform.send(apiRequest('POST', '/api/signup', { body: SIGN_UP }), {
+      RESEND_API_KEY: '',
+    });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ emailStatus: 'unavailable' });
+    const recovery = await platform.send(
+      apiRequest('POST', '/api/link', {
+        body: { contact: 'rosa@example.com', turnstileToken: 'token' },
+      }),
+      { RESEND_API_KEY: '' },
+    );
+    expect(recovery.status).toBe(503);
+    expect((await recovery.json<{ message: string }>()).message).toMatch(
+      /unavailable|can't|couldn.t/i,
+    );
   });
 
   it('never signs a phone in with someone else’s contact, and sends them their link', async () => {
@@ -132,10 +174,22 @@ describe('sign-up and links', () => {
   });
 
   it('checks every field and names the ones that are wrong', async () => {
-    const response = await signUp({ firstName: ' ', contact: 'nope', zip: '90210', age: 'child' });
+    const response = await signUp({
+      firstName: ' ',
+      contact: 'nope',
+      zip: '9021',
+      county: 'Washoe',
+      age: 'child',
+    });
     expect(response.status).toBe(400);
     const body: { errors: Record<string, string> } = await response.json();
-    expect(Object.keys(body.errors).sort()).toEqual(['age', 'contact', 'firstName', 'zip']);
+    expect(Object.keys(body.errors).sort()).toEqual([
+      'age',
+      'contact',
+      'county',
+      'firstName',
+      'zip',
+    ]);
     expect(await count('participants')).toBe(0);
   });
 

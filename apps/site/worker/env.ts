@@ -1,4 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
+import type { County } from './validate';
 
 /**
  * What the Worker is given. Everything past ASSETS is optional so the same
@@ -68,9 +69,9 @@ export interface Participant {
   contact: string;
   contactType: ContactType;
   zip: string;
+  county: County | null;
   instagram: string | null;
   age: AgeGroup;
-  newsletter: boolean;
 }
 
 /** What every API handler gets. `now` is read once so a request sees one time. */

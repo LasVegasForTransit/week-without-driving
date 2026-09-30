@@ -21,11 +21,6 @@ export const NOTICES: Record<string, Notice> = {
   ),
   'no-reason': problem('Pick why you are removing the entry.'),
   'tag-entered': done('Tag logged as that day’s entry for the person who saved the handle.'),
-  'tag-handle': done('Nobody saved that handle at sign-up, so the tag is a handle-only entry.'),
-  'mail-entered': done('Mailed entry logged for their sign-up.'),
-  'mail-new': done(
-    'Mailed entry logged. They hadn’t signed up, so they now have a sign-up with no account.',
-  ),
   drawn: done('Winner drawn. Their details are under Draw the winner.'),
   'draw-confirm': problem('Tick the box to confirm, then draw.'),
   'draw-not-open': problem('The draw opens October 14, 2026.'),

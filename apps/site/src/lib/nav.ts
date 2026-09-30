@@ -29,7 +29,7 @@ export const mainNav = [
   },
   {
     href: '/giveaway',
-    label: 'Win prizes',
+    label: 'Win a bus pass',
     help: 'Share a trip without the car to win a bus pass.',
     icon: 'mdi:gift-outline',
   },

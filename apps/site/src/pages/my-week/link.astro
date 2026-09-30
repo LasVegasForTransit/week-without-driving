@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Get my link: sends the "Open my week" link again to the phone number or
-// email someone signed up with. The confirmation is the same whether or
+// Get my link: sends the "Open my week" link again to the email
+// someone signed up with. The confirmation is the same whether or
 // not the contact matches a sign-up, so the page never reveals who signed
 // up. The behaviour is in /scripts/my-week-link.js. A link that has
 // expired or doesn't work lands here with ?expired=1.
@@ -19,16 +19,17 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       That link has expired or doesn’t work. Get a new one below.
     </p>
     <p class="page-lede">
-      Type the phone number or email you signed up with. We’ll send a link that opens My week on
-      this phone.
+      Type the email address you signed up with. We’ll request a link that opens My week on this
+      phone.
     </p>
 
     <form data-link-form class="getlink__card" novalidate data-needs-connection="get-link">
       <div class="form-field">
-        <label for="gl-contact" class="form-label">Phone number or email</label>
+        <label for="gl-contact" class="form-label">Email address</label>
         <input
           id="gl-contact"
           name="contact"
+          type="email"
           class="form-input"
           autocomplete="email"
           autocapitalize="off"
@@ -52,13 +53,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </form>
 
     <div data-link-sent hidden class="getlink__card" role="status">
-      <h2 class="getlink__h2">Check your texts or email.</h2>
+      <h2 class="getlink__h2">Check your email.</h2>
       <p class="mt-2">
-        If that matches a sign-up, we sent your link. It can take a few minutes. Check your spam
-        folder too.
+        If that matches a sign-up and delivery is available, a link should arrive in a few minutes.
+        Check your spam folder too.
       </p>
       <p class="mt-4">
-        Nothing came? Try the other phone number or email you might have used, or email
+        Nothing came? Try another email address you might have used, or email
         <a href="mailto:wwd@lasvegasfortransit.org" class="body-link">wwd@lasvegasfortransit.org</a
         >.
       </p>

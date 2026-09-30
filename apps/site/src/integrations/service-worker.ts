@@ -16,6 +16,7 @@ import type { AstroIntegration } from 'astro';
 
 /** Pages saved on the phone after one visit. My week and Sign up never are. */
 export const PRECACHE_PAGES = [
+  '/',
   '/offline',
   '/guides',
   '/guides/pay-your-fare',
@@ -34,6 +35,9 @@ export const DATA_FILES = ['/data/stops.json', '/data/routes.json'] as const;
 /** The most the service worker may download in the background, in bytes. */
 export const PRECACHE_LIMIT = 2_000_000;
 
+/** An install without either page cannot open from the home screen offline. */
+const REQUIRED_PAGES = new Set(['/', '/offline']);
+
 /** Files sent compressed, so their download size is their gzip size. */
 const COMPRESSED = /\.(?:html|js|mjs|css|json|svg|webmanifest|txt|xml)$/;
 
@@ -45,7 +49,7 @@ export interface PrecacheEntry {
   url: string;
   revision: string;
   bytes: number;
-  /** Part of the offline page, so saved even when the phone asks to save data. */
+  /** Part of Home or the offline page, so saved even under Save Data. */
   core: boolean;
 }
 
@@ -182,19 +186,18 @@ class PrecacheList {
   }
 
   /**
-   * Adds a page and the files its HTML asks for. The offline page's own
-   * files are saved even under Save-Data; the fonts its stylesheets ask
-   * for are saved only without it.
+   * Adds a page and the files its HTML asks for. Home and the offline
+   * page, including their stylesheets' assets, are saved under Save Data.
    */
   addPage(url: string, html: Uint8Array): void {
-    const core = url === '/offline';
+    const core = REQUIRED_PAGES.has(url);
     this.add(url, html, core);
     for (const file of referencedByHtml(text(html)).filter((f) => this.exists(f))) {
       const content = this.read(file);
       this.add(file, content, core);
       if (!file.endsWith('.css')) continue;
       for (const asset of referencedByCss(text(content))) {
-        if (this.exists(asset)) this.add(asset, this.read(asset), false);
+        if (this.exists(asset)) this.add(asset, this.read(asset), core);
       }
     }
   }
@@ -234,6 +237,12 @@ export function serviceWorker(): AstroIntegration {
       'astro:build:done': ({ dir, logger }) => {
         const dist = fileURLToPath(dir);
         const { build, total, missing } = buildManifest(dist);
+        const requiredMissing = missing.filter((page) => REQUIRED_PAGES.has(page));
+        if (requiredMissing.length > 0) {
+          throw new Error(
+            `The build is missing a required offline launch page: ${requiredMissing.join(', ')}.`,
+          );
+        }
         for (const page of missing) {
           logger.warn(`${page} is in the precache list but the build did not make it.`);
         }

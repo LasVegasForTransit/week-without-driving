@@ -1,6 +1,6 @@
 import { type AdminContext, field } from './common';
 import { seeOther } from './html';
-import { ELIGIBLE_SQL, drawOpen, randomIndex } from './pick';
+import { ELIGIBLE_SQL, PENDING_REVIEW_SQL, drawOpen, randomIndex } from './pick';
 
 /**
  * POST /admin/draw: draws the winner, or draws again when a winner doesn't
@@ -27,9 +27,7 @@ export async function drawWinner(c: AdminContext, form: FormData): Promise<Respo
 
   const db = c.env.DB;
   const [waiting, eligible] = await db.batch<Record<string, unknown>>([
-    db.prepare(
-      'SELECT count(*) AS n FROM checkins WHERE removed_at IS NULL AND checked_at IS NULL',
-    ),
+    db.prepare(PENDING_REVIEW_SQL),
     db.prepare(ELIGIBLE_SQL),
   ]);
   if (Number(waiting?.results[0]?.n ?? 0) > 0) return back('draw-unchecked');

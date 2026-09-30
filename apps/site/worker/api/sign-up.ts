@@ -16,8 +16,10 @@ import { FIELD_MESSAGES, checkSignUp, parseContact } from '../validate';
 
 export const REPLIES = {
   checkAnswers: 'Check the answers above, then try again.',
-  alreadySignedUp: 'You’ve already signed up with that. We sent your link to it.',
-  linkSent: 'If that matches a sign-up, we sent your link.',
+  alreadySignedUp:
+    'You’ve already signed up with that email. If delivery is available, we’ll try to send your link.',
+  linkSent: 'If that matches a sign-up, we’ll try to email your link.',
+  emailUnavailable: 'Email links are unavailable right now. Please try again later.',
   tooManySignUps: 'Too many tries. Wait a minute, then try again.',
   tooManyLinks: 'Too many requests from this connection. Try again in an hour.',
   botFailed: 'We couldn’t check that you’re a person. Reload the page and try again.',
@@ -83,7 +85,12 @@ function botProblem(check: Exclude<BotCheck, 'pass'>): Response {
  */
 async function alreadySignedUp(c: ApiContext, row: OwnerRow): Promise<Response> {
   const preview = await deliverLink(c, owner(row), true);
-  return json({ status: 'existing', message: REPLIES.alreadySignedUp, ...preview });
+  return json({
+    status: 'existing',
+    message: REPLIES.alreadySignedUp,
+    emailStatus: c.env.RESEND_API_KEY ? 'queued' : 'unavailable',
+    ...preview,
+  });
 }
 
 export async function signUp(c: ApiContext): Promise<Response> {
@@ -108,7 +115,7 @@ export async function signUp(c: ApiContext): Promise<Response> {
   const session = await newSession(c.env.DB, id, c.now);
   const insert = c.env.DB.prepare(
     `INSERT INTO participants
-       (id, first_name, contact, contact_type, zip, instagram, age, newsletter, created_at, updated_at)
+       (id, first_name, contact, contact_type, zip, county, instagram, age, created_at, updated_at)
      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?9)`,
   ).bind(
     id,
@@ -116,9 +123,9 @@ export async function signUp(c: ApiContext): Promise<Response> {
     contact.value,
     contact.type,
     details.zip,
+    details.county,
     details.instagram,
     details.age,
-    details.newsletter ? 1 : 0,
     stamp,
   );
   try {
@@ -139,7 +146,12 @@ export async function signUp(c: ApiContext): Promise<Response> {
     false,
   );
   return json(
-    { status: 'created', redirect: '/my-week?welcome=1', ...preview },
+    {
+      status: 'created',
+      redirect: `/my-week?welcome=1&email=${c.env.RESEND_API_KEY ? 'queued' : 'unavailable'}`,
+      emailStatus: c.env.RESEND_API_KEY ? 'queued' : 'unavailable',
+      ...preview,
+    },
     201,
     signInCookies(session.token),
   );
@@ -153,7 +165,7 @@ export async function sendMyLink(c: ApiContext): Promise<Response> {
   const body = await readJsonObject(c.request);
   if (!body) return problem(400, MESSAGES.badRequest);
   const contact = parseContact(typeof body.contact === 'string' ? body.contact : '');
-  if (!contact) {
+  if (contact?.type !== 'email') {
     return problem(400, FIELD_MESSAGES.contact, { errors: { contact: FIELD_MESSAGES.contact } });
   }
 
@@ -163,6 +175,9 @@ export async function sendMyLink(c: ApiContext): Promise<Response> {
   }
   const bot = await checkTurnstile(c.env, body.turnstileToken, ip);
   if (bot !== 'pass') return botProblem(bot);
+  if (!c.env.RESEND_API_KEY && c.env.PREVIEW_SHOW_LINKS !== 'true') {
+    return problem(503, REPLIES.emailUnavailable);
+  }
 
   const row = await findByContact(c, contact.value);
   const preview = row ? await deliverLink(c, owner(row), true) : {};

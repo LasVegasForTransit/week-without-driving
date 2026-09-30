@@ -12,9 +12,9 @@ const valid = {
   firstName: '  Rosa  ',
   contact: 'rosa@example.com',
   zip: '89101',
+  county: 'Clark',
   instagram: '',
   age: 'teen',
-  newsletter: false,
 };
 
 describe('parseContact', () => {
@@ -50,7 +50,7 @@ describe('checkSignUp', () => {
   it('accepts a complete sign-up and tidies it', () => {
     const checked = checkSignUp(valid);
     expect(checked).toEqual({
-      details: { firstName: 'Rosa', zip: '89101', instagram: null, age: 'teen', newsletter: false },
+      details: { firstName: 'Rosa', zip: '89101', county: 'Clark', instagram: null, age: 'teen' },
       contact: { type: 'email', value: 'rosa@example.com' },
     });
   });
@@ -74,10 +74,13 @@ describe('checkSignUp', () => {
     }
   });
 
-  it('takes only Southern Nevada ZIP codes', () => {
-    expect('details' in checkSignUp({ ...valid, zip: '89002' })).toBe(true);
-    const outside = checkSignUp({ ...valid, zip: '90210' });
-    expect('errors' in outside && outside.errors.zip).toMatch(/Southern Nevada/);
+  it('accepts a five-digit ZIP in each eligible county and rejects other counties', () => {
+    for (const county of ['Clark', 'Esmeralda', 'Lincoln', 'Nye']) {
+      expect('details' in checkSignUp({ ...valid, county, zip: '89301' })).toBe(true);
+    }
+    const outside = checkSignUp({ ...valid, county: 'Washoe' });
+    expect('errors' in outside && outside.errors.county).toBeTruthy();
+    expect('errors' in checkSignUp({ ...valid, county: '' })).toBe(true);
   });
 
   it('keeps names to 40 characters', () => {
@@ -95,11 +98,9 @@ describe('checkSignUp', () => {
     expect('errors' in checkDetails({ ...valid, instagram: 'rosa rides!' })).toBe(true);
   });
 
-  it('treats only a real true as a newsletter yes', () => {
-    const yes = checkDetails({ ...valid, newsletter: true });
-    const stringy = checkDetails({ ...valid, newsletter: 'true' });
-    expect('details' in yes && yes.details.newsletter).toBe(true);
-    expect('details' in stringy && stringy.details.newsletter).toBe(false);
+  it('requires an email address for a web sign-up', () => {
+    const phone = checkSignUp({ ...valid, contact: '702-555-0123' });
+    expect('errors' in phone && phone.errors.contact).toMatch(/email/i);
   });
 });
 

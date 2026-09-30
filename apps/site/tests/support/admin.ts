@@ -128,6 +128,7 @@ export interface EntrySeed {
   day?: number;
   source?: 'post' | 'tag' | 'mail';
   modes?: string;
+  description?: string | null;
   hard?: string | null;
   postUrl?: string | null;
   screenshotKey?: string | null;
@@ -142,6 +143,7 @@ const ENTRY_DEFAULTS = {
   day: 3,
   source: 'post',
   modes: 'bus',
+  description: 'I took a bus trip without driving.',
   hard: null,
   postUrl: 'https://www.instagram.com/p/SEED/',
   screenshotKey: null,
@@ -158,9 +160,9 @@ export async function seedEntry(platform: Platform, seed: EntrySeed): Promise<nu
     ? ['2026-10-04T02:00:00.000Z', 'checker@lvbt.test', 'no-trip']
     : [null, null, null];
   const row = await platform.env.DB.prepare(
-    `INSERT INTO checkins (participant_id, instagram, day, source, created_at, modes, hard,
+    `INSERT INTO checkins (participant_id, instagram, day, source, created_at, modes, description, hard,
        post_url, screenshot_key, checked_at, checked_by, removed_at, removed_by, removal_reason)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14) RETURNING id`,
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15) RETURNING id`,
   )
     .bind(
       entry.participantId,
@@ -169,6 +171,7 @@ export async function seedEntry(platform: Platform, seed: EntrySeed): Promise<nu
       entry.source,
       entry.createdAt,
       entry.modes,
+      entry.description,
       entry.hard,
       entry.postUrl,
       entry.screenshotKey,
@@ -183,20 +186,27 @@ export async function seedEntry(platform: Platform, seed: EntrySeed): Promise<nu
 /** Puts a sign-up straight into the database and returns its id. */
 export async function seedParticipant(
   platform: Platform,
-  person: { firstName?: string; contact: string; instagram?: string | null; createdAt?: string },
+  person: {
+    firstName?: string;
+    contact: string;
+    instagram?: string | null;
+    county?: string | null;
+    createdAt?: string;
+  },
 ): Promise<string> {
   const id = crypto.randomUUID();
   const type = person.contact.includes('@') ? 'email' : 'phone';
   await platform.env.DB.prepare(
     `INSERT INTO participants
-       (id, first_name, contact, contact_type, zip, instagram, age, newsletter, created_at, updated_at)
-     VALUES (?1, ?2, ?3, ?4, '89101', ?5, 'adult', 0, ?6, ?6)`,
+       (id, first_name, contact, contact_type, zip, county, instagram, age, created_at, updated_at)
+     VALUES (?1, ?2, ?3, ?4, '89101', ?5, ?6, 'adult', ?7, ?7)`,
   )
     .bind(
       id,
       person.firstName ?? 'Ana',
       person.contact,
       type,
+      person.county === undefined ? 'Clark' : person.county,
       person.instagram ?? null,
       person.createdAt ?? '2026-09-20T00:00:00.000Z',
     )

@@ -94,6 +94,19 @@ describe('admin draw', () => {
     ]);
   });
 
+  it('does not let old mail or ineligible sign-ups hold up the draw', async () => {
+    const ana = await person('ana@example.com');
+    const winning = await seedEntry(platform, { participantId: ana, checked: true });
+    await seedEntry(platform, {
+      participantId: await person('mail@example.com'),
+      day: 1,
+      source: 'mail',
+    });
+    await seedEntry(platform, { participantId: await person('+17025550188'), day: 2 });
+    expect(noticeOf(await draw())).toBe('drawn');
+    expect(await draws()).toMatchObject([{ entry_id: winning, eligible_count: 1 }]);
+  });
+
   it('leaves out anyone whose email is a volunteer’s', async () => {
     const sam = await person(VOLUNTEER);
     const ana = await person('ana@example.com');
@@ -106,10 +119,11 @@ describe('admin draw', () => {
 
   it('draws again without earlier winners, and shows the winner in full', async () => {
     const ana = await person('ana@example.com');
-    const ben = await person('+17025550188');
+    const ben = await person('ben@example.com');
+    const cara = await person('cara@example.com', 'cara.rides');
     await seedEntry(platform, { participantId: ana, day: 1, checked: true });
     await seedEntry(platform, { participantId: ben, day: 1, checked: true });
-    await seedEntry(platform, { instagram: 'solo.rider', day: 1, source: 'tag', checked: true });
+    await seedEntry(platform, { participantId: cara, day: 1, source: 'tag', checked: true });
     await draw(1);
     await draw(2);
     await draw(3);
@@ -121,8 +135,8 @@ describe('admin draw', () => {
     const page = await (await admin.get('/admin')).text();
     const latest = rounds[2]?.entrant ?? '';
     if (latest === ana) expect(page).toContain('ana@example.com');
-    else if (latest === ben) expect(page).toContain('(702) 555-0188');
-    else expect(page).toContain('@solo.rider');
+    else if (latest === ben) expect(page).toContain('ben@example.com');
+    else expect(page).toContain('cara@example.com');
   });
 
   it('makes one draw when two volunteers draw at the same moment', async () => {
@@ -135,18 +149,19 @@ describe('admin draw', () => {
     expect(await draws()).toHaveLength(1);
   });
 
-  it('counts a handle-only tag as the entry of the person who later saved the handle', async () => {
-    await seedEntry(platform, { instagram: 'ana.rides', day: 2, source: 'tag', checked: true });
-    await seedEntry(platform, { instagram: 'ana.rides', day: 5, source: 'tag', checked: true });
-    const ana = await seedParticipant(platform, {
-      contact: 'ana@example.com',
-      instagram: 'ana.rides',
-      createdAt: '2026-10-06T00:00:00.000Z',
+  it('excludes unregistered tags, missing counties, and phone accounts', async () => {
+    const ana = await person('ana@example.com');
+    const outside = await seedParticipant(platform, {
+      contact: 'outside@example.com',
+      county: null,
     });
+    const phone = await person('+17025550188');
     await seedEntry(platform, { participantId: ana, day: 2, checked: true });
-    await draw();
-    // Day 2 counts once, day 5's tag counts for Ana.
-    expect(await draws()).toMatchObject([{ entrant: ana, eligible_count: 2 }]);
+    await seedEntry(platform, { instagram: 'solo.rider', day: 2, source: 'tag', checked: true });
+    await seedEntry(platform, { participantId: outside, day: 2, checked: true });
+    await seedEntry(platform, { participantId: phone, day: 2, checked: true });
+    expect(noticeOf(await draw())).toBe('drawn');
+    expect(await draws()).toMatchObject([{ entrant: ana, eligible_count: 1 }]);
   });
 
   it('gives each entry the same chance', () => {

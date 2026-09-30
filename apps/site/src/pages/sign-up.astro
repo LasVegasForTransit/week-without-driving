@@ -4,7 +4,7 @@ import { Icon } from 'astro-icon/components';
 import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 
 // Sign up to win. Signing up makes someone eligible for LVBT's giveaway
-// (each shared trip is then an entry) and becomes their identity on
+// (each logged trip is then an entry) and becomes their identity on
 // lvwwd.org: their phone stays signed in, and the link we send opens My
 // week on any other phone. Anyone can take part in Week Without Driving
 // without signing up; this form is only for the giveaway and My week. The
@@ -13,7 +13,7 @@ import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 // another on one tablet, and /scripts/needs-connection.js dims "Sign up"
 // while the phone is offline.
 const title = 'Sign up to win · Week Without Driving Las Vegas';
-const description = `Sign up to win a one-month RTC bus pass. Each day you take a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
+const description = `Sign up to win a 30-day RTC bus pass. Each day you log a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -21,13 +21,12 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
     <div class="signup__intro">
       <p class="signup__prize">
         <Icon name="mdi:gift-outline" class="size-5" aria-hidden="true" />
-        Win a one-month RTC bus pass
+        Win a 30-day RTC bus pass
       </p>
       <h1 class="page-title signup__title">Sign up to win</h1>
       <p class="signup__lede">
-        Sign up once. Then, each day you take a trip without driving, share it for one entry, up to{
-          ' '
-        }
+        Sign up once. Then, each day you take a trip without driving, tell us about it for one
+        entry, up to{' '}
         {wwd.maxEntries}.
       </p>
       <p class="signup__aside">
@@ -36,7 +35,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       </p>
       <ol class="signup__next" aria-label="What happens next">
         <li>You land on My week. This phone stays signed in.</li>
-        <li>Each day you skip the car, share a photo of your trip. Each day is one entry.</li>
+        <li>Each day you skip the car, describe your trip. A post or photo is optional.</li>
         <li>We draw the winner by October 15 and contact them.</li>
       </ol>
     </div>
@@ -74,13 +73,15 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       </div>
 
       <div class="form-field">
-        <label for="su-contact" class="form-label">Phone number or email</label>
+        <label for="su-contact" class="form-label">Email address</label>
         <p id="su-contact-help" class="form-help" data-contact-help>
-          We use it to tell you if you win, and to send your link to My week.
+          We use it to tell you if you win and to request a link to My week when email delivery is
+          available.
         </p>
         <input
           id="su-contact"
           name="contact"
+          type="email"
           class="form-input"
           autocomplete="email"
           autocapitalize="off"
@@ -95,7 +96,7 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       <div class="form-field">
         <label for="su-zip" class="form-label">ZIP code</label>
         <p id="su-zip-help" class="form-help">
-          The giveaway is for people who live in Southern Nevada.
+          The giveaway is for people who live in Clark, Esmeralda, Lincoln or Nye County.
         </p>
         <input
           id="su-zip"
@@ -111,11 +112,30 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
       </div>
 
       <div class="form-field">
+        <label for="su-county" class="form-label">County where you live</label>
+        <select
+          id="su-county"
+          name="county"
+          class="form-input"
+          required
+          aria-describedby="su-county-error"
+        >
+          <option value="">Choose your county</option>
+          <option value="Clark">Clark</option>
+          <option value="Esmeralda">Esmeralda</option>
+          <option value="Lincoln">Lincoln</option>
+          <option value="Nye">Nye</option>
+        </select>
+        <p id="su-county-error" class="form-error" data-error-for="county" aria-live="polite"></p>
+      </div>
+
+      <div class="form-field">
         <label for="su-ig" class="form-label">
           Instagram <span class="form-optional">(optional)</span>
         </label>
         <p id="su-ig-help" class="form-help">
-          Tag @lasvegasfortransit when you post your trip, and we count it for you.
+          If you tag @lasvegasfortransit in a trip post, we can count it for you. Posting is
+          optional.
         </p>
         <div class="form-prefix">
           <span aria-hidden="true">@</span>
@@ -145,22 +165,18 @@ const description = `Sign up to win a one-month RTC bus pass. Each day you take 
         <p id="su-age-error" class="form-error" data-error-for="age" aria-live="polite"></p>
       </fieldset>
 
-      <fieldset class="form-choices">
-        <legend class="sr-only">Newsletter</legend>
-        <label class="check-row">
-          <input type="checkbox" name="newsletter" />
-          <span
-            >Also send me LVBT’s newsletter: transit news and easy ways to help in Las Vegas.</span
-          >
-        </label>
-      </fieldset>
-
       <p class="signup__legal">
         By signing up, you agree to the <a href="/giveaway/rules" class="body-link"
           >Official Rules</a
         >. We delete your details on November 30, 2026. See <a href="/privacy" class="body-link"
           >Privacy</a
         >.
+      </p>
+      <p class="signup__legal">
+        Want transit news after the week? <a
+          href="https://mail.lasvegasfortransit.org/"
+          class="body-link">Sign up for LVBT’s newsletter</a
+        > separately.
       </p>
 
       {/* Turnstile, the bot check. The Worker writes the site key into data-sitekey. */}

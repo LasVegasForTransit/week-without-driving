@@ -41,8 +41,8 @@ const bannerCards = BANNERS.map((banner) => ({
 
   <div class="kit" data-kit-body hidden>
     <p class="section-intro">
-      Pick your organization to get your link, QR code, banners and flyers. Every sign-up made
-      through your link counts toward your organization.
+      Use the general link, QR code, banners and flyer now. A named partner link is available after
+      LVBT adds that organization to the roster.
     </p>
 
     <div class="kit__picker">
@@ -50,9 +50,11 @@ const bannerCards = BANNERS.map((banner) => ({
       <select id="kit-organization" class="kit__select" data-kit-picker>
         <option value="" selected></option>
         {partners.map((partner) => <option value={partner.slug}>{partner.name}</option>)}
-        <option value={GENERAL}>None (general materials)</option>
+        <option value={GENERAL}>General materials</option>
       </select>
-      <p class="kit__hint" data-kit-hint>Pick your organization to see your link and materials.</p>
+      <p class="kit__hint" data-kit-hint>
+        Choose General materials to get a link and files you can share today.
+      </p>
     </div>
 
     <div class="kit__materials" data-kit-materials hidden>

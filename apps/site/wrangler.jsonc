@@ -51,12 +51,12 @@
   // The secrets, the Turnstile widget, volunteer sign-in (Cloudflare Access)
   // and email are listed in platform.json; `pnpm bootstrap --production`
   // sets them up and `pnpm preflight --production` checks them. The bot
-  // check stays off until the Turnstile widget exists: then add its public
-  // site key here as TURNSTILE_SITE_KEY and remove BOT_CHECK. Sign-up and
-  // "Get my link" keep their rate limits either way.
+  // check requires the Turnstile widget, its public TURNSTILE_SITE_KEY var,
+  // and its TURNSTILE_SECRET Worker secret. Sign-up and "Get my link" fail
+  // closed until they are configured.
   //
   // VAPID_SUBJECT is the contact push services use to reach LVBT about its
   // reminder notifications. The key that signs them, VAPID_PRIVATE_KEY, is
   // a secret that `pnpm bootstrap --production` generates once.
-  "vars": { "BOT_CHECK": "off", "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org" },
+  "vars": { "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org" },
 }

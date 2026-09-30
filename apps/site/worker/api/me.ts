@@ -13,7 +13,7 @@ import { listTrips } from './week';
  */
 
 const CONTACT_IS_FIXED =
-  'You can’t change your phone number or email here. Email wwd@lasvegasfortransit.org and we’ll change it for you.';
+  'You can’t change your sign-up contact here. Email wwd@lasvegasfortransit.org for help.';
 
 export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
   const trips = await listTrips(c, me);
@@ -22,9 +22,9 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     contactMasked: maskContact(me.contact, me.contactType),
     contactType: me.contactType,
     zip: me.zip,
+    county: me.county,
     instagram: me.instagram,
     age: me.age,
-    newsletter: me.newsletter,
     days: trips.map((trip) => trip.day),
     trips,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
@@ -39,24 +39,24 @@ export async function updateMe(c: ApiContext, me: Participant): Promise<Response
   const checked = checkDetails({
     firstName: me.firstName,
     zip: me.zip,
+    county: me.county,
     instagram: me.instagram ?? '',
     age: me.age,
-    newsletter: me.newsletter,
     ...body,
   });
   if ('errors' in checked) return problem(400, REPLIES.checkAnswers, { errors: checked.errors });
   const { details } = checked;
   await c.env.DB.prepare(
     `UPDATE participants
-     SET first_name = ?1, zip = ?2, instagram = ?3, age = ?4, newsletter = ?5, updated_at = ?6
+     SET first_name = ?1, zip = ?2, county = ?3, instagram = ?4, age = ?5, updated_at = ?6
      WHERE id = ?7`,
   )
     .bind(
       details.firstName,
       details.zip,
+      details.county,
       details.instagram,
       details.age,
-      details.newsletter ? 1 : 0,
       c.now.toISOString(),
       me.id,
     )
