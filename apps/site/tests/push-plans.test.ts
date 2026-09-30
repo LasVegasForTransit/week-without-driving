@@ -85,7 +85,7 @@ describe('event reminders for saved plans', () => {
     return browser;
   }
 
-  const run = (at: string, env: object = enabled) => platform.cron(PLAN_PUSH_CRONS[1], at, env);
+  const run = (at: string, env: object = enabled) => platform.cron(PLAN_PUSH_CRONS[0], at, env);
 
   it('sends an event-specific push to each phone once when the lead time arrives', async () => {
     const planId = await plan();
@@ -260,10 +260,10 @@ describe('event reminders for saved plans', () => {
     expect(service.requests).toHaveLength(2);
   });
 
-  it('uses the September 30 cron for one-day lead times', async () => {
+  it('handles September 30 for one-day lead times', async () => {
     await plan(1440, 1);
     await subscribe();
-    await platform.cron(PLAN_PUSH_CRONS[0], '2026-09-30T17:00:00.000Z', enabled);
+    await run('2026-09-30T17:00:00.000Z');
     expect(service.requests).toHaveLength(1);
   });
 
@@ -274,6 +274,13 @@ describe('event reminders for saved plans', () => {
     expect(service.requests).toHaveLength(0);
     await run('2026-10-09T06:15:00.000Z');
     expect(service.requests).toHaveLength(1);
+  });
+
+  it('leaves the all-year clock idle outside the campaign reminder window', async () => {
+    await plan();
+    await subscribe();
+    await run('2026-10-10T16:00:00.000Z');
+    expect(service.requests).toHaveLength(0);
   });
 
   it('uses actual execution time when a scheduled run arrives late', async () => {

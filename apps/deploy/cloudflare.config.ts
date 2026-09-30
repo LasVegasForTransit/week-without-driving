@@ -29,13 +29,7 @@ export default defineConfig({
         schedule: '0 13 * * *',
       }),
       triggers.scheduled({
-        schedule: '1-59/2 15 1-8 10 *',
-      }),
-      triggers.scheduled({
-        schedule: '*/5 * 30 9 *',
-      }),
-      triggers.scheduled({
-        schedule: '*/5 * 1-9 10 *',
+        schedule: '2-59/5 * * * *',
       }),
     ],
     env: {
