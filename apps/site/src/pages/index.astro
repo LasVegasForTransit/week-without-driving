@@ -7,7 +7,7 @@ import Steps from '../components/Steps.astro';
 import { photos } from '../lib/photos';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
-import { days, prizes, proclamations } from '../lib/campaign';
+import { days, mysteryPrize, prizes, proclamations } from '../lib/campaign';
 import { partners } from '../lib/partners';
 import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { STAY_INVOLVED } from '../lib/newsletter';
@@ -193,7 +193,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       </div>
       <ul class="home-prizes__list">
         {
-          prizes.map((p) => (
+          [...prizes, mysteryPrize].map((p) => (
             <li class="home-prize">
               <PhotoSlot
                 class="home-prize__photo"

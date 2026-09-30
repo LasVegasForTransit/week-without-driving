@@ -2,8 +2,7 @@ import { photos, type Photo } from './photos';
 import { wwd } from './wwd';
 
 // Campaign content that LVBT fills in as it is confirmed: the daily
-// Instagram hosts and proclamations are shown when confirmed. Prize
-// information describes only the committed RTC bus pass.
+// Instagram hosts, proclamations, and extra prizes are shown when confirmed.
 
 const dayFormat = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
@@ -30,13 +29,15 @@ export const proclamations: Array<{ government: string; url: string | null }> = 
 ];
 
 /** The giveaway prizes, as the Giveaway page describes them. */
-export const prizes: Array<{
+interface Prize {
   name: string;
   body: string;
   photo: string;
   image?: Photo;
   icon: string;
-}> = [
+}
+
+export const prizes: Prize[] = [
   {
     name: 'A 30-day RTC bus pass',
     body: 'One 30-day pass for RTC buses.',
@@ -45,6 +46,14 @@ export const prizes: Array<{
     icon: 'mdi:bus',
   },
 ];
+
+/** A teaser only: do not use this as a confirmed giveaway prize. */
+export const mysteryPrize: Prize = {
+  name: 'Mystery prizes coming soon',
+  body: 'More prize details will be announced here.',
+  photo: 'A wrapped mystery gift',
+  icon: 'mdi:gift-outline',
+};
 
 /** The three steps to win, shown on How it works and the giveaway page. */
 export const winSteps = [
