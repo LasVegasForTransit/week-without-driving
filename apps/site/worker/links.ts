@@ -1,7 +1,7 @@
 import { signInCookies } from './cookies';
 import type { ApiContext, Env, Participant } from './env';
 import { LIMITS, overLimit } from './rate-limit';
-import { sendLink } from './send';
+import { type Delivery, sendLink } from './send';
 import { newSession } from './session';
 import { SIGNED_IN_UNTIL } from './time';
 import { TOKEN_PATTERN, newToken, sha256 } from './tokens';
@@ -16,7 +16,10 @@ import { TOKEN_PATTERN, newToken, sha256 } from './tokens';
 type LinkOwner = Pick<Participant, 'id' | 'firstName' | 'contact' | 'contactType'>;
 
 /** Makes a new link for someone, sends it, records it, and returns it. */
-async function issueLink(c: ApiContext, owner: LinkOwner): Promise<string> {
+async function issueLink(
+  c: ApiContext,
+  owner: LinkOwner,
+): Promise<{ link: string; delivery: Delivery }> {
   const token = newToken();
   const link = `${c.url.origin}/my-week?t=${token}`;
   const delivery = await sendLink(c.env, owner, link);
@@ -33,30 +36,35 @@ async function issueLink(c: ApiContext, owner: LinkOwner): Promise<string> {
       SIGNED_IN_UNTIL.toISOString(),
     )
     .run();
-  return link;
+  return { link, delivery };
 }
 
 /**
- * Sends someone their link without making the page wait on the email
- * service, which also keeps "Get my link" equally quick whether or not the
- * contact matched. The preview Worker waits instead, so it can hand the
- * link back for testers. `limited` applies the per-contact hourly limit;
- * over it, nothing is sent and nothing is said.
+ * Link recovery sends without making the page wait on the email service,
+ * keeping its response equally quick whether or not the contact matched.
+ * A new signup waits so it can report a rejected email accurately. The
+ * preview Worker also waits to hand the link back to testers. `limited`
+ * applies the per-contact hourly limit; over it, nothing is sent or said.
  */
 export async function deliverLink(
   c: ApiContext,
   owner: LinkOwner,
   limited: boolean,
-): Promise<{ previewLink?: string }> {
+  awaitDelivery = false,
+): Promise<{ previewLink?: string; delivery?: Delivery }> {
   const work = (async () => {
     if (limited && (await overLimit(c.env.DB, LIMITS.linkPerContact, owner.contact, c.now))) {
       return undefined;
     }
     return issueLink(c, owner);
   })();
-  if (c.env.PREVIEW_SHOW_LINKS === 'true') {
-    const link = await work;
-    return link ? { previewLink: link } : {};
+  if (c.env.PREVIEW_SHOW_LINKS === 'true' || awaitDelivery) {
+    const result = await work;
+    if (!result) return {};
+    return {
+      ...(c.env.PREVIEW_SHOW_LINKS === 'true' ? { previewLink: result.link } : {}),
+      delivery: result.delivery,
+    };
   }
   c.ctx.waitUntil(
     work.catch((error: unknown) => {
