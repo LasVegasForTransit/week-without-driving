@@ -42,7 +42,7 @@ test('the current partners and sharing materials are visible', async ({ page }) 
   await expect(page.getByRole('heading', { name: 'Partner kit' })).toBeVisible();
   const options = await picker(page).locator('option').allTextContents();
   expect(options.filter((text) => text.trim() !== '')).toEqual([
-    'General Week Without Driving link',
+    'General link',
     'RTC of Southern Nevada',
     'Sierra Club Toiyabe Chapter',
   ]);
@@ -81,7 +81,7 @@ test('general materials: the link, QR code, banners and snippet credit no one', 
   page,
 }) => {
   await page.goto('/partners');
-  await picker(page).selectOption({ label: 'General Week Without Driving link' });
+  await picker(page).selectOption({ label: 'General link' });
   expect(new URL(page.url()).hash).toBe('#kit-general');
   await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway');
   await expect(page.getByText('The general link does not credit a partner.')).toBeVisible();
