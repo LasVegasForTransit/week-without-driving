@@ -597,6 +597,26 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     justify-content: center;
     margin-top: 1.5rem;
   }
+  @media (min-width: 48rem) {
+    .home-partners > .container-page {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 1.5rem;
+    }
+    .home-partners .home-h2,
+    .home-partners .home-intro {
+      grid-column: 1;
+    }
+    .home-partners__action {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: end;
+      margin-top: 0;
+    }
+    .logo-wall {
+      grid-column: 1 / -1;
+    }
+  }
   .logo-wall {
     display: flex;
     gap: 1rem;
