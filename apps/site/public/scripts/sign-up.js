@@ -216,6 +216,11 @@
   function startEditing(me) {
     editing = true;
     if (unavailable) unavailable.hidden = true;
+    // The server blocks unavailable sign-up forms even if an older cached
+    // script clears `hidden`. Only a verified signed-in edit can unlock it.
+    form.removeAttribute('data-turnstile-unavailable');
+    form.removeAttribute('inert');
+    form.style.removeProperty('display');
     // Offline, needs-connection.js says saving waits, not signing up.
     form.setAttribute('data-needs-connection', 'edit-details');
     field('firstName').value = me.firstName ?? '';

@@ -275,6 +275,9 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
     background: var(--color-surface-container);
     border-radius: 1.25rem;
   }
+  form[data-turnstile-unavailable] {
+    display: none !important;
+  }
   .signup__h2 {
     font-size: 1.6rem;
     line-height: 1.15;

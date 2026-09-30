@@ -102,6 +102,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     background: var(--color-surface-container);
     border-radius: 1.25rem;
   }
+  form[data-turnstile-unavailable] {
+    display: none !important;
+  }
   .getlink__h2 {
     font-size: 1.6rem;
     line-height: 1.15;
