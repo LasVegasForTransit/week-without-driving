@@ -13,8 +13,8 @@
  * file changes this script, the browser installs the new version in the
  * background, and only files whose revision changed are downloaded again.
  * When the phone asks sites to save data (Save-Data), the background save
- * keeps Home and the offline page with their essential assets; everything
- * else is saved as the visitor opens it.
+ * still keeps the small public pages and stop data, so Home, guides, the
+ * bus finder, and Bingo work offline from the first visit.
  *
  * It also shows the daily reminders. Each one arrives as a push message,
  * encrypted by the Worker for this browser alone, with the day's title and
@@ -110,8 +110,8 @@ function keyOf(request) {
 }
 
 /**
- * The precache entries to download: all of them, or only the offline page
- * and what it needs when the phone asks sites to save data.
+ * The precache entries to download. Every public page is core because the
+ * complete download fits the offline budget, even under Save Data.
  *
  * @param {PrecacheEntry[]} precache
  * @param {boolean} saveData
@@ -341,17 +341,15 @@ if (BUILD) {
             await cache.put(key, await plain(response));
           }),
         );
-        if (!saveData) {
-          const data = await caches.open(CACHES.data);
-          await Promise.all(
-            DATA_FILES.map(async (url) => {
-              if (await data.match(url)) return;
-              const response = await fetch(url, { cache: 'no-cache' });
-              if (!response.ok) throw new Error(`Couldn’t save ${url}: ${response.status}`);
-              await data.put(url, response);
-            }),
-          );
-        }
+        const data = await caches.open(CACHES.data);
+        await Promise.all(
+          DATA_FILES.map(async (url) => {
+            if (await data.match(url)) return;
+            const response = await fetch(url, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`Couldn’t save ${url}: ${response.status}`);
+            await data.put(url, response);
+          }),
+        );
         // The first version takes over at once, so one visit is enough. A
         // later version waits until the visitor taps Refresh on the update
         // bar or closes every lvwwd.org tab.

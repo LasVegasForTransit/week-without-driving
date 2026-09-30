@@ -105,12 +105,16 @@ describe('installing', () => {
     );
   });
 
-  it('saves Home, the offline page, and their assets when the phone asks to save data', async () => {
+  it('saves Home, public tools, and stop data when the phone asks to save data', async () => {
     const { caches, extendable } = load(BUILD, { saveData: true });
     await extendable('install');
     expect(caches.everything().sort()).toEqual([
+      'wwd-data-v1: /data/routes.json',
+      'wwd-data-v1: /data/stops.json',
       'wwd-precache-v1: /?__rev=hom1',
       'wwd-precache-v1: /_astro/site.css?__rev=css1',
+      'wwd-precache-v1: /fonts/body.woff2?__rev=fon1',
+      'wwd-precache-v1: /guides?__rev=gui1',
       'wwd-precache-v1: /offline?__rev=off1',
       'wwd-precache-v1: /scripts/home.js?__rev=hjs1',
     ]);
@@ -163,6 +167,8 @@ describe('answering pages', () => {
       const response = await request(path, navigate).settled();
       expect(await response?.text()).toBe('<h1>Try a week without driving</h1>');
     }
+    const guides = await request('/guides', navigate).settled();
+    expect(await guides?.text()).toBe('<h1>Rider guides</h1>');
   });
 
   it('shows the network copy and stores it without the query string', async () => {

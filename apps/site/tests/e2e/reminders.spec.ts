@@ -10,9 +10,9 @@ const ME = {
   contactMasked: 'a•••@example.com',
   contactType: 'email',
   zip: '89101',
+  county: 'Clark',
   instagram: null,
   age: 'adult',
-  newsletter: false,
   days: [],
   trips: [],
   today: 0,
@@ -104,14 +104,32 @@ async function standInPushService(page: Page, options: StandIn = {}): Promise<vo
 
 const section = (page: Page) => page.locator('[data-remind]');
 
+/** Exposes the disabled launch feature to these simulated browser tests only. */
+async function openTestReminders(page: Page): Promise<void> {
+  await page.goto('/my-week');
+  await page.evaluate(() => {
+    const reminders = document.querySelector<HTMLElement>('[data-remind]');
+    if (reminders) reminders.hidden = false;
+  });
+}
+
 test.describe('the reminder section on My week', () => {
+  test('stays hidden in the public participant journey before phone delivery is proven', async ({
+    page,
+  }) => {
+    await signIn(page);
+    await page.goto('/my-week');
+    await expect(page.getByRole('heading', { name: /Hi, Ana/ })).toBeVisible();
+    await expect(section(page)).toBeHidden();
+  });
+
   test('sits below the shortcuts and above "Keep going after the week", with its own heading', async ({
     page,
   }) => {
     await signIn(page);
     await standInPushService(page);
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await page.goto('/my-week');
+    await openTestReminders(page);
 
     const heading = page.getByRole('heading', { level: 2, name: 'Remind me to share my trip' });
     await expect(heading).toBeVisible();
@@ -145,7 +163,7 @@ test.describe('the reminder section on My week', () => {
     const calls = await signIn(page);
     await standInPushService(page);
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await page.goto('/my-week');
+    await openTestReminders(page);
 
     await page.getByRole('button', { name: 'Turn on notifications' }).click();
     await expect(section(page)).toContainText(
@@ -169,9 +187,13 @@ test.describe('the reminder section on My week', () => {
     await standInPushService(page, { subscribed: true });
     await page.clock.setFixedTime(new Date('2026-10-03T20:00:00Z'));
     // A phone with reminders on has been here before, so its service worker is in place.
-    await page.goto('/my-week');
+    await openTestReminders(page);
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
     await page.reload();
+    await page.evaluate(() => {
+      const reminders = document.querySelector<HTMLElement>('[data-remind]');
+      if (reminders) reminders.hidden = false;
+    });
     await expect(section(page)).toContainText(
       'Reminders are on for this device. The next one arrives at about 8:00 am.',
     );
@@ -182,7 +204,7 @@ test.describe('the reminder section on My week', () => {
     await signIn(page);
     await standInPushService(page, { permission: 'denied' });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await page.goto('/my-week');
+    await openTestReminders(page);
     await expect(section(page)).toContainText('Notifications are blocked for lvwwd.org');
     await expect(section(page).getByRole('button', { includeHidden: false })).toHaveCount(0);
   });
@@ -191,7 +213,7 @@ test.describe('the reminder section on My week', () => {
     const calls = await signIn(page);
     await standInPushService(page, { answer: 'denied' });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await page.goto('/my-week');
+    await openTestReminders(page);
     await page.getByRole('button', { name: 'Turn on notifications' }).click();
     await expect(section(page)).toContainText('Notifications are blocked for lvwwd.org');
     expect(calls.subscribed).toEqual([]);
@@ -201,11 +223,15 @@ test.describe('the reminder section on My week', () => {
     await signIn(page);
     await standInPushService(page);
     await page.clock.setFixedTime(new Date('2026-10-08T14:59:59Z'));
-    await page.goto('/my-week');
+    await openTestReminders(page);
     await expect(page.getByRole('heading', { name: 'Remind me to share my trip' })).toBeVisible();
 
     await page.clock.setFixedTime(new Date('2026-10-08T15:00:00Z'));
     await page.reload();
+    await page.evaluate(() => {
+      const reminders = document.querySelector<HTMLElement>('[data-remind]');
+      if (reminders) reminders.hidden = false;
+    });
     await expect(section(page)).toContainText(
       'Daily reminders have ended. Thanks for taking part!',
     );
@@ -233,7 +259,7 @@ test.describe('on an iPhone outside the Home Screen', () => {
       localStorage.setItem('wwd-ios-install-dismissed', '2026-09-20T00:00:00.000Z');
     });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await page.goto('/my-week');
+    await openTestReminders(page);
     await expect(section(page)).toContainText(
       'On iPhone, notifications work only from the Home Screen.',
     );

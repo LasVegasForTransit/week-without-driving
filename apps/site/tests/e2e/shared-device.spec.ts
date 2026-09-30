@@ -11,13 +11,12 @@ const ME = {
   contactMasked: 'l•••@example.com',
   contactType: 'email',
   zip: '89101',
+  county: 'Clark',
   instagram: null,
   age: 'adult',
-  newsletter: false,
   days: [],
   trips: [],
   today: 0,
-  reminders: { push: false, text: false, email: false },
 };
 
 interface Api {
@@ -44,8 +43,9 @@ async function signInTablet(context: BrowserContext, baseURL: string | undefined
 
 async function fillSignUp(page: Page, contact: string) {
   await page.getByLabel('First name').fill('Marco');
-  await page.getByLabel('Phone number or email').fill(contact);
+  await page.getByLabel('Email address').fill(contact);
   await page.getByLabel('ZIP code').fill('89104');
+  await page.getByLabel('County where you live').selectOption('Clark');
   await page.getByLabel('18 or older').check();
 }
 
@@ -72,9 +72,10 @@ test('signs the tablet out on the sign-up page and readies the empty form', asyn
   await expect(ready).toBeFocused();
   await expect(page).toHaveURL('/sign-up');
   await expect(page.getByLabel('First name')).toHaveValue('');
-  await expect(page.getByLabel('Phone number or email')).toHaveValue('');
+  await expect(page.getByLabel('Email address')).toHaveValue('');
+  await expect(page.getByLabel('County where you live')).toHaveValue('');
   await expect(page.locator('input[name="age"]:checked')).toHaveCount(0);
-  await expect(page.getByLabel(/newsletter/)).not.toBeChecked();
+  await expect(page.locator('input[name="newsletter"]')).toHaveCount(0);
   await expect(page.locator('.site-cta').first()).toContainText('Sign up to win');
   expect(await page.evaluate(() => localStorage.getItem('lvwwd_bingo_2026'))).toBeNull();
 

@@ -22,11 +22,6 @@
   // 12:00 am on October 9, 2026, in Las Vegas.
   const SIGN_UP_ENDS = Date.parse('2026-10-09T07:00:00Z');
   const params = new URLSearchParams(window.location.search);
-  // Keep reminders out of the public flow until a real production phone proves delivery.
-  if (params.get('reminders-test') === '1') {
-    const reminderSection = document.querySelector('[data-remind]');
-    if (reminderSection) reminderSection.hidden = false;
-  }
   let me = null;
 
   /** How an entry came in, for the count: never the link or the picture itself. */

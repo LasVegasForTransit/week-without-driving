@@ -105,8 +105,8 @@ export const BUILD: Build = {
     { url: '/offline', revision: 'off1', bytes: 10, core: true },
     { url: '/_astro/site.css', revision: 'css1', bytes: 10, core: true },
     { url: '/scripts/home.js', revision: 'hjs1', bytes: 10, core: true },
-    { url: '/guides', revision: 'gui1', bytes: 10, core: false },
-    { url: '/fonts/body.woff2', revision: 'fon1', bytes: 10, core: false },
+    { url: '/guides', revision: 'gui1', bytes: 10, core: true },
+    { url: '/fonts/body.woff2', revision: 'fon1', bytes: 10, core: true },
   ],
   files: {
     '/_astro/site.css': 'css1',

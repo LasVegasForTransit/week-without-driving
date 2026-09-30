@@ -45,6 +45,7 @@ test('a saved trip sends only its day and entry method', async ({ page }) => {
     contactMasked: 'r•••@example.com',
     contactType: 'email',
     zip: '89101',
+    county: 'Clark',
     instagram: 'rosa.rides',
     age: 'adult',
     newsletter: false,
@@ -61,6 +62,9 @@ test('a saved trip sends only its day and entry method', async ({ page }) => {
 
   await page.goto('/my-week');
   await page.locator('label', { has: page.locator('input[value="bus"]') }).click();
+  await page
+    .getByLabel('Where did you go, and how did you get there?')
+    .fill('I took the bus to the grocery store.');
   await page.getByLabel('Link to your post').fill('https://www.instagram.com/p/C0mmuteByBus/');
   await page.locator('[data-trip-submit]').click();
 
