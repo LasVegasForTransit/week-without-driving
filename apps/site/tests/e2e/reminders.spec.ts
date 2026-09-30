@@ -145,7 +145,9 @@ test.describe('the reminder section on My week', () => {
       '/privacy',
     );
 
-    const shortcuts = await page.getByRole('heading', { name: 'Plan today’s trip' }).boundingBox();
+    const shortcuts = await page
+      .getByRole('heading', { name: 'Plan a trip or event' })
+      .boundingBox();
     const reminders = await heading.boundingBox();
     const keepGoing = await page
       .getByRole('heading', { name: 'Keep going after the week' })
