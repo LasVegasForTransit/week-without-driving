@@ -2,9 +2,8 @@ import { readFileSync } from 'node:fs';
 
 import { expect, test, type Page } from '@playwright/test';
 
-// The Partners page as the site ships it today, with no partner in the
-// roster yet, and the partner kit with a partner added to the page for
-// the test.
+// The Partners page with the current roster and an extra partner added
+// to the kit picker for referral-link coverage.
 
 const DESCRIPTION =
   'Week Without Driving Las Vegas, October 1 to 8, 2026. Sign up to win at lvwwd.org.';
@@ -28,21 +27,27 @@ async function withExamplePartner(page: Page) {
 // rewritten page; the Partners page is never saved for offline use anyway.
 test.use({ serviceWorkers: 'block' });
 
-const picker = (page: Page) => page.getByRole('combobox', { name: 'Use materials for' });
+const picker = (page: Page) => page.getByRole('combobox', { name: 'Choose a sharing link' });
 
-test('before the first partner, the page has no roster and ready materials', async ({ page }) => {
+test('the current partners and sharing materials are visible', async ({ page }) => {
   await page.goto('/partners');
   await expect(page.getByRole('heading', { level: 1, name: 'Partners' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Taking part in 2026' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Taking part in 2026' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'RTC of Southern Nevada' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sierra Club Toiyabe Chapter' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeVisible();
-  await expect(page.getByText('Partnering is free, and any size of group can join')).toBeVisible();
+  await expect(
+    page.getByText('Organizations of any size can join. There is no fee.'),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Partner kit' })).toBeVisible();
   const options = await picker(page).locator('option').allTextContents();
-  expect(options.filter((text) => text.trim() !== '')).toEqual(['General LVBT materials']);
-  await expect(
-    page.getByText('Start with the ready-to-share link, QR code, banners and flyer below.'),
-  ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Your link' })).toBeVisible();
+  expect(options.filter((text) => text.trim() !== '')).toEqual([
+    'General Week Without Driving link',
+    'RTC of Southern Nevada',
+    'Sierra Club Toiyabe Chapter',
+  ]);
+  await expect(page.getByText('Copy a link, download a graphic or print a flyer.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Share a link' })).toBeVisible();
 });
 
 test('"Email us to join" opens an email with the subject and the five lines', async ({ page }) => {
@@ -76,12 +81,10 @@ test('general materials: the link, QR code, banners and snippet credit no one', 
   page,
 }) => {
   await page.goto('/partners');
-  await picker(page).selectOption({ label: 'General LVBT materials' });
+  await picker(page).selectOption({ label: 'General Week Without Driving link' });
   expect(new URL(page.url()).hash).toBe('#kit-general');
   await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway');
-  await expect(
-    page.getByText("These don't credit any organization. LVBT uses them for its own outreach."),
-  ).toBeVisible();
+  await expect(page.getByText('The general link does not credit a partner.')).toBeVisible();
   const qr = page.getByRole('img', { name: 'QR code for lvwwd.org/giveaway' });
   await expect(qr).toHaveAttribute('src', '/partners/qr/general.svg');
   await expect(page.getByRole('link', { name: 'Download PNG' })).toHaveAttribute(
@@ -127,9 +130,7 @@ test('a partner gets its own link and snippet, and the address picks it again', 
   await picker(page).selectOption({ label: 'Example Club' });
   expect(new URL(page.url()).hash).toBe('#kit-example-club');
   await expect(page.locator('#kit-link')).toHaveText('https://lvwwd.org/giveaway?ref=example-club');
-  await expect(
-    page.getByText("These don't credit any organization. LVBT uses them for its own outreach."),
-  ).toBeHidden();
+  await expect(page.getByText('The general link does not credit a partner.')).toBeHidden();
   await expect(
     page.getByRole('img', { name: 'QR code for lvwwd.org/giveaway?ref=example-club' }),
   ).toBeVisible();
@@ -271,7 +272,7 @@ test.describe('with JavaScript off', () => {
       .evaluate((el) => el.textContent);
     expect(message).toContain('The partner kit needs JavaScript turned on.');
     await expect(page.locator('[data-kit-body]')).toBeHidden();
-    await expect(page.getByRole('combobox', { name: 'Use materials for' })).toBeHidden();
+    await expect(page.getByRole('combobox', { name: 'Choose a sharing link' })).toBeHidden();
     await expect(page.getByRole('button', { name: 'Copy email address' })).toBeHidden();
     await expect(
       page.locator('[data-partners-join]').getByText('wwd@lasvegasfortransit.org', { exact: true }),
