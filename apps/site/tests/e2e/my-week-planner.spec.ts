@@ -17,6 +17,7 @@ const ME = {
     {
       id: 17,
       day: 2,
+      origin: 'Downtown Las Vegas',
       destination: 'Sunset Park',
       eventName: null,
       startsAt: '2026-10-02T17:00:00.000Z',
@@ -29,6 +30,7 @@ const ME = {
 
 interface PlanInput {
   day: number;
+  origin: string;
   destination: string;
   startsAt: string;
   availableModes: string[];
@@ -84,7 +86,8 @@ test('shows eight day cards and saves a reactive outing plan on its chosen day',
   await expect(page).toHaveURL(/\/my-week\/plan\/where$/);
   await expect(page.getByRole('heading', { name: 'Where are you going?' })).toBeVisible();
   const planner = page.locator('[data-plan-form]');
-  await planner.getByLabel('Pick a place to try').check();
+  await planner.getByLabel('Where will you start?').fill('Downtown Las Vegas');
+  await planner.getByLabel('Pick from the list').check();
   await planner.getByLabel('Choose a place').selectOption('east-las-vegas-library');
   await planner.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/\/my-week\/plan\/when$/);
@@ -124,6 +127,7 @@ test('shows eight day cards and saves a reactive outing plan on its chosen day',
   await expect.poll(() => saves).toHaveLength(1);
   expect(saves[0]).toEqual({
     day: 4,
+    origin: 'Downtown Las Vegas',
     destination: 'East Las Vegas Library',
     startsAt: '2026-10-04T20:30:00.000Z',
     availableModes: ['bus'],
@@ -141,11 +145,18 @@ test('carries a compared trip into the planner for review', async ({ page, baseU
   await page.evaluate(() => {
     sessionStorage.setItem(
       'wwd-compare-plan',
-      JSON.stringify({ destination: 'Sunset Park', day: 4, time: '17:00', mode: 'bike' }),
+      JSON.stringify({
+        origin: 'Sahara and Maryland',
+        destination: 'Sunset Park',
+        day: 4,
+        time: '17:00',
+        mode: 'bike',
+      }),
     );
   });
   await page.goto('/my-week/plan/where');
-  await expect(page.getByLabel('My own destination')).toBeChecked();
+  await expect(page.getByLabel('Enter another place')).toBeChecked();
+  await expect(page.getByLabel('Where will you start?')).toHaveValue('Sahara and Maryland');
   await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park');
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByLabel('Day of the week')).toHaveValue('4');
@@ -159,26 +170,31 @@ test('carries a compared trip into the planner for review', async ({ page, baseU
   await expect(page.locator('[data-plan-summary]')).toContainText('Sunset Park');
   await page.getByRole('button', { name: 'Save this plan' }).click();
   await expect.poll(() => saves).toHaveLength(1);
-  expect(saves[0]).toMatchObject({ destination: 'Sunset Park', day: 4, willingModes: ['bike'] });
+  expect(saves[0]).toMatchObject({
+    origin: 'Sahara and Maryland',
+    destination: 'Sunset Park',
+    day: 4,
+    willingModes: ['bike'],
+  });
 });
 
 test('keeps choices when navigating the plan with a keyboard', async ({ page, baseURL }) => {
   await standInPlanApi(page, baseURL);
   await page.goto('/my-week/plan/where');
-  const own = page.getByLabel('My own destination');
+  const own = page.getByLabel('Enter another place');
   await own.focus();
   await page.keyboard.press('Space');
+  await page.getByLabel('Where will you start?').fill('Downtown Las Vegas');
   await page.getByLabel('Where do you want to go?').fill('Sunset Park');
   await page.getByRole('button', { name: 'Next' }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/my-week\/plan\/when$/);
-  const placeStep = page.getByRole('navigation', { name: 'Plan steps' }).getByRole('link', {
-    name: '1. Place',
-  });
-  await placeStep.focus();
+  const back = page.getByRole('button', { name: 'Back' });
+  await back.focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/my-week\/plan\/where$/);
-  await expect(page.getByLabel('My own destination')).toBeChecked();
+  await expect(page.getByLabel('Enter another place')).toBeChecked();
+  await expect(page.getByLabel('Where will you start?')).toHaveValue('Downtown Las Vegas');
   await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park');
 });
 

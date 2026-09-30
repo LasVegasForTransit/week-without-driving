@@ -642,12 +642,22 @@ const shortcuts = [
     font-size: 0.85rem;
   }
   :global(.entries__plan-use) {
-    display: block;
+    display: inline-flex;
+    align-items: center;
     min-height: 44px;
-    margin-top: 0.3rem;
+    margin: 0.3rem 0.35rem 0 0;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid currentColor;
+    border-radius: 0.6rem;
     font-weight: 700;
     text-align: left;
-    text-decoration: underline;
+    text-decoration: none;
+  }
+  :global(.entries__plan-use:hover),
+  :global(.entries__plan-use:focus-visible) {
+    background: var(--color-on-slab);
+    color: var(--color-slab);
+    text-decoration: none;
   }
   .entries__bingo {
     display: flex;

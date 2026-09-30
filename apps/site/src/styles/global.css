@@ -1205,13 +1205,7 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
   }
 
   .footer-install {
-    color: var(--color-primary-ink);
-  }
-
-  .footer-install:hover,
-  .footer-install:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    flex: none;
   }
 
   @media (min-width: 48rem) {
@@ -2004,15 +1998,25 @@ body {
   .install-button {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.55rem;
     min-height: 44px;
-    padding: 0;
-    color: inherit;
+    padding: 0.7rem 1rem;
+    color: var(--color-on-primary-warm);
     font: inherit;
-    font-weight: 600;
-    background: none;
-    border: 0;
+    font-weight: 800;
+    background: var(--color-primary-warm);
+    border: 2px solid var(--color-primary-warm);
+    border-radius: 999px;
     cursor: pointer;
+  }
+  .install-button:hover {
+    color: var(--color-surface);
+    background: var(--color-primary-ink);
+    border-color: var(--color-primary-ink);
+  }
+  .install-button:focus-visible {
+    outline: 3px solid var(--color-primary-ink);
+    outline-offset: 3px;
   }
   .install-button[hidden] {
     display: none;

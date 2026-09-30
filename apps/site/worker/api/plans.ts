@@ -12,6 +12,7 @@ const START = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:
 const FIELDS = new Set([
   'id',
   'day',
+  'origin',
   'destination',
   'eventName',
   'startsAt',
@@ -29,6 +30,7 @@ export const PLAN_REPLIES = {
 
 interface PlanInput {
   day: number;
+  origin: string | null;
   destination: string;
   eventName: string | null;
   startsAt: string | null;
@@ -41,6 +43,7 @@ interface PlanRow {
   id: string;
   participant_id: string;
   day: number;
+  origin: string | null;
   destination: string;
   event_name: string | null;
   starts_at: string | null;
@@ -53,7 +56,7 @@ interface PlanRow {
   updated_at: string;
 }
 
-const SELECT = `SELECT p.id, p.participant_id, p.day, p.destination, p.event_name, p.starts_at,
+const SELECT = `SELECT p.id, p.participant_id, p.day, p.origin, p.destination, p.event_name, p.starts_at,
   p.available_modes, p.willing_modes, p.reminder_minutes_before, p.reminder_at,
   p.created_at, p.updated_at,
   c.id AS logged_entry_id
@@ -63,6 +66,7 @@ function plan(row: PlanRow) {
   return {
     id: row.id,
     day: row.day,
+    origin: row.origin,
     destination: row.destination,
     eventName: row.event_name,
     startsAt: row.starts_at,
@@ -117,6 +121,11 @@ function placeName(value: unknown): string | null {
   return trimmed.length > 0 && trimmed.length <= MAX_NAME ? trimmed : null;
 }
 
+function startingPoint(value: unknown): string | null | undefined {
+  if (value === null || value === undefined) return null;
+  return placeName(value) ?? undefined;
+}
+
 function optionalName(value: unknown): string | null | undefined {
   if (value === null) return null;
   if (typeof value !== 'string' || value.trim().length > MAX_NAME) return undefined;
@@ -159,19 +168,35 @@ function reminderChoice(
   return value as number;
 }
 
+function validDetails(value: {
+  origin: string | null | undefined;
+  destination: string | null;
+  eventName: string | null | undefined;
+  reminderMinutesBefore: number | null | undefined;
+}): value is Pick<PlanInput, 'origin' | 'destination' | 'eventName' | 'reminderMinutesBefore'> {
+  return (
+    value.origin !== undefined &&
+    !!value.destination &&
+    value.eventName !== undefined &&
+    value.reminderMinutesBefore !== undefined
+  );
+}
+
 function details(body: Record<string, unknown>, previous?: PlanRow): PlanInput | null {
   if (!knownFields(body)) return null;
   const day = chosen(body, 'day', previous?.day);
   if (!dayNumber(day)) return null;
+  const origin = startingPoint(chosen(body, 'origin', previous?.origin ?? null));
   const destination = placeName(chosen(body, 'destination', previous?.destination));
   const eventName = optionalName(chosen(body, 'eventName', previous?.event_name ?? null));
   const startsAt = startTime(chosen(body, 'startsAt', previous?.starts_at ?? null), day);
   if (startsAt === undefined) return null;
   const reminderMinutesBefore = reminderChoice(body, startsAt, previous);
   const choices = modeChoices(body, previous);
-  if (!destination || eventName === undefined || reminderMinutesBefore === undefined) return null;
+  const place = { origin, destination, eventName, reminderMinutesBefore };
+  if (!validDetails(place)) return null;
   if (!choices) return null;
-  return { day, destination, eventName, startsAt, reminderMinutesBefore, ...choices };
+  return { day, ...place, startsAt, ...choices };
 }
 
 function reminderAt(input: PlanInput): string | null {
@@ -203,14 +228,15 @@ export async function createPlan(c: ApiContext, me: Participant): Promise<Respon
   const now = c.now.toISOString();
   await c.env.DB.prepare(
     `INSERT INTO trip_plans
-      (id, participant_id, day, destination, event_name, starts_at,
+      (id, participant_id, day, origin, destination, event_name, starts_at,
        available_modes, willing_modes, reminder_minutes_before, reminder_at, created_at, updated_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?11)`,
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?12)`,
   )
     .bind(
       id,
       me.id,
       input.day,
+      input.origin,
       input.destination,
       input.eventName,
       input.startsAt,
@@ -239,12 +265,13 @@ export async function updatePlan(c: ApiContext, me: Participant): Promise<Respon
     return problem(409, PLAN_REPLIES.linkedDay);
   const nextReminderAt = reminderAt(input);
   const update = c.env.DB.prepare(
-    `UPDATE trip_plans SET day = ?1, destination = ?2, event_name = ?3, starts_at = ?4,
-       available_modes = ?5, willing_modes = ?6, reminder_minutes_before = ?7,
-       reminder_at = ?8, updated_at = ?9
-     WHERE id = ?10 AND participant_id = ?11`,
+    `UPDATE trip_plans SET day = ?1, origin = ?2, destination = ?3, event_name = ?4,
+       starts_at = ?5, available_modes = ?6, willing_modes = ?7, reminder_minutes_before = ?8,
+       reminder_at = ?9, updated_at = ?10
+     WHERE id = ?11 AND participant_id = ?12`,
   ).bind(
     input.day,
+    input.origin,
     input.destination,
     input.eventName,
     input.startsAt,
