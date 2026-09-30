@@ -41,6 +41,14 @@
     out.hidden = false;
   }
 
+  function clearPlanDraft() {
+    try {
+      sessionStorage.removeItem('wwd-trip-plan-draft');
+    } catch {
+      // Signing out still works when browser storage is unavailable.
+    }
+  }
+
   function dayState(n, today, done) {
     if (done.has(n)) return 'done';
     if (n === today) return 'today';
@@ -191,24 +199,26 @@
   function renderEventReminders() {
     const enabled = me.eventRemindersEnabled === true;
     document.querySelector('[data-remind]')?.toggleAttribute('hidden', !enabled);
-    document.querySelector('[data-plan-event-reminder]')?.toggleAttribute('hidden', !enabled);
+  }
+
+  function welcomeMessage() {
+    if (params.get('plan') === 'saved')
+      return 'Your plan is saved. After your trip, describe what you did for an entry.';
+    if (params.get('saved') === '1') return 'Your details are saved.';
+    if (params.get('email') === 'failed')
+      return 'You’re signed up on this phone, but we couldn’t email a sign-in link. Keep using this phone and try again later.';
+    if (params.get('email') === 'unavailable')
+      return 'You’re signed up. Email links are unavailable right now; keep using this phone.';
+    return 'You’re signed up to win.';
   }
 
   function renderBanners() {
     const welcome = document.querySelector('[data-me-welcome]');
     const saved = params.get('saved') === '1';
-    if (welcome && (params.get('welcome') === '1' || saved)) {
+    const planSaved = params.get('plan') === 'saved';
+    if (welcome && (params.get('welcome') === '1' || saved || planSaved)) {
       welcome.hidden = false;
-      setText(
-        '[data-me-welcome-text]',
-        saved
-          ? 'Your details are saved.'
-          : params.get('email') === 'failed'
-            ? 'You’re signed up on this phone, but we couldn’t email a sign-in link. Keep using this phone and try again later.'
-            : params.get('email') === 'unavailable'
-              ? 'You’re signed up. Email links are unavailable right now; keep using this phone.'
-              : 'You’re signed up to win.',
-      );
+      setText('[data-me-welcome-text]', welcomeMessage());
     }
     // The preview Worker hands back the link it would have sent; show it once.
     try {
@@ -340,8 +350,10 @@
   function bindSignOut() {
     document.querySelector('[data-signout]')?.addEventListener('click', async () => {
       const { ok, status, data } = await api.call('POST', '/api/signout', {});
-      if (ok || status === 401) window.location.href = '/';
-      else setText('[data-signout-status]', data.message);
+      if (ok || status === 401) {
+        clearPlanDraft();
+        window.location.href = '/';
+      } else setText('[data-signout-status]', data.message);
     });
   }
 
@@ -356,8 +368,10 @@
     button.addEventListener('click', async () => {
       setText('[data-someone-else-status]', '');
       const { ok, message } = await api.signUpSomeoneElse();
-      if (ok) window.location.href = '/sign-up';
-      else setText('[data-someone-else-status]', message);
+      if (ok) {
+        clearPlanDraft();
+        window.location.href = '/sign-up';
+      } else setText('[data-someone-else-status]', message);
     });
   }
 
@@ -384,7 +398,6 @@
     window.lvwwdMe = me;
     document.dispatchEvent(new CustomEvent('lvwwd:me', { detail: me }));
     bindTrip();
-    window.lvwwdPlanner?.({ api, me, showSignedOut, renderEntries });
     bindSignOut();
     bindSomeoneElse();
     return undefined;

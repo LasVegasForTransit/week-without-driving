@@ -37,10 +37,11 @@ interface PlanInput {
 
 async function standInPlanApi(page: Page, baseURL: string | undefined): Promise<PlanInput[]> {
   const saves: PlanInput[] = [];
+  const me = { ...ME, plans: [...ME.plans] };
   await page
     .context()
     .addCookies([{ name: 'lvwwd_signed_in', value: '1', url: baseURL ?? 'http://127.0.0.1:4322' }]);
-  await page.route('**/api/me', (route) => route.fulfill({ json: ME }));
+  await page.route('**/api/me', (route) => route.fulfill({ json: me }));
   await page.route('**/api/plans', async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({ json: { plans: ME.plans } });
@@ -52,9 +53,11 @@ async function standInPlanApi(page: Page, baseURL: string | undefined): Promise<
     }
     const input = route.request().postDataJSON() as PlanInput;
     saves.push(input);
+    const plan = { id: 18, eventName: null, loggedEntryId: null, ...input };
+    me.plans.push(plan);
     await route.fulfill({
       status: 201,
-      json: { plan: { id: 18, eventName: null, loggedEntryId: null, ...input } },
+      json: { plan },
     });
   });
   return saves;
@@ -77,33 +80,47 @@ test('shows eight day cards and saves a reactive outing plan on its chosen day',
     '/bingo',
   );
 
+  await page.locator('.myweek__hello').getByRole('link', { name: 'Plan a trip' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/where$/);
+  await expect(page.getByRole('heading', { name: 'Where are you going?' })).toBeVisible();
   const planner = page.locator('[data-plan-form]');
-  await expect(planner).toBeVisible();
   await planner.getByLabel('Pick a place to try').check();
   await planner.getByLabel('Choose a place').selectOption('east-las-vegas-library');
   await planner.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/when$/);
   await planner.getByLabel('Day of the week').selectOption('4');
   await planner.getByLabel('About what time?').fill('13:30');
+  await page.reload();
+  await expect(planner.getByLabel('Day of the week')).toHaveValue('4');
+  await expect(planner.getByLabel('About what time?')).toHaveValue('13:30');
   await planner.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/available$/);
 
   await planner.locator('input[name="availableMode"][value="bus"]').check();
+  await planner.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/try$/);
   await planner.locator('input[name="willingMode"][value="bus"]').check();
   await planner.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/review$/);
   await expect(
     planner.getByRole('link', { name: /route guide for East Las Vegas Library/ }),
   ).toHaveAttribute('href', '/go#east-las-vegas-library');
   await expect(planner.getByRole('link', { name: 'See how to pay your bus fare' })).toBeVisible();
 
-  await planner.getByRole('button', { name: 'Back' }).click();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/my-week\/plan\/try$/);
+  await expect(planner.locator('input[name="willingMode"][value="bus"]')).toBeChecked();
   await planner.locator('input[name="willingMode"][value="bus"]').uncheck();
   await planner.locator('input[name="willingMode"][value="bike"]').check();
   await planner.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/review$/);
   await expect(planner.getByRole('link', { name: 'See how to pay your bus fare' })).toHaveCount(0);
   await expect(
     planner.getByRole('link', { name: 'See how to put a bike on the bus' }),
   ).toBeVisible();
 
-  await planner.getByRole('button', { name: 'I’ll go without driving' }).click();
+  await planner.getByRole('button', { name: 'Save this plan' }).click();
+  await expect(page).toHaveURL(/\/my-week\?plan=saved$/);
   await expect.poll(() => saves).toHaveLength(1);
   expect(saves[0]).toEqual({
     day: 4,
@@ -115,7 +132,54 @@ test('shows eight day cards and saves a reactive outing plan on its chosen day',
   await expect(page.locator('[data-day="4"]')).toContainText('East Las Vegas Library');
   await expect(page.locator('[data-day="3"]')).not.toContainText('East Las Vegas Library');
   await expect(page.locator('[data-day="5"]')).not.toContainText('East Las Vegas Library');
-  await expect(page.locator('[data-plan-status]')).toContainText('Saved for');
+  await expect(page.locator('[data-me-welcome-text]')).toContainText('Your plan is saved');
+});
+
+test('carries a compared trip into the planner for review', async ({ page, baseURL }) => {
+  const saves = await standInPlanApi(page, baseURL);
+  await page.goto('/go/compare');
+  await page.evaluate(() => {
+    sessionStorage.setItem(
+      'wwd-compare-plan',
+      JSON.stringify({ destination: 'Sunset Park', day: 4, time: '17:00', mode: 'bike' }),
+    );
+  });
+  await page.goto('/my-week/plan/where');
+  await expect(page.getByLabel('My own destination')).toBeChecked();
+  await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByLabel('Day of the week')).toHaveValue('4');
+  await expect(page.getByLabel('About what time?')).toHaveValue('17:00');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/available$/);
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/try$/);
+  await expect(page.locator('input[name="willingMode"][value="bike"]')).toBeChecked();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.locator('[data-plan-summary]')).toContainText('Sunset Park');
+  await page.getByRole('button', { name: 'Save this plan' }).click();
+  await expect.poll(() => saves).toHaveLength(1);
+  expect(saves[0]).toMatchObject({ destination: 'Sunset Park', day: 4, willingModes: ['bike'] });
+});
+
+test('keeps choices when navigating the plan with a keyboard', async ({ page, baseURL }) => {
+  await standInPlanApi(page, baseURL);
+  await page.goto('/my-week/plan/where');
+  const own = page.getByLabel('My own destination');
+  await own.focus();
+  await page.keyboard.press('Space');
+  await page.getByLabel('Where do you want to go?').fill('Sunset Park');
+  await page.getByRole('button', { name: 'Next' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/my-week\/plan\/when$/);
+  const placeStep = page.getByRole('navigation', { name: 'Plan steps' }).getByRole('link', {
+    name: '1. Place',
+  });
+  await placeStep.focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/my-week\/plan\/where$/);
+  await expect(page.getByLabel('My own destination')).toBeChecked();
+  await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park');
 });
 
 test('marks a plan as logged as soon as its completed trip is saved', async ({ page, baseURL }) => {
@@ -161,6 +225,9 @@ test('does not submit a deleted plan with a completed trip', async ({ page, base
   const day = page.locator('[data-day="2"]');
   await day.getByRole('button', { name: 'Use this plan for today’s entry' }).click();
   await day.getByRole('button', { name: 'Remove plan' }).click();
+  await expect(page.locator('[data-plan-status]')).toHaveText(
+    'Plan removed. Your logged trips are unchanged.',
+  );
   const trip = page.locator('[data-trip-form]');
   await trip.locator('input[name="mode"][value="bus"]').check({ force: true });
   await trip.getByLabel('Where did you go, and how did you get there?').fill('I took the bus.');

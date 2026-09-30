@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { days } from '../lib/campaign';
-import { destinations } from '../lib/destinations';
 import { comparePublished } from '../lib/compare-release';
 import { KEEP_GOING } from '../lib/newsletter';
 import { REMINDERS } from '../lib/reminders';
@@ -36,17 +35,6 @@ const shortcuts = [
     : []),
   { href: '/go#find-routes', label: 'Find a bus', icon: 'mdi:bus' },
   { href: '/guides', label: 'Rider guides', icon: 'mdi:book-open-variant-outline' },
-] as const;
-
-const planOutings = destinations.filter(
-  (destination) => destination.anchor !== 'allegiant-stadium',
-);
-const planModes = [
-  { value: 'bus', label: 'Bus' },
-  { value: 'walk', label: 'Walk or roll' },
-  { value: 'bike', label: 'Bike' },
-  { value: 'scooter', label: 'Scooter' },
-  { value: 'ride', label: 'Get a ride' },
 ] as const;
 ---
 
@@ -83,7 +71,7 @@ const planModes = [
         <p class="myweek__lede" data-me-phase>
           Describe a trip each day you skip the car, October 1 to 8.
         </p>
-        <a href="#go-heading" class="btn btn--outline mt-4">Plan a trip</a>
+        <a href="/my-week/plan/where" class="btn btn--outline mt-4">Plan a trip</a>
         <div class="preview-link" data-preview-link hidden></div>
       </section>
 
@@ -129,6 +117,7 @@ const planModes = [
             ))
           }
         </ol>
+        <p class="entries__status" data-plan-status role="status" aria-live="polite"></p>
         <a href="/bingo" class="entries__bingo">
           <Icon name="mdi:grid" class="size-6" aria-hidden="true" />
           Play Transit Bingo while you go
@@ -293,144 +282,12 @@ const planModes = [
 
       {/* A plan is preparation; a completed trip becomes an entry only after it is described. */}
       <section class="myweek__section planner" aria-labelledby="go-heading">
-        <p class="planner__eyebrow">Make it happen</p>
         <h2 id="go-heading" class="myweek__h2">Plan a trip or event</h2>
         <p class="myweek__p">
           Pick a place and a way to get there. Save the plan for one of your eight days, then come
           back to describe the trip you actually take. Planning alone is not an entry.
         </p>
-        <p class="planner__status" data-plan-status role="status" aria-live="polite" tabindex="-1">
-        </p>
-
-        <form data-plan-form hidden class="planner__form" novalidate data-needs-connection="plan">
-          <p class="planner__progress" data-plan-progress>Step 1 of 4</p>
-
-          <fieldset class="planner__step" data-plan-step="1">
-            <legend>1. Where are you going?</legend>
-            <div class="planner__choices">
-              <label
-                ><input type="radio" name="planKind" value="outing" /> Pick a place to try</label
-              >
-              <label><input type="radio" name="planKind" value="event" /> Go to an event</label>
-              <label><input type="radio" name="planKind" value="own" /> My own destination</label>
-            </div>
-            <div class="planner__detail" data-plan-kind-panel="outing" hidden>
-              <label for="plan-outing">Choose a place</label>
-              <select id="plan-outing" name="outing">
-                <option value="">Choose a place</option>
-                {
-                  planOutings.map((outing) => (
-                    <option value={outing.anchor} data-destination={outing.heading}>
-                      {outing.heading}
-                    </option>
-                  ))
-                }
-              </select>
-            </div>
-            <div class="planner__detail" data-plan-kind-panel="event" hidden>
-              <label for="plan-event-name">What event?</label>
-              <input id="plan-event-name" name="eventName" type="text" maxlength="120" />
-              <label for="plan-event-place">Where is it?</label>
-              <input id="plan-event-place" name="eventDestination" type="text" maxlength="120" />
-            </div>
-            <div class="planner__detail" data-plan-kind-panel="own" hidden>
-              <label for="plan-own-place">Where do you want to go?</label>
-              <input id="plan-own-place" name="ownDestination" type="text" maxlength="120" />
-            </div>
-          </fieldset>
-
-          <fieldset class="planner__step" data-plan-step="2" hidden>
-            <legend>2. When will you go?</legend>
-            <div class="planner__when">
-              <div>
-                <label for="plan-day">Day of the week</label>
-                <select id="plan-day" name="day" required>
-                  <option value="">Choose a day</option>
-                  {
-                    days.map((day) => (
-                      <option value={day.number}>
-                        {day.weekday}, {day.monthDay}
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
-              <div>
-                <label for="plan-time">About what time?</label>
-                <input id="plan-time" name="time" type="time" required />
-              </div>
-            </div>
-            <p class="planner__hint">Use Las Vegas time. An approximate departure time is fine.</p>
-          </fieldset>
-
-          <fieldset class="planner__step" data-plan-step="3" hidden>
-            <legend>3. What could work for you?</legend>
-            <p class="planner__hint">
-              Choose what you have available, then what you would try. You can pick more than one.
-            </p>
-            <div class="planner__mode-groups">
-              <div>
-                <h3>Available to me</h3>
-                <div class="planner__mode-choices">
-                  {
-                    planModes.map((mode) => (
-                      <label>
-                        <input type="checkbox" name="availableMode" value={mode.value} />{' '}
-                        {mode.label}
-                      </label>
-                    ))
-                  }
-                </div>
-              </div>
-              <div>
-                <h3>I’d consider</h3>
-                <div class="planner__mode-choices">
-                  {
-                    planModes.map((mode) => (
-                      <label>
-                        <input type="checkbox" name="willingMode" value={mode.value} /> {mode.label}
-                      </label>
-                    ))
-                  }
-                </div>
-              </div>
-            </div>
-          </fieldset>
-
-          <div class="planner__step" data-plan-step="4" hidden>
-            <h3>4. Your plan</h3>
-            <p class="planner__summary" data-plan-summary></p>
-            <p class="planner__hint">Check a route and your trip home before you leave.</p>
-            <ul class="planner__suggestions" data-plan-suggestions></ul>
-            <label class="planner__reminder" data-plan-event-reminder
-              >Remind me on this phone
-              <select name="reminderMinutesBefore">
-                <option value="">No event reminder</option>
-                <option value="30">30 minutes before</option>
-                <option value="60">1 hour before</option>
-                <option value="120">2 hours before</option>
-                <option value="1440">1 day before</option>
-              </select>
-            </label>
-            <p class="planner__hint">Turn on event reminders above before saving this choice.</p>
-            <p class="planner__hint">
-              Planning alone is not an entry. After your trip, come back to describe what you did.
-            </p>
-          </div>
-
-          <p class="planner__error" data-plan-error role="alert" aria-live="polite"></p>
-          <div class="planner__actions">
-            <button type="button" class="btn btn--outline" data-plan-back hidden>Back</button>
-            <button type="button" class="btn btn--primary" data-plan-next>Next</button>
-            <button
-              type="submit"
-              class="btn btn--primary"
-              data-plan-save
-              data-needs-connection-button
-              hidden>I’ll go without driving</button
-            >
-          </div>
-        </form>
+        <a href="/my-week/plan/where" class="btn btn--primary mt-5">Start a plan</a>
         <h3 class="planner__tools-heading">Helpful tools</h3>
         <ul class="shortcuts">
           {
@@ -578,7 +435,6 @@ const planModes = [
   <script is:inline src="/scripts/share-trip.js" defer></script>
   <script is:inline src="/scripts/reminders.js" defer></script>
   <script is:inline src="/scripts/my-week-plan-cards.js" defer></script>
-  <script is:inline src="/scripts/my-week-planner.js" defer></script>
   <script is:inline src="/scripts/my-week.js" defer></script>
   <script is:inline src="/scripts/needs-connection.js" defer></script>
   <script is:inline src="/scripts/keep-going.js" defer></script>
@@ -850,136 +706,6 @@ const planModes = [
     border-radius: 0.75rem;
   }
 
-  /* A saved plan, made in four short steps. */
-  .planner__eyebrow {
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-primary-ink);
-  }
-  .planner__form {
-    margin-top: 1.25rem;
-    padding: clamp(1rem, 4vw, 1.5rem);
-    background: var(--color-surface-container);
-    border-radius: 1.25rem;
-  }
-  .planner__progress {
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--color-primary-ink);
-  }
-  .planner__step legend,
-  .planner__step > h3 {
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  .planner__choices,
-  .planner__mode-choices {
-    display: grid;
-    gap: 0.55rem;
-  }
-  .planner__choices label,
-  .planner__mode-choices label {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    min-height: 3rem;
-    padding: 0.7rem 0.85rem;
-    font-weight: 700;
-    background: var(--color-surface);
-    border: 2px solid transparent;
-    border-radius: 0.75rem;
-    cursor: pointer;
-  }
-  .planner__choices label:has(input:checked),
-  .planner__mode-choices label:has(input:checked) {
-    border-color: var(--color-primary);
-  }
-  .planner__choices input,
-  .planner__mode-choices input {
-    width: 1.2rem;
-    height: 1.2rem;
-    flex: none;
-    accent-color: var(--color-primary);
-  }
-  .planner__detail,
-  .planner__when {
-    margin-top: 1rem;
-  }
-  .planner__detail label,
-  .planner__when label {
-    display: block;
-    margin-top: 0.7rem;
-    font-weight: 700;
-  }
-  .planner__detail input,
-  .planner__detail select,
-  .planner__when input,
-  .planner__when select {
-    width: 100%;
-    min-height: 3rem;
-    margin-top: 0.35rem;
-    padding: 0.5rem 0.75rem;
-    color: var(--color-on-surface);
-    background: var(--color-field);
-    border: 2px solid transparent;
-    border-radius: 0.7rem;
-  }
-  .planner__when,
-  .planner__mode-groups {
-    display: grid;
-    gap: 1rem;
-  }
-  .planner__mode-groups h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    font-weight: 700;
-  }
-  .planner__hint {
-    margin-top: 0.65rem;
-    font-size: 0.9rem;
-    color: var(--color-on-surface-variant);
-  }
-  .planner__summary {
-    font-size: 1.1rem;
-    font-weight: 700;
-    line-height: 1.5;
-  }
-  .planner__suggestions {
-    display: grid;
-    gap: 0.6rem;
-    margin-top: 1rem;
-  }
-  .planner__suggestions :global(a) {
-    font-weight: 700;
-    text-decoration: underline;
-  }
-  .planner__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1.25rem;
-  }
-  .planner__error,
-  .planner__status {
-    margin-top: 0.65rem;
-    font-weight: 700;
-  }
-  .planner__status:empty {
-    display: none;
-  }
-  .planner__error {
-    color: var(--color-error);
-  }
-  .planner__error:empty,
-  .planner__status:empty {
-    display: none;
-  }
   .planner__tools-heading {
     margin-top: 1.5rem;
     font-size: 1.1rem;
@@ -1315,10 +1041,6 @@ const planModes = [
 
   @media (min-width: 40rem) {
     .entries__days {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .planner__when,
-    .planner__mode-groups {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
