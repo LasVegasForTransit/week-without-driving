@@ -27,7 +27,7 @@
   ],
   "turnstile": [
     {
-      "name": "lvwwd.org",
+      "name": "LVWWD production signup",
       "domains": ["lvwwd.org"],
       "mode": "managed",
       "siteKeyVar": "TURNSTILE_SITE_KEY",
@@ -81,7 +81,7 @@
       "url": "https://dash.cloudflare.com/",
       "steps": [
         "Open Turnstile in the Cloudflare dashboard with the \"Las Vegans for Better Transit\" account.",
-        "Click the widget named lvwwd.org. If there is none, click \"Add widget\", type the widget name lvwwd.org, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
+        "Click the widget named LVWWD production signup. If there is none, click \"Add widget\", type the widget name LVWWD production signup, add the hostname lvwwd.org under \"Hostname management\", choose the widget mode \"Managed\", leave pre-clearance off, and click \"Create\".",
         "Leave the Site Key alone for now: it is public and goes into TURNSTILE_SITE_KEY in apps/deploy/cloudflare.config.ts, which this command shows later.",
         "Copy the Secret Key, which is private and starts with 0x, and paste it at this command's prompt."
       ],
