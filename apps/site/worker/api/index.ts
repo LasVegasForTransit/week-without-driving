@@ -3,6 +3,7 @@ import type { ApiContext, ApiEnv, Env, Participant } from '../env';
 import { MESSAGES, isSameOriginWrite, json, problem } from '../http';
 import { signedInParticipant } from '../session';
 import { getMe, signOut, updateMe } from './me';
+import { createPlan, deletePlan, getPlans, updatePlan } from './plans';
 import { pushKey, subscribe, unsubscribe } from './push';
 import { sendMyLink, signUp } from './sign-up';
 import { checkIn, getBingo, putBingo } from './week';
@@ -25,6 +26,10 @@ const ROUTES: Route[] = [
   { method: 'POST', path: '/api/signout', signedIn: false, handler: signOut },
   { method: 'GET', path: '/api/me', signedIn: true, handler: getMe },
   { method: 'PATCH', path: '/api/me', signedIn: true, handler: updateMe },
+  { method: 'GET', path: '/api/plans', signedIn: true, handler: getPlans },
+  { method: 'POST', path: '/api/plans', signedIn: true, handler: createPlan },
+  { method: 'PATCH', path: '/api/plans', signedIn: true, handler: updatePlan },
+  { method: 'DELETE', path: '/api/plans', signedIn: true, handler: deletePlan },
   { method: 'POST', path: '/api/checkin', signedIn: true, multipart: true, handler: checkIn },
   { method: 'GET', path: '/api/push/key', signedIn: false, handler: pushKey },
   { method: 'POST', path: '/api/push/subscribe', signedIn: true, handler: subscribe },

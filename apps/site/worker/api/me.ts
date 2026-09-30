@@ -5,6 +5,7 @@ import { sessionHash } from '../session';
 import { todayNumber } from '../time';
 import { checkDetails, maskContact } from '../validate';
 import { REPLIES } from './sign-up';
+import { listPlans } from './plans';
 import { listTrips } from './week';
 
 /**
@@ -17,6 +18,7 @@ const CONTACT_IS_FIXED =
 
 export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
   const trips = await listTrips(c, me);
+  const plans = await listPlans(c, me);
   return json({
     firstName: me.firstName,
     contactMasked: maskContact(me.contact, me.contactType),
@@ -27,6 +29,7 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     age: me.age,
     days: trips.map((trip) => trip.day),
     trips,
+    plans,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
   });
 }

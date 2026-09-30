@@ -51,6 +51,8 @@ export async function dailyCleanup(env: Env, now: Date): Promise<void> {
       'draws',
       'volunteers',
       'checkins',
+      'trip_plan_pushes',
+      'trip_plans',
       'push_subscriptions',
       'bingo',
       'link_tokens',
