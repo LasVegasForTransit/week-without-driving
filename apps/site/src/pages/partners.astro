@@ -56,16 +56,26 @@ const whatPartnersDo = [
           <ul class="partner-roster">
             {partners.map((partner) => (
               <li id={`partner-${partner.slug}`}>
-                <h3 class="partner-roster__name">
-                  {partner.url ? <a href={partner.url}>{partner.name}</a> : partner.name}
-                </h3>
-                <div class="partner-roster__mark">
-                  {partner.logo && (
-                    <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
-                  )}
-                </div>
-                <p class="partner-roster__type">{partner.type}</p>
-                <p class="partner-roster__sentence">{partner.sentence}</p>
+                <a
+                  class="partner-roster__card"
+                  href={partner.url}
+                  aria-labelledby={`partner-name-${partner.slug}`}
+                  data-external-icon="false"
+                >
+                  <h3 id={`partner-name-${partner.slug}`} class="partner-roster__name">
+                    {partner.name}
+                    {partner.url && (
+                      <Icon name="mdi:open-in-new" class="size-5" aria-hidden="true" />
+                    )}
+                  </h3>
+                  <div class="partner-roster__mark">
+                    {partner.logo && (
+                      <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
+                    )}
+                  </div>
+                  <p class="partner-roster__type">{partner.type}</p>
+                  <p class="partner-roster__sentence">{partner.sentence}</p>
+                </a>
               </li>
             ))}
           </ul>
@@ -262,8 +272,25 @@ const whatPartnersDo = [
   }
   .partner-roster > li {
     min-width: 0;
+  }
+  .partner-roster__card {
+    display: block;
+    height: 100%;
     padding: clamp(1.25rem, 2.5vw, 2rem);
+    color: inherit;
     background: var(--color-surface-container);
+    text-decoration: none;
+    transition:
+      background-color 180ms var(--ease-out),
+      box-shadow 180ms var(--ease-out);
+  }
+  .partner-roster__card[href]:hover {
+    background: color-mix(in srgb, var(--color-surface-container) 88%, var(--color-primary-warm));
+    box-shadow: 0 0.5rem 1.5rem rgb(20 8 14 / 0.12);
+  }
+  .partner-roster__card[href]:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
   }
   @media (min-width: 48rem) {
     .partner-roster {
@@ -274,19 +301,16 @@ const whatPartnersDo = [
     }
   }
   .partner-roster__name {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
     font-size: var(--text-title-lg);
     font-weight: 700;
     overflow-wrap: anywhere;
   }
-  .partner-roster__name a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .partner-roster__name a:hover,
-  .partner-roster__name a:focus-visible {
-    color: var(--color-primary-ink);
-    outline: 2px solid currentcolor;
-    outline-offset: 3px;
+  .partner-roster__name svg {
+    flex: none;
   }
   .partner-roster__mark {
     display: flex;
