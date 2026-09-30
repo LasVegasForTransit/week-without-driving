@@ -51,12 +51,19 @@ export async function withSiteKey(request: Request, env: Env): Promise<Response>
         element(element) {
           element.setAttribute('hidden', '');
           element.setAttribute('data-turnstile-unavailable', '');
+          // A cached script can clear `hidden`. Keep the unavailable form
+          // visually and interactively blocked until current code confirms
+          // this person is signed in and editing their details.
+          element.setAttribute('style', 'display: none !important');
+          element.setAttribute('inert', '');
         },
       })
       .on('[data-link-form]', {
         element(element) {
           element.setAttribute('hidden', '');
           element.setAttribute('data-turnstile-unavailable', '');
+          element.setAttribute('style', 'display: none !important');
+          element.setAttribute('inert', '');
         },
       })
       .on('[data-signup-unavailable]', {

@@ -90,6 +90,10 @@ describe('Turnstile pages', () => {
       const response = await withSiteKey(request, env);
 
       expect(changed(form).has('hidden')).toBe(true);
+      // A cached older script can clear `hidden`; the server's inline style
+      // and inert state must continue to block the unavailable form.
+      expect(changed(form).get('style')).toBe('display: none !important');
+      expect(changed(form).has('inert')).toBe(true);
       expect(changed(notice, { hidden: '' }).has('hidden')).toBe(false);
       expect(assetRequests[0]?.headers.get('If-None-Match')).toBeNull();
       expect(response.headers.get('Cache-Control')).toBe('no-store');
@@ -103,6 +107,7 @@ describe('Turnstile pages', () => {
     await withSiteKey(new Request('https://lvwwd.org/sign-up'), env);
 
     expect(changed('[data-signup-form]').has('hidden')).toBe(true);
+    expect(changed('[data-signup-form]').get('style')).toBe('display: none !important');
     expect(changed('[data-signup-unavailable]', { hidden: '' }).has('hidden')).toBe(false);
   });
 
@@ -112,6 +117,7 @@ describe('Turnstile pages', () => {
     await withSiteKey(new Request('https://lvwwd.org/my-week/link'), env);
 
     expect(changed('[data-link-form]').has('hidden')).toBe(true);
+    expect(changed('[data-link-form]').get('style')).toBe('display: none !important');
     expect(changed('[data-link-unavailable]', { hidden: '' }).has('hidden')).toBe(false);
   });
 
