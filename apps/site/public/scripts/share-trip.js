@@ -32,7 +32,7 @@
   }
 
   function caption(trip) {
-    return `I skipped the car today, ${modesPhrase(trip.modes)}, for #WeekWithoutDriving in Las Vegas. Try it October 1–8 and you could win a 30-day RTC bus pass: lvwwd.org @lasvegasfortransit`;
+    return `Week Without Driving giveaway entry: I skipped the car today, ${modesPhrase(trip.modes)}, in Las Vegas. Try it October 1–8 and you could win a 30-day RTC bus pass: lvwwd.org #WeekWithoutDriving @lasvegasfortransit`;
   }
 
   // Splits text into lines that fit maxWidth at the context's current font.

@@ -42,6 +42,6 @@ steps:
         [wwd@lasvegasfortransit.org](mailto:wwd@lasvegasfortransit.org). If you use Instagram, you
         can also post them and tag [@lasvegasfortransit](https://instagram.com/lasvegasfortransit).
       - >-
-        Las Vegans for Better Transit collects every report and passes it to the city, the county or
-        RTC, whichever is responsible for that street or stop.
+        Las Vegans for Better Transit uses these reports to advocate for safer streets and bus
+        stops.
 ---

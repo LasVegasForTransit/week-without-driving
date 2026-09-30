@@ -10,7 +10,7 @@ import {
 } from './common';
 import { hidden, outsideLink, screenshotPath } from './entry-card';
 import { type Html, html } from './html';
-import { drawOpen } from './pick';
+import { drawOpen, replyPeriodEnded } from './pick';
 import type { DrawRow, PageData } from './queries';
 
 /**
@@ -42,8 +42,9 @@ export function tagForm(prefill?: Prefill): Html {
   return html`<section id="tag">
     <h2>Log an Instagram tag</h2>
     <p>
-      For an Instagram post or story that tags @lasvegasfortransit. It counts as that day’s entry
-      for the eligible person who saved the handle when they signed up. Reject unmatched handles.
+      For a post or story about a trip without driving that tags @lasvegasfortransit. It counts as
+      that day’s entry for the eligible person who saved the handle in Your details. Reject
+      unmatched handles.
     </p>
     <form method="post" action="/admin/tags" class="stack">
       <label
@@ -64,6 +65,11 @@ export function tagForm(prefill?: Prefill): Html {
           placeholder="https://www.instagram.com/p/…"
           value="${value('link')}"
       /></label>
+      <label
+        ><input type="checkbox" name="trip-confirmed" value="yes" required /> I checked that this
+        post or story came from the registered handle, tagged @lasvegasfortransit, appeared on the
+        selected day, described a trip without driving, and said it was a giveaway entry.</label
+      >
       <button type="submit">Log the tag</button>
     </form>
   </section>`;
@@ -137,6 +143,10 @@ export function drawSection(c: AdminContext, data: PageData): Html {
     action = html`<p>
       Check or remove the ${counted(totals.to_check, 'entry', 'entries')} still waiting before the
       draw.
+    </p>`;
+  } else if (latest && !replyPeriodEnded(latest.drawn_at, c.now)) {
+    action = html`<p>
+      The winner has seven days to reply. Come back after that period if another draw is needed.
     </p>`;
   } else action = drawForm(data);
   return html`<section id="draw">

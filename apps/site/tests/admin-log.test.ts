@@ -21,7 +21,7 @@ describe('volunteer tag logging', () => {
   const realFetch = globalThis.fetch;
   const TAG = 'https://www.instagram.com/p/TAG1/';
   const logTag = (handle: string, day = '3', link = TAG) =>
-    admin.post('/admin/tags', { handle, day, link });
+    admin.post('/admin/tags', { handle, day, link, 'trip-confirmed': 'yes' });
 
   beforeAll(async () => {
     platform = await startPlatform();
@@ -67,6 +67,25 @@ describe('volunteer tag logging', () => {
     });
     expect((await logTag('outside')).status).toBe(400);
     expect(await countRows(platform, 'SELECT count(*) AS n FROM checkins')).toBe(0);
+  });
+
+  it('does not count a tag without volunteer confirmation of the trip and disclosure', async () => {
+    await seedParticipant(platform, { contact: 'ana@example.com', instagram: 'ana.rides' });
+    const response = await admin.post('/admin/tags', {
+      handle: 'ana.rides',
+      day: '3',
+      link: TAG,
+    });
+    expect(response.status).toBe(400);
+    expect(await countRows(platform, 'SELECT count(*) AS n FROM checkins')).toBe(0);
+  });
+
+  it('tells reviewers to verify the account, tag, posted day and trip', async () => {
+    const page = (await (await admin.get('/admin')).text()).replace(/\s+/g, ' ');
+    expect(page).toContain('came from the registered handle');
+    expect(page).toContain('tagged @lasvegasfortransit');
+    expect(page).toContain('on the selected day');
+    expect(page).toContain('trip without driving');
   });
 
   it('counts a story without a durable link and refuses an ambiguous handle', async () => {

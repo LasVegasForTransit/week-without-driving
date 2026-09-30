@@ -117,6 +117,19 @@ describe('admin draw', () => {
     expect(await draws()).toMatchObject([{ entrant: ana, eligible_count: 1 }]);
   });
 
+  it('keeps the winner in place for the seven-day reply period', async () => {
+    await seedEntry(platform, { participantId: await person('ana@example.com'), checked: true });
+    await seedEntry(platform, { participantId: await person('ben@example.com'), checked: true });
+    expect(noticeOf(await draw())).toBe('drawn');
+    expect(noticeOf(await draw(2))).toBe('draw-wait');
+    expect(await draws()).toHaveLength(1);
+    expect(await (await admin.get('/admin')).text()).not.toContain('action="/admin/draw"');
+
+    vi.setSystemTime(new Date('2026-10-21T15:59:59Z'));
+    expect(noticeOf(await draw(2))).toBe('draw-wait');
+    expect(await draws()).toHaveLength(1);
+  });
+
   it('draws again without earlier winners, and shows the winner in full', async () => {
     const ana = await person('ana@example.com');
     const ben = await person('ben@example.com');
@@ -125,11 +138,14 @@ describe('admin draw', () => {
     await seedEntry(platform, { participantId: ben, day: 1, checked: true });
     await seedEntry(platform, { participantId: cara, day: 1, source: 'tag', checked: true });
     await draw(1);
+    vi.setSystemTime(new Date('2026-10-21T16:00:00Z'));
     await draw(2);
+    vi.setSystemTime(new Date('2026-10-28T16:00:00Z'));
     await draw(3);
     const rounds = await draws();
     expect(new Set(rounds.map((row) => row.entrant)).size).toBe(3);
     expect(rounds.map((row) => row.eligible_count)).toEqual([3, 2, 1]);
+    vi.setSystemTime(new Date('2026-11-04T16:00:00Z'));
     expect(noticeOf(await draw(4))).toBe('draw-no-entries');
 
     const page = await (await admin.get('/admin')).text();

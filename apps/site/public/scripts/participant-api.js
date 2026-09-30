@@ -142,7 +142,7 @@
     title.textContent = 'Preview only';
     const note = document.createElement('p');
     note.textContent =
-      'On lvwwd.org this link is only sent by email or text. The preview shows it so you can test it:';
+      'On lvwwd.org this link is only sent by email. The preview shows it so you can test it:';
     const anchor = document.createElement('a');
     anchor.href = link;
     anchor.textContent = link;

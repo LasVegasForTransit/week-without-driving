@@ -9,6 +9,8 @@ export const LOG_PROBLEMS = {
   handle: 'Enter the Instagram handle: letters, numbers, periods and underscores, up to 30.',
   day: 'Pick a day from October 1 to 8.',
   tagLink: 'If you add a link, use a post on instagram.com.',
+  tripConfirmed:
+    'Check the registered handle, LVBT tag, posted day, trip and giveaway disclosure before logging.',
   unregistered:
     'That handle is not registered by an eligible participant. Ask them to enter in My week.',
   ambiguous:
@@ -40,6 +42,8 @@ export async function logTag(c: AdminContext, form: FormData): Promise<Response>
   if (!day) return refused(c, { form: 'tag', values: form }, LOG_PROBLEMS.day);
   if (link && !isInstagramLink(link))
     return refused(c, { form: 'tag', values: form }, LOG_PROBLEMS.tagLink);
+  if (field(form, 'trip-confirmed') !== 'yes')
+    return refused(c, { form: 'tag', values: form }, LOG_PROBLEMS.tripConfirmed);
 
   const found = await c.env.DB.prepare(
     `SELECT (SELECT count(*) FROM draws) AS draws,

@@ -115,6 +115,7 @@ export const BUILD: Build = {
     '/scripts/app.js': 'app1',
     '/photos/bus.webp': 'pho1',
   },
+  data: { '/data/stops.json': 'sto1', '/data/routes.json': 'rou1' },
 };
 
 /** What the fake network answers: a response per path, or offline for everything. */

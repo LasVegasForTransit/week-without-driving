@@ -70,14 +70,20 @@ describe('Places to go', () => {
     }
   });
 
-  it('adds the wheelchair note exactly where a step crosses a bridge', () => {
+  it('warns about bridge access and the Water Street stop closures', () => {
     for (const destination of destinations) {
       const crossesBridge = destination.steps.some((step) => /\bbridge\b/i.test(step));
-      expect(Boolean(destination.note), destination.anchor).toBe(crossesBridge);
+      if (crossesBridge) {
+        expect(destination.note?.heading, destination.anchor).toMatch(/wheelchair|walker/i);
+      } else if (destination.note) {
+        expect(destination.anchor).toBe('water-street-henderson');
+        expect(destination.note.text).toMatch(/October 1.*October 4/);
+        expect(destination.note.text).toMatch(/stop 246.*stop 245/);
+      }
     }
   });
 
-  it('links only to guides that exist', () => {
+  it('links only to existing guides or official RTC service information', () => {
     const links = destinations
       .flatMap((destination) => destination.steps)
       .flatMap((step) => parseInlineLinks(step))
@@ -85,10 +91,17 @@ describe('Places to go', () => {
     expect(links.length).toBeGreaterThan(0);
     for (const href of links) {
       const guide = /^\/guides\/([a-z0-9-]+)$/.exec(href)?.[1];
-      expect(guide, href).toBeDefined();
-      expect(existsSync(new URL(`../src/content/guides/${guide}.md`, import.meta.url)), href).toBe(
-        true,
-      );
+      if (guide) {
+        expect(
+          existsSync(new URL(`../src/content/guides/${guide}.md`, import.meta.url)),
+          href,
+        ).toBe(true);
+      } else {
+        const url = new URL(href);
+        expect(url.protocol, href).toBe('https:');
+        expect(url.hostname, href).toBe('www.rtcsnv.com');
+        expect(url.pathname, href).toMatch(/^\/ways-to-travel\/transit-services\//);
+      }
     }
   });
 

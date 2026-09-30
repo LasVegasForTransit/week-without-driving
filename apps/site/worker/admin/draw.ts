@@ -1,6 +1,6 @@
 import { type AdminContext, field } from './common';
 import { seeOther } from './html';
-import { ELIGIBLE_SQL, PENDING_REVIEW_SQL, drawOpen, randomIndex } from './pick';
+import { ELIGIBLE_SQL, PENDING_REVIEW_SQL, drawOpen, randomIndex, replyPeriodEnded } from './pick';
 
 /**
  * POST /admin/draw: draws the winner, or draws again when a winner doesn't
@@ -19,12 +19,27 @@ function back(notice: string): Response {
   return seeOther(`/admin?notice=${notice}#draw`);
 }
 
-export async function drawWinner(c: AdminContext, form: FormData): Promise<Response> {
-  if (field(form, 'confirm') !== 'yes') return back('draw-confirm');
-  if (!drawOpen(c.env, c.now)) return back('draw-not-open');
-  const round = Number(field(form, 'round'));
-  if (!Number.isSafeInteger(round) || round < 1) return back('draw-stale');
+type DrawGate = { round: number } | { problem: string };
 
+async function drawGate(c: AdminContext, form: FormData): Promise<DrawGate> {
+  if (field(form, 'confirm') !== 'yes') return { problem: 'draw-confirm' };
+  if (!drawOpen(c.env, c.now)) return { problem: 'draw-not-open' };
+  const round = Number(field(form, 'round'));
+  if (!Number.isSafeInteger(round) || round < 1) return { problem: 'draw-stale' };
+  if (round > 1) {
+    const latest = await c.env.DB.prepare(
+      'SELECT round, drawn_at FROM draws ORDER BY round DESC LIMIT 1',
+    ).first<{ round: number; drawn_at: string }>();
+    if (latest?.round !== round - 1) return { problem: 'draw-stale' };
+    if (!replyPeriodEnded(latest.drawn_at, c.now)) return { problem: 'draw-wait' };
+  }
+  return { round };
+}
+
+export async function drawWinner(c: AdminContext, form: FormData): Promise<Response> {
+  const gate = await drawGate(c, form);
+  if ('problem' in gate) return back(gate.problem);
+  const { round } = gate;
   const db = c.env.DB;
   const [waiting, eligible] = await db.batch<Record<string, unknown>>([
     db.prepare(PENDING_REVIEW_SQL),

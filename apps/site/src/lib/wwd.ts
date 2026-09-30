@@ -12,7 +12,7 @@ export const wwd = {
   endDate: '2026-10-08',
   nationalUrl: 'https://weekwithoutdriving.org/',
   nationalOrganizer: 'America Walks',
-  rtcTripPlannerUrl: 'https://www.rtcsnv.com/ways-to-travel/trip-planner/',
+  rtcTripPlannerUrl: 'https://www.rtcsnv.com/tripplanner/',
   hashtag: '#WeekWithoutDriving',
   maxEntries: 8,
 } as const;
@@ -62,7 +62,7 @@ export const wwdResources: Array<{
     audience: 'participants',
     title: 'Plan a bus trip',
     blurb: 'The RTC trip planner for routes, times, and the bus after the one you want.',
-    url: 'https://www.rtcsnv.com/ways-to-travel/trip-planner/',
+    url: 'https://www.rtcsnv.com/tripplanner/',
     linkLabel: 'RTC trip planner',
   },
   {

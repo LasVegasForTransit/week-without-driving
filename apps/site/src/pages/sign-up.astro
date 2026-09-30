@@ -18,7 +18,7 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
 
 <BaseLayout title={title} description={description}>
   <section class="signup container-page">
-    <div class="signup__intro">
+    <div class="signup__intro" data-signup-intro>
       <p class="signup__prize">
         <Icon name="mdi:gift-outline" class="size-5" aria-hidden="true" />
         Win a 30-day RTC bus pass
@@ -38,6 +38,14 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
         <li>Each day you skip the car, describe your trip. A post or photo is optional.</li>
         <li>We draw the winner by October 15 and contact them.</li>
       </ol>
+    </div>
+
+    <div data-signup-closed hidden class="signup__card">
+      <h1 class="signup__h2">Entries are closed.</h1>
+      <p class="mt-3">The last day to enter was October 8, 2026.</p>
+      <p class="mt-3">
+        Already signed up? <a href="/my-week/link" class="body-link">Get my link</a> to open My week.
+      </p>
     </div>
 
     <div data-signup-already hidden class="signup__card">
@@ -134,8 +142,9 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
           Instagram <span class="form-optional">(optional)</span>
         </label>
         <p id="su-ig-help" class="form-help">
-          If you tag @lasvegasfortransit in a trip post, we can count it for you. Posting is
-          optional.
+          A tag from this handle may count after volunteer review. Posting is optional. If you post
+          to enter, say “Week Without Driving giveaway entry” at the start of the caption or on the
+          story itself.
         </p>
         <div class="form-prefix">
           <span aria-hidden="true">@</span>

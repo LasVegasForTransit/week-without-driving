@@ -42,7 +42,7 @@ export const prizes: Array<{
     body: 'One 30-day pass for RTC buses.',
     photo: 'An RTC bus traveling through Las Vegas',
     image: photos.rtcBusMlk,
-    icon: 'mdi:card-account-details-outline',
+    icon: 'mdi:bus',
   },
 ];
 

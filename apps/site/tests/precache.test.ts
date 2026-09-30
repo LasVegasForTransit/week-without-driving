@@ -150,6 +150,12 @@ describe('the precache manifest', () => {
     expect(byUrl['/offline']?.bytes).toBe(
       bytesOf('/offline.html', new Uint8Array(readFileSync(join(dist, 'offline/index.html')))),
     );
+    expect(build.data['/data/stops.json']).toBe(
+      revisionOf(new TextEncoder().encode('{"stops":[]}')),
+    );
+    expect(build.data['/data/routes.json']).toBe(
+      revisionOf(new TextEncoder().encode('{"routes":[]}')),
+    );
 
     expect(missing).toContain('/bingo');
     expect(missing).not.toContain('/guides');
@@ -167,11 +173,30 @@ describe('the precache manifest', () => {
     ).toEqual([]);
   });
 
+  it('changes the injected worker when stop data changes without a page or static file change', () => {
+    site();
+    const before = buildManifest(dist).build;
+    write('data/stops.json', '{"stops":[{"id":"new"}]}');
+    const after = buildManifest(dist).build;
+    expect(after.precache).toEqual(before.precache);
+    expect(after.files).toEqual(before.files);
+    expect(after.data['/data/stops.json']).not.toBe(before.data['/data/stops.json']);
+    expect(after.data['/data/routes.json']).toBe(before.data['/data/routes.json']);
+  });
+
   it('writes the list into the service worker, and refuses a worker without the marker', () => {
     const source = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
-    const written = injectBuild(source, { precache: [], files: { '/a.js': 'abc' } });
-    expect(written).toContain('const BUILD = {"precache":[],"files":{"/a.js":"abc"}};');
-    expect(() => injectBuild('const BUILD = null;', { precache: [], files: {} })).toThrow(/marker/);
+    const written = injectBuild(source, {
+      precache: [],
+      files: { '/a.js': 'abc' },
+      data: { '/data/stops.json': 'sto1' },
+    });
+    expect(written).toContain(
+      'const BUILD = {"precache":[],"files":{"/a.js":"abc"},"data":{"/data/stops.json":"sto1"}};',
+    );
+    expect(() => injectBuild('const BUILD = null;', { precache: [], files: {}, data: {} })).toThrow(
+      /marker/,
+    );
   });
 
   it('stops the build when the background save would pass 2,000,000 bytes', () => {

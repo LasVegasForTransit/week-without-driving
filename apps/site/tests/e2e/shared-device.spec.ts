@@ -167,3 +167,11 @@ test('once sign-up closes, "Sign up someone else" is gone', async ({ page, conte
   await expect(page.getByRole('heading', { name: /Hi, Luz/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign up someone else' })).toBeHidden();
 });
+
+test('after October 8, direct visitors see closed entries and link recovery', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-09T07:00:00Z'));
+  await page.goto('/sign-up');
+  await expect(page.getByRole('heading', { name: 'Entries are closed.' })).toBeVisible();
+  await expect(page.locator('[data-signup-form]')).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Get my link' })).toBeVisible();
+});

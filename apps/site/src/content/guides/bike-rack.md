@@ -11,17 +11,14 @@ steps:
     icon: 'mdi:bike'
     body:
       - >-
-        RTC's bike racks hold more than one bike. Take anything loose off your bike, such as a water
-        bottle or bag, before the bus gets there.
+        RTC's bike racks hold two or three bikes, with no extra charge for the rack. Take anything
+        loose off your bike, such as a water bottle or bag, before the bus gets there.
       - >-
         When the bus arrives, let the driver see you're loading a bike, and stay where they can see
         you while you load it.
       - >-
         If the rack is already full, tell the driver. They can tell you what to do, such as waiting
         for the next bus.
-    note:
-      "How many bikes the rack holds, and whether there's a fee, hasn't been confirmed for this
-      guide."
   - heading: 'Load your bike'
     icon: 'mdi:bike-fast'
     body:
@@ -41,18 +38,10 @@ steps:
         Lift your bike out of the rack, then fold the rack back up if you're the last bike on it.
       - >-
         Step back to the curb before the bus pulls away.
-    note: 'Check the rack rules and any fee at rtcsnv.com.'
+    note: 'Check RTC’s current bike-rack instructions and restrictions before you ride.'
     links:
-      - label: "RTC's website"
-        href: 'https://www.rtcsnv.com/'
+      - label: 'RTC bike-rack instructions'
+        href: 'https://www.rtcsnv.com/ways-to-travel/how-to-ride/'
 ---
 
-<!--
-  Facts nobody on this team has verified against RTC's own pages yet
-  (see build-brief.md's instruction not to state unverified numbers as
-  fact). Confirm before launch:
-  - How many bikes the front rack holds.
-  - Whether there's a fee for the rack (RTC's own fee, separate from your
-    bus fare).
-  - Any size or weight limit on bikes the rack accepts.
--->
+<!-- RTC bike-rack capacity, cost and boarding instructions checked September 29, 2026. -->

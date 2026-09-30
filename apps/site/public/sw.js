@@ -11,7 +11,8 @@
  * precache list, with a revision (a fingerprint of the file's content) for
  * each file, and every static file the build made. A deploy that changes a
  * file changes this script, the browser installs the new version in the
- * background, and only files whose revision changed are downloaded again.
+ * background, and only files whose revision changed are downloaded again,
+ * including the stop and route data used by Find a bus.
  * When the phone asks sites to save data (Save-Data), the background save
  * still keeps the small public pages and stop data, so Home, guides, the
  * bus finder, and Bingo work offline from the first visit.
@@ -26,7 +27,7 @@
 
 /**
  * @typedef {{ url: string, revision: string, bytes: number, core: boolean }} PrecacheEntry
- * @typedef {{ precache: PrecacheEntry[], files: Record<string, string> }} Build
+ * @typedef {{ precache: PrecacheEntry[], files: Record<string, string>, data: Record<string, string> }} Build
  */
 
 /** @type {Build | null} */
@@ -291,11 +292,12 @@ if (BUILD) {
 
   const answerData = async (event, url) => {
     const cache = await caches.open(CACHES.data);
-    const saved = await cache.match(url.pathname);
+    const key = revisionKey(url.pathname, build.data[url.pathname]);
+    const saved = await cache.match(key);
     const fresh = fetch(event.request).then((response) => {
       if (storable(response)) {
         const copy = response.clone();
-        event.waitUntil(cache.put(url.pathname, copy));
+        event.waitUntil(cache.put(key, copy));
       }
       return response;
     });
@@ -342,12 +344,16 @@ if (BUILD) {
           }),
         );
         const data = await caches.open(CACHES.data);
+        const haveData = new Set((await data.keys()).map(keyOf));
         await Promise.all(
           DATA_FILES.map(async (url) => {
-            if (await data.match(url)) return;
+            const revision = build.data[url];
+            if (!revision) throw new Error(`The build has no revision for ${url}.`);
+            const key = revisionKey(url, revision);
+            if (haveData.has(key)) return;
             const response = await fetch(url, { cache: 'no-cache' });
             if (!response.ok) throw new Error(`Couldn’t save ${url}: ${response.status}`);
-            await data.put(url, response);
+            await data.put(key, response);
           }),
         );
         // The first version takes over at once, so one visit is enough. A
@@ -379,6 +385,17 @@ if (BUILD) {
           staticRequests
             .filter((request) => staleStatic.has(keyOf(request)))
             .map((request) => statics.delete(request)),
+        );
+        const data = await caches.open(CACHES.data);
+        const keptData = new Set(
+          Object.entries(build.data).map(([url, revision]) => revisionKey(url, revision)),
+        );
+        const dataRequests = await data.keys();
+        const staleData = new Set(staleKeys(dataRequests.map(keyOf), keptData));
+        await Promise.all(
+          dataRequests
+            .filter((request) => staleData.has(keyOf(request)))
+            .map((request) => data.delete(request)),
         );
         await self.clients.claim();
       })(),

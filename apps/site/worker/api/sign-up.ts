@@ -5,6 +5,7 @@ import { MESSAGES, clientIp, json, problem, readJsonObject } from '../http';
 import { deliverLink } from '../links';
 import { LIMITS, overLimit } from '../rate-limit';
 import { newSession } from '../session';
+import { weekDayNumber } from '../time';
 import { type BotCheck, checkTurnstile } from '../turnstile';
 import { FIELD_MESSAGES, checkSignUp, parseContact } from '../validate';
 
@@ -24,6 +25,7 @@ export const REPLIES = {
   tooManyLinks: 'Too many requests from this connection. Try again in an hour.',
   botFailed: 'We couldn’t check that you’re a person. Reload the page and try again.',
   botUnavailable: 'We couldn’t check the form just now. Try again in a minute.',
+  signUpClosed: 'Entries closed after October 8. If you signed up, you can still get your link.',
 } as const;
 
 interface OwnerRow {
@@ -94,6 +96,7 @@ async function alreadySignedUp(c: ApiContext, row: OwnerRow): Promise<Response> 
 }
 
 export async function signUp(c: ApiContext): Promise<Response> {
+  if (weekDayNumber(c.now) > 8) return problem(409, REPLIES.signUpClosed, { status: 'closed' });
   const body = await readJsonObject(c.request);
   if (!body) return problem(400, MESSAGES.badRequest);
   const checked = checkSignUp(body);

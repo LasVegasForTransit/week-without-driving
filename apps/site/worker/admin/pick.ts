@@ -60,6 +60,13 @@ export function randomIndex(n: number): number {
 
 /** The draw opens at 12:00 am on October 14 in Las Vegas. */
 export const DRAW_OPENS = new Date('2026-10-14T07:00:00Z');
+const REPLY_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Keep the winner's seven-day reply period open before another draw. */
+export function replyPeriodEnded(drawnAt: string, now: Date): boolean {
+  const drawnTime = Date.parse(drawnAt);
+  return Number.isFinite(drawnTime) && now.getTime() >= drawnTime + REPLY_PERIOD_MS;
+}
 
 /** Whether the draw may run now. The preview Worker can open it early to test it. */
 export function drawOpen(env: { PREVIEW_DRAW_ANYTIME?: string | undefined }, now: Date): boolean {

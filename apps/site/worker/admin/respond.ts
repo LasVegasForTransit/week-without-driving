@@ -24,6 +24,9 @@ export const NOTICES: Record<string, Notice> = {
   drawn: done('Winner drawn. Their details are under Draw the winner.'),
   'draw-confirm': problem('Tick the box to confirm, then draw.'),
   'draw-not-open': problem('The draw opens October 14, 2026.'),
+  'draw-wait': problem(
+    'The previous winner still has time to reply. Wait seven days after their draw.',
+  ),
   'draw-unchecked': problem('Some entries still need a check. Check or remove them, then draw.'),
   'draw-no-entries': problem('There are no checked entries to draw from.'),
   'draw-stale': problem('Another volunteer drew at the same moment. Their draw is shown below.'),
