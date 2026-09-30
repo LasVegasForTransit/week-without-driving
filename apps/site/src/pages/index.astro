@@ -248,12 +248,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       <div class="home-split">
         <div>
           <h2 id="partners-heading" class="home-h2">Partners</h2>
-          <p class="home-intro">
-            Meet the groups taking part. Find a flyer, a social post or a link to share with your
-            community.
-          </p>
+          <p class="home-intro">Meet the groups taking part in Week Without Driving.</p>
         </div>
-        <a href="/partners" class="btn btn--primary self-start">See partners and materials</a>
+        <a href="/partners" class="btn btn--primary self-start">Meet our partners</a>
       </div>
       {
         partners.length > 0 && (
@@ -268,11 +265,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
           </ul>
         )
       }
-      <p class="home-national">
-        Part of the national{' '}
-        <a href={wwd.nationalUrl} target="_blank" rel="noopener noreferrer">Week Without Driving</a
-        >, led by America Walks and the Nondrivers Alliance.
-      </p>
     </div>
   </section>
 
@@ -623,6 +615,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     padding: 1.25rem;
     color: inherit;
     text-decoration: none;
+    overflow-wrap: anywhere;
   }
   .logo-wall__tile img {
     display: block;
@@ -635,21 +628,21 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     outline: 3px solid var(--color-primary-warm);
     outline-offset: 3px;
   }
-  .home-national {
-    margin-top: 1.5rem;
-    color: var(--color-on-surface-variant);
+  @media (max-width: 40rem) {
+    .logo-wall {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: visible;
+      gap: 0.75rem;
+    }
+    .logo-wall__tile {
+      min-width: 0;
+      font-size: 0.875rem;
+    }
+    .logo-wall__tile > a {
+      padding: 0.75rem;
+    }
   }
-  .home-national a {
-    color: inherit;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .home-national a:hover,
-  .home-national a:focus-visible {
-    outline: 2px solid currentcolor;
-    outline-offset: 3px;
-  }
-
   /* Leaders */
   .home-leaders {
     padding-block: clamp(3.5rem, 9vw, 6rem);

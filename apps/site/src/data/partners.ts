@@ -38,6 +38,7 @@ export const roster: RosterItem[] = [
     slug: 'sierra-club-toiyabe',
     name: 'Sierra Club Toiyabe Chapter',
     url: 'https://www.sierraclub.org/toiyabe',
+    logo: '/partners/logos/sierra-club-toiyabe.png',
     type: 'Environmental and justice groups',
     sentence: 'The Toiyabe Chapter works on environmental issues in Nevada.',
   },
