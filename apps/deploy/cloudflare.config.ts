@@ -4,7 +4,6 @@ import { bindings, defineConfig, triggers } from 'cf/config';
 // fallback mirror. This deploy package has no Astro dependency so cf uses its
 // Wrangler bundler for the Worker and static assets.
 export default defineConfig({
-  accountId: '2557b5c2e166292ded0f8425b73075e9',
   worker: {
     name: 'lvwwd',
     compatibilityDate: '2026-08-31',
