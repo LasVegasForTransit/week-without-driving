@@ -5,6 +5,7 @@ import { CLEANUP_CRON, dailyCleanup } from './cleanup';
 import type { Env } from './env';
 import { openLink } from './links';
 import { TURNSTILE_PAGES, withSiteKey } from './pages';
+import { PLAN_PUSH_CRONS, sendPlanReminders } from './push/plans';
 import { redirectFor } from './redirect';
 import { channelFor, sendReminders } from './reminders/channels';
 
@@ -43,6 +44,8 @@ export default {
   async scheduled(controller, env): Promise<void> {
     const now = new Date(controller.scheduledTime);
     if (controller.cron === CLEANUP_CRON) return dailyCleanup(env, now);
+    if (PLAN_PUSH_CRONS.some((cron) => cron === controller.cron))
+      return sendPlanReminders(env, new Date(Math.max(controller.scheduledTime, Date.now())));
     const channel = channelFor(controller.cron);
     if (channel) return sendReminders(channel, env, now);
     console.warn('No job runs on this Cron Trigger', controller.cron);

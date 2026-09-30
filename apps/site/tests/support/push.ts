@@ -83,9 +83,13 @@ export async function decryptPush(
 export async function readReminder(
   push: { body: Uint8Array<ArrayBuffer> } | undefined,
   browser: TestBrowser | undefined,
-): Promise<{ title: string; body: string }> {
+): Promise<{ title: string; body: string; tag?: string }> {
   if (!push || !browser) throw new Error('No push, or no browser to read it');
-  return JSON.parse(await decryptPush(push.body, browser)) as { title: string; body: string };
+  return JSON.parse(await decryptPush(push.body, browser)) as {
+    title: string;
+    body: string;
+    tag?: string;
+  };
 }
 
 export interface PushRequest {

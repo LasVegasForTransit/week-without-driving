@@ -16,6 +16,8 @@ export interface StoredSubscription extends BrowserKeys {
 export interface Notice {
   title: string;
   body: string;
+  /** Plan reminders use a stable distinct tag so two outings remain visible. */
+  tag?: string;
 }
 
 /**
@@ -81,6 +83,7 @@ export async function sendPush(
   subscription: StoredSubscription,
   notice: Notice,
   authorize: (endpoint: string) => Promise<string>,
+  ttlSeconds = TTL_SECONDS,
 ): Promise<PushResult> {
   let body: Uint8Array;
   try {
@@ -95,7 +98,7 @@ export async function sendPush(
       method: 'POST',
       headers: {
         Authorization: await authorize(subscription.endpoint),
-        TTL: String(TTL_SECONDS),
+        TTL: String(ttlSeconds),
         Urgency: 'normal',
         'Content-Encoding': 'aes128gcm',
         'Content-Type': 'application/octet-stream',
