@@ -254,7 +254,10 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       </div>
       {
         partners.length > 0 && (
-          <ul class="logo-wall" aria-label="Partner organizations">
+          <ul
+            class:list={['logo-wall', { 'logo-wall--compact': partners.length <= 2 }]}
+            aria-label="Partner organizations"
+          >
             {partners.map((p) => (
               <li class="logo-wall__tile">
                 <a href={`/partners#partner-${p.slug}`}>
@@ -589,6 +592,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   /* Partner wall */
   .home-partners {
     background: var(--color-surface-container);
+    padding-block: clamp(3rem, 6vw, 4.5rem);
   }
   .logo-wall {
     display: flex;
@@ -606,6 +610,14 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     background: var(--color-surface);
     border-radius: 0.75rem;
     scroll-snap-align: start;
+  }
+  .logo-wall--compact {
+    justify-content: center;
+    overflow: visible;
+  }
+  .logo-wall--compact .logo-wall__tile {
+    flex: 1 1 0;
+    max-width: 22rem;
   }
   .logo-wall__tile > a {
     display: flex;
