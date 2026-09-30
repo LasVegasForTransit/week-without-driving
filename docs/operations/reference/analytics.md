@@ -25,9 +25,9 @@ The analytics runtime is added only when a build has `PUBLIC_LVBT_CWA_TOKEN`, lv
 Analytics token. The Deploy workflow reads it from the `production` environment's variables. Local,
 pull-request, and preview builds have no runtime or beacon, so event calls send nothing.
 
-The production variable is currently unset. Without the token the site builds and works normally,
-with no analytics. The package treats a missing token as "not production", so the campaign events
-stay off too until the token exists. Update the Privacy page before enabling it.
+Without the token the site builds and works normally, with no campaign event tracking. The package
+treats a missing token as "not production", so the campaign events stay off too until the token
+exists. Keep the Privacy page accurate when changing this setting.
 [Set up lvwwd.org's production](../how-to/set-up-production.md#6-turn-on-analytics) shows how to
 create it.
 
