@@ -1,6 +1,6 @@
 /**
  * Offline notices for the forms that need a connection: Sign up, today's
- * trip, reminders and "Send my link again" on My week, and Get my link.
+ * trip, reminders and "Email a sign-in link" on My Week.
  *
  * Each form (or section) carries data-needs-connection with its notice
  * key, and each button that sends something to lvwwd.org carries

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Get my link: sends the "Open my week" link again to the email
+// Email a sign-in link: sends the "Open My Week" link again to the email
 // someone signed up with. The confirmation is the same whether or
 // not the contact matches a sign-up, so the page never reveals who signed
 // up. The behaviour is in /scripts/my-week-link.js. A link that has
@@ -9,22 +9,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="Get my link · Week Without Driving Las Vegas"
-  description="Get the link that opens My week on this phone."
+  title="Email me a sign-in link · Week Without Driving Las Vegas"
+  description="Email a sign-in link that opens My Week on this phone."
   noindex
 >
   <section class="container-page getlink narrow">
-    <h1 class="page-title">Get my link</h1>
+    <h1 class="page-title">Email me a sign-in link</h1>
     <p data-link-expired hidden class="getlink__expired" role="alert">
       That link has expired or doesn’t work.
     </p>
     <p class="page-lede" data-link-instructions>
-      Type the email address you signed up with. We’ll request a link that opens My week on this
+      Enter the email address you used to sign up. We’ll email a link that opens My Week on this
       phone.
     </p>
 
     <div data-link-unavailable hidden class="getlink__card getlink__unavailable" role="status">
-      <h2 class="getlink__h2">Link recovery is temporarily unavailable.</h2>
+      <h2 class="getlink__h2">Email sign-in links are temporarily unavailable.</h2>
       <p class="mt-3">The rider guides and Bingo are open now while we restore this service.</p>
       <p class="mt-4">
         <a href="/guides" class="arrow-link">Read the rider guides</a>
@@ -56,7 +56,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         data-link-submit
         data-needs-connection-button
       >
-        Send my link
+        Email me a sign-in link
       </button>
       <p class="form-error mt-3 text-center" data-link-status aria-live="polite"></p>
     </form>

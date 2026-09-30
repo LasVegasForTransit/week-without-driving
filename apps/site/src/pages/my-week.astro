@@ -53,14 +53,16 @@ const planModes = [
 
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
-      <h1 id="out-heading" class="page-title">My week</h1>
-      <p class="myweek__lede">This phone isn’t signed in.</p>
+      <h1 id="out-heading" class="page-title">Your Week Without Driving</h1>
+      <p class="myweek__lede">
+        Plan car-free trips. Track your eight days. Tell us about each trip.
+      </p>
       <div class="myweek__actions">
-        <a href="/my-week/link" class="btn btn--primary btn--big">Get my link</a>
-        <a href="/sign-up" class="btn btn--outline">Sign up to win</a>
+        <a href="/sign-up" class="btn btn--primary btn--big">Sign up</a>
+        <a href="/my-week/link" class="btn btn--outline">Email me a sign-in link</a>
       </div>
       <p class="myweek__note">
-        Signed up on another phone? Request a link by email when delivery is available.
+        Already signed up? Use the same email. We’ll send a link that opens My Week on this phone.
       </p>
     </section>
 
@@ -525,12 +527,12 @@ const planModes = [
         aria-labelledby="phones-heading"
         data-needs-connection="send-link"
       >
-        <h2 id="phones-heading" class="myweek__h2">Open My week on another phone</h2>
+        <h2 id="phones-heading" class="myweek__h2">Use My Week on another phone</h2>
         <p class="myweek__p" data-me-link-line>
-          Request a link by email to open My week on another phone.
+          We can email a sign-in link to open My Week on another phone.
         </p>
         <a href="/my-week/link" class="arrow-link mt-3" data-needs-connection-button
-          >Send my link again</a
+          >Email a sign-in link</a
         >
       </section>
 
