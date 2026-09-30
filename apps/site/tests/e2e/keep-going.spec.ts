@@ -86,7 +86,7 @@ async function standInNewsletter(page: Page, replies: Array<{ status: number; bo
 const card = (page: Page, name = 'Keep going after the week') => page.getByRole('region', { name });
 
 test.describe('My week', () => {
-  test('the card sits after the reminders and before signing out, linking to the newsletter page', async ({
+  test('the card sits after reminders and offers LVBT membership or another way to help', async ({
     page,
     context,
   }) => {
@@ -101,13 +101,14 @@ test.describe('My week', () => {
         'Week Without Driving lasts eight days, but Las Vegans for Better Transit works all year for better buses and safer streets across the valley. Keep going with us.',
       ),
     ).toBeVisible();
-    await expect(
-      keepGoing.getByRole('link', { name: "Sign up on LVBT's newsletter page" }),
-    ).toHaveAttribute('href', 'https://mail.lasvegasfortransit.org/');
-    await expect(keepGoing.getByText('Ready to do more?')).toBeVisible();
-    await expect(keepGoing.getByRole('link', { name: 'Become a member' })).toHaveAttribute(
+    await expect(keepGoing.getByRole('link', { name: 'Join LVBT' })).toHaveAttribute(
       'href',
-      'https://lasvegasfortransit.org/join',
+      'https://lasvegasfortransit.org/join/member/?from=wwd',
+    );
+    await expect(keepGoing.getByText('Already an LVBT member?')).toBeVisible();
+    await expect(keepGoing.getByRole('link', { name: 'Explore ways to help' })).toHaveAttribute(
+      'href',
+      'https://lasvegasfortransit.org/go/',
     );
     await expect(keepGoing.getByRole('button', { name: 'Join the newsletter' })).toBeHidden();
 
@@ -135,9 +136,7 @@ test.describe('My week', () => {
     await page.goto('/my-week');
     const keepGoing = card(page);
     await expect(keepGoing.getByText("We'll send it to w•••@example.com.")).toBeVisible();
-    await expect(
-      keepGoing.getByRole('link', { name: "Sign up on LVBT's newsletter page" }),
-    ).toBeHidden();
+    await expect(keepGoing.getByRole('link', { name: 'Join LVBT' })).toBeHidden();
     expect(loads).toEqual([]);
 
     await keepGoing.getByRole('button', { name: 'Join the newsletter' }).click();
@@ -403,18 +402,16 @@ test.describe('Home', () => {
 test.describe('with JavaScript off', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('the card still shows its heading, the newsletter page and "Become a member", with no field', async ({
-    page,
-  }) => {
+  test('the card still offers both LVBT paths with JavaScript off', async ({ page }) => {
     await page.goto('/');
     // Home keeps its campaign text without JavaScript, so this reads the card's markup, which
     // is the same on My week.
     const section = page.locator('#stay-involved');
-    await expect(section.locator('a[href="https://mail.lasvegasfortransit.org/"]')).toHaveText(
-      "Sign up on LVBT's newsletter page",
-    );
-    await expect(section.locator('a[href="https://lasvegasfortransit.org/join"]')).toHaveText(
-      'Become a member',
+    await expect(
+      section.locator('a[href="https://lasvegasfortransit.org/join/member/?from=wwd"]'),
+    ).toHaveText('Join LVBT');
+    await expect(section.locator('a[href="https://lasvegasfortransit.org/go/"]')).toHaveText(
+      'Explore ways to help',
     );
     await expect(section.locator('form')).toHaveAttribute('hidden', '');
     await expect(page.getByRole('heading', { name: 'Try it this October.' })).toBeVisible();

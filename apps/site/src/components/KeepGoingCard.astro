@@ -2,11 +2,11 @@
 import { lvbt } from '../lib/site';
 import { NEWSLETTER_PAGE, ONE_TAP_NEWSLETTER } from '../lib/newsletter';
 
-// The invitation to keep going with LVBT: a newsletter sign-up and the
-// membership link. My week shows it as "Keep going after the week"; Home
-// shows it as "Stay involved with LVBT" once the giveaway closes.
+// The invitation to join LVBT after the campaign. My week shows it as
+// "Keep going after the week"; Home shows it as "Stay involved with LVBT"
+// once the giveaway closes.
 //
-// Everyone sees the link to LVBT's newsletter page and "Become a member".
+// Everyone sees a link to LVBT's membership page.
 // When the one-tap sign-up is on (src/lib/newsletter.ts), /scripts/keep-going.js
 // swaps the link for "Join the newsletter": with the signed-in participant's
 // own address on My week, or an email field.
@@ -36,7 +36,7 @@ const headingId = `${id}-heading`;
   <p class="keep-going__text">{text}</p>
 
   <p class="keep-going__link" data-kg-page-link>
-    <a href={NEWSLETTER_PAGE} class="arrow-link">Sign up on LVBT's newsletter page</a>
+    <a href={NEWSLETTER_PAGE} class="btn btn--primary">Join LVBT</a>
   </p>
 
   <form class="keep-going__form" data-kg-form novalidate hidden>
@@ -80,8 +80,8 @@ const headingId = `${id}-heading`;
   </form>
   <p class="keep-going__message" aria-live="polite" data-kg-message></p>
 
-  <p class="keep-going__more">Ready to do more?</p>
-  <a href={lvbt.joinUrl} class="arrow-link keep-going__member">Become a member</a>
+  <p class="keep-going__more">Already an LVBT member?</p>
+  <a href={`${lvbt.url}/go/`} class="body-link keep-going__member">Explore ways to help</a>
 </section>
 
 <style>
