@@ -85,6 +85,21 @@ describe('sign-up and links', () => {
     });
   });
 
+  it('keeps a new signup signed in but reports a rejected email accurately', async () => {
+    outbound.resendStatus = 503;
+    const response = await signUp({});
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({
+      emailStatus: 'failed',
+      redirect: '/my-week?welcome=1&email=failed',
+    });
+    expect(response.headers.getSetCookie()).toHaveLength(2);
+    expect(await count('participants')).toBe(1);
+    expect(await platform.env.DB.prepare('SELECT delivery FROM link_tokens').first()).toEqual({
+      delivery: 'failed',
+    });
+  });
+
   it('closes new sign-ups at midnight after October 8 while link recovery stays open', async () => {
     vi.setSystemTime(new Date('2026-10-09T06:59:59.999Z'));
     expect((await signUp({})).status).toBe(201);

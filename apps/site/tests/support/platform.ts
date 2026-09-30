@@ -116,6 +116,8 @@ export interface Outbound {
   emails: { to: string[]; text: string }[];
   /** Whether Turnstile says yes. */
   turnstilePasses: boolean;
+  /** HTTP status returned by Resend. */
+  resendStatus: number;
   /** The public keys a Cloudflare Access team publishes, for the admin tests. */
   accessKeys: JsonWebKey[];
   /** How many times the Worker fetched the Access keys. */
@@ -131,6 +133,7 @@ export function fakeOutbound(realFetch: typeof fetch): Outbound {
   const outbound: Outbound = {
     emails: [],
     turnstilePasses: true,
+    resendStatus: 200,
     accessKeys: [],
     accessKeyFetches: 0,
     fetch: async (input, init) => {
@@ -145,7 +148,10 @@ export function fakeOutbound(realFetch: typeof fetch): Outbound {
       if (url === 'https://api.resend.com/emails') {
         const body = typeof init?.body === 'string' ? init.body : '{}';
         outbound.emails.push(JSON.parse(body) as { to: string[]; text: string });
-        return Response.json({ id: 'email-id' });
+        return Response.json(
+          outbound.resendStatus === 200 ? { id: 'email-id' } : { message: 'delivery refused' },
+          { status: outbound.resendStatus },
+        );
       }
       return realFetch(input, init);
     },

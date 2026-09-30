@@ -146,12 +146,19 @@ export async function signUp(c: ApiContext): Promise<Response> {
     c,
     { id, firstName: details.firstName, contact: contact.value, contactType: contact.type },
     false,
+    true,
   );
+  const emailStatus =
+    preview.delivery === 'sent'
+      ? 'queued'
+      : preview.delivery === 'unconfigured'
+        ? 'unavailable'
+        : 'failed';
   return json(
     {
       status: 'created',
-      redirect: `/my-week?welcome=1&email=${c.env.RESEND_API_KEY ? 'queued' : 'unavailable'}`,
-      emailStatus: c.env.RESEND_API_KEY ? 'queued' : 'unavailable',
+      redirect: `/my-week?welcome=1&email=${emailStatus}`,
+      emailStatus,
       ...preview,
     },
     201,
