@@ -4,6 +4,7 @@ import WinBand from '../components/WinBand.astro';
 import { destinations, finderPlaces } from '../lib/destinations';
 import { parseInlineLinks } from '../lib/inline-links';
 import { buildMapLinks } from '../lib/map-links';
+import { comparePublished } from '../lib/compare-release';
 
 // The Go page: "Find a bus" shows the bus stops nearest the visitor, or
 // nearest a place they pick without sharing their location, and "Places to
@@ -41,20 +42,26 @@ const mapButtonClass =
     <p class="text-sm font-bold uppercase tracking-widest text-primary">Get moving</p>
     <h1 id="plan-heading" class="page-title">Plan a trip</h1>
     <p class="page-lede">Where would you go without a car?</p>
-    <div class="mt-8 grid gap-4 md:grid-cols-3">
-      <a
-        href="/go/compare"
-        class="group border-2 border-primary bg-surface-container p-6 no-underline hover:bg-primary hover:text-on-primary focus-visible:bg-primary focus-visible:text-on-primary"
-      >
-        <span class="text-3xl font-black">01</span>
-        <h2 class="mt-4 text-title-lg font-black">Compare ways to go →</h2>
-        <p class="mt-2 leading-relaxed">See driving next to bus, walking, biking, or scooter.</p>
-      </a>
+    <div class:list={['mt-8 grid gap-4', comparePublished ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
+      {
+        comparePublished && (
+          <a
+            href="/go/compare"
+            class="group border-2 border-primary bg-surface-container p-6 no-underline hover:bg-primary hover:text-on-primary focus-visible:bg-primary focus-visible:text-on-primary"
+          >
+            <span class="text-3xl font-black">01</span>
+            <h2 class="mt-4 text-title-lg font-black">Compare ways to go →</h2>
+            <p class="mt-2 leading-relaxed">
+              See driving next to bus, walking, biking, or scooter.
+            </p>
+          </a>
+        )
+      }
       <a
         href="#find-routes"
         class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
       >
-        <span class="text-3xl font-black">02</span>
+        <span class="text-3xl font-black">{comparePublished ? '02' : '01'}</span>
         <h2 class="mt-4 text-title-lg font-black">Find a bus →</h2>
         <p class="mt-2 leading-relaxed">See nearby stops and the routes that serve them.</p>
       </a>
@@ -62,10 +69,18 @@ const mapButtonClass =
         href="#places-to-go"
         class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
       >
-        <span class="text-3xl font-black">03</span>
+        <span class="text-3xl font-black">{comparePublished ? '03' : '02'}</span>
         <h2 class="mt-4 text-title-lg font-black">Pick a place →</h2>
         <p class="mt-2 leading-relaxed">Try one of seven places across the valley.</p>
       </a>
+    </div>
+    <div class="mt-6 border-l-4 border-primary bg-surface-container p-5 leading-relaxed">
+      <p class="font-bold">Going to work or school?</p>
+      <p class="mt-1">
+        <a href="https://www.rtcsnv.com/ways-to-travel/club-ride/" class="body-link"
+          >RTC Club Ride</a
+        > can help you plan another way there. Its rewards are separate from the LVBT giveaway.
+      </p>
     </div>
   </section>
   {/* FIND A BUS — the nearest-route finder, straight under the title */}

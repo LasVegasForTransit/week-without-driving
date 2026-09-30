@@ -3,6 +3,7 @@
   "ui": "tui",
   "globalEnv": [
     "CI",
+    "COMPARE_PUBLISHED",
     "LVBT_REQUIRE_ANALYTICS",
     "PUBLIC_LVBT_ANALYTICS_COLLECTOR",
     "PUBLIC_LVBT_CWA_TOKEN"

@@ -7,6 +7,7 @@ import { defineConfig } from 'astro/config';
 import { minifyScripts } from './src/integrations/minify-scripts';
 import { reminderCheck } from './src/integrations/reminder-check';
 import { serviceWorker } from './src/integrations/service-worker';
+import { comparePublished } from './src/lib/compare-release';
 
 export default defineConfig({
   // The canonical URL. The sitemap and absolute links are built from it.
@@ -27,7 +28,13 @@ export default defineConfig({
   integrations: [
     reminderCheck(),
     sitemap({
-      filter: (page) => !/\/(?:my-week|offline|get-involved)(?:\/|$)/.test(new URL(page).pathname),
+      filter: (page) => {
+        const path = new URL(page).pathname;
+        return (
+          !/\/(?:my-week|offline|get-involved)(?:\/|$)/.test(path) &&
+          (comparePublished || path !== '/go/compare')
+        );
+      },
     }),
     icon(),
     lvbtAnalytics({ site: 'lvwwd.org', exclude: ['^/admin'] }),
