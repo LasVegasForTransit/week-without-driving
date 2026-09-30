@@ -1,5 +1,7 @@
 /** A saved trip plan is preparation; describing a completed trip creates an entry. */
 (() => {
+  const STEPS = ['where', 'when', 'available', 'try', 'review'];
+  const DRAFT_KEY = 'wwd-trip-plan-draft';
   const MODE_LABELS = {
     bus: 'bus',
     walk: 'walk or roll',
@@ -130,16 +132,77 @@
     form.querySelectorAll('[data-plan-step]').forEach((panel) => {
       panel.hidden = Number(panel.getAttribute('data-plan-step')) !== step;
     });
-    setText('[data-plan-progress]', `Step ${step} of 4`);
     const back = form.querySelector('[data-plan-back]');
     const forward = form.querySelector('[data-plan-next]');
     const save = form.querySelector('[data-plan-save]');
     if (back) back.hidden = step === 1;
-    if (forward) forward.hidden = step === 4;
-    if (save) save.hidden = step !== 4;
+    if (forward) forward.hidden = step === 5;
+    if (save) save.hidden = step !== 5;
     setText('[data-plan-error]', '');
     renderPreview(form);
-    form.querySelector(`[data-plan-step="${step}"]`)?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function readDraft() {
+    try {
+      return JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function setField(form, name, value) {
+    const field = form.elements.namedItem(name);
+    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement)
+      field.value = typeof value === 'string' ? value : '';
+  }
+
+  function restoreDraft(form, draft) {
+    if (!draft || typeof draft !== 'object') return;
+    const kind = ['outing', 'event', 'own'].includes(draft.kind) ? draft.kind : '';
+    const kindRadio = form.querySelector(`input[name="planKind"][value="${kind}"]`);
+    if (kindRadio instanceof HTMLInputElement) kindRadio.checked = true;
+    setField(form, 'outing', draft.outingAnchor);
+    setField(form, 'eventName', draft.eventName);
+    setField(form, 'eventDestination', draft.eventDestination);
+    setField(form, 'ownDestination', draft.ownDestination);
+    setField(form, 'day', String(draft.day ?? ''));
+    setField(form, 'time', draft.time);
+    setField(form, 'reminderMinutesBefore', String(draft.reminderMinutesBefore ?? ''));
+    for (const name of ['availableMode', 'willingMode']) {
+      const modes = Array.isArray(draft[name]) ? draft[name] : [];
+      form.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+        if (input instanceof HTMLInputElement) input.checked = modes.includes(input.value);
+      });
+    }
+  }
+
+  function draftValues(form) {
+    const plan = values(form);
+    return {
+      ...plan,
+      eventDestination: fieldValue(form, 'eventDestination'),
+      ownDestination: fieldValue(form, 'ownDestination'),
+      availableMode: plan.availableModes,
+      willingMode: plan.willingModes,
+    };
+  }
+
+  function keepDraft(form) {
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draftValues(form)));
+      return true;
+    } catch {
+      setText(
+        '[data-plan-error]',
+        'This browser could not keep your choices. Try another browser.',
+      );
+      return false;
+    }
+  }
+
+  function goToStep(state, next) {
+    if (!keepDraft(state.form)) return;
+    window.location.assign(`/my-week/plan/${STEPS[next - 1]}`);
   }
 
   function validationMessage(plan, step) {
@@ -153,7 +216,7 @@
         return 'Choose one day from October 1 to 8.';
       if (!/^\d{2}:\d{2}$/.test(plan.time)) return 'Choose about what time you will go.';
     }
-    if (step === 3 && plan.willingModes.length === 0)
+    if (step === 4 && plan.willingModes.length === 0)
       return 'Pick at least one way you would consider going.';
     return '';
   }
@@ -180,17 +243,16 @@
 
   async function save(state, event) {
     event.preventDefault();
-    for (const step of [1, 2, 3]) {
+    for (const step of [1, 2, 3, 4]) {
       if (!validStep(state, step)) {
-        showStep(state, step);
-        validStep(state, step);
+        goToStep(state, step);
         return;
       }
     }
-    const { form, api, me, showSignedOut, renderEntries, dayField } = state;
+    const { form, api, showSignedOut } = state;
     const button = form.querySelector('[data-plan-save]');
     if (button instanceof HTMLButtonElement) button.disabled = true;
-    const { ok, status, data } = await api.call('POST', '/api/plans', payload(values(form)));
+    const { ok, status } = await api.call('POST', '/api/plans', payload(values(form)));
     if (button instanceof HTMLButtonElement) button.disabled = false;
     if (status === 401) return showSignedOut();
     if (!ok) {
@@ -200,20 +262,12 @@
       );
       return;
     }
-    me.plans = [...(me.plans ?? []), data.plan];
-    renderEntries();
-    const date =
-      dayField instanceof HTMLSelectElement ? dayField.selectedOptions[0]?.textContent : '';
-    setText(
-      '[data-plan-status]',
-      `Saved for ${date?.trim() || 'your day'}. Come back after your trip to describe it for an entry.`,
-    );
-    form.reset();
-    if (dayField instanceof HTMLSelectElement)
-      dayField.value = String(me.today >= 1 ? me.today : 1);
-    showKindPanel(form);
-    showStep(state, 1);
-    document.querySelector('[data-plan-status]')?.focus();
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* The saved plan is already on the server. */
+    }
+    window.location.assign('/my-week?plan=saved');
   }
 
   function bindEvents(state) {
@@ -222,15 +276,21 @@
       showKindPanel(form);
       renderPreview(form);
       setText('[data-plan-error]', '');
+      keepDraft(form);
     };
     form.addEventListener('input', update);
     form.addEventListener('change', update);
     form.querySelector('[data-plan-next]')?.addEventListener('click', () => {
-      if (validStep(state, state.step)) showStep(state, Math.min(state.step + 1, 4));
+      if (validStep(state, state.step)) goToStep(state, Math.min(state.step + 1, 5));
     });
     form
       .querySelector('[data-plan-back]')
-      ?.addEventListener('click', () => showStep(state, Math.max(state.step - 1, 1)));
+      ?.addEventListener('click', () => goToStep(state, Math.max(state.step - 1, 1)));
+    document.querySelectorAll('[data-plan-step-link]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (!keepDraft(form)) event.preventDefault();
+      });
+    });
     form.addEventListener('submit', (event) => void save(state, event));
   }
 
@@ -253,35 +313,64 @@
       dayField.value = String(draft.day);
       form.elements.namedItem('time').value = draft.time;
       form.querySelector(`input[name="willingMode"][value="${draft.mode}"]`).checked = true;
-      setText(
-        '[data-plan-status]',
-        'Your trip is ready to review. Save it here when it looks right.',
-      );
+      setText('[data-plan-status]', 'Your trip details are filled in. Check them before saving.');
       sessionStorage.removeItem('wwd-compare-plan');
+      keepDraft(form);
     } catch {
       /* The planner still works when browser storage is unavailable. */
     }
   }
 
-  window.lvwwdPlanner = ({ api, me, showSignedOut, renderEntries }) => {
+  function prepareDay(form, today) {
+    const dayField = form.elements.namedItem('day');
+    if (!(dayField instanceof HTMLSelectElement)) return null;
+    for (const option of dayField.options) {
+      if (Number(option.value) < today) option.disabled = true;
+    }
+    return dayField;
+  }
+
+  async function start() {
     const form = document.querySelector('[data-plan-form]');
     if (!(form instanceof HTMLFormElement)) return;
+    const loading = document.querySelector('[data-plan-loading]');
+    const api = window.lvwwdApi;
+    if (!api) return;
+    const { ok, status, data: me } = await api.call('GET', '/api/me');
+    if (loading) loading.hidden = true;
+    const showSignedOut = () => {
+      try {
+        sessionStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* Sign-in instructions are still available without browser storage. */
+      }
+      document.querySelector('[data-plan-signed-out]')?.removeAttribute('hidden');
+      form.hidden = true;
+    };
+    if (status === 401) return showSignedOut();
+    if (!ok) {
+      document.querySelector('[data-plan-offline]')?.removeAttribute('hidden');
+      return;
+    }
     if (me.today > 8) {
-      setText('[data-plan-status]', 'The week has ended. Your saved plans are still shown above.');
+      document.querySelector('[data-plan-closed]')?.removeAttribute('hidden');
       return;
     }
     form.hidden = false;
-    const dayField = form.elements.namedItem('day');
-    if (dayField instanceof HTMLSelectElement) {
-      for (const option of dayField.options) {
-        if (Number(option.value) < me.today) option.disabled = true;
-      }
+    const dayField = prepareDay(form, me.today);
+    restoreDraft(form, readDraft());
+    if (dayField instanceof HTMLSelectElement && !dayField.value)
       dayField.value = String(me.today >= 1 ? me.today : 1);
-    }
-    const state = { form, api, me, showSignedOut, renderEntries, dayField, step: 1 };
-    bindEvents(state);
     applyComparisonDraft(form, dayField, me.today);
+    const current = STEPS.indexOf(window.location.pathname.split('/').at(-1));
+    const state = { form, api, showSignedOut, step: current + 1 };
+    bindEvents(state);
     showKindPanel(form);
-    showStep(state, 1);
-  };
+    showStep(state, state.step);
+    document
+      .querySelector('[data-plan-event-reminder]')
+      ?.toggleAttribute('hidden', me.eventRemindersEnabled !== true);
+  }
+
+  void start();
 })();

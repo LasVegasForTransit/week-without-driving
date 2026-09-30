@@ -1,0 +1,381 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { days } from '../../../lib/campaign';
+import { destinations } from '../../../lib/destinations';
+
+export function getStaticPaths() {
+  return ['where', 'when', 'available', 'try', 'review'].map((step) => ({ params: { step } }));
+}
+
+const step = Astro.params.step;
+const steps = [
+  {
+    slug: 'where',
+    label: 'Place',
+    title: 'Where are you going?',
+    description: 'Pick a place to go without driving.',
+  },
+  {
+    slug: 'when',
+    label: 'Time',
+    title: 'When will you go?',
+    description: 'Choose a day from October 1 to 8 and a time.',
+  },
+  {
+    slug: 'available',
+    label: 'Have',
+    title: 'What can you use?',
+    description: 'Pick any ways to travel that you can use.',
+  },
+  {
+    slug: 'try',
+    label: 'Try',
+    title: 'How would you like to go?',
+    description: 'Pick a way you would try for this trip.',
+  },
+  {
+    slug: 'review',
+    label: 'Review',
+    title: 'Your plan',
+    description: 'Check your plan before saving it.',
+  },
+];
+const current = steps.findIndex((item) => item.slug === step);
+const planOutings = destinations.filter(
+  (destination) => destination.anchor !== 'allegiant-stadium',
+);
+const planModes = [
+  { value: 'bus', label: 'Bus' },
+  { value: 'walk', label: 'Walk or roll' },
+  { value: 'bike', label: 'Bike' },
+  { value: 'scooter', label: 'Scooter' },
+  { value: 'ride', label: 'Get a ride' },
+];
+---
+
+<BaseLayout title={`${steps[current]?.title} · Week Without Driving Las Vegas`} noindex>
+  <section class="container-page plan-flow narrow" data-plan-page={step}>
+    <a href="/my-week" class="body-link plan-flow__return">← My week</a>
+    <p class="plan-flow__eyebrow">Plan a trip</p>
+    <h1 class="page-title" tabindex="-1" data-plan-heading>{steps[current]?.title}</h1>
+    <p class="plan-flow__lead">{steps[current]?.description}</p>
+
+    <nav aria-label="Plan steps" class="plan-flow__nav">
+      <ol>
+        {
+          steps.map((item, index) => (
+            <li aria-current={index === current ? 'step' : undefined}>
+              {index < current ? (
+                <a href={`/my-week/plan/${item.slug}`} data-plan-step-link>
+                  {index + 1}. {item.label}
+                </a>
+              ) : (
+                <span>
+                  {index + 1}. {item.label}
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <p data-plan-loading role="status">Opening your plan…</p>
+    <div data-plan-signed-out hidden class="plan-flow__notice">
+      <p>Sign in to save a trip plan.</p>
+      <a href="/my-week/link" class="btn btn--primary">Email me a sign-in link</a>
+      <a href="/sign-up" class="body-link">Sign up</a>
+    </div>
+    <p data-plan-offline hidden class="plan-flow__notice" role="alert">
+      Reconnect to plan a trip in My week.
+    </p>
+    <p data-plan-closed hidden class="plan-flow__notice">
+      The week has ended. Your saved plans are still in My week.
+    </p>
+    <p data-plan-status class="plan-flow__status" role="status" aria-live="polite"></p>
+
+    <form data-plan-form hidden class="plan-flow__form" novalidate data-needs-connection="plan">
+      <fieldset class="plan-flow__panel" data-plan-step="1" hidden={step !== 'where'}>
+        <legend class="sr-only">Where are you going?</legend>
+        <div class="plan-flow__choices">
+          <label><input type="radio" name="planKind" value="outing" /> Pick a place to try</label>
+          <label><input type="radio" name="planKind" value="event" /> Go to an event</label>
+          <label><input type="radio" name="planKind" value="own" /> My own destination</label>
+        </div>
+        <div class="plan-flow__detail" data-plan-kind-panel="outing" hidden>
+          <label for="plan-outing">Choose a place</label>
+          <select id="plan-outing" name="outing">
+            <option value="">Choose a place</option>
+            {
+              planOutings.map((outing) => (
+                <option value={outing.anchor} data-destination={outing.heading}>
+                  {outing.heading}
+                </option>
+              ))
+            }
+          </select>
+        </div>
+        <div class="plan-flow__detail" data-plan-kind-panel="event" hidden>
+          <label for="plan-event-name">What event?</label>
+          <input id="plan-event-name" name="eventName" type="text" maxlength="120" />
+          <label for="plan-event-place">Where is it?</label>
+          <input id="plan-event-place" name="eventDestination" type="text" maxlength="120" />
+        </div>
+        <div class="plan-flow__detail" data-plan-kind-panel="own" hidden>
+          <label for="plan-own-place">Where do you want to go?</label>
+          <input id="plan-own-place" name="ownDestination" type="text" maxlength="120" />
+        </div>
+      </fieldset>
+
+      <fieldset class="plan-flow__panel" data-plan-step="2" hidden={step !== 'when'}>
+        <legend class="sr-only">When will you go?</legend>
+        <div class="plan-flow__when">
+          <div>
+            <label for="plan-day">Day of the week</label>
+            <select id="plan-day" name="day" required>
+              <option value="">Choose a day</option>
+              {
+                days.map((day) => (
+                  <option value={day.number}>
+                    {day.weekday}, {day.monthDay}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+          <div>
+            <label for="plan-time">About what time?</label>
+            <input id="plan-time" name="time" type="time" required />
+          </div>
+        </div>
+        <p class="plan-flow__hint">Use Las Vegas time. An approximate departure time is fine.</p>
+      </fieldset>
+
+      <fieldset class="plan-flow__panel" data-plan-step="3" hidden={step !== 'available'}>
+        <legend class="sr-only">What can you use?</legend>
+        <p class="plan-flow__hint">
+          Pick anything you have access to. It is okay to leave this blank.
+        </p>
+        <div class="plan-flow__choices">
+          {
+            planModes.map((mode) => (
+              <label>
+                <input type="checkbox" name="availableMode" value={mode.value} /> {mode.label}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="plan-flow__panel" data-plan-step="4" hidden={step !== 'try'}>
+        <legend class="sr-only">How would you like to go?</legend>
+        <p class="plan-flow__hint">Pick at least one way you would try for this trip.</p>
+        <div class="plan-flow__choices">
+          {
+            planModes.map((mode) => (
+              <label>
+                <input type="checkbox" name="willingMode" value={mode.value} /> {mode.label}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="plan-flow__panel" data-plan-step="5" hidden={step !== 'review'}>
+        <p class="plan-flow__summary" data-plan-summary></p>
+        <p class="plan-flow__hint">Check a route and your trip home before you leave.</p>
+        <ul class="plan-flow__suggestions" data-plan-suggestions></ul>
+        <label class="plan-flow__reminder" data-plan-event-reminder hidden>
+          Remind me on this phone
+          <select name="reminderMinutesBefore">
+            <option value="">No event reminder</option>
+            <option value="30">30 minutes before</option>
+            <option value="60">1 hour before</option>
+            <option value="120">2 hours before</option>
+            <option value="1440">1 day before</option>
+          </select>
+        </label>
+        <p class="plan-flow__hint">
+          Planning alone is not an entry. After your trip, describe what you did.
+        </p>
+      </div>
+
+      <p class="plan-flow__error" data-plan-error role="alert" aria-live="polite"></p>
+      <div class="plan-flow__actions">
+        <button type="button" class="btn btn--outline" data-plan-back hidden={step === 'where'}
+          >Back</button
+        >
+        <button type="button" class="btn btn--primary" data-plan-next hidden={step === 'review'}
+          >Next</button
+        >
+        <button
+          type="submit"
+          class="btn btn--primary"
+          data-plan-save
+          data-needs-connection-button
+          hidden={step !== 'review'}>Save this plan</button
+        >
+      </div>
+    </form>
+    <noscript><p class="plan-flow__notice">Turn on JavaScript to plan a trip.</p></noscript>
+  </section>
+
+  <script is:inline src="/scripts/participant-api.js" defer></script>
+  <script is:inline src="/scripts/my-week-planner.js" defer></script>
+  <script is:inline src="/scripts/needs-connection.js" defer></script>
+</BaseLayout>
+
+<style>
+  .plan-flow {
+    padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 7vw, 5rem);
+  }
+  .plan-flow__return {
+    display: inline-block;
+    margin-bottom: 1.75rem;
+  }
+  .plan-flow__eyebrow {
+    color: var(--color-primary-ink);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .plan-flow__lead {
+    max-width: 38rem;
+    margin-top: 0.8rem;
+    color: var(--color-on-surface-variant);
+  }
+  .plan-flow__nav {
+    margin-block: 1.5rem 2rem;
+  }
+  .plan-flow__nav ol {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+  .plan-flow__nav li {
+    padding: 0.4rem 0.25rem;
+    border-radius: 99px;
+    color: var(--color-on-surface-variant);
+    background: var(--color-surface-container);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  .plan-flow__nav li[aria-current='step'] {
+    color: var(--color-on-primary-warm);
+    background: var(--color-primary-warm);
+  }
+  .plan-flow__nav a {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .plan-flow__form {
+    max-width: 45rem;
+    padding: clamp(1rem, 4vw, 1.75rem);
+    border-radius: 1.25rem;
+    background: var(--color-surface-container);
+  }
+  .plan-flow__panel {
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .plan-flow__choices {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .plan-flow__choices label {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 3.2rem;
+    padding: 0.75rem 0.9rem;
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .plan-flow__choices label:has(input:checked) {
+    border-color: var(--color-primary);
+  }
+  .plan-flow__choices input {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: none;
+    accent-color: var(--color-primary);
+  }
+  .plan-flow__detail,
+  .plan-flow__when {
+    margin-top: 1rem;
+  }
+  .plan-flow__detail label,
+  .plan-flow__when label,
+  .plan-flow__reminder {
+    display: block;
+    margin-top: 0.8rem;
+    font-weight: 700;
+  }
+  .plan-flow__detail input,
+  .plan-flow__detail select,
+  .plan-flow__when input,
+  .plan-flow__when select,
+  .plan-flow__reminder select {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 0.35rem;
+    padding: 0.55rem 0.75rem;
+    border: 2px solid transparent;
+    border-radius: 0.7rem;
+    color: var(--color-on-surface);
+    background: var(--color-field);
+  }
+  .plan-flow__hint {
+    margin-top: 0.75rem;
+    color: var(--color-on-surface-variant);
+    font-size: 0.95rem;
+  }
+  .plan-flow__summary {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .plan-flow__suggestions {
+    display: grid;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+  .plan-flow__suggestions :global(a) {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+  .plan-flow__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.5rem;
+  }
+  .plan-flow__error {
+    margin-top: 0.75rem;
+    color: var(--color-error);
+    font-weight: 700;
+  }
+  .plan-flow__error:empty,
+  .plan-flow__status:empty {
+    display: none;
+  }
+  .plan-flow__notice {
+    max-width: 45rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--color-surface-container);
+  }
+  .plan-flow__notice .btn {
+    margin-block: 1rem;
+  }
+</style>
