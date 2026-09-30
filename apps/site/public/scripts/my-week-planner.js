@@ -43,6 +43,7 @@
       outingAnchor: kind === 'outing' ? (option?.value ?? '') : '',
       availableModes: selected(form, 'availableMode'),
       willingModes: selected(form, 'willingMode'),
+      reminderMinutesBefore: Number(fieldValue(form, 'reminderMinutesBefore')) || null,
     };
   }
 
@@ -173,6 +174,7 @@
       ).toISOString(),
       availableModes: plan.availableModes,
       willingModes: plan.willingModes,
+      ...(plan.reminderMinutesBefore ? { reminderMinutesBefore: plan.reminderMinutesBefore } : {}),
     };
   }
 
