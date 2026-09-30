@@ -78,7 +78,16 @@ describe('Places to go', () => {
       } else if (destination.note) {
         expect(destination.anchor).toBe('water-street-henderson');
         expect(destination.note.text).toMatch(/October 1.*October 4/);
-        expect(destination.note.text).toMatch(/stop 246.*stop 245/);
+        expect(destination.note.text).toMatch(/four BHX-A stops/);
+        expect(destination.note.details).toEqual([
+          expect.stringMatching(/Basic after Water.*stop 149.*stop 246/),
+          expect.stringMatching(/Water after Victory.*stop 6247.*stop 6253/),
+          expect.stringMatching(/Basic after Texas.*stop 5636.*stop 245/),
+          expect.stringMatching(/Water after Victory.*stop 6251.*stop 276/),
+        ]);
+        expect(destination.note.source?.href).toBe(
+          'https://www.rtcsnv.com/ways-to-travel/schedules-maps/bus-stop-closures/',
+        );
       }
     }
   });

@@ -135,6 +135,30 @@ test('a first sign-up on the tablet is not marked as a shared device', async ({
   expect(api.signUps[0]).toMatchObject({ ref: 'campus-riders', sharedDevice: false });
 });
 
+test('repeat sign-up without email delivery stays on the form and explains the outage', async ({
+  page,
+}) => {
+  await page.route('**/api/signup', (route) =>
+    route.fulfill({
+      status: 200,
+      json: {
+        status: 'existing',
+        message: 'You’ve already signed up with that email. We’ll try to send your link.',
+        emailStatus: 'unavailable',
+      },
+    }),
+  );
+  await page.goto('/sign-up');
+  await fillSignUp(page, 'rosa@example.com');
+  await page.getByRole('button', { name: 'Sign up', exact: true }).click();
+
+  await expect(page.locator('[data-signup-form]')).toBeVisible();
+  await expect(page.locator('[data-signup-status]')).toHaveText(
+    'Email links are unavailable right now. Please try again later.',
+  );
+  await expect(page.locator('[data-signup-status]')).toHaveClass(/form-error/);
+});
+
 test('a partner link opened in another tab does not follow into a new one', async ({
   page,
   context,

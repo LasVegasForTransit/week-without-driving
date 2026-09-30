@@ -62,7 +62,12 @@ export interface Destination {
   steps: readonly [string, string, string];
   buttonRows: readonly ButtonRow[];
   /** Important access or temporary service information for a destination. */
-  note?: { heading: string; text: string };
+  note?: {
+    heading: string;
+    text: string;
+    details?: readonly string[];
+    source?: { label: string; href: string };
+  };
 }
 
 export const destinations: readonly Destination[] = [
@@ -121,7 +126,17 @@ export const destinations: readonly Destination[] = [
     buttonRows: [{ placeName: 'Water Street District', lat: 36.0306, lng: -114.982 }],
     note: {
       heading: 'BHX-A stop changes October 1–4',
-      text: 'RTC plans to close both Basic Road stops from 11 pm October 1 until 1 am October 4 for Henderson Hot Rod Days. For the trip to Water Street, use stop 246, southbound Boulder Highway after Basic. For the return trip, use stop 245, northbound Boulder Highway after Basic. Check RTC’s current stop closures before you leave.',
+      text: 'RTC plans to close four BHX-A stops from 11 pm October 1 until 1 am October 4 for Henderson Hot Rod Days. Use these stops instead:',
+      details: [
+        'Toward Water Street: Basic after Water (stop 149) → southbound Boulder Highway after Basic (stop 246).',
+        'Toward Water Street: Water after Victory (stop 6247) → southbound Boulder Highway before Lake Mead (stop 6253).',
+        'Heading back: Basic after Texas (stop 5636) → northbound Boulder Highway after Basic (stop 245).',
+        'Heading back: Water after Victory (stop 6251) → northbound Boulder Highway after Lake Mead (stop 276).',
+      ],
+      source: {
+        label: 'Check RTC’s current stop closures before you leave',
+        href: 'https://www.rtcsnv.com/ways-to-travel/schedules-maps/bus-stop-closures/',
+      },
     },
   },
   {

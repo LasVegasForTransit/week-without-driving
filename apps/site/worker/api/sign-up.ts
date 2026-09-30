@@ -17,8 +17,7 @@ import { FIELD_MESSAGES, checkSignUp, parseContact } from '../validate';
 
 export const REPLIES = {
   checkAnswers: 'Check the answers above, then try again.',
-  alreadySignedUp:
-    'You’ve already signed up with that email. If delivery is available, we’ll try to send your link.',
+  alreadySignedUp: 'If that email matches a sign-up, we’ll try to send its link.',
   linkSent: 'If that matches a sign-up, we’ll try to email your link.',
   emailUnavailable: 'Email links are unavailable right now. Please try again later.',
   tooManySignUps: 'Too many tries. Wait a minute, then try again.',
@@ -89,7 +88,7 @@ async function alreadySignedUp(c: ApiContext, row: OwnerRow): Promise<Response> 
   const preview = await deliverLink(c, owner(row), true);
   return json({
     status: 'existing',
-    message: REPLIES.alreadySignedUp,
+    message: c.env.RESEND_API_KEY ? REPLIES.alreadySignedUp : REPLIES.emailUnavailable,
     emailStatus: c.env.RESEND_API_KEY ? 'queued' : 'unavailable',
     ...preview,
   });
