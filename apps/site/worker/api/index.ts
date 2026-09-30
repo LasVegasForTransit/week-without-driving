@@ -7,6 +7,7 @@ import { createPlan, deletePlan, getPlans, updatePlan } from './plans';
 import { pushKey, subscribe, unsubscribe } from './push';
 import { sendMyLink, signUp } from './sign-up';
 import { checkIn, getBingo, putBingo } from './week';
+import { compareTrip } from './compare';
 
 /**
  * The participant API under /api/. Every route says whether it needs a
@@ -22,6 +23,7 @@ type Route = { method: string; path: string; multipart?: true } & (
 
 const ROUTES: Route[] = [
   { method: 'POST', path: '/api/signup', signedIn: false, handler: signUp },
+  { method: 'POST', path: '/api/compare', signedIn: false, handler: compareTrip },
   { method: 'POST', path: '/api/link', signedIn: false, handler: sendMyLink },
   { method: 'POST', path: '/api/signout', signedIn: false, handler: signOut },
   { method: 'GET', path: '/api/me', signedIn: true, handler: getMe },

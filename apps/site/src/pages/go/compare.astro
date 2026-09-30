@@ -1,0 +1,440 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Compare ways to go · Week Without Driving Las Vegas"
+  description="Compare driving with a bus, walk, bike, or scooter trip."
+>
+  <div class="container-page page-top compare-page">
+    <a href="/go" class="body-link">← Plan a trip</a>
+    <header class="compare-intro">
+      <p class="compare-eyebrow">PLAN A TRIP</p>
+      <h1 class="page-title">What if you left the car?</h1>
+      <p class="page-lede">Pick where you’re going. See two ways to get there.</p>
+    </header>
+
+    <form data-compare-form class="compare-form" novalidate>
+      <div class="compare-fields">
+        <label
+          >Starting place
+          <input
+            name="origin"
+            type="text"
+            autocomplete="street-address"
+            required
+            maxlength="160"
+            placeholder="Address or place"
+          />
+        </label>
+        <label
+          >Where to?
+          <input
+            name="destination"
+            type="text"
+            required
+            maxlength="160"
+            placeholder="A park, game, or address"
+          />
+        </label>
+        <label
+          >Leave on
+          <input name="date" type="date" required />
+        </label>
+        <label
+          >At about
+          <input name="time" type="time" required />
+        </label>
+      </div>
+      <fieldset class="compare-modes">
+        <legend>Go without driving by</legend>
+        <div class="compare-mode-choices">
+          <label><input name="mode" type="radio" value="bus" checked /><span>Bus</span></label>
+          <label><input name="mode" type="radio" value="walk" /><span>Walk</span></label>
+          <label><input name="mode" type="radio" value="bike" /><span>Bike</span></label>
+          <label><input name="mode" type="radio" value="scooter" /><span>Scooter</span></label>
+        </div>
+      </fieldset>
+      <label class="compare-purpose"
+        ><input name="workSchool" type="checkbox" /> This is a work or school trip</label
+      >
+      <div data-club-ride hidden class="compare-club">
+        <strong>Going to work or school?</strong>
+        <a
+          href="https://www.rtcsnv.com/ways-to-travel/club-ride/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="body-link">RTC Club Ride</a
+        > can help you find another way there and has its own rewards program. Club Ride rewards are separate
+        from the LVBT giveaway.
+      </div>
+      <button type="submit" class="btn btn--primary compare-submit">Compare my trip</button>
+      <p data-compare-status class="compare-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <div data-compare-results hidden>
+      <div class="compare-cards">
+        <article class="compare-card" data-route-card="drive" aria-labelledby="compare-drive-title">
+          <p class="compare-card__eyebrow">ONE WAY</p>
+          <h2 id="compare-drive-title">Drive</h2>
+          <div data-route-body="drive"></div>
+        </article>
+        <article
+          class="compare-card compare-card--other"
+          data-route-card="alternative"
+          aria-labelledby="compare-other-title"
+        >
+          <p class="compare-card__eyebrow">ONE WAY</p>
+          <h2 id="compare-other-title" data-alternative-heading>Bus</h2>
+          <div data-route-body="alternative"></div>
+        </article>
+      </div>
+      <div class="compare-next" data-compare-next hidden>
+        <a data-save-plan href="/my-week#go-heading" class="btn btn--primary">Save to My week</a>
+        <p>A plan is not a giveaway entry. After your trip, describe what you did in My week.</p>
+      </div>
+    </div>
+
+    <section class="compare-fallback" data-compare-fallback hidden aria-live="polite">
+      <h2 data-fallback-title>Check another way</h2>
+      <p data-fallback-copy></p>
+      <div class="compare-links">
+        <a data-google-link target="_blank" rel="noopener noreferrer" class="body-link"
+          >Open directions in Google Maps</a
+        >
+        <a data-apple-link target="_blank" rel="noopener noreferrer" class="body-link"
+          >Open directions in Apple Maps</a
+        >
+        <a
+          data-rtc-link
+          href="https://www.rtcsnv.com/tripplanner/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="body-link">Check RTC’s trip planner</a
+        >
+        <button type="button" data-try-time class="body-link">Try another time</button>
+        <a href="/guides" class="body-link">Rider guides</a>
+        <a href="/go#find-routes" class="body-link">Offline bus finder</a>
+      </div>
+      <p class="compare-privacy-note">
+        Map links share the places you entered with the map service you choose.
+      </p>
+    </section>
+
+    <section class="compare-settings" aria-labelledby="estimate-heading">
+      <h2 id="estimate-heading">Your cost settings</h2>
+      <div class="compare-settings__fields">
+        <label
+          >Gas per gallon <span>$</span><input
+            data-gas
+            type="number"
+            min="0"
+            max="25"
+            step="0.1"
+            value="4"
+            inputmode="decimal"
+          /></label
+        >
+        <label
+          >Parking <span>$</span><input
+            data-parking
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value="0"
+            inputmode="decimal"
+          /></label
+        >
+      </div>
+      <p>$4 gas and $0 parking are examples. Change them to match your trip.</p>
+    </section>
+
+    <details class="compare-method">
+      <summary>How we estimated this</summary>
+      <p>
+        Driving cost is miles ÷ 22.2 miles per gallon × gas price + parking. It includes fuel and
+        parking only. Bus fare appears only when route data includes it; see <a
+          href="https://www.rtcsnv.com/ways-to-travel/fares-passes/"
+          class="body-link">RTC fares</a
+        >. Walking, biking, and a scooter you own have no fare here. Rentals and equipment are not
+        included.
+      </p>
+      <p>
+        One-way operating carbon uses route meters ÷ 1,609.344 to get miles. Drive: miles × (0.297 +
+        0.0059 × 28 ÷ 1,000 + 0.0053 × 265 ÷ 1,000) = 0.2985697 kg CO₂e per vehicle-mile. Bus: miles
+        aboard bus × (0.066 + 0.0046 × 28 ÷ 1,000 + 0.0019 × 265 ÷ 1,000) = 0.0666323 kg CO₂e per
+        passenger-mile. Walk, bike, and scooter have no tailpipe emissions. Charging, equipment, and
+        vehicle production are excluded. Source: <a
+          href="https://www.epa.gov/system/files/documents/2025-01/ghg-emission-factors-hub-2025.pdf"
+          class="body-link">EPA 2025 emission factors, Tables 10–11</a
+        >.
+      </p>
+      <p>
+        Routes and travel times come from <span class="compare-attribution" translate="no"
+          >Google Maps</span
+        >. Routes can change. Check full directions before you leave. Walking, biking, and scooter
+        routes may miss sidewalks or safe crossings. Scooter times use walking directions.
+      </p>
+    </details>
+  </div>
+  <script is:inline type="module" src="/scripts/compare-trip.js"></script>
+</BaseLayout>
+
+<style>
+  .compare-page {
+    padding-bottom: 5rem;
+  }
+  .compare-intro {
+    margin: 1.25rem 0 2rem;
+  }
+  .compare-eyebrow,
+  .compare-card__eyebrow {
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+  .compare-form {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--color-surface-container);
+    border: 1px solid var(--color-outline-variant);
+    border-top: 8px solid var(--color-primary);
+    margin-bottom: 2rem;
+  }
+  .compare-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .compare-fields label,
+  .compare-settings label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 700;
+  }
+  .compare-fields input,
+  .compare-settings input {
+    width: 100%;
+    min-height: 3rem;
+    border: 1px solid var(--color-outline);
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+    padding: 0.65rem 0.8rem;
+    border-radius: 0.25rem;
+  }
+  .compare-modes {
+    margin: 1.5rem 0 1rem;
+  }
+  .compare-modes legend {
+    font-weight: 800;
+    margin-bottom: 0.65rem;
+  }
+  .compare-mode-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .compare-mode-choices label {
+    position: relative;
+  }
+  .compare-mode-choices input {
+    position: absolute;
+    opacity: 0;
+  }
+  .compare-mode-choices span {
+    display: block;
+    min-width: 5.5rem;
+    text-align: center;
+    padding: 0.7rem 1rem;
+    border: 2px solid var(--color-outline);
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .compare-mode-choices input:checked + span {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .compare-mode-choices input:focus-visible + span {
+    outline: 3px solid var(--color-on-surface);
+    outline-offset: 3px;
+  }
+  .compare-purpose {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    font-weight: 700;
+  }
+  .compare-purpose input {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+  .compare-club {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 5px solid var(--color-primary);
+    background: var(--color-surface);
+    line-height: 1.5;
+  }
+  .compare-submit {
+    margin-top: 1.5rem;
+  }
+  .compare-status {
+    margin-top: 0.8rem;
+    font-weight: 700;
+  }
+  .compare-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .compare-card {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 2px solid var(--color-outline);
+    background: var(--color-surface);
+    min-width: 0;
+  }
+  .compare-card--other {
+    border-color: var(--color-primary);
+    background: var(--color-surface-container);
+  }
+  .compare-card h2 {
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-weight: 900;
+    margin: 0.25rem 0 1rem;
+  }
+  .compare-card__time {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+  .compare-card__time small {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .compare-card__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-outline-variant);
+  }
+  .compare-card__stats dt {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .compare-card__stats dd {
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin: 0.25rem 0;
+  }
+  .compare-card ol {
+    padding-left: 1.25rem;
+    line-height: 1.5;
+  }
+  .compare-card li + li {
+    margin-top: 0.4rem;
+  }
+  .compare-card__attribution {
+    font-size: 0.8rem;
+    margin: 1.3rem 0 0;
+  }
+  .compare-attribution {
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: nowrap;
+    color: #5e5e5e;
+    background: #fff;
+    padding: 2px 5px;
+    border-radius: 2px;
+  }
+  .compare-next {
+    margin: 1.5rem 0 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .compare-next p {
+    max-width: 28rem;
+  }
+  .compare-fallback {
+    border-left: 6px solid var(--color-primary);
+    padding: 1.25rem;
+    background: var(--color-surface-container);
+    margin: 1.5rem 0;
+  }
+  .compare-fallback h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+  .compare-links {
+    display: flex;
+    gap: 0.75rem 1.2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .compare-links button {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  .compare-privacy-note {
+    font-size: 0.85rem;
+    margin-top: 1rem;
+  }
+  .compare-settings,
+  .compare-method {
+    border-top: 1px solid var(--color-outline-variant);
+    padding: 1.3rem 0;
+    max-width: 48rem;
+  }
+  .compare-settings h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+  .compare-settings__fields {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+  .compare-settings label {
+    max-width: 11rem;
+  }
+  .compare-settings p,
+  .compare-method p {
+    line-height: 1.55;
+  }
+  .compare-method summary {
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .compare-method p {
+    margin-top: 1rem;
+  }
+  @media (max-width: 700px) {
+    .compare-fields,
+    .compare-cards {
+      grid-template-columns: 1fr;
+    }
+    .compare-mode-choices label {
+      flex: 1 1 40%;
+    }
+    .compare-next {
+      display: block;
+    }
+    .compare-next p {
+      margin-top: 1rem;
+    }
+  }
+</style>

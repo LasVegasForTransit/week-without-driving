@@ -40,6 +40,7 @@ export default defineConfig({
       ACCESS_TEAM_DOMAIN: bindings.secret(),
       ACCESS_AUD: bindings.secret(),
       VAPID_PRIVATE_KEY: bindings.secret(),
+      GOOGLE_ROUTES_API_KEY: bindings.secret(),
       // A release switch, not a credential. Keep event-specific reminders off
       // until a real production phone has received and opened a test push.
       EVENT_REMINDERS_ENABLED: bindings.text('false'),

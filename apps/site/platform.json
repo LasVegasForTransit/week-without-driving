@@ -58,6 +58,21 @@
   ],
   "secrets": [
     {
+      "name": "GOOGLE_ROUTES_API_KEY",
+      "purpose": "Lets the Worker compare driving with bus, walking, biking, or scooter routes. The key stays server-side and never appears in a page.",
+      "use": "live",
+      "neededFor": "live route comparisons on /go/compare",
+      "url": "https://console.cloud.google.com/apis/credentials",
+      "steps": [
+        "In the LVBT Google Cloud project, enable the Routes API and billing for the project.",
+        "Create a server API key named lvwwd.org Routes. Set Application restrictions to None because Cloudflare Worker egress IPs are not fixed and website referrer restrictions do not apply to server calls. Under API restrictions, allow only Routes API. The key stays in a Worker secret; do not put it in site vars or browser code.",
+        "In Google Cloud Quotas, set the Routes API Compute Routes daily quota to 1,000 requests. The Worker also caps usage at 1,000 provider requests per day and 30 comparisons per IP per hour.",
+        "Paste the key at this command's prompt. Test a real comparison after deployment before sharing the page."
+      ],
+      "pattern": "^\\S{20,}$",
+      "patternHint": "A Google API key has at least 20 characters and no spaces."
+    },
+    {
       "name": "RESEND_API_KEY",
       "purpose": "Sends each participant's \"Open my week\" link by email from hello@lvwwd.org.",
       "use": "live",

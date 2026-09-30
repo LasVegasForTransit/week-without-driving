@@ -194,7 +194,10 @@
     if (button instanceof HTMLButtonElement) button.disabled = false;
     if (status === 401) return showSignedOut();
     if (!ok) {
-      setText('[data-plan-error]', data.message);
+      setText(
+        '[data-plan-error]',
+        'Your plan isn’t saved yet. Your choices are still here. Try saving again.',
+      );
       return;
     }
     me.plans = [...(me.plans ?? []), data.plan];
@@ -231,6 +234,35 @@
     form.addEventListener('submit', (event) => void save(state, event));
   }
 
+  function applyComparisonDraft(form, dayField, today) {
+    try {
+      const raw = sessionStorage.getItem('wwd-compare-plan');
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      const valid =
+        typeof draft.destination === 'string' &&
+        draft.destination.length <= 120 &&
+        Number.isInteger(draft.day) &&
+        draft.day >= today &&
+        draft.day <= 8 &&
+        /^\d{2}:\d{2}$/.test(draft.time) &&
+        ['bus', 'walk', 'bike', 'scooter'].includes(draft.mode);
+      if (!valid) return;
+      form.querySelector('input[name="planKind"][value="own"]').checked = true;
+      form.elements.namedItem('ownDestination').value = draft.destination;
+      dayField.value = String(draft.day);
+      form.elements.namedItem('time').value = draft.time;
+      form.querySelector(`input[name="willingMode"][value="${draft.mode}"]`).checked = true;
+      setText(
+        '[data-plan-status]',
+        'Your trip is ready to review. Save it here when it looks right.',
+      );
+      sessionStorage.removeItem('wwd-compare-plan');
+    } catch {
+      /* The planner still works when browser storage is unavailable. */
+    }
+  }
+
   window.lvwwdPlanner = ({ api, me, showSignedOut, renderEntries }) => {
     const form = document.querySelector('[data-plan-form]');
     if (!(form instanceof HTMLFormElement)) return;
@@ -248,6 +280,8 @@
     }
     const state = { form, api, me, showSignedOut, renderEntries, dayField, step: 1 };
     bindEvents(state);
+    applyComparisonDraft(form, dayField, me.today);
+    showKindPanel(form);
     showStep(state, 1);
   };
 })();
