@@ -54,6 +54,8 @@ export interface Env {
   VAPID_PRIVATE_KEY?: string;
   /** Where push services can reach LVBT about its notifications, as a mailto: address. */
   VAPID_SUBJECT?: string;
+  /** Explicit release switch; event reminders remain off until a phone test succeeds. */
+  EVENT_REMINDERS_ENABLED?: string;
 }
 
 /** The environment once the API has checked the database is there. */

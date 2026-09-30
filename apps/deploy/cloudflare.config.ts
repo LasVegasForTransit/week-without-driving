@@ -40,6 +40,7 @@ export default defineConfig({
       ACCESS_TEAM_DOMAIN: bindings.secret(),
       ACCESS_AUD: bindings.secret(),
       VAPID_PRIVATE_KEY: bindings.secret(),
+      EVENT_REMINDERS_ENABLED: bindings.secret(),
       DB: bindings.d1({
         name: 'lvwwd',
         id: 'a3a6c177-f000-4a64-8bc8-a4aad6d07cf1',

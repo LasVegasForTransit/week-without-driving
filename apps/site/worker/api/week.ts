@@ -11,7 +11,7 @@ import { MAX_SCREENSHOT_BYTES, SCREENSHOT_REPLIES, storeScreenshot } from './pho
 const MAX_BINGO_BYTES = 4096;
 
 /** The ways to get around without driving that count as a trip. */
-export const TRIP_MODES = ['bus', 'walk', 'bike', 'ride'] as const;
+export const TRIP_MODES = ['bus', 'walk', 'bike', 'scooter', 'ride'] as const;
 
 // Public posts can come from these apps. Anything else is refused, so a
 // volunteer only ever opens links to known social media sites.
@@ -53,6 +53,7 @@ export const WEEK_REPLIES = {
   noteTooLong: `Keep the note under ${MAX_NOTE_LENGTH} characters.`,
   alreadyChecked: 'A volunteer already checked today’s entry, so it can’t be changed.',
   badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
+  badPlan: 'Choose one of your plans for today, or log this trip without a plan.',
   bingoTooBig: 'That bingo card is too big to save.',
 } as const;
 
@@ -63,6 +64,7 @@ interface TripInput {
   link: string | null;
   screenshot: File | null;
   share: boolean;
+  planId: string | null;
 }
 
 /** A text field from the form, trimmed; a file or a missing field reads as empty. */
@@ -94,7 +96,9 @@ function readTrip(form: FormData): TripInput | string {
   const link = textField(form, 'link');
   const file = form.get('screenshot');
   const screenshot = file instanceof File && file.size > 0 ? file : null;
+  const planId = textField(form, 'planId');
   if (link && !isPostLink(link)) return WEEK_REPLIES.badLink;
+  if (planId && !/^[0-9a-f-]{36}$/.test(planId)) return WEEK_REPLIES.badPlan;
   return {
     modes,
     description,
@@ -102,6 +106,7 @@ function readTrip(form: FormData): TripInput | string {
     link: link || null,
     screenshot,
     share: form.get('share') === '1',
+    planId: planId || null,
   };
 }
 
@@ -165,11 +170,11 @@ async function saveTrip(
 ): Promise<boolean> {
   const saved = await c.env.DB.prepare(
     `INSERT INTO checkins
-       (participant_id, day, source, created_at, modes, description, hard, post_url, screenshot_key, share)
-     VALUES (?1, ?2, 'post', ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+       (participant_id, day, source, created_at, modes, description, hard, post_url, screenshot_key, share, plan_id)
+     VALUES (?1, ?2, 'post', ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
      ON CONFLICT (participant_id, day) DO UPDATE SET
        source = 'post', created_at = ?3, modes = ?4, description = ?5, hard = ?6, post_url = ?7,
-       screenshot_key = ?8, share = ?9, received_on = NULL, logged_by = NULL,
+       screenshot_key = ?8, share = ?9, plan_id = ?10, received_on = NULL, logged_by = NULL,
        checked_at = NULL, checked_by = NULL,
        removed_at = NULL, removed_by = NULL, removal_reason = NULL
      WHERE checkins.checked_at IS NULL OR checkins.removed_at IS NOT NULL
@@ -185,6 +190,7 @@ async function saveTrip(
       trip.link,
       trip.key,
       trip.share ? 1 : 0,
+      trip.planId,
     )
     .first<{ id: number }>();
   return saved !== null;
@@ -203,6 +209,33 @@ function entryEligibility(me: Participant): string | null {
   return null;
 }
 
+async function planMatchesToday(
+  c: ApiContext,
+  me: Participant,
+  day: number,
+  planId: string | null,
+): Promise<boolean> {
+  if (!planId) return true;
+  const match = await c.env.DB.prepare(
+    'SELECT id FROM trip_plans WHERE id = ?1 AND participant_id = ?2 AND day = ?3',
+  )
+    .bind(planId, me.id, day)
+    .first<{ id: string }>();
+  return match !== null;
+}
+
+async function checkedTrip(
+  c: ApiContext,
+  me: Participant,
+  day: number,
+  form: FormData,
+): Promise<TripInput | Response> {
+  const trip = readTrip(form);
+  if (typeof trip === 'string') return problem(400, trip);
+  if (!(await planMatchesToday(c, me, day, trip.planId))) return problem(400, WEEK_REPLIES.badPlan);
+  return trip;
+}
+
 /**
  * Enters today's shared trip, where "today" is the server's Las Vegas date,
  * never the phone's. It needs how the person got around and a description
@@ -217,8 +250,8 @@ export async function checkIn(c: ApiContext, me: Participant): Promise<Response>
   if (today instanceof Response) return today;
   const form = await readForm(c.request);
   if (!form) return problem(413, SCREENSHOT_REPLIES.tooBig);
-  const trip = readTrip(form);
-  if (typeof trip === 'string') return problem(400, trip);
+  const trip = await checkedTrip(c, me, today, form);
+  if (trip instanceof Response) return trip;
   const previous = await todaysEntry(c, me, today);
   if (previous?.locked) return problem(409, WEEK_REPLIES.alreadyChecked);
 
