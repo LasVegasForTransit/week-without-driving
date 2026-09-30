@@ -14,7 +14,7 @@ export const lvbt = {
   ein: '42-1995935',
   url: 'https://lasvegasfortransit.org',
   projectPageUrl: 'https://lasvegasfortransit.org/projects/week-without-driving',
-  joinUrl: 'https://lasvegasfortransit.org/join',
+  joinUrl: 'https://lasvegasfortransit.org/join/member/?from=wwd',
   email: {
     general: 'hello@lasvegasfortransit.org',
     partners: 'partners@lasvegasfortransit.org',

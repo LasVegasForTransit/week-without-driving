@@ -1,6 +1,8 @@
 // LVBT's separate membership invitation, shown after campaign sign-up and
 // in the "Keep going after the week" cards.
 
+import { lvbt } from './site';
+
 /**
  * Whether the card can add someone to LVBT's newsletter in one tap, through
  * the Worker's POST /api/newsletter. That route, and the Beehiiv key it
@@ -11,7 +13,7 @@
 export const ONE_TAP_NEWSLETTER = false;
 
 /** LVBT's membership page, carrying the campaign referral for onboarding. */
-export const NEWSLETTER_PAGE = 'https://lasvegasfortransit.org/join/member/?from=wwd';
+export const NEWSLETTER_PAGE = lvbt.joinUrl;
 
 /** 12:00 am October 9, 2026, Las Vegas time: the giveaway closes and Home changes. */
 export const GIVEAWAY_CLOSES = '2026-10-09T07:00:00Z';

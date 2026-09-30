@@ -25,7 +25,7 @@ test.describe('lvwwd.org/get-involved', () => {
       route.fulfill({ contentType: 'text/html', body: '<h1>Join LVBT</h1>' }),
     );
     await page.goto('/get-involved');
-    await expect(page).toHaveURL('https://lasvegasfortransit.org/join');
+    await expect(page).toHaveURL('https://lasvegasfortransit.org/join/member/?from=wwd');
   });
 
   test.describe('without JavaScript', () => {
@@ -37,7 +37,7 @@ test.describe('lvwwd.org/get-involved', () => {
       await expect(page.getByText(/Week Without Driving runs October 1–8/)).toBeVisible();
       await expect(page.getByRole('link', { name: 'Join LVBT' }).first()).toHaveAttribute(
         'href',
-        'https://lasvegasfortransit.org/join',
+        'https://lasvegasfortransit.org/join/member/?from=wwd',
       );
       await expect(page.getByRole('link', { name: 'Signed up? Go to My week' })).toHaveAttribute(
         'href',
