@@ -47,3 +47,5 @@ jobs:
           # production environment. The build adds LVBT's analytics only
           # when it is set; see docs/operations/reference/analytics.md.
           PUBLIC_LVBT_CWA_TOKEN: ${{ vars.PUBLIC_LVBT_CWA_TOKEN }}
+          # Set only after a real production comparison and its fallback links pass.
+          COMPARE_PUBLISHED: ${{ vars.COMPARE_PUBLISHED }}
