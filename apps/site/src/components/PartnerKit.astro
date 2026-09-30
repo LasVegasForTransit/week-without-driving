@@ -3,8 +3,8 @@ import { Icon } from 'astro-icon/components';
 import { BANNER_DESCRIPTION as DESCRIPTION, BANNERS } from '../lib/banners';
 import { contactEmail, GENERAL, partners } from '../lib/partners';
 
-// The partner kit: pick an organization, then get its link, QR code, the
-// four banners and an embed snippet for its website. It needs JavaScript
+// The partner kit starts with ready-to-share general materials, then lets a
+// listed organization switch to its tracked link. It needs JavaScript
 // (/scripts/partner-kit.js fills in the chosen organization's link), so
 // without it the kit shows only its heading and a way to ask by email.
 // The copy buttons are run by /scripts/partners.js.
@@ -17,6 +17,7 @@ const bannerCards = BANNERS.map((banner) => ({
 ---
 
 <section
+  id="partner-kit"
   class="section mt-12"
   aria-labelledby="kit-heading"
   data-partner-kit
@@ -41,19 +42,18 @@ const bannerCards = BANNERS.map((banner) => ({
 
   <div class="kit" data-kit-body hidden>
     <p class="section-intro">
-      Use the general link, QR code, banners and flyer now. A named partner link is available after
-      LVBT adds that organization to the roster.
+      Start with the ready-to-share link, QR code, banners and flyer below. A listed organization
+      can switch to its tracked link.
     </p>
 
     <div class="kit__picker">
-      <label for="kit-organization" class="kit__label">Your organization</label>
+      <label for="kit-organization" class="kit__label">Use materials for</label>
       <select id="kit-organization" class="kit__select" data-kit-picker>
-        <option value="" selected></option>
+        <option value={GENERAL}>General LVBT materials</option>
         {partners.map((partner) => <option value={partner.slug}>{partner.name}</option>)}
-        <option value={GENERAL}>General materials</option>
       </select>
       <p class="kit__hint" data-kit-hint>
-        Choose General materials to get a link and files you can share today.
+        Choose a listed organization only after LVBT gives it a tracked link.
       </p>
     </div>
 

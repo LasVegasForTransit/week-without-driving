@@ -44,9 +44,9 @@ describe('the web app manifest', () => {
     });
   });
 
-  it('uses the desert colors: sand behind the app, teal for its bar', () => {
+  it('uses the campaign colors: cream behind the app, plum for its bar', () => {
     expect(manifest.background_color).toBe(token('sand'));
-    expect(manifest.theme_color).toBe(token('teal'));
+    expect(manifest.theme_color).toBe(token('plum'));
   });
 
   it('has 192 and 512 pixel icons and a maskable 512, each the size it says', () => {

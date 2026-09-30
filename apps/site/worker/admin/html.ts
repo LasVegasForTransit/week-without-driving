@@ -42,10 +42,10 @@ export function html(strings: TemplateStringsArray, ...values: Content[]): Html 
 
 // The site's colors (src/styles/global.css), light and dark.
 const STYLES = `
-:root{--surface:#fbf4e6;--on-surface:#3b2a20;--muted:#6b5646;--container:#f2e4c8;--primary:#0e7c86;
---link:#0a5e66;--field:#fff;--error:#b3261e;--line:#3b2a20;color-scheme:light dark}
-@media (prefers-color-scheme:dark){:root{--surface:#17130f;--on-surface:#fbf4e6;--muted:#c9bba9;
---container:#221c16;--link:#6fd3db;--field:#1d1813;--error:#ffb4ab;--line:#7f7164}}
+:root{--surface:#f4ece7;--on-surface:#4b2130;--muted:#765360;--container:#eadbd3;--primary:#542432;
+--link:#3d1925;--field:#fff;--error:#b3261e;--line:#4b2130;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--surface:#17130f;--on-surface:#f4ece7;--muted:#c9bba9;
+--container:#221c16;--link:#f4b6a1;--field:#1d1813;--error:#ffb4ab;--line:#7f7164}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--surface);color:var(--on-surface);font:16px/1.5 system-ui,sans-serif}
 main{max-width:60rem;margin:0 auto;padding:1rem}

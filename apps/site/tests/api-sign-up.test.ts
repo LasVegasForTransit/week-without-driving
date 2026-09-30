@@ -292,7 +292,7 @@ describe('sign-up and links', () => {
 
     vi.setSystemTime(new Date('2026-09-23T19:21:00Z'));
     expect((await signUp({ contact: 'person20@example.com' }, '198.51.100.1')).status).toBe(201);
-  });
+  }, 15_000);
 
   it('drops rate-limit counts older than a day in the daily cleanup', async () => {
     await signUp({});

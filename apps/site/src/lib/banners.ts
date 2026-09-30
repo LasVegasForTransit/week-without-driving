@@ -4,11 +4,11 @@
 
 /** The site's own palette (src/styles/global.css). */
 export const BANNER_COLORS = {
-  background: '#0e5f66', // --teal-deep, the slab
-  text: '#fbf4e6', // --sand
-  quiet: '#cfe7e4', // --slab-mist
-  button: '#ff6b4a', // --coral-bright
-  onButton: '#1a1210', // --on-coral
+  background: '#431a28', // --plum-deep, the slab
+  text: '#f4ece7', // --sand
+  quiet: '#f0d7ca', // --slab-mist
+  button: '#f2532d', // --orange
+  onButton: '#35121b', // --on-orange
 } as const;
 
 /** Every text on a banner and the color behind it; each must reach 4.5 to 1. */

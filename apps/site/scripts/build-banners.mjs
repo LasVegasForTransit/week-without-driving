@@ -29,7 +29,7 @@ const sharp = createRequire(import.meta.resolve('astro'))('sharp');
 const icons = require('@iconify-json/mdi/icons.json');
 
 const font = (file) =>
-  `url(data:font/woff2;base64,${readFileSync(new URL(`public/fonts/${file}`, site)).toString('base64')}) format('woff2')`;
+  `url(data:font/woff2;base64,${readFileSync(new URL(`src/fonts/${file}`, site)).toString('base64')}) format('woff2')`;
 const icon = (name) =>
   `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="${/ d="([^"]+)"/.exec(icons.icons[name].body)[1]}"/></svg>`;
 
