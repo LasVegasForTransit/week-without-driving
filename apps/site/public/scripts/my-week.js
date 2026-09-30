@@ -168,9 +168,11 @@
         '[data-me-welcome-text]',
         saved
           ? 'Your details are saved.'
-          : params.get('email') === 'unavailable'
-            ? 'You’re signed up. Email links are unavailable right now; keep using this phone.'
-            : 'You’re signed up to win.',
+          : params.get('email') === 'failed'
+            ? 'You’re signed up on this phone, but we couldn’t email your link. Keep this phone signed in and try Get my link later.'
+            : params.get('email') === 'unavailable'
+              ? 'You’re signed up. Email links are unavailable right now; keep using this phone.'
+              : 'You’re signed up to win.',
       );
     }
     // The preview Worker hands back the link it would have sent; show it once.

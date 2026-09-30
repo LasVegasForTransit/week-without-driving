@@ -100,6 +100,22 @@ describe('sign-up and links', () => {
     });
   });
 
+  it('keeps a new signup signed in if its link cannot be stored', async () => {
+    await platform.env.DB.exec(
+      "CREATE TRIGGER fail_link BEFORE INSERT ON link_tokens BEGIN SELECT RAISE(ABORT, 'link store unavailable'); END;",
+    );
+    try {
+      const response = await signUp({});
+      expect(response.status).toBe(201);
+      expect(await response.json()).toMatchObject({ emailStatus: 'failed' });
+      expect(response.headers.getSetCookie()).toHaveLength(2);
+      expect(await count('participants')).toBe(1);
+      expect(outbound.emails).toHaveLength(0);
+    } finally {
+      await platform.env.DB.exec('DROP TRIGGER fail_link;');
+    }
+  });
+
   it('closes new sign-ups at midnight after October 8 while link recovery stays open', async () => {
     vi.setSystemTime(new Date('2026-10-09T06:59:59.999Z'));
     expect((await signUp({})).status).toBe(201);
