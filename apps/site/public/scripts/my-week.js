@@ -154,7 +154,7 @@
     setText(
       '[data-me-link-line]',
       me.contactType === 'email'
-        ? `Use Get my link to request a sign-in email at ${me.contactMasked}.`
+        ? `When email delivery is available, Get my link can send a sign-in link to ${me.contactMasked}.`
         : 'Email wwd@lasvegasfortransit.org for help with an older phone sign-up.',
     );
   }
