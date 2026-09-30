@@ -44,7 +44,7 @@ prints one line per check:
   ok    git hooks      core.hooksPath is .githooks
   ok    commit scopes  .lvbt/commit-scopes.txt is present
   ok    GitHub CLI     gh is installed and signed in
-  ok    Cloudflare     wrangler is signed in; deployables: apps/site
+  ok    Cloudflare     cf is signed in; deployables: apps/deploy
 preflight: all 7 checks passed
 ```
 

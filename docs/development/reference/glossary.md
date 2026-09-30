@@ -29,8 +29,11 @@ discussed in review. The settings come from `@lasvegasfortransit/prettier-config
 
 <a id="playwright"></a>**Playwright**: runs end-to-end tests in a real browser, under `tests/e2e/`.
 
-<a id="wrangler"></a>**Wrangler**: Cloudflare's command line for deploying Workers.
-`pnpm run deploy` calls it.
+<a id="cf"></a>**cf**: Cloudflare's command line for deploying the production Worker and managing
+its resources. `pnpm run deploy` calls it.
+
+<a id="wrangler"></a>**Wrangler**: Cloudflare's older Workers command line. This site still uses it
+for preview Workers, local test bindings, and single-secret uploads that `cf` does not yet support.
 
 <a id="github-packages"></a>**GitHub Packages**: the registry LVBT publishes its own packages to,
 such as `@lasvegasfortransit/analytics`. Installing from it needs a GitHub token even for reading;
@@ -62,8 +65,8 @@ where visitors came from, and how fast pages load, without cookies. See
 that counts the campaign events LVBT's analytics allow, such as a sign-up or a trip entry, without
 recording who sent them.
 
-<a id="platform-manifest"></a>**Platform manifest**: `platform.json`, next to an app's production
-`wrangler.jsonc`, which lists everything the app needs in production: its database, bucket, bot
-check, admin sign-in, email domain, secrets, and the values that must never be set there.
-`pnpm preflight --production` checks production against it, and `pnpm bootstrap --production` sets
-up what is missing.
+<a id="platform-manifest"></a>**Platform manifest**: `apps/site/platform.json`, which points to
+`apps/deploy/cloudflare.config.ts` and which lists everything the app needs in production: its
+database, bucket, bot check, admin sign-in, email domain, secrets, and the values that must never be
+set there. `pnpm preflight --production` checks production against it, and
+`pnpm bootstrap --production` sets up what is missing.

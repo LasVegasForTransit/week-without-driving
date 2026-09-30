@@ -9,14 +9,27 @@ sets up what is missing, so you do not need to remember any of it.
 
 ## Before you start
 
-- `pnpm bootstrap` passes on your machine, which means the GitHub CLI and Wrangler are signed in. If
-  Wrangler is not, run `pnpm exec wrangler login` and sign in with your LVBT account.
+- GitHub CLI is signed in with `read:packages` access to the private LVBT packages.
+- Sign in to `cf` with `pnpm --dir apps/deploy exec cf auth login` using your LVBT account.
+- Run `pnpm --dir apps/site exec wrangler login`. Production bootstrap still uses Wrangler
+  authentication to inspect Worker, D1, and R2 resources and upload individual secrets while `cf` is
+  in beta. The GitHub deploy token has narrower permissions and is not for setup.
 - Your Cloudflare user can administer the Las Vegans for Better Transit account, including
   Cloudflare One, which Cloudflare used to call Zero Trust.
 - Your GitHub user is an admin of `LasVegasForTransit/week-without-driving`.
 - You can sign in to the LVBT Resend account.
 - Only if Google Workspace is not yet connected to Cloudflare One (it is today), a Google Workspace
   super admin for lasvegasfortransit.org is at hand.
+
+Installing the private LVBT package needs a GitHub CLI token with `read:packages`. If your shell
+warns that `NODE_AUTH_TOKEN` is unset, run a new bootstrap with this one-command credential:
+
+```bash
+NODE_AUTH_TOKEN="$(gh auth token -h github.com)" pnpm bootstrap --production
+```
+
+The token is available only to that command and its children. A bootstrap already past the install
+step can continue without restarting.
 
 ## 1. See what is missing
 
@@ -27,12 +40,13 @@ pnpm preflight --production
 After the usual machine checks, this prints one line per item and changes nothing. `ok` means
 production has it. `FAIL` means production needs it now; the `next:` line under it says what fixes
 it. `WARN` marks something recommended, or something production is allowed to carry for now, such as
-`BOT_CHECK`. The last line says whether lvwwd.org is ready.
+an optional integration. `BOT_CHECK=off` is a failure, because production signup must use Turnstile.
+The last line says whether lvwwd.org is ready.
 
 ## 2. Set up what is missing
 
 ```bash
-pnpm bootstrap --production
+NODE_AUTH_TOKEN="$(gh auth token -h github.com)" pnpm bootstrap --production
 ```
 
 It prints the same report, lists what it is about to do, and asks once before starting. For
@@ -40,7 +54,7 @@ lvwwd.org, it works through these, skipping anything already in place:
 
 | Item                       | What happens                                                                                                                                                                            |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Database `lvwwd`           | Created if missing; every migration in `apps/site/migrations` applied (Wrangler asks to confirm).                                                                                       |
+| Database `lvwwd`           | Created if missing; every migration in `apps/site/migrations` applied with `cf`.                                                                                                        |
 | Reminder key               | `VAPID_PRIVATE_KEY` generated (32 random bytes) and stored on the Worker, only if the Worker doesn't have one. See step 5.                                                              |
 | Bucket `lvwwd-photos`      | Created if missing. It holds the screenshots of shared posts.                                                                                                                           |
 | Turnstile widget           | Created for lvwwd.org; its secret is stored as `TURNSTILE_SECRET`, and its site key is printed.                                                                                         |
@@ -49,8 +63,9 @@ lvwwd.org, it works through these, skipping anything already in place:
 | GitHub `production`        | `CLOUDFLARE_ACCOUNT_ID` stored; it asks for `CLOUDFLARE_API_TOKEN`, with steps to create it.                                                                                            |
 | Preview-only values        | Checked; if `PREVIEW_ADMIN_KEY` or another preview value is on production, it offers to delete it.                                                                                      |
 
-Turnstile and Access need a Cloudflare API token that Wrangler's sign-in cannot provide. The command
-prints a link that opens Cloudflare's token page with the right permissions already chosen, and
+The setup flow asks for a short-lived personal token to inspect and manage Turnstile and Access.
+Cloudflare account API tokens do not support Turnstile yet. The command prints a link that opens
+Cloudflare's token page with the right permissions already chosen, and
 [the steps below](#the-setup-token) say what to check. It asks for the token on every run, because
 it cannot even check Turnstile and Access without it. The token stays in memory and is never saved.
 
@@ -65,10 +80,11 @@ account does it print the first-time steps, offer to open the page, and wait for
 
 ## 3. Commit the site key and turn the bot check on
 
-The command never edits `apps/site/wrangler.jsonc`, because a config change should be reviewed.
-After the Turnstile widget exists, it prints its public site key. On a branch, in
-`apps/site/wrangler.jsonc`, add it to `vars` as `"TURNSTILE_SITE_KEY": "<the site key>"`, remove
-`"BOT_CHECK": "off"`, and open a pull request. The deploy from `main` turns the bot check on.
+The command never edits production config, because a config change should be reviewed. After the
+Turnstile widget exists, it prints its public site key. On a branch, add
+`TURNSTILE_SITE_KEY: bindings.text("<the site key>")` to `worker.env` in
+`apps/deploy/cloudflare.config.ts`. Add the same value to `vars` in the fallback
+`apps/site/wrangler.jsonc`, then open a pull request. The deploy from `main` turns the bot check on.
 
 ## 4. Let volunteers into the admin views
 
@@ -91,19 +107,19 @@ Participants can turn on one browser notification each morning of the week, Octo
 "Remind me to share my trip" section of My week. Each one is signed with a key pair, so push
 services (Google, Apple, Mozilla and Microsoft) deliver it as coming from lvwwd.org.
 
-| Value               | Where it lives                           | What it is                                                                    |
-| ------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
-| `VAPID_PRIVATE_KEY` | A secret on the Worker                   | 32 random bytes in base64url (43 characters), generated by step 2             |
-| Public key          | Nowhere to set                           | The Worker works it out from the private key and gives it to browsers         |
-| `VAPID_SUBJECT`     | `vars` in `apps/site/wrangler.jsonc`     | `mailto:wwd@lasvegasfortransit.org`, already set                              |
-| Send times          | `triggers` in `apps/site/wrangler.jsonc` | `1-59/2 15 1-8 10 *`: odd minutes, 8:01 to 8:59 am Las Vegas time, Oct 1 to 8 |
-| Subscriptions       | Table `push_subscriptions` in `lvwwd`    | Added by migration `0006`, which step 2 applies                               |
+| Value               | Where it lives                                          | What it is                                                                    |
+| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `VAPID_PRIVATE_KEY` | A secret on the Worker                                  | 32 random bytes in base64url (43 characters), generated by step 2             |
+| Public key          | Nowhere to set                                          | The Worker works it out from the private key and gives it to browsers         |
+| `VAPID_SUBJECT`     | `worker.env` in `apps/deploy/cloudflare.config.ts`      | `mailto:wwd@lasvegasfortransit.org`, already set                              |
+| Send times          | `worker.triggers` in `apps/deploy/cloudflare.config.ts` | `1-59/2 15 1-8 10 *`: odd minutes, 8:01 to 8:59 am Las Vegas time, Oct 1 to 8 |
+| Subscriptions       | Table `push_subscriptions` in `lvwwd`                   | Added by migration `0006`, which step 2 applies                               |
 
 You do nothing by hand. Step 2 generates the key once and applies the migration. Running it again
 leaves the key alone, because a new key would silently stop every browser's reminders: browsers
 accept notifications only from the key they subscribed with. Replace it only if it has leaked, and
 know that everyone then has to turn reminders on again. To replace it, run
-`pnpm exec wrangler secret delete VAPID_PRIVATE_KEY` in `apps/site`, then
+`pnpm exec cf workers secrets delete VAPID_PRIVATE_KEY --worker lvwwd` in `apps/deploy`, then
 `pnpm bootstrap --production`.
 
 To test before October 1, open My week on your phone, tap "Turn on notifications" and allow it. On
@@ -141,13 +157,11 @@ The last line should read `Ready for production.` Then delete the Cloudflare tok
 `pnpm bootstrap --production` is safe to run at any time. Each step checks before it acts: the
 database, bucket, widget, and Access application are found by name and never created twice, a secret
 that is already set is never asked for or replaced, applied migrations are skipped, and
-`apps/site/wrangler.jsonc` is never edited. On a finished setup it changes nothing and says so.
+`apps/deploy/cloudflare.config.ts` is never edited. On a finished setup it changes nothing and says
+so.
 
 To replace a secret on purpose, for example after a leak, name it:
 `pnpm bootstrap --production --rotate RESEND_API_KEY`. The command asks before it replaces anything.
-(`--rotate` arrives with repository tooling 0.4.2; until this repository updates, replace a value
-with `pnpm exec wrangler secret put <NAME>` in `apps/site` or
-`gh secret set <NAME> --env production`, which read the value from standard input.)
 
 ## What to enter in each dashboard
 
@@ -280,8 +294,8 @@ Open Turnstile in the Cloudflare dashboard with the LVBT account. If there is no
 `lvwwd.org`, click "Add widget", name it `lvwwd.org`, add the hostname `lvwwd.org` under "Hostname
 management", choose the mode "Managed", leave pre-clearance off, and click "Create". When the
 command asks for `TURNSTILE_SECRET`, copy the Secret Key and paste it at the prompt. After that,
-copy the Site Key and paste it into `apps/site/wrangler.jsonc` as step 3 describes. Both start with
-`0x`; only the Site Key is public.
+copy the Site Key and add it to `apps/deploy/cloudflare.config.ts` and its Wrangler fallback mirror
+as step 3 describes. Both start with `0x`; only the Site Key is public.
 
 ### The setup token
 
@@ -296,8 +310,9 @@ only once), and paste it at the command's prompt.
 
 It becomes the GitHub secret `CLOUDFLARE_API_TOKEN` in the `production` environment, which the
 Deploy workflow uses. Make it an account API token, which belongs to the LVBT account rather than to
-you, so deploys keep working after you leave; creating one needs the Super Administrator role. It
-works with Wrangler because the workflow also sets `CLOUDFLARE_ACCOUNT_ID`.
+you, so deploys keep working after you leave. Creating one needs the Super Administrator role or the
+API Token Provisioning capability. It works with `cf` because the workflow also sets
+`CLOUDFLARE_ACCOUNT_ID`.
 
 1. In the Cloudflare dashboard, choose "Las Vegans for Better Transit" and go to Manage Account,
    then "Account API Tokens". Click "Create Token", then "Create Custom Token".

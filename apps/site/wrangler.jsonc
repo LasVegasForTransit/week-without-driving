@@ -1,5 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
+  // Legacy mirror for Wrangler commands that cf cannot run yet. Production
+  // builds and deployments use apps/deploy/cloudflare.config.ts.
   "name": "lvwwd",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-31",
@@ -38,7 +40,7 @@
   },
   // The participant database and the bucket for screenshots of shared
   // posts, on LVBT's account with the lvwwd.org zone. Apply migrations with
-  // `npx wrangler d1 migrations apply lvwwd --remote`.
+  // `pnpm exec cf d1 migrations apply <DATABASE_ID> --dir migrations`.
   "d1_databases": [
     {
       "binding": "DB",
