@@ -27,18 +27,13 @@
   if (!section || !(part instanceof HTMLElement) || !api) return;
 
   const closesAt = Date.parse(section.getAttribute('data-closes-at') ?? '');
-  // 12:00 am on October 1, Las Vegas time: from here on, the next reminder
-  // is at most a day away.
-  const FIRST_DAY = Date.parse('2026-10-01T07:00:00Z');
   // How long to wait for the service worker before giving up on turning
   // on, and for the browser to confirm a stop before saying it's done.
   const WAIT_MS = 10_000;
   const STOP_WAIT_MS = 2000;
 
   const SAY = {
-    onBefore:
-      'Reminders are on for this device. Your first one arrives October 1 at about 8:00 am.',
-    onDuring: 'Reminders are on for this device. The next one arrives at about 8:00 am.',
+    on: 'Event reminders are on for this device. Choose a reminder time when you save a plan.',
     off: 'Reminders are off for this device.',
     unsupported:
       'This browser can’t show notifications from lvwwd.org. Open My week in your phone’s own browser, such as Chrome, to turn them on.',
@@ -66,8 +61,7 @@
     if (status) status.textContent = message;
   }
 
-  const showOn = () =>
-    show({ message: Date.now() < FIRST_DAY ? SAY.onBefore : SAY.onDuring, buttons: ['stop'] });
+  const showOn = () => show({ message: SAY.on, buttons: ['stop'] });
   const showReady = (message = '') => show({ line: 'consent', message, buttons: ['on'] });
 
   function showClosed() {

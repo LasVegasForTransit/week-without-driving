@@ -397,6 +397,17 @@ const planModes = [
             <p class="planner__summary" data-plan-summary></p>
             <p class="planner__hint">Check a route and your trip home before you leave.</p>
             <ul class="planner__suggestions" data-plan-suggestions></ul>
+            <label class="planner__reminder"
+              >Remind me on this phone
+              <select name="reminderMinutesBefore">
+                <option value="">No event reminder</option>
+                <option value="30">30 minutes before</option>
+                <option value="60">1 hour before</option>
+                <option value="120">2 hours before</option>
+                <option value="1440">1 day before</option>
+              </select>
+            </label>
+            <p class="planner__hint">Turn on event reminders above before saving this choice.</p>
             <p class="planner__hint">
               Planning alone is not an entry. After your trip, come back to describe what you did.
             </p>
@@ -438,7 +449,6 @@ const planModes = [
       */
       }
       <section
-        hidden
         class="myweek__card"
         aria-labelledby="remind-heading"
         data-remind
@@ -446,10 +456,10 @@ const planModes = [
         data-needs-connection="reminders"
       >
         <div data-remind-intro>
-          <h2 id="remind-heading" class="myweek__h2">Remind me to share my trip</h2>
+          <h2 id="remind-heading" class="myweek__h2">Turn on event reminders</h2>
           <p class="myweek__p">
-            One short reminder each morning, October 1 to 8, at about 8:00 am, to leave the car at
-            home and share your trip. You can stop anytime.
+            Turn on notifications for saved plans on this phone. Choose the timing while you make a
+            plan, and stop notifications here anytime.
           </p>
         </div>
         <p class="myweek__p remind__closed" data-remind-closed hidden>
@@ -458,9 +468,11 @@ const planModes = [
         <div class="remind__part" data-push hidden>
           <h3 class="remind__h3">Browser notifications</h3>
           <p class="myweek__p" data-push-consent hidden>
-            One notification a day on this phone, October 1 to 8, at about 8:00 am. No phone number
-            needed. Tap it to open My week and share your trip. Turn them off anytime with Stop
-            reminders on this page. See <a href="/privacy" class="body-link">Privacy</a>.
+            Notifications about saved plans arrive on this phone. No phone number needed. Tap one to
+            open My week. Turn them off anytime with Stop reminders on this page. See <a
+              href="/privacy"
+              class="body-link">Privacy</a
+            >.
           </p>
           <p class="myweek__p" data-push-iphone hidden>
             On iPhone, notifications work only from the Home Screen. Add lvwwd.org to your Home
