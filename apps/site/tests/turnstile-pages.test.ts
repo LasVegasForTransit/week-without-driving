@@ -37,7 +37,7 @@ class FakeHTMLRewriter {
   }
 }
 
-function page(key?: string, secret?: string) {
+function page(key?: string, secret?: string, delivery: 'resend' | 'preview' | 'none' = 'none') {
   const response = new Response('<!doctype html><html></html>', {
     headers: {
       'Content-Type': 'text/html',
@@ -55,6 +55,8 @@ function page(key?: string, secret?: string) {
     },
     TURNSTILE_SITE_KEY: key,
     TURNSTILE_SECRET: secret,
+    RESEND_API_KEY: delivery === 'resend' ? 'local-test-key' : undefined,
+    PREVIEW_SHOW_LINKS: delivery === 'preview' ? 'true' : undefined,
   } as unknown as Env;
   return { env, assetRequests };
 }
@@ -103,6 +105,27 @@ describe('Turnstile pages', () => {
     expect(changed('[data-signup-form]').has('hidden')).toBe(true);
     expect(changed('[data-signup-unavailable]', { hidden: '' }).has('hidden')).toBe(false);
   });
+
+  it('hides link recovery when email delivery is unavailable', async () => {
+    vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);
+    const { env } = page('public-test-key', 'server-secret');
+    await withSiteKey(new Request('https://lvwwd.org/my-week/link'), env);
+
+    expect(changed('[data-link-form]').has('hidden')).toBe(true);
+    expect(changed('[data-link-unavailable]', { hidden: '' }).has('hidden')).toBe(false);
+  });
+
+  it.each(['resend', 'preview'] as const)(
+    'shows link recovery when %s delivery is available',
+    async (delivery) => {
+      vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);
+      const { env } = page('public-test-key', 'server-secret', delivery);
+      await withSiteKey(new Request('https://lvwwd.org/my-week/link'), env);
+
+      expect(changed('[data-turnstile]').get('data-sitekey')).toBe('public-test-key');
+      expect(FakeHTMLRewriter.latest?.handlers.has('[data-link-form]')).toBe(false);
+    },
+  );
 
   it('keeps both forms usable when the site key is configured', async () => {
     vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);

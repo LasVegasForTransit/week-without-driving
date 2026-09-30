@@ -2,12 +2,19 @@ import type { Env } from './env';
 
 /**
  * The site key differs between preview and production, so the Worker writes
- * it into the built pages. Without both Turnstile values, sign-up and link
- * recovery show their unavailable state before the page reaches a browser.
+ * it into the built pages. Without both Turnstile values, sign-up shows its
+ * unavailable state. Link recovery also needs email delivery (or preview
+ * links) before its form appears. These states reach the browser as HTML.
  * My week and Home ('' once the trailing slash is dropped) also hold a
  * widget for the optional newsletter card.
  */
 export const TURNSTILE_PAGES = new Set(['/sign-up', '/my-week/link', '/my-week', '']);
+
+function canShowForm(path: string, env: Env, key: string | undefined): boolean {
+  if (!key || !env.TURNSTILE_SECRET?.trim()) return false;
+  if (path !== '/my-week/link') return true;
+  return Boolean(env.RESEND_API_KEY?.trim()) || env.PREVIEW_SHOW_LINKS === 'true';
+}
 
 export async function withSiteKey(request: Request, env: Env): Promise<Response> {
   const path = new URL(request.url).pathname;
@@ -36,7 +43,7 @@ export async function withSiteKey(request: Request, env: Env): Promise<Response>
     : response;
 
   const key = env.TURNSTILE_SITE_KEY?.trim();
-  const available = Boolean(key && env.TURNSTILE_SECRET?.trim());
+  const available = canShowForm(path, env, key);
   if (!available) {
     if (!privateForm) return page;
     return new HTMLRewriter()
