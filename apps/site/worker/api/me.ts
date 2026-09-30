@@ -31,6 +31,7 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     trips,
     plans,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
+    eventRemindersEnabled: c.env.EVENT_REMINDERS_ENABLED === 'true',
   });
 }
 

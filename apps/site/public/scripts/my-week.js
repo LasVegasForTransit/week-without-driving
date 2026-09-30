@@ -188,6 +188,12 @@
     );
   }
 
+  function renderEventReminders() {
+    const enabled = me.eventRemindersEnabled === true;
+    document.querySelector('[data-remind]')?.toggleAttribute('hidden', !enabled);
+    document.querySelector('[data-plan-event-reminder]')?.toggleAttribute('hidden', !enabled);
+  }
+
   function renderBanners() {
     const welcome = document.querySelector('[data-me-welcome]');
     const saved = params.get('saved') === '1';
@@ -370,6 +376,7 @@
     me = data;
     planCards = window.lvwwdPlanCards?.({ api, showSignedOut, renderEntries });
     renderDetails();
+    renderEventReminders();
     renderBanners();
     renderEntries();
     inside.hidden = false;

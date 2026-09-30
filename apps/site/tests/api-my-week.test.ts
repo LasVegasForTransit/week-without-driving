@@ -19,6 +19,7 @@ interface Me {
   days: number[];
   trips: { day: number; modes: string[] }[];
   today: number;
+  eventRemindersEnabled: boolean;
 }
 
 interface Trip {
@@ -56,8 +57,8 @@ describe('my week', () => {
     cookie = await signUpAs(platform);
   });
 
-  const me = async () => {
-    const response = await platform.send(apiRequest('GET', '/api/me', { cookie }));
+  const me = async (env: Record<string, unknown> = {}) => {
+    const response = await platform.send(apiRequest('GET', '/api/me', { cookie }), env);
     return response.json<Me>();
   };
   // Enters a shared trip the way My week does, as a multipart form.
@@ -93,6 +94,11 @@ describe('my week', () => {
     expect(mine.instagram).toBe('rosa.rides');
     expect(mine.county).toBe('Clark');
     expect(mine.days).toEqual([]);
+  });
+
+  it('only offers event reminders after the release switch is on', async () => {
+    expect((await me()).eventRemindersEnabled).toBe(false);
+    expect((await me({ EVENT_REMINDERS_ENABLED: 'true' })).eventRemindersEnabled).toBe(true);
   });
 
   it('answers 401 without a session, and clears the signed-in flag', async () => {
