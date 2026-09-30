@@ -411,6 +411,10 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .home-hero :global(.home-hero__photo img) {
     object-position: center 60%;
   }
+  .home-hero :global(.home-hero__photo[data-photo-unavailable] img),
+  .home-hero :global(.home-hero__photo[data-photo-unavailable] .photo__credit) {
+    display: none;
+  }
   .home-hero__shade {
     position: absolute;
     inset: 0;
