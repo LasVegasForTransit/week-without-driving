@@ -91,7 +91,7 @@
     const text =
       today === 0
         ? 'Sharing trips opens October 1.'
-        : 'The week is over. We’ll draw the winner by October 15, 2026.';
+        : 'The week is over. LVBT will email the winner by October 15, 2026.';
     setText('[data-me-phase]', text);
     const closed = document.querySelector('[data-log-closed]');
     if (closed) {
