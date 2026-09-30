@@ -11,6 +11,23 @@
     }).format(date);
   }
 
+  function directionsUrl(plan) {
+    if (!plan.origin) return null;
+    const mode = plan.willingModes.includes('bus')
+      ? 'transit'
+      : plan.willingModes.includes('bike')
+        ? 'bicycling'
+        : plan.willingModes.includes('ride')
+          ? 'driving'
+          : 'walking';
+    return `https://www.google.com/maps/dir/?${new URLSearchParams({
+      api: '1',
+      origin: plan.origin,
+      destination: plan.destination,
+      travelmode: mode,
+    })}`;
+  }
+
   function usePlanForEntry(plan) {
     const form = document.querySelector('[data-trip-form]');
     const id = form?.querySelector('[data-trip-plan-id]');
@@ -36,6 +53,7 @@
     const meta = document.createElement('span');
     meta.className = 'entries__plan-meta';
     meta.textContent = [
+      plan.origin ? `From ${plan.origin}` : '',
       plan.eventName ? plan.destination : '',
       planTime(plan),
       plan.loggedEntryId ? 'Trip entered' : 'Planned',
@@ -43,6 +61,16 @@
       .filter(Boolean)
       .join(' · ');
     item.append(meta);
+    const route = directionsUrl(plan);
+    if (route) {
+      const link = document.createElement('a');
+      link.href = route;
+      link.className = 'entries__plan-use';
+      link.textContent = 'Directions in Google Maps ↗';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      item.append(link);
+    }
     if (canUse && !plan.loggedEntryId) {
       const use = document.createElement('button');
       use.type = 'button';

@@ -11,31 +11,26 @@ const step = Astro.params.step;
 const steps = [
   {
     slug: 'where',
-    label: 'Place',
     title: 'Where are you going?',
-    description: 'Pick a place to go without driving.',
+    description: 'Enter where you will start, then choose where you will go.',
   },
   {
     slug: 'when',
-    label: 'Time',
     title: 'When will you go?',
     description: 'Choose a day from October 1 to 8 and a time.',
   },
   {
     slug: 'available',
-    label: 'Have',
     title: 'What can you use?',
     description: 'Pick any ways to travel that you can use.',
   },
   {
     slug: 'try',
-    label: 'Try',
     title: 'How would you like to go?',
     description: 'Pick a way you would try for this trip.',
   },
   {
     slug: 'review',
-    label: 'Review',
     title: 'Your plan',
     description: 'Check your plan before saving it.',
   },
@@ -56,29 +51,21 @@ const planModes = [
 <BaseLayout title={`${steps[current]?.title} · Week Without Driving Las Vegas`} noindex>
   <section class="container-page plan-flow narrow" data-plan-page={step}>
     <a href="/my-week" class="body-link plan-flow__return">← My week</a>
-    <p class="plan-flow__eyebrow">Plan a trip</p>
     <h1 class="page-title" tabindex="-1" data-plan-heading>{steps[current]?.title}</h1>
     <p class="plan-flow__lead">{steps[current]?.description}</p>
-
-    <nav aria-label="Plan steps" class="plan-flow__nav">
-      <ol>
-        {
-          steps.map((item, index) => (
-            <li aria-current={index === current ? 'step' : undefined}>
-              {index < current ? (
-                <a href={`/my-week/plan/${item.slug}`} data-plan-step-link>
-                  {index + 1}. {item.label}
-                </a>
-              ) : (
-                <span>
-                  {index + 1}. {item.label}
-                </span>
-              )}
-            </li>
-          ))
-        }
-      </ol>
-    </nav>
+    <div class="plan-flow__progress-group">
+      <p>Step {current + 1} of {steps.length}</p>
+      <div
+        class="plan-flow__progress"
+        role="progressbar"
+        aria-label="Trip plan progress"
+        aria-valuemin="1"
+        aria-valuemax={steps.length}
+        aria-valuenow={current + 1}
+      >
+        <span style={`width: ${((current + 1) / steps.length) * 100}%`}></span>
+      </div>
+    </div>
 
     <p data-plan-loading role="status">Opening your plan…</p>
     <div data-plan-signed-out hidden class="plan-flow__notice">
@@ -97,10 +84,21 @@ const planModes = [
     <form data-plan-form hidden class="plan-flow__form" novalidate data-needs-connection="plan">
       <fieldset class="plan-flow__panel" data-plan-step="1" hidden={step !== 'where'}>
         <legend class="sr-only">Where are you going?</legend>
-        <div class="plan-flow__choices">
-          <label><input type="radio" name="planKind" value="outing" /> Pick a place to try</label>
+        <label for="plan-origin" class="plan-flow__field-label">Where will you start?</label>
+        <input
+          id="plan-origin"
+          name="origin"
+          type="text"
+          maxlength="120"
+          required
+          placeholder="A bus stop, cross streets, or ZIP"
+        />
+        <p class="plan-flow__hint">A nearby stop or cross streets are enough.</p>
+        <h2 class="plan-flow__subheading" id="plan-destination-heading">Where to?</h2>
+        <div class="plan-flow__choices" role="group" aria-labelledby="plan-destination-heading">
+          <label><input type="radio" name="planKind" value="outing" /> Pick from the list</label>
           <label><input type="radio" name="planKind" value="event" /> Go to an event</label>
-          <label><input type="radio" name="planKind" value="own" /> My own destination</label>
+          <label><input type="radio" name="planKind" value="own" /> Enter another place</label>
         </div>
         <div class="plan-flow__detail" data-plan-kind-panel="outing" hidden>
           <label for="plan-outing">Choose a place</label>
@@ -182,9 +180,15 @@ const planModes = [
       </fieldset>
 
       <div class="plan-flow__panel" data-plan-step="5" hidden={step !== 'review'}>
-        <p class="plan-flow__summary" data-plan-summary></p>
+        <dl class="plan-flow__summary" data-plan-summary>
+          <div><dt>Starting from</dt><dd data-plan-summary-origin></dd></div>
+          <div><dt>Going to</dt><dd data-plan-summary-where></dd></div>
+          <div><dt>When</dt><dd data-plan-summary-when></dd></div>
+          <div><dt>Travel choices</dt><dd data-plan-summary-modes></dd></div>
+        </dl>
         <p class="plan-flow__hint">Check a route and your trip home before you leave.</p>
         <ul class="plan-flow__suggestions" data-plan-suggestions></ul>
+        <p class="plan-flow__hint">Opening directions shares your locations with Google Maps.</p>
         <label class="plan-flow__reminder" data-plan-event-reminder hidden>
           Remind me on this phone
           <select name="reminderMinutesBefore">
@@ -232,45 +236,40 @@ const planModes = [
   .plan-flow__return {
     display: inline-block;
     margin-bottom: 1.75rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--color-outline);
+    border-radius: 0.65rem;
+    font-weight: 700;
+    text-decoration: none;
   }
-  .plan-flow__eyebrow {
-    color: var(--color-primary-ink);
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .plan-flow__return:hover,
+  .plan-flow__return:focus-visible {
+    background: var(--color-surface-container);
+    text-decoration: none;
   }
   .plan-flow__lead {
     max-width: 38rem;
     margin-top: 0.8rem;
     color: var(--color-on-surface-variant);
   }
-  .plan-flow__nav {
+  .plan-flow__progress-group {
+    max-width: 45rem;
     margin-block: 1.5rem 2rem;
-  }
-  .plan-flow__nav ol {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.4rem;
-    padding: 0;
-    list-style: none;
-  }
-  .plan-flow__nav li {
-    padding: 0.4rem 0.25rem;
-    border-radius: 99px;
-    color: var(--color-on-surface-variant);
-    background: var(--color-surface-container);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    text-align: center;
   }
-  .plan-flow__nav li[aria-current='step'] {
-    color: var(--color-on-primary-warm);
+  .plan-flow__progress {
+    height: 0.5rem;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    border-radius: 99px;
+    background: var(--color-surface-container);
+  }
+  .plan-flow__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
     background: var(--color-primary-warm);
-  }
-  .plan-flow__nav a {
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
   }
   .plan-flow__form {
     max-width: 45rem;
@@ -286,6 +285,26 @@ const planModes = [
   .plan-flow__choices {
     display: grid;
     gap: 0.6rem;
+  }
+  .plan-flow__subheading {
+    margin-block: 1.5rem 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .plan-flow__field-label {
+    display: block;
+    font-weight: 700;
+  }
+  #plan-origin {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 0.35rem;
+    padding: 0.55rem 0.75rem;
+    border: 2px solid transparent;
+    border-radius: 0.7rem;
+    color: var(--color-on-surface);
+    background: var(--color-field);
   }
   .plan-flow__choices label {
     display: flex;
@@ -340,9 +359,19 @@ const planModes = [
     font-size: 0.95rem;
   }
   .plan-flow__summary {
+    display: grid;
+    gap: 1rem;
+  }
+  .plan-flow__summary dt {
+    color: var(--color-on-surface-variant);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .plan-flow__summary dd {
+    margin: 0.15rem 0 0;
     font-size: 1.15rem;
     font-weight: 700;
-    line-height: 1.5;
+    line-height: 1.4;
   }
   .plan-flow__suggestions {
     display: grid;
@@ -350,8 +379,18 @@ const planModes = [
     margin-top: 1rem;
   }
   .plan-flow__suggestions :global(a) {
+    display: block;
+    min-height: 3rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--color-outline);
+    border-radius: 0.7rem;
     font-weight: 700;
-    text-decoration: underline;
+    text-decoration: none;
+  }
+  .plan-flow__suggestions :global(a:hover),
+  .plan-flow__suggestions :global(a:focus-visible) {
+    background: var(--color-surface);
+    text-decoration: none;
   }
   .plan-flow__actions {
     display: flex;

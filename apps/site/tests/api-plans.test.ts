@@ -13,6 +13,7 @@ import {
 
 const SAMPLE = {
   day: 3,
+  origin: 'Bonneville Transit Center',
   destination: 'East Las Vegas Library',
   eventName: 'Reading hour',
   startsAt: '2026-10-03T17:00:00.000Z',
@@ -23,6 +24,7 @@ const SAMPLE = {
 interface Plan {
   id: string;
   day: number;
+  origin: string | null;
   destination: string;
   eventName: string | null;
   startsAt: string | null;
@@ -88,11 +90,13 @@ describe('participant trip plans', () => {
     expect((await request('DELETE', { id: plan.id }, otherCookie)).status).toBe(404);
     const changed = await request('PATCH', {
       id: plan.id,
+      origin: 'Sahara and Maryland',
       destination: 'Sunrise Library',
       availableModes: ['scooter'],
     });
     expect(changed.status).toBe(200);
     expect((await changed.json<{ plan: Plan }>()).plan).toMatchObject({
+      origin: 'Sahara and Maryland',
       destination: 'Sunrise Library',
       availableModes: ['scooter'],
       willingModes: SAMPLE.willingModes,
@@ -105,6 +109,8 @@ describe('participant trip plans', () => {
     for (const body of [
       { ...SAMPLE, day: 0 },
       { ...SAMPLE, day: 9 },
+      { ...SAMPLE, origin: '' },
+      { ...SAMPLE, origin: 'x'.repeat(121) },
       { ...SAMPLE, destination: '' },
       { ...SAMPLE, destination: 'x'.repeat(121) },
       { ...SAMPLE, eventName: 'x'.repeat(121) },

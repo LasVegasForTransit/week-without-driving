@@ -329,6 +329,7 @@ if (form instanceof HTMLFormElement) {
   });
   document.querySelector('[data-save-plan]')?.addEventListener('click', (event) => {
     const draft = {
+      origin: value('origin'),
       destination: value('destination'),
       day: Number(value('date').slice(-2)),
       time: value('time'),

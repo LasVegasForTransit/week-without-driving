@@ -3,11 +3,11 @@
   const STEPS = ['where', 'when', 'available', 'try', 'review'];
   const DRAFT_KEY = 'wwd-trip-plan-draft';
   const MODE_LABELS = {
-    bus: 'bus',
-    walk: 'walk or roll',
-    bike: 'bike',
-    scooter: 'scooter',
-    ride: 'ride',
+    bus: 'Bus',
+    walk: 'Walk or roll',
+    bike: 'Bike',
+    scooter: 'Scooter',
+    ride: 'Get a ride',
   };
 
   function setText(selector, text) {
@@ -38,6 +38,7 @@
           : fieldValue(form, 'ownDestination');
     return {
       kind,
+      origin: fieldValue(form, 'origin'),
       destination,
       eventName: kind === 'event' ? fieldValue(form, 'eventName') : '',
       day: Number(fieldValue(form, 'day')),
@@ -56,8 +57,27 @@
     });
   }
 
+  function directionsUrl(plan) {
+    const mode = plan.willingModes.includes('bus')
+      ? 'transit'
+      : plan.willingModes.includes('bike')
+        ? 'bicycling'
+        : plan.willingModes.includes('ride')
+          ? 'driving'
+          : 'walking';
+    const query = new URLSearchParams({
+      api: '1',
+      origin: plan.origin,
+      destination: plan.destination,
+      travelmode: mode,
+    });
+    return `https://www.google.com/maps/dir/?${query}`;
+  }
+
   function suggestionItems(plan) {
     const items = [];
+    if (plan.origin && plan.destination)
+      items.push({ label: 'Open directions in Google Maps', href: directionsUrl(plan) });
     if (plan.outingAnchor)
       items.push({
         label: `See the route guide for ${plan.destination}`,
@@ -117,12 +137,15 @@
     const dayLabel = dayOption?.textContent?.trim() ?? '';
     const chosen = plan.willingModes.map((mode) => MODE_LABELS[mode] ?? mode);
     const where = plan.eventName
-      ? `${plan.eventName} at ${plan.destination || 'a place to choose'}`
-      : plan.destination || 'a place to choose';
+      ? `${plan.eventName} · ${plan.destination || 'Choose a place'}`
+      : plan.destination || 'Choose a place';
+    setText('[data-plan-summary-origin]', plan.origin || 'Add a starting point');
+    setText('[data-plan-summary-where]', where);
     setText(
-      '[data-plan-summary]',
-      `${where}, ${dayLabel || 'on a day to choose'}${plan.time ? ` around ${displayTime(plan.time)}` : ''}. ${chosen.length ? `You’d consider ${chosen.join(', ')}.` : 'Choose how you might go.'}`,
+      '[data-plan-summary-when]',
+      `${dayLabel || 'Choose a day'}${plan.time ? ` · ${displayTime(plan.time)}` : ''}`,
     );
+    setText('[data-plan-summary-modes]', chosen.length ? chosen.join(', ') : 'Choose how to go');
     renderSuggestions(form, suggestionItems(plan));
   }
 
@@ -161,6 +184,7 @@
     const kind = ['outing', 'event', 'own'].includes(draft.kind) ? draft.kind : '';
     const kindRadio = form.querySelector(`input[name="planKind"][value="${kind}"]`);
     if (kindRadio instanceof HTMLInputElement) kindRadio.checked = true;
+    setField(form, 'origin', draft.origin);
     setField(form, 'outing', draft.outingAnchor);
     setField(form, 'eventName', draft.eventName);
     setField(form, 'eventDestination', draft.eventDestination);
@@ -205,17 +229,24 @@
     window.location.assign(`/my-week/plan/${STEPS[next - 1]}`);
   }
 
+  function placeMessage(plan) {
+    if (!plan.origin) return 'Enter a starting point.';
+    if (!plan.kind) return 'Choose a place or event, or enter another place.';
+    if (plan.kind === 'event' && !plan.eventName) return 'Name the event you want to attend.';
+    if (!plan.destination) return 'Choose or enter where you want to go.';
+    return '';
+  }
+
+  function timeMessage(plan) {
+    if (!Number.isInteger(plan.day) || plan.day < 1 || plan.day > 8)
+      return 'Choose one day from October 1 to 8.';
+    if (!/^\d{2}:\d{2}$/.test(plan.time)) return 'Choose about what time you will go.';
+    return '';
+  }
+
   function validationMessage(plan, step) {
-    if (step === 1) {
-      if (!plan.kind) return 'Choose an outing, an event, or your own destination.';
-      if (plan.kind === 'event' && !plan.eventName) return 'Name the event you want to attend.';
-      if (!plan.destination) return 'Choose or enter where you want to go.';
-    }
-    if (step === 2) {
-      if (!Number.isInteger(plan.day) || plan.day < 1 || plan.day > 8)
-        return 'Choose one day from October 1 to 8.';
-      if (!/^\d{2}:\d{2}$/.test(plan.time)) return 'Choose about what time you will go.';
-    }
+    if (step === 1) return placeMessage(plan);
+    if (step === 2) return timeMessage(plan);
     if (step === 4 && plan.willingModes.length === 0)
       return 'Pick at least one way you would consider going.';
     return '';
@@ -230,6 +261,7 @@
   function payload(plan) {
     return {
       day: plan.day,
+      origin: plan.origin,
       destination: plan.destination,
       ...(plan.eventName ? { eventName: plan.eventName } : {}),
       startsAt: new Date(
@@ -286,11 +318,6 @@
     form
       .querySelector('[data-plan-back]')
       ?.addEventListener('click', () => goToStep(state, Math.max(state.step - 1, 1)));
-    document.querySelectorAll('[data-plan-step-link]').forEach((link) => {
-      link.addEventListener('click', (event) => {
-        if (!keepDraft(form)) event.preventDefault();
-      });
-    });
     form.addEventListener('submit', (event) => void save(state, event));
   }
 
@@ -302,6 +329,8 @@
       const valid =
         typeof draft.destination === 'string' &&
         draft.destination.length <= 120 &&
+        typeof draft.origin === 'string' &&
+        draft.origin.length <= 120 &&
         Number.isInteger(draft.day) &&
         draft.day >= today &&
         draft.day <= 8 &&
@@ -309,6 +338,7 @@
         ['bus', 'walk', 'bike', 'scooter'].includes(draft.mode);
       if (!valid) return;
       form.querySelector('input[name="planKind"][value="own"]').checked = true;
+      form.elements.namedItem('origin').value = draft.origin;
       form.elements.namedItem('ownDestination').value = draft.destination;
       dayField.value = String(draft.day);
       form.elements.namedItem('time').value = draft.time;
