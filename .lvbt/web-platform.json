@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "preset": "lvbt-web",
   "release": null,
-  "commit": "faead94a4664f04771d48715142f2f8d22ab9f53",
+  "commit": "1d6a2ad92af4ff022f38e9a55b175ac867dae36e",
   "contentHash": "6fc142bbee7aff355e04e1ea58c6eba646324ddbfbc65af1ee5b1e6260705fb9",
   "executables": [
     "examples/with-astro/.githooks/commit-msg",
