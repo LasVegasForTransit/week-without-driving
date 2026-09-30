@@ -48,7 +48,7 @@ const bannerCards = BANNERS.map((banner) => ({
     <div class="kit__picker">
       <label for="kit-organization" class="kit__label">Choose a sharing link</label>
       <select id="kit-organization" class="kit__select" data-kit-picker>
-        <option value={GENERAL}>General Week Without Driving link</option>
+        <option value={GENERAL}>General link</option>
         {partners.map((partner) => <option value={partner.slug}>{partner.name}</option>)}
       </select>
       <p class="kit__hint" data-kit-hint>Choose a listed partner to use its link.</p>
