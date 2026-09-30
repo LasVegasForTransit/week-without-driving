@@ -24,7 +24,7 @@ const mediaAdvisory = wwdResources.find((r) => r.title === '2026 media advisory'
 
 const storyAngles = [
   "Las Vegans who don't drive, in their own words.",
-  'Local leaders taking the challenge for a day or the whole week.',
+  'What local leaders might learn from a day without driving.',
   'What a first bus trip is like for someone who has never ridden.',
   'What a sidewalk audit finds when you look at a street on foot.',
   'Volunteers organizing a citywide week without a paid staff.',
@@ -50,14 +50,14 @@ const storyAngles = [
     </div>
   </section>
 
-  {/* PRESS RELEASE */}
+  {/* NATIONAL MEDIA ADVISORY */}
   <section class="container-page section mt-12" aria-labelledby="release-heading">
-    <h2 id="release-heading" class="section-title">Press release</h2>
+    <h2 id="release-heading" class="section-title">National media advisory</h2>
     <p class="section-intro">For local quotes or campaign details, email the media contact.</p>
     {
       mediaAdvisory && (
         <p class="section-intro">
-          In the meantime, read the national campaign's{' '}
+          Read the national campaign's{' '}
           <a
             href={mediaAdvisory.url}
             data-print-url={mediaAdvisory.url}
@@ -103,7 +103,7 @@ const storyAngles = [
       <div>
         <dt>National campaign</dt>
         <dd>
-          Organized by {wwd.nationalOrganizer} with the Nondrivers Alliance.{' '}
+          Co-hosted by {wwd.nationalOrganizer} and the Nondrivers Alliance.{' '}
           <a
             href={wwd.nationalUrl}
             data-print-url={wwd.nationalUrl}
@@ -118,9 +118,8 @@ const storyAngles = [
       <div>
         <dt>Take part</dt>
         <dd>
-          Anyone can. Sign up to win at <a href="/sign-up" class="body-link font-bold"
-            >lvwwd.org/sign-up</a
-          >.
+          Anyone can take part. Eligible residents can sign up to win at{' '}
+          <a href="/sign-up" class="body-link font-bold">lvwwd.org/sign-up</a>.
         </dd>
       </div>
       <div>
@@ -132,10 +131,8 @@ const storyAngles = [
 
   {/* STORIES */}
   <section class="container-page section" aria-labelledby="stories-heading">
-    <h2 id="stories-heading" class="section-title">Stories we can connect you with</h2>
-    <p class="section-intro">
-      Tell us what you're working on, and we'll help find the right person or angle.
-    </p>
+    <h2 id="stories-heading" class="section-title">Possible story angles</h2>
+    <p class="section-intro">Email us to ask about interviews.</p>
     <ul class="stories section-body">
       {storyAngles.map((item) => <li>{item}</li>)}
     </ul>

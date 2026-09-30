@@ -56,6 +56,8 @@ export interface PrecacheEntry {
 export interface Build {
   precache: PrecacheEntry[];
   files: Record<string, string>;
+  /** Revisions make a data-only deploy change sw.js and refresh the offline bundle. */
+  data: Record<string, string>;
 }
 
 export interface Manifest {
@@ -216,8 +218,11 @@ export function buildManifest(dist: string): Manifest {
     (sum, url) => sum + bytesOf(url, list.read(url)),
     0,
   );
+  const data = Object.fromEntries(
+    DATA_FILES.filter((url) => list.exists(url)).map((url) => [url, revisionOf(list.read(url))]),
+  );
   const total = precache.reduce((sum, entry) => sum + entry.bytes, 0) + dataBytes;
-  return { build: { precache, files: staticFiles(dist) }, total, missing };
+  return { build: { precache, files: staticFiles(dist), data }, total, missing };
 }
 
 const MARKER = '/* __WWD_BUILD__ */ null';

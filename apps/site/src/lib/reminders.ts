@@ -46,7 +46,7 @@ export const MAX_TEXT_LENGTH = 160;
 
 export const SIGNUP_CLOSES_AT = '2026-10-08T15:00:00Z';
 
-export const ENTRY_LINE = 'A post is optional. Enter by describing your trip in My week.';
+export const ENTRY_LINE = 'Describe your trip in My week to enter. A post is optional.';
 
 const TEXT_END = `${LINK_PLACEHOLDER} Reply STOP to end.`;
 

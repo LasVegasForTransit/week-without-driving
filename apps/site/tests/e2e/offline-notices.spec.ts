@@ -5,10 +5,10 @@ import { type BrowserContext, expect, test } from '@playwright/test';
 // when the connection returns. Nothing may ask the API while offline.
 
 const SIGN_UP_NOTICE = 'You’re offline. You can sign up as soon as you’re back online.';
-const GET_LINK_NOTICE = 'You’re offline. You can get your link as soon as you’re back online.';
+const GET_LINK_NOTICE = 'You’re offline. Try requesting your link when you’re back online.';
 const TRIP_NOTICE =
   'You’re offline. My week needs a connection to show entries and submit your trip.';
-const SEND_LINK_NOTICE = 'You’re offline. You can send your link as soon as you’re back online.';
+const SEND_LINK_NOTICE = 'You’re offline. Try requesting your link when you’re back online.';
 
 let offline = false;
 let apiCallsOffline: string[] = [];
@@ -103,10 +103,8 @@ test('with the clock after sign-up closes, no notice appears', async ({ page, co
   await page.clock.install({ time: new Date('2026-10-09T08:00:00Z') });
   await page.goto('/sign-up');
   await goOffline(context);
-  await expect(page.getByRole('button', { name: 'Sign up', exact: true })).not.toHaveAttribute(
-    'aria-disabled',
-    'true',
-  );
+  await expect(page.getByRole('heading', { name: 'Entries are closed.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign up', exact: true })).toBeHidden();
   await expect(page.locator('[data-offline-notice]')).toHaveCount(0);
 });
 

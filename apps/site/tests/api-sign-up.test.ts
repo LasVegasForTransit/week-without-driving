@@ -85,6 +85,18 @@ describe('sign-up and links', () => {
     });
   });
 
+  it('closes new sign-ups at midnight after October 8 while link recovery stays open', async () => {
+    vi.setSystemTime(new Date('2026-10-09T06:59:59.999Z'));
+    expect((await signUp({})).status).toBe(201);
+
+    vi.setSystemTime(new Date('2026-10-09T07:00:00Z'));
+    const late = await signUp({ contact: 'late@example.com' });
+    expect(late.status).toBe(409);
+    expect((await late.json<{ message: string }>()).message).toMatch(/closed|ended/i);
+    expect(await count('participants')).toBe(1);
+    expect((await askForLink('rosa@example.com')).status).toBe(202);
+  });
+
   it('stores only hashes of session and link tokens', async () => {
     const response = await signUp({});
     const token = cookiesFrom(response).split('; ')[0]?.split('=')[1] ?? '';

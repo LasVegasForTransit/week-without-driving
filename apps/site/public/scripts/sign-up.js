@@ -18,6 +18,8 @@
   const api = window.lvwwdApi;
   const form = document.querySelector('[data-signup-form]');
   const already = document.querySelector('[data-signup-already]');
+  const intro = document.querySelector('[data-signup-intro]');
+  const closed = document.querySelector('[data-signup-closed]');
   if (!api || !(form instanceof HTMLFormElement) || !already) return;
 
   const FIELDS = ['firstName', 'contact', 'zip', 'county', 'instagram', 'age'];
@@ -145,6 +147,10 @@
       turnstileToken,
     });
     bot.reset();
+    if (status === 409 && data.status === 'closed') {
+      showClosed();
+      return false;
+    }
     if (status === 201) {
       window.lvbt?.track('campaign_signup');
       rememberPreviewLink(data.previewLink);
@@ -179,9 +185,18 @@
     return false;
   }
 
+  function showClosed() {
+    if (intro) intro.hidden = true;
+    form.hidden = true;
+    already.hidden = true;
+    if (closed) closed.hidden = false;
+  }
+
   function startSignUp() {
+    if (Date.now() >= SIGN_UP_ENDS) return showClosed();
     bot = api.botCheck(form.querySelector('[data-turnstile]'), 'signup');
     form.hidden = false;
+    return undefined;
   }
 
   function startEditing(me) {
@@ -244,6 +259,7 @@
 
   // Someone signed in on this phone sees who they are, or edits with ?edit=1.
   async function start() {
+    if (Date.now() >= SIGN_UP_ENDS && intro) intro.hidden = true;
     if (!/(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie)) {
       // Just after "Sign up someone else" on My week.
       if (api.readyForNextPerson()) return showReadyForNext();

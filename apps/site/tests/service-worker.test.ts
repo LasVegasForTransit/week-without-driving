@@ -69,8 +69,8 @@ describe('installing', () => {
     const { caches, extendable, self } = load(BUILD);
     await extendable('install');
     expect(caches.everything().sort()).toEqual([
-      'wwd-data-v1: /data/routes.json',
-      'wwd-data-v1: /data/stops.json',
+      'wwd-data-v1: /data/routes.json?__rev=rou1',
+      'wwd-data-v1: /data/stops.json?__rev=sto1',
       'wwd-precache-v1: /?__rev=hom1',
       'wwd-precache-v1: /_astro/site.css?__rev=css1',
       'wwd-precache-v1: /fonts/body.woff2?__rev=fon1',
@@ -105,12 +105,52 @@ describe('installing', () => {
     );
   });
 
+  it('replaces changed stop and route bundles in an existing cache before an updated install goes offline', async () => {
+    const firstBuild = {
+      ...BUILD,
+      data: { '/data/stops.json': 'sto1', '/data/routes.json': 'rou1' },
+    };
+    const first = load(firstBuild, {
+      routes: {
+        '/data/stops.json': () => new Response('{"stops":["old"]}'),
+        '/data/routes.json': () => new Response('{"routes":["old"]}'),
+      },
+    });
+    await first.extendable('install');
+
+    const nextBuild = {
+      ...firstBuild,
+      data: { '/data/stops.json': 'sto2', '/data/routes.json': 'rou2' },
+    };
+    const next = load(nextBuild, {
+      caches: first.caches,
+      running: true,
+      routes: {
+        '/data/stops.json': () => new Response('{"stops":["new"]}'),
+        '/data/routes.json': () => new Response('{"routes":["new"]}'),
+      },
+    });
+    await next.extendable('install');
+    expect(next.net.state.calls.sort()).toEqual(['/data/routes.json', '/data/stops.json']);
+
+    next.net.state.offline = true;
+    expect(await (await next.request('/data/stops.json').settled())?.text()).toBe(
+      '{"stops":["new"]}',
+    );
+    expect(await (await next.request('/data/routes.json').settled())?.text()).toBe(
+      '{"routes":["new"]}',
+    );
+    await next.extendable('activate');
+    expect(next.caches.everything()).not.toContain('wwd-data-v1: /data/stops.json?__rev=sto1');
+    expect(next.caches.everything()).not.toContain('wwd-data-v1: /data/routes.json?__rev=rou1');
+  });
+
   it('saves Home, public tools, and stop data when the phone asks to save data', async () => {
     const { caches, extendable } = load(BUILD, { saveData: true });
     await extendable('install');
     expect(caches.everything().sort()).toEqual([
-      'wwd-data-v1: /data/routes.json',
-      'wwd-data-v1: /data/stops.json',
+      'wwd-data-v1: /data/routes.json?__rev=rou1',
+      'wwd-data-v1: /data/stops.json?__rev=sto1',
       'wwd-precache-v1: /?__rev=hom1',
       'wwd-precache-v1: /_astro/site.css?__rev=css1',
       'wwd-precache-v1: /fonts/body.woff2?__rev=fon1',

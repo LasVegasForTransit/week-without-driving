@@ -61,7 +61,7 @@ export interface Destination {
   /** Exactly three steps. */
   steps: readonly [string, string, string];
   buttonRows: readonly ButtonRow[];
-  /** Only for a destination whose steps cross a bridge or other hard part. */
+  /** Important access or temporary service information for a destination. */
   note?: { heading: string; text: string };
 }
 
@@ -114,11 +114,15 @@ export const destinations: readonly Destination[] = [
     heading: 'Water Street District, Henderson',
     intro: 'Downtown Henderson, with shops and places to eat along Water Street.',
     steps: [
-      'Take the BHX (Boulder Highway Express), which runs between Bonneville Transit Center downtown and Henderson along Boulder Highway. Only some BHX buses stop near Water Street: take a bus marked BHX-A and get off at Basic after Water. From there, walk or roll about 0.2 mile to Water Street.',
+      'Take the BHX (Boulder Highway Express), which runs between Bonneville Transit Center downtown and Henderson along Boulder Highway. Only some BHX buses stop near Water Street: take a bus marked BHX-A. The usual stop is Basic after Water, about 0.2 mile from Water Street. Check the temporary stop change below if you travel October 1–4.',
       'From elsewhere in the valley, change to the BHX at Bonneville Transit Center or at any BHX stop on Boulder Highway.',
-      'To head home, catch the BHX at Basic after Texas, going west.',
+      'To head home, the usual BHX-A stop is Basic after Texas, going west. Check the temporary stop change below if you travel October 1–4.',
     ],
     buttonRows: [{ placeName: 'Water Street District', lat: 36.0306, lng: -114.982 }],
+    note: {
+      heading: 'BHX-A stop changes October 1–4',
+      text: 'RTC plans to close both Basic Road stops from 11 pm October 1 until 1 am October 4 for Henderson Hot Rod Days. For the trip to Water Street, use stop 246, southbound Boulder Highway after Basic. For the return trip, use stop 245, northbound Boulder Highway after Basic. Check RTC’s current stop closures before you leave.',
+    },
   },
   {
     anchor: 'unlv',
@@ -150,8 +154,8 @@ export const destinations: readonly Destination[] = [
     intro:
       'The Raiders play the Kansas City Chiefs at Allegiant Stadium on Sunday, October 4, at 1:25 pm, during the week.',
     steps: [
-      "Take RTC's Game Day Express, RTC's special event bus service to stadium games. On Raiders home game days it runs from six casinos: Red Rock (Summerlin), Santa Fe Station (Centennial Hills), Aliante (North Las Vegas), Sam's Town (East Las Vegas), Green Valley Ranch (Henderson) and M Resort (West Henderson). A round trip costs $4. Buy it in the rideRTC, Transit or Uber app up to seven days ahead, or pay $4 when you board with a debit card, credit card, phone wallet or cash, and you get a pass for the ride back.",
-      'For the 1:25 pm kickoff, the buses run from 10:30 am until 12:30 pm, an hour before kickoff. They drop you at the southeast corner of the stadium on Dean Martin Drive, next to Gate 11.',
+      "Take RTC's Game Day Express, RTC's special event bus service to stadium games. On Raiders home game days it runs from six casinos: Red Rock (Summerlin), Santa Fe Station (Centennial Hills), Aliante (North Las Vegas), Sam's Town (East Las Vegas), Green Valley Ranch (Henderson) and M Resort (West Henderson). A round trip costs $4. Buy it in the rideRTC, Transit or Uber app up to seven days ahead, or pay $4 when you board with cash. If you pay by debit card, credit card or phone wallet, tap twice when you board to get a return pass.",
+      "For the scheduled 1:25 pm kickoff, RTC says buses begin three hours before the game and stop one hour before it. Check [RTC's Game Day Express page](https://www.rtcsnv.com/ways-to-travel/transit-services/game-day-express-raiders/) for current times. Buses drop you at the southeast corner of the stadium on Dean Martin Drive, next to Gate 11.",
       "After the game, buses leave from the same corner for up to 40 minutes after it ends. If you're heading to the Strip instead, walk or roll east over the Hacienda Avenue bridge to Las Vegas Boulevard, about 20 minutes, and catch the Deuce at Mandalay Bay.",
     ],
     buttonRows: [{ placeName: 'Allegiant Stadium', lat: 36.09074, lng: -115.18333 }],
