@@ -16,11 +16,29 @@ import type { RosterItem } from '../lib/partners';
 //     slug: 'example-club',
 //     name: 'Example Club',
 //     url: 'https://example.org',
+//     logo: '/partners/logos/example-club.png',
 //     type: 'Student groups',
 //     sentence: 'Our members are taking the bus to class together on October 6.',
 //   },
 //
-// `url` is optional. `type` is one of the six in PARTNER_TYPES in
+// `url` and `logo` are optional. Put supplied logos in public/partners/logos.
+// `type` is one of the six in PARTNER_TYPES in
 // src/lib/partners.ts, spelled exactly. The build stops with a message
 // naming the partner if an item breaks a rule.
-export const roster: RosterItem[] = [];
+export const roster: RosterItem[] = [
+  {
+    slug: 'rtc-southern-nevada',
+    name: 'RTC of Southern Nevada',
+    url: 'https://www.rtcsnv.com/',
+    logo: '/partners/logos/rtc-southern-nevada.png',
+    type: 'Public agencies',
+    sentence: 'RTC provides bus service and trip planning information across Southern Nevada.',
+  },
+  {
+    slug: 'sierra-club-toiyabe',
+    name: 'Sierra Club Toiyabe Chapter',
+    url: 'https://www.sierraclub.org/toiyabe',
+    type: 'Environmental and justice groups',
+    sentence: 'The Toiyabe Chapter works on environmental issues in Nevada.',
+  },
+];

@@ -24,6 +24,8 @@ export interface RosterItem {
   name: string;
   /** Its website or social media page, starting with https://. */
   url?: string;
+  /** Local logo artwork in public/partners/logos, if supplied by the group. */
+  logo?: string;
   type: PartnerType;
   /** One sentence on how it is taking part, at most 200 characters. */
   sentence: string;
@@ -64,6 +66,12 @@ function problemsWith(item: UncheckedItem): string[] {
   if (slug) problems.push(...slugProblems(slug));
   if (item.url !== undefined && !text(item.url).startsWith('https://')) {
     problems.push(`its url "${text(item.url)}" must start with https://`);
+  }
+  if (
+    item.logo !== undefined &&
+    !/^\/partners\/logos\/[a-z0-9-]+\.(?:svg|png|webp)$/.test(text(item.logo))
+  ) {
+    problems.push('its logo must be a local image in /partners/logos');
   }
   const type = text(item.type);
   if (type && !(PARTNER_TYPES as readonly string[]).includes(type)) {

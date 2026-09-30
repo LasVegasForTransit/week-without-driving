@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 
 import { describe, expect, it } from 'vitest';
@@ -11,6 +11,7 @@ import {
   GENERAL,
   PARTNER_TYPES,
   partnerLink,
+  partners,
   qrFiles,
   sortPartners,
   type RosterItem,
@@ -42,6 +43,22 @@ describe('the partner roster', () => {
     expect(checkRoster([example, { ...noWebsite, slug: 'no-site', name: 'No Site' }])).toHaveLength(
       2,
     );
+  });
+
+  it('accepts a local partner logo and rejects an external image', () => {
+    expect(checkRoster([{ ...example, logo: '/partners/logos/example-club.png' }])).toHaveLength(1);
+    expect(problemsFor({ ...example, logo: 'https://example.org/logo.png' })).toContain(
+      'its logo must be a local image',
+    );
+  });
+
+  it('includes each listed logo in the public site', () => {
+    for (const partner of partners) {
+      if (!partner.logo) continue;
+      expect(existsSync(new URL(`../public${partner.logo}`, import.meta.url)), partner.name).toBe(
+        true,
+      );
+    }
   });
 
   const cases: Array<[string, UncheckedItem, string]> = [
