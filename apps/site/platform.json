@@ -51,6 +51,7 @@
     {
       "domain": "lvwwd.org",
       "provider": "resend",
+      "dnsProfile": "forge",
       "region": "us-east-1",
       "apiKeySecret": "RESEND_API_KEY"
     }
@@ -64,8 +65,8 @@
       "url": "https://resend.com/api-keys",
       "steps": [
         "Sign in to Resend at https://resend.com/login. If you have no account, sign up at https://resend.com/signup with your @lasvegasfortransit.org address and ask a maintainer to invite you to the LVBT team.",
-        "Open https://resend.com/domains. If lvwwd.org is not listed, click \"Add Domain\", type lvwwd.org, choose the region \"North Virginia (us-east-1)\", and click \"Add\".",
-        "If lvwwd.org does not say \"Verified\", click \"Sign in to Cloudflare\" on its page and approve the request, which adds its DNS records; then click \"Verify DNS Records\" and wait until it says \"Verified\". A key for an unverified domain cannot send.",
+        "Open the existing LVBT domain at https://resend.com/domains/c3eed87b-e72c-4235-85fd-af148cbe0121. It uses North Virginia (us-east-1). Check that its current status is Verified before continuing.",
+        "If the domain is Pending, check its DNS records in Cloudflare: TXT resend._domainkey has the full p= value shown by Resend; DNS-only CNAME rsend points to rsend.forge.rmta.net; DNS-only CNAME send points to send.forge.rmta.net. TXT _dmarc with v=DMARC1; p=none; is recommended. Then click Verify DNS Records in Resend and wait for Verified. This domain does not use the older SES MX or SPF records.",
         "Open https://resend.com/api-keys and click \"Create API Key\". Name it lvwwd.org Worker, choose the permission \"Sending access\", choose the domain lvwwd.org, and click \"Add\".",
         "Copy the key, which starts with re_ and is shown only once, and paste it at this command's prompt."
       ],

@@ -344,15 +344,21 @@ manage Turnstile.
 
 1. Sign in at <https://resend.com/login>, or sign up at <https://resend.com/signup> with your
    @lasvegasfortransit.org address and ask a maintainer to invite you to the LVBT team.
-2. On <https://resend.com/domains>, if `lvwwd.org` is not listed, click "Add Domain", type
-   `lvwwd.org`, choose the region "North Virginia (us-east-1)", and click "Add".
-3. On the domain's page, click "Sign in to Cloudflare" and approve the request; it adds the DNS
-   records. By hand, they are, each with TTL "Auto" and Proxy status "DNS only": MX `send` →
-   `feedback-smtp.us-east-1.amazonses.com` with priority 10; TXT `send` →
-   `v=spf1 include:amazonses.com ~all`; TXT `resend._domainkey` → the `p=` value Resend shows; and
-   the recommended TXT `_dmarc` → `v=DMARC1; p=none;`.
-4. Click "Verify DNS Records" and wait until the domain says "Verified", usually a few minutes.
-5. On <https://resend.com/api-keys>, click "Create API Key", name it `lvwwd.org Worker`, choose
+2. Open the existing
+   [lvwwd.org domain](https://resend.com/domains/c3eed87b-e72c-4235-85fd-af148cbe0121) in the LVBT
+   team. It uses North Virginia (us-east-1). Resend showed **Verified** and ready to send at 7:10 PM
+   PDT on September 29, 2026; check its current status before sending.
+3. If the domain returns to **Pending**, check these records in Cloudflare DNS. Use TTL "Auto" and
+   set both CNAME records to "DNS only":
+
+   - TXT `resend._domainkey` → copy the full value shown on the Resend domain page.
+   - CNAME `rsend` → `rsend.forge.rmta.net`.
+   - CNAME `send` → `send.forge.rmta.net`.
+   - Optional TXT `_dmarc` → `v=DMARC1; p=none;`.
+
+   Then click "Verify DNS Records" on the Resend domain page and wait for **Verified**.
+
+4. On <https://resend.com/api-keys>, click "Create API Key", name it `lvwwd.org Worker`, choose
    "Sending access" and the domain `lvwwd.org`, and click "Add". Copy the key, which starts with
    `re_` and is shown only once, and paste it when the command asks for `RESEND_API_KEY`.
 
