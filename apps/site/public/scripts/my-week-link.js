@@ -18,6 +18,8 @@
     if (expired) expired.hidden = false;
   }
 
+  if (form.hasAttribute('data-turnstile-unavailable')) return;
+
   const bot = api.botCheck(form.querySelector('[data-turnstile]'), 'link');
 
   function looksLikeContact(text) {

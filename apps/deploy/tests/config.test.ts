@@ -34,6 +34,7 @@ interface WranglerMirror {
 interface SetupInventory {
   cloudflare: { accountId: string; worker: string };
   secrets: { name: string; targets?: string[] }[];
+  vars: { name: string }[];
 }
 
 const deployDir = path.dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
@@ -119,4 +120,18 @@ void test('production secret declarations cover the Worker secrets in the setup 
       .map((secret) => secret.name)
       .sort(),
   );
+});
+
+void test('both deploy configs include every production var from the setup inventory', async () => {
+  const inventory = JSON.parse(
+    await readFile(path.join(siteDir, 'platform.json'), 'utf8'),
+  ) as SetupInventory;
+  const configured = Object.entries(cloudflare.worker.env).flatMap(([name, binding]) =>
+    binding.type === 'text' ? [name] : [],
+  );
+  assert.deepEqual(configured.sort(), inventory.vars.map((variable) => variable.name).sort());
+  assert.deepEqual(Object.keys(wrangler.vars).sort(), configured.sort());
+  const siteKey = wrangler.vars.TURNSTILE_SITE_KEY;
+  assert.ok(siteKey, 'the public Turnstile site key must be configured');
+  assert.match(siteKey, /^0x[A-Za-z0-9_-]+$/);
 });
