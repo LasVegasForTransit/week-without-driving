@@ -11,6 +11,7 @@ export const site = {
 export const lvbt = {
   name: 'Las Vegans for Better Transit',
   shortName: 'LVBT',
+  ein: '42-1995935',
   url: 'https://lasvegasfortransit.org',
   projectPageUrl: 'https://lasvegasfortransit.org/projects/week-without-driving',
   joinUrl: 'https://lasvegasfortransit.org/join',

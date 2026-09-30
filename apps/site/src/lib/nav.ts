@@ -41,9 +41,12 @@ export const mainNav = [
   },
 ] as const;
 
-export const footerLinks = [
+export const footerExploreLinks = [
   { href: '/press', label: 'Press' },
   { href: '/resources', label: 'Resources' },
+] as const;
+
+export const footerDetailLinks = [
   { href: '/privacy', label: 'Privacy' },
   { href: '/terms', label: 'Terms of Use' },
   { href: '/giveaway/rules', label: 'Official Rules' },

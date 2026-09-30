@@ -5,7 +5,7 @@ import '../styles/global.css';
 import '../styles/print.css';
 import { lvbt, site } from '../lib/site';
 import { Icon } from 'astro-icon/components';
-import { footerLinks, isCurrent, mainNav } from '../lib/nav';
+import { footerDetailLinks, footerExploreLinks, isCurrent, mainNav } from '../lib/nav';
 
 interface Props {
   title: string;
@@ -161,70 +161,82 @@ const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
         An initiative by <a href={lvbt.url} class="body-link">{lvbt.name}</a>
       </p>
     </dialog>
-    <footer
-      id="site-footer"
-      class="site-footer container-page border-t border-outline-variant/15 py-10"
-    >
-      <div class="flex flex-wrap items-start justify-between gap-x-12 gap-y-6">
-        <p class="max-w-md text-sm leading-relaxed text-on-surface-variant">
-          An initiative by{' '}
-          <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-semibold"
-            >{lvbt.name}</a
-          >, a 501(c)(3) nonprofit. The national campaign is organized by{' '}
-          <a
-            href="https://weekwithoutdriving.org/"
-            data-print-url="https://weekwithoutdriving.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="body-link">America Walks</a
-          >.
-        </p>
-        <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-          {/* Shown by /scripts/app.js where installing is possible. */}
-          <li>
-            <button type="button" class="install-button body-link" data-install-button hidden>
-              <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />
-              Add to home screen
-            </button>
-          </li>
-          <li>
-            <a
-              href={lvbt.instagramUrl}
-              data-print-url={lvbt.instagramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="body-link"
-            >
-              Instagram
-            </a>
-          </li>
-          <li>
-            <a href="mailto:wwd@lasvegasfortransit.org" class="body-link">Email us</a>
-          </li>
-          {
-            footerLinks.map((link) => (
-              <li>
-                <a href={link.href} class="body-link">
-                  {link.label}
-                </a>
-              </li>
-            ))
-          }
-          <li>
-            <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl} class="body-link">Join LVBT</a>
-          </li>
-          <li>
+    <footer id="site-footer" class="site-footer">
+      <div class="container-page site-footer__inner">
+        <div class="footer-primary">
+          <div class="footer-brand">
+            <p class="footer-brand__date">Las Vegas · Oct 1–8, 2026</p>
+            <p class="footer-brand__name">Week Without Driving</p>
+          </div>
+          <nav class="footer-utilities" aria-label="Footer">
+            <div class="footer-group">
+              <h2>Explore</h2>
+              <ul>
+                {
+                  footerExploreLinks.map((link) => (
+                    <li>
+                      <a href={link.href}>{link.label}</a>
+                    </li>
+                  ))
+                }
+                <li>
+                  <a
+                    href="https://weekwithoutdriving.org/"
+                    data-print-url="https://weekwithoutdriving.org/"
+                    target="_blank"
+                    rel="noopener noreferrer">National campaign</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="footer-group">
+              <h2>Stay connected</h2>
+              <ul>
+                <li>
+                  <a
+                    href={lvbt.instagramUrl}
+                    data-print-url={lvbt.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer">Instagram</a
+                  >
+                </li>
+                <li><a href="mailto:wwd@lasvegasfortransit.org">Email us</a></li>
+                <li><a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl}>Join LVBT</a></li>
+              </ul>
+            </div>
+            <div class="footer-group footer-group--details">
+              <h2>The details</h2>
+              <ul>
+                {
+                  footerDetailLinks.map((link) => (
+                    <li>
+                      <a href={link.href}>{link.label}</a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </nav>
+        </div>
+        <div class="footer-meta">
+          <p class="footer-mission">
+            An initiative by{' '}
+            <a href={lvbt.url} data-print-url={lvbt.url} class="body-link">{lvbt.name}</a>, a
+            501(c)(3) nonprofit (EIN {lvbt.ein}). The national campaign is organized by{' '}
             <a
               href="https://weekwithoutdriving.org/"
               data-print-url="https://weekwithoutdriving.org/"
               target="_blank"
               rel="noopener noreferrer"
-              class="body-link"
-            >
-              weekwithoutdriving.org
-            </a>
-          </li>
-        </ul>
+              class="body-link">America Walks</a
+            >.
+          </p>
+          {/* Shown by /scripts/app.js where installing is possible. */}
+          <button type="button" class="install-button footer-install" data-install-button hidden>
+            <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />
+            Add to home screen
+          </button>
+        </div>
       </div>
     </footer>
     {
