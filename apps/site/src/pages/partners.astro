@@ -158,12 +158,16 @@ const whatPartnersDo = [
 </BaseLayout>
 
 <style>
+  .partners-page {
+    padding-top: clamp(1.25rem, 2.5vw, 2rem);
+  }
   .partners-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 2rem;
     padding: clamp(1.5rem, 4vw, 3rem);
     border-top: 0.5rem solid var(--color-primary-warm);
+    border-radius: 0.75rem;
     background: var(--color-slab);
     color: var(--color-on-slab);
   }
@@ -196,6 +200,10 @@ const whatPartnersDo = [
     font-weight: 700;
     text-decoration: none;
   }
+  .partners-hero__primary,
+  .partners-hero__secondary {
+    border-radius: 0.5rem;
+  }
   .partners-hero__primary {
     background: var(--color-primary-warm);
     color: var(--color-on-primary-warm);
@@ -216,6 +224,7 @@ const whatPartnersDo = [
     margin-top: 1.5rem;
     border-top: 0.375rem solid var(--color-primary-warm);
     background: var(--color-surface-container);
+    border-radius: 0.75rem;
   }
   .partners-join > .section-intro {
     margin-top: 0.75rem;
@@ -229,6 +238,7 @@ const whatPartnersDo = [
     padding: clamp(1.25rem, 2.5vw, 2rem);
     border: 1px solid var(--color-outline);
     background: var(--color-surface);
+    border-radius: 0.75rem;
   }
   .partners-join__list {
     margin-top: 1rem;
@@ -244,6 +254,7 @@ const whatPartnersDo = [
     padding: clamp(1.25rem, 2.5vw, 2rem);
     border: 1px solid var(--color-outline);
     background: var(--color-surface);
+    border-radius: 0.75rem;
   }
   .partners-join__instructions {
     max-width: 56rem;
@@ -260,6 +271,7 @@ const whatPartnersDo = [
   .partner-roster-section {
     margin-top: 1.5rem;
     padding: clamp(1.25rem, 3vw, 2.5rem);
+    padding-bottom: 1rem;
   }
   .partner-roster {
     display: grid;
@@ -343,11 +355,28 @@ const whatPartnersDo = [
     color: var(--color-on-surface-variant);
   }
   @media (max-width: 47.999rem) {
+    .partners-page {
+      padding-top: 0;
+    }
     .partners-hero {
       display: block;
+      margin-inline: calc(-1 * var(--page-pad));
+      padding-inline: var(--page-pad);
+      border-radius: 0;
+    }
+    .partner-roster-section {
+      padding-inline: 0;
     }
     .partners-hero__actions {
       margin-top: 1.5rem;
+    }
+    .partners-join__card,
+    .partners-join__contact {
+      padding: 1.25rem 0 0;
+      border: 0;
+      border-top: 1px solid var(--color-outline);
+      border-radius: 0;
+      background: transparent;
     }
   }
   [data-partners-ended][hidden],
