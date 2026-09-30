@@ -35,6 +35,7 @@ export default defineConfig({
     ],
     env: {
       VAPID_SUBJECT: bindings.text('mailto:wwd@lasvegasfortransit.org'),
+      TURNSTILE_SITE_KEY: bindings.text('0x4AAAAAAFJwyZWXSScAitjH'),
       RESEND_API_KEY: bindings.secret(),
       TURNSTILE_SECRET: bindings.secret(),
       ACCESS_TEAM_DOMAIN: bindings.secret(),

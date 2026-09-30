@@ -60,5 +60,8 @@
   // VAPID_SUBJECT is the contact push services use to reach LVBT about its
   // reminder notifications. The key that signs them, VAPID_PRIVATE_KEY, is
   // a secret that `pnpm bootstrap --production` generates once.
-  "vars": { "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org" },
+  "vars": {
+    "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAFJwyZWXSScAitjH",
+  },
 }

@@ -1,23 +1,80 @@
 import type { Env } from './env';
 
 /**
- * The static pages that hold a Turnstile widget. The site key differs
- * between the preview and production Workers while the built pages are the
- * same, so the Worker writes the key into the widget's data-sitekey as the
- * page goes out. My week and Home ('' once the trailing slash is dropped)
- * hold the newsletter card's widget.
+ * The site key differs between preview and production, so the Worker writes
+ * it into the built pages. Without both Turnstile values, sign-up and link
+ * recovery show their unavailable state before the page reaches a browser.
+ * My week and Home ('' once the trailing slash is dropped) also hold a
+ * widget for the optional newsletter card.
  */
 export const TURNSTILE_PAGES = new Set(['/sign-up', '/my-week/link', '/my-week', '']);
 
 export async function withSiteKey(request: Request, env: Env): Promise<Response> {
-  const response = await env.ASSETS.fetch(request);
-  const key = env.TURNSTILE_SITE_KEY;
-  if (!key || !response.headers.get('Content-Type')?.includes('text/html')) return response;
+  const path = new URL(request.url).pathname;
+  const privateForm = path === '/sign-up' || path === '/my-week/link';
+  const assetRequest = privateForm
+    ? new Request(request, { headers: new Headers(request.headers) })
+    : request;
+  if (privateForm) {
+    assetRequest.headers.delete('If-None-Match');
+    assetRequest.headers.delete('If-Modified-Since');
+  }
+  const response = await env.ASSETS.fetch(assetRequest);
+  if (!response.headers.get('Content-Type')?.includes('text/html')) return response;
+
+  const headers = new Headers(response.headers);
+  if (privateForm) {
+    headers.set('Cache-Control', 'no-store');
+    headers.delete('ETag');
+  }
+  const page = privateForm
+    ? new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      })
+    : response;
+
+  const key = env.TURNSTILE_SITE_KEY?.trim();
+  const available = Boolean(key && env.TURNSTILE_SECRET?.trim());
+  if (!available) {
+    if (!privateForm) return page;
+    return new HTMLRewriter()
+      .on('[data-signup-form]', {
+        element(element) {
+          element.setAttribute('hidden', '');
+          element.setAttribute('data-turnstile-unavailable', '');
+        },
+      })
+      .on('[data-link-form]', {
+        element(element) {
+          element.setAttribute('hidden', '');
+          element.setAttribute('data-turnstile-unavailable', '');
+        },
+      })
+      .on('[data-signup-unavailable]', {
+        element(element) {
+          element.removeAttribute('hidden');
+        },
+      })
+      .on('[data-link-unavailable]', {
+        element(element) {
+          element.removeAttribute('hidden');
+        },
+      })
+      .on('[data-link-instructions]', {
+        element(element) {
+          element.setAttribute('hidden', '');
+        },
+      })
+      .transform(page);
+  }
+
   return new HTMLRewriter()
     .on('[data-turnstile]', {
       element(element) {
-        element.setAttribute('data-sitekey', key);
+        element.setAttribute('data-sitekey', key ?? '');
       },
     })
-    .transform(response);
+    .transform(page);
 }

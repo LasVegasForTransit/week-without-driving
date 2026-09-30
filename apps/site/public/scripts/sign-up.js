@@ -18,6 +18,7 @@
   const api = window.lvwwdApi;
   const form = document.querySelector('[data-signup-form]');
   const already = document.querySelector('[data-signup-already]');
+  const unavailable = document.querySelector('[data-signup-unavailable]');
   const intro = document.querySelector('[data-signup-intro]');
   const closed = document.querySelector('[data-signup-closed]');
   if (!api || !(form instanceof HTMLFormElement) || !already) return;
@@ -195,11 +196,18 @@
     if (intro) intro.hidden = true;
     form.hidden = true;
     already.hidden = true;
+    if (unavailable) unavailable.hidden = true;
     if (closed) closed.hidden = false;
   }
 
   function startSignUp() {
     if (Date.now() >= SIGN_UP_ENDS) return showClosed();
+    if (form.hasAttribute('data-turnstile-unavailable')) {
+      form.hidden = true;
+      if (unavailable) unavailable.hidden = false;
+      return undefined;
+    }
+    if (unavailable) unavailable.hidden = true;
     bot = api.botCheck(form.querySelector('[data-turnstile]'), 'signup');
     form.hidden = false;
     return undefined;
@@ -207,6 +215,7 @@
 
   function startEditing(me) {
     editing = true;
+    if (unavailable) unavailable.hidden = true;
     // Offline, needs-connection.js says saving waits, not signing up.
     form.setAttribute('data-needs-connection', 'edit-details');
     field('firstName').value = me.firstName ?? '';
@@ -241,7 +250,13 @@
     const block = already.querySelector('[data-someone-else]');
     const button = already.querySelector('[data-someone-else-button]');
     const status = already.querySelector('[data-someone-else-status]');
-    if (!block || !button || Date.now() >= SIGN_UP_ENDS) return;
+    if (
+      !block ||
+      !button ||
+      Date.now() >= SIGN_UP_ENDS ||
+      form.hasAttribute('data-turnstile-unavailable')
+    )
+      return;
     block.hidden = false;
     button.addEventListener('click', async () => {
       if (status) status.textContent = '';
@@ -257,6 +272,7 @@
   }
 
   function showAlready(me) {
+    if (unavailable) unavailable.hidden = true;
     const title = already.querySelector('[data-signup-already-title]');
     if (title) title.textContent = `You’re signed up, ${me.firstName}.`;
     offerSomeoneElse();
