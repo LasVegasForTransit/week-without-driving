@@ -37,7 +37,6 @@ const whatPartnersDo = [
 <BaseLayout title={title} description={description}>
   <section class="container-page page-header pb-16">
     <div class="partners-hero">
-      <p class="partners-hero__eyebrow">Week Without Driving Las Vegas</p>
       <h1 class="page-title">Partners</h1>
       <p class="partners-hero__lede">
         Bring Week Without Driving to your members, neighbors, students and staff.
@@ -60,21 +59,22 @@ const whatPartnersDo = [
           </h2>
           <ul class="partner-roster">
             {partners.map((partner) => (
-              <li>
+              <li id={`partner-${partner.slug}`}>
                 <h3 class="partner-roster__name">
-                  {partner.url ? (
-                    <a href={partner.url} class="body-link">
-                      {partner.name}
-                    </a>
-                  ) : (
-                    partner.name
-                  )}
+                  {partner.url ? <a href={partner.url}>{partner.name}</a> : partner.name}
                 </h3>
+                {partner.logo && (
+                  <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
+                )}
                 <p class="partner-roster__type">{partner.type}</p>
                 <p class="partner-roster__sentence">{partner.sentence}</p>
               </li>
             ))}
           </ul>
+          <p class="partner-roster__mark-note">
+            RTC and its logo are trademarks of the Regional Transportation Commission of Southern
+            Nevada.
+          </p>
         </div>
       )
     }
@@ -186,16 +186,8 @@ const whatPartnersDo = [
     bottom: -88%;
     opacity: 0.5;
   }
-  .partners-hero__eyebrow {
-    font-size: var(--text-label-lg);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-on-slab-accent);
-  }
   .partners-hero .page-title {
     max-width: 12ch;
-    margin-top: 0.35rem;
   }
   .partners-hero__lede {
     max-width: 42rem;
@@ -262,6 +254,24 @@ const whatPartnersDo = [
     font-weight: 700;
     overflow-wrap: anywhere;
   }
+  .partner-roster__name a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .partner-roster__name a:hover,
+  .partner-roster__name a:focus-visible {
+    color: var(--color-primary-ink);
+    outline: 2px solid currentcolor;
+    outline-offset: 3px;
+  }
+  .partner-roster__logo {
+    display: block;
+    width: min(100%, 16rem);
+    max-height: 7rem;
+    margin-block: 0.75rem;
+    object-fit: contain;
+    object-position: left center;
+  }
   .partner-roster__type {
     margin-top: 0.25rem;
     font-size: var(--text-body-sm);
@@ -272,6 +282,11 @@ const whatPartnersDo = [
     margin-top: 0.25rem;
     line-height: 1.55;
     text-wrap: pretty;
+  }
+  .partner-roster__mark-note {
+    margin-top: 1.5rem;
+    font-size: var(--text-body-sm);
+    color: var(--color-on-surface-variant);
   }
   [data-partners-ended][hidden],
   [data-partners-join][hidden] {
