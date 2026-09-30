@@ -79,6 +79,19 @@
     else window.addEventListener('load', register, { once: true });
   }
 
+  function hideFailedHeroPhoto() {
+    const photo = document.querySelector('.home-hero__photo');
+    const image = photo?.querySelector('img');
+    if (!(photo instanceof HTMLElement) || !(image instanceof HTMLImageElement)) return;
+
+    const showFallback = () => {
+      photo.dataset.photoUnavailable = '';
+      photo.setAttribute('aria-label', image.alt);
+    };
+    image.addEventListener('error', showFallback, { once: true });
+    if (image.complete && image.naturalWidth === 0) showFallback();
+  }
+
   /** What this browser can do about installing the site. */
   function browser() {
     const ua = navigator.userAgent;
@@ -211,6 +224,7 @@
   }
 
   registerServiceWorker();
+  hideFailedHeroPhoto();
   setUpInstall();
   countPrints();
   countSeen();
