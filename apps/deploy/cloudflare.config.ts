@@ -40,7 +40,9 @@ export default defineConfig({
       ACCESS_TEAM_DOMAIN: bindings.secret(),
       ACCESS_AUD: bindings.secret(),
       VAPID_PRIVATE_KEY: bindings.secret(),
-      EVENT_REMINDERS_ENABLED: bindings.secret(),
+      // A release switch, not a credential. Keep event-specific reminders off
+      // until a real production phone has received and opened a test push.
+      EVENT_REMINDERS_ENABLED: bindings.text('false'),
       DB: bindings.d1({
         name: 'lvwwd',
         id: 'a3a6c177-f000-4a64-8bc8-a4aad6d07cf1',

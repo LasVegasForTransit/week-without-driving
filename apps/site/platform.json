@@ -124,19 +124,6 @@
       "patternHint": "An AUD tag is 64 lowercase letters and digits."
     },
     {
-      "name": "EVENT_REMINDERS_ENABLED",
-      "purpose": "Release switch for plan-specific push reminders. Leave it absent until a production phone receives and opens a test notification; then set it to true.",
-      "use": "future",
-      "neededFor": "event-specific notifications for saved trip plans",
-      "url": "https://dash.cloudflare.com/",
-      "steps": [
-        "After a real production phone receives and opens a test notification, set the Worker secret EVENT_REMINDERS_ENABLED to true for lvwwd in the LVBT Cloudflare account.",
-        "Keep this secret absent before that phone test, so plan reminder requests and their scheduled sends are refused."
-      ],
-      "pattern": "^true$",
-      "patternHint": "Use exactly true after the production phone test."
-    },
-    {
       "name": "VAPID_PRIVATE_KEY",
       "purpose": "Signs every daily reminder notification, so push services deliver it as coming from lvwwd.org. The Worker works out the public key from it, and a new key would stop every browser's reminders, so setup generates it only when it is missing.",
       "use": "live",
@@ -184,6 +171,12 @@
       "purpose": "The contact push services use to reach LVBT about its reminder notifications: mailto:wwd@lasvegasfortransit.org.",
       "use": "live",
       "neededFor": "daily reminders by browser notification"
+    },
+    {
+      "name": "EVENT_REMINDERS_ENABLED",
+      "purpose": "Keeps saved-plan browser reminders off until a real production phone has received and opened a test notification.",
+      "use": "live",
+      "neededFor": "preventing event-specific notifications before their delivery test passes"
     }
   ],
   "github": {
