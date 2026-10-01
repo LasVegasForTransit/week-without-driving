@@ -5,7 +5,7 @@ import '../styles/global.css';
 import '../styles/print.css';
 import { lvbt, site } from '../lib/site';
 import { Icon } from 'astro-icon/components';
-import { footerDetailLinks, footerExploreLinks, isCurrent, mainNav } from '../lib/nav';
+import { footerDetailLinks, footerExploreLinks, isCurrent, mainNav, tabNav } from '../lib/nav';
 
 interface Props {
   title: string;
@@ -23,6 +23,7 @@ const {
 const path = Astro.url.pathname;
 // Built pages report /guides/; the site answers and links at /guides.
 const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
+const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(href, path));
 ---
 
 <!doctype html>
@@ -249,6 +250,34 @@ const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
         </div>
       </div>
     </footer>
+    {
+      /* The tab bar: phones and tablets only, fixed to the bottom of the
+      screen like an app's. Wide screens use the header's links instead. */
+    }
+    <nav class="tab-bar" aria-label="Tabs" data-tab-bar>
+      <ul class="tab-bar__list">
+        {
+          tabNav.map((tab) => (
+            <li>
+              <a
+                href={tab.href}
+                class="tab-bar__link"
+                aria-current={tabCurrent(tab.match) ? 'page' : undefined}
+                {...('signup' in tab ? { 'data-signup-link': '' } : {})}
+              >
+                <Icon name={tab.icon} class="tab-bar__icon" aria-hidden="true" />
+                <span
+                  class="tab-bar__label"
+                  {...('signup' in tab ? { 'data-signup-label': '' } : {})}
+                >
+                  {tab.label}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
     {
       /* The instructions for adding the site to the home screen. /scripts/app.js
       opens it with the iPhone steps (data-install-ios) or the steps for
