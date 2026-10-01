@@ -17,7 +17,7 @@ interface Props {
 const {
   title,
   description = site.description,
-  ogImage = '/og-wwd-2026-v3.png',
+  ogImage = '/og-wwd-2026-v4.png',
   noindex = false,
 } = Astro.props;
 const path = Astro.url.pathname;
@@ -77,14 +77,17 @@ const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Week Without Driving, Las Vegas, October 1 to 8, 2026" />
+    <meta
+      property="og:image:alt"
+      content="Week Without Driving, Las Vegas, October 1 to 8, 2026, with the LVBT logo"
+    />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(ogImage, site.url).toString()} />
     <meta
       name="twitter:image:alt"
-      content="Week Without Driving, Las Vegas, October 1 to 8, 2026"
+      content="Week Without Driving, Las Vegas, October 1 to 8, 2026, with the LVBT logo"
     />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
