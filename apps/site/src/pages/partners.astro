@@ -10,9 +10,9 @@ import { partners, contactEmail, joinMailto } from '../lib/partners';
 // the page opens with "Bring your organization".
 //
 // After the week ends (12:00 am October 9, 2026, Las Vegas time, by the
-// phone's clock), /scripts/partners.js changes the roster heading to "Took
-// part in 2026" and swaps "Bring your organization" for a note about next
-// year. Without JavaScript the page keeps its during-the-week text.
+// phone's clock), /scripts/partners.js swaps "Bring your organization" for
+// a note about next year. Without JavaScript the page keeps its
+// during-the-week text.
 
 const title = 'Partners · Week Without Driving Las Vegas';
 const description = 'Meet the groups taking part and find materials to share.';
@@ -49,10 +49,7 @@ const whatPartnersDo = [
 
     {
       partners.length > 0 && (
-        <section class="partner-roster-section" aria-labelledby="roster-heading">
-          <h2 id="roster-heading" class="section-title" data-partners-roster-heading>
-            Taking part in 2026
-          </h2>
+        <section class="partner-roster-section" aria-label="Partner organizations">
           <ul class="partner-roster">
             {partners.map((partner) => (
               <li id={`partner-${partner.slug}`}>
@@ -62,12 +59,12 @@ const whatPartnersDo = [
                   aria-labelledby={`partner-name-${partner.slug}`}
                   data-external-icon="false"
                 >
-                  <h3 id={`partner-name-${partner.slug}`} class="partner-roster__name">
+                  <h2 id={`partner-name-${partner.slug}`} class="partner-roster__name">
                     {partner.name}
                     {partner.url && (
                       <Icon name="mdi:open-in-new" class="size-5" aria-hidden="true" />
                     )}
-                  </h3>
+                  </h2>
                   <div class="partner-roster__mark">
                     {partner.logo && (
                       <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
@@ -269,14 +266,12 @@ const whatPartnersDo = [
     margin-top: 1.5rem;
   }
   .partner-roster-section {
-    margin-top: 1.5rem;
-    padding: clamp(1.25rem, 3vw, 2.5rem);
-    padding-bottom: 1rem;
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
   }
   .partner-roster {
     display: grid;
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 0;
     padding: 0;
     list-style: none;
   }
@@ -316,6 +311,7 @@ const whatPartnersDo = [
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.75rem;
+    font-family: var(--font-sans);
     font-size: var(--text-title-lg);
     font-weight: 700;
     overflow-wrap: anywhere;
@@ -363,9 +359,6 @@ const whatPartnersDo = [
       margin-inline: calc(-1 * var(--page-pad));
       padding-inline: var(--page-pad);
       border-radius: 0;
-    }
-    .partner-roster-section {
-      padding-inline: 0;
     }
     .partners-hero__actions {
       margin-top: 1.5rem;
