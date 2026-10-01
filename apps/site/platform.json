@@ -200,7 +200,7 @@
   "forbidden": [
     {
       "name": "PREVIEW_ADMIN_KEY",
-      "reason": "It lets anyone who holds the key into the volunteer admin views without Cloudflare Access, so it belongs only on the workers.dev preview."
+      "reason": "This retired preview credential must not be deployed. All admin views require Cloudflare Access."
     },
     {
       "name": "PREVIEW_DRAW_ANYTIME",

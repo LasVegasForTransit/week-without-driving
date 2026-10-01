@@ -187,7 +187,7 @@ describe('admin review', () => {
     expect(await days(cookie)).toEqual([3]);
   });
 
-  it('shows a screenshot to volunteers only, with private caching', async () => {
+  it('shows a screenshot to volunteers only, without browser caching', async () => {
     const cookie = await signUpAs(platform);
     await sendTrip(cookie, { screenshot: true });
     const row = await platform.env.DB.prepare('SELECT screenshot_key AS key FROM checkins').first<{
@@ -199,7 +199,7 @@ describe('admin review', () => {
     const response = await admin.get(path);
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('image/png');
-    expect(response.headers.get('Cache-Control')).toMatch(/^private/);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(PNG);
 
     expect((await platform.send(adminGet(path))).status).toBe(403);

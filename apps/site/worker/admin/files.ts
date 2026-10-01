@@ -28,8 +28,10 @@ export async function screenshot(c: AdminContext): Promise<Response> {
     headers: {
       'Content-Type': object.httpMetadata?.contentType ?? 'application/octet-stream',
       'Content-Disposition': 'inline',
-      // Only this volunteer's browser may keep it, and not for long.
-      'Cache-Control': 'private, max-age=3600',
+      // Each load must recheck authorization, including after sign-out.
+      'Cache-Control': 'private, no-store',
+      'Cross-Origin-Resource-Policy': 'same-origin',
+      'X-Robots-Tag': 'noindex, nofollow',
       'Content-Security-Policy': "default-src 'none'; sandbox",
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',

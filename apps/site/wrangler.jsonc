@@ -40,6 +40,7 @@
   },
   "observability": {
     "enabled": true,
+    "redact_query_string": true,
   },
   // The participant database and the bucket for screenshots of shared
   // posts, on LVBT's account with the lvwwd.org zone. Apply migrations with

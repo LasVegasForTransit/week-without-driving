@@ -46,7 +46,9 @@ function decodeBase64url(segment: string): Uint8Array<ArrayBuffer> {
 function decodeJson(segment: string): Claims | null {
   try {
     const value: unknown = JSON.parse(new TextDecoder().decode(decodeBase64url(segment)));
-    return value !== null && typeof value === 'object' ? (value as Claims) : null;
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Claims)
+      : null;
   } catch {
     return null;
   }
@@ -91,8 +93,12 @@ function emailFrom(claims: Claims, host: string, audience: string, now: Date): s
   const seconds = now.getTime() / 1000;
   const { aud, iss, exp, nbf, email } = claims;
   if (!audienceMatches(aud, audience) || iss !== `https://${host}`) return null;
-  if (typeof exp !== 'number' || exp <= seconds) return null;
-  if (typeof nbf === 'number' && nbf > seconds + CLOCK_SKEW_S) return null;
+  if (typeof exp !== 'number' || !Number.isFinite(exp) || exp <= seconds) return null;
+  if (
+    Object.hasOwn(claims, 'nbf') &&
+    (typeof nbf !== 'number' || !Number.isFinite(nbf) || nbf > seconds + CLOCK_SKEW_S)
+  )
+    return null;
   return typeof email === 'string' && email.includes('@') ? email.trim().toLowerCase() : null;
 }
 
@@ -129,9 +135,9 @@ export async function accessEmail(request: Request, env: Env, now: Date): Promis
   if (!token) return null;
   try {
     return await verify(token, env, now);
-  } catch (error) {
-    // The token itself is never logged.
-    console.error('Checking the Access token failed', error);
+  } catch {
+    // Neither the token nor provider error bodies belong in logs.
+    console.error('Checking the Access token failed');
     return null;
   }
 }
