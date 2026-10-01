@@ -10,8 +10,7 @@
  * are shown only once this script runs.
  *
  * From 12:00 am October 9, 2026, Las Vegas time, by the phone's clock, the
- * roster heading reads "Took part in 2026" and "Bring your organization"
- * gives way to a note about next year.
+ * "Bring your organization" gives way to a note about next year.
  */
 (() => {
   const ENDED = Date.parse('2026-10-09T07:00:00Z');
@@ -19,8 +18,6 @@
   const timers = new WeakMap();
 
   function showEnded() {
-    const heading = document.querySelector('[data-partners-roster-heading]');
-    if (heading) heading.textContent = 'Took part in 2026';
     const join = document.querySelector('[data-partners-join]');
     const ended = document.querySelector('[data-partners-ended]');
     if (join) join.hidden = true;

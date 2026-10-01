@@ -32,7 +32,6 @@ const picker = (page: Page) => page.getByRole('combobox', { name: 'Choose a shar
 test('the current partners and sharing materials are visible', async ({ page }) => {
   await page.goto('/partners');
   await expect(page.getByRole('heading', { level: 1, name: 'Partners' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Taking part in 2026' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'RTC of Southern Nevada' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Sierra Club Toiyabe Chapter' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeVisible();
