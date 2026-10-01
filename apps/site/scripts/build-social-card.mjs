@@ -24,16 +24,17 @@ const html = `<!doctype html><html lang="en"><head><style>
   * { box-sizing: border-box; }
   html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
   body { background: #fff; color: #431a28; font-family: Fraunces, Georgia, serif; }
-  main { display: grid; grid-template-columns: 400px 1fr; gap: 88px; height: 530px; padding: 48px; align-items: start; }
-  .mark { width: 400px; height: auto; display: block; }
-  .details { align-self: end; }
+  main { display: grid; grid-template-columns: 560px 1fr; height: 530px; }
+  .brand { display: flex; align-items: center; padding: 48px; }
+  .mark { width: 450px; height: auto; display: block; }
+  .details { display: flex; flex-direction: column; justify-content: center; padding: 0 52px; background: #f4ece7; }
   h1 { font: 600 58px/1.07 Fraunces, Georgia, serif; letter-spacing: -.025em; margin: 0 0 22px; white-space: nowrap; }
   .place { margin: 0; font-size: 40px; font-weight: 600; }
   footer { height: 100px; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; background: #431a28; color: #f7f4ec; }
   .url { font-size: 30px; font-weight: 600; }
   .owner { width: 72px; height: 72px; }
 </style></head><body><main>
-  <div><img class="mark" src="${markData}" alt="Week Without Driving" /></div>
+  <div class="brand"><img class="mark" src="${markData}" alt="Week Without Driving" /></div>
   <div class="details"><h1>October 1–8, 2026</h1><p class="place">Las Vegas, Nevada</p></div>
 </main><footer><span class="url">lvwwd.org</span><img class="owner" src="${lvbtLogo}" alt="LVBT" /></footer></body></html>`;
 
@@ -49,7 +50,7 @@ try {
   const png = await sharp(screenshot)
     .png({ palette: true, quality: 100, compressionLevel: 9 })
     .toBuffer();
-  const output = fileURLToPath(new URL('public/og-wwd-2026-v5.png', site));
+  const output = fileURLToPath(new URL('public/og-wwd-2026-v6.png', site));
   writeFileSync(output, png);
   console.log(`${output}: 1200 × 630, ${png.length.toLocaleString()} bytes`);
 } finally {
