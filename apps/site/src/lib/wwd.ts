@@ -15,6 +15,16 @@ export const wwd = {
   maxEntries: 8,
 } as const;
 
+// The two RTC fares a first-time rider needs, shown in the "Before you go"
+// list on /go. Same values as the fare guide
+// (src/content/guides/pay-your-fare.md), checked against
+// rtcsnv.com/ways-to-travel/fares-passes on September 29, 2026. Change both
+// together.
+export const fares = {
+  singleRide: '$2',
+  dayPass: '$5',
+} as const;
+
 // Links out to the national campaign and local tools, grouped by who they
 // are for. Rendered as the /wwd "Resources" section. URLs checked against
 // weekwithoutdriving.org on 2026-09-10.

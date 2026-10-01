@@ -21,7 +21,8 @@ August 23, 2026 to August 21, 2027, and RTC last changed the file on July 30, 20
 the site was rebuilt from that download and matches it: 3,785 stops on 39 routes.
 
 The same day, each of the seven places in "Or pick a place:" was checked. Every point sits at the
-place it names, on public ground, and each shows five stops within a mile, nearest first:
+place it names, on public ground, and each has at least five stops within a mile. The finder shows
+the nearest stop for each route and direction, up to five, nearest first:
 
 | Place                             | First stop                                   | Distance     | Routes   |
 | --------------------------------- | -------------------------------------------- | ------------ | -------- |
