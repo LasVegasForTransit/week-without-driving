@@ -75,7 +75,7 @@ const shortcuts = [
         <div class="preview-link" data-preview-link hidden></div>
       </section>
 
-      {/* ENTRIES: the eight days, today's trip, and sharing it. */}
+      {/* ENTRIES: today's trip first, then the eight days and Bingo. */}
       <section class="entries" aria-labelledby="entries-heading">
         <div class="entries__head">
           <h2 id="entries-heading" class="entries__count">
@@ -97,32 +97,6 @@ const shortcuts = [
         >
           <span data-me-progress-fill></span>
         </div>
-        <ol class="entries__days" aria-label="October 1 to 8, one day at a time">
-          {
-            days.map((d) => (
-              <li class="entries__day" data-day={d.number}>
-                <span class="entries__day-number">Day {d.number}</span>
-                <span class="entries__date">
-                  {d.weekday}, {d.monthDay}
-                </span>
-                <span class="entries__mark" aria-hidden="true">
-                  <Icon name="mdi:check-bold" class="entries__check" />
-                </span>
-                <span class="entries__state" data-day-status>
-                  Coming up
-                </span>
-                <span class="entries__modes" data-day-modes hidden />
-                <ul class="entries__plans" data-day-plans hidden />
-              </li>
-            ))
-          }
-        </ol>
-        <p class="entries__status" data-plan-status role="status" aria-live="polite"></p>
-        <a href="/bingo" class="entries__bingo">
-          <Icon name="mdi:grid" class="size-6" aria-hidden="true" />
-          Play Transit Bingo while you go
-          <Icon name="mdi:arrow-right" class="size-5" aria-hidden="true" />
-        </a>
 
         {/* Today's trip: how they traveled, a description, and optional media. */}
         <form data-trip-form hidden class="trip" novalidate data-needs-connection="trip">
@@ -274,6 +248,33 @@ const shortcuts = [
         </div>
 
         <p class="entries__status" data-log-closed hidden></p>
+        {/* The eight days come after today's entry, so the thing to do today is first. */}
+        <ol class="entries__days" aria-label="October 1 to 8, one day at a time">
+          {
+            days.map((d) => (
+              <li class="entries__day" data-day={d.number}>
+                <span class="entries__day-number">Day {d.number}</span>
+                <span class="entries__date">
+                  {d.weekday}, {d.monthDay}
+                </span>
+                <span class="entries__mark" aria-hidden="true">
+                  <Icon name="mdi:check-bold" class="entries__check" />
+                </span>
+                <span class="entries__state" data-day-status>
+                  Coming up
+                </span>
+                <span class="entries__modes" data-day-modes hidden />
+                <ul class="entries__plans" data-day-plans hidden />
+              </li>
+            ))
+          }
+        </ol>
+        <p class="entries__status" data-plan-status role="status" aria-live="polite"></p>
+        <a href="/bingo" class="entries__bingo">
+          <Icon name="mdi:grid" class="size-6" aria-hidden="true" />
+          Play Transit Bingo while you go
+          <Icon name="mdi:arrow-right" class="size-5" aria-hidden="true" />
+        </a>
         <p class="entries__fine">
           One entry for each day you describe a trip without driving, up to 8. A post is optional.
           See the <a href="/giveaway/rules" class="body-link">Official Rules</a>.
@@ -799,7 +800,11 @@ const shortcuts = [
     color: var(--color-on-slab-variant);
   }
 
-  /* Today's trip, in three steps */
+  /* Today's trip, in three steps, straight under the count */
+  .trip,
+  .shared {
+    margin-top: 1.5rem;
+  }
   .trip__step {
     padding-block: 1.1rem;
     border-top: 1px solid color-mix(in srgb, var(--color-on-slab) 22%, transparent);

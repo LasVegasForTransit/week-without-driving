@@ -331,6 +331,8 @@
       } catch {
         // The entry is already saved and remains visible below.
       }
+      // app.js offers the Home Screen steps now, once a trip is in.
+      document.dispatchEvent(new CustomEvent('lvwwd:trip-entered'));
       const planId = form.querySelector('[data-trip-plan-id]');
       const selectedPlanId =
         planId instanceof HTMLInputElement && !planId.disabled ? String(planId.value) : '';

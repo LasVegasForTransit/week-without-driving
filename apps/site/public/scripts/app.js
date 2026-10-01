@@ -9,7 +9,7 @@
  *   sheet: the browser's own install box where there is one (Chrome,
  *   Edge), the iPhone steps in Safari on an iPhone or iPad, and general
  *   steps in other phone browsers. The iPhone sheet also opens by itself
- *   on My week after signing up, until it has been closed once.
+ *   after the first trip entered on My week, until it has been closed once.
  *
  * Campaign analytics events are listed in docs/operations/reference/analytics.md.
  * Without JavaScript the button stays hidden and every page still works.
@@ -230,9 +230,13 @@
       }
     });
 
-    const signedIn = /(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie);
-    const myWeek = /^\/my-week\/?$/.test(window.location.pathname);
-    if (iosSafari && signedIn && myWeek && !dismissed()) open('ios', true);
+    // On an iPhone the steps open by themselves once, right after the first
+    // trip is entered on My week: by then the site has earned a place on the
+    // Home Screen, and the sheet no longer covers the welcome after sign-up.
+    // The short wait lets the "trip entered" confirmation show and be read first.
+    document.addEventListener('lvwwd:trip-entered', () => {
+      if (iosSafari && !dismissed()) window.setTimeout(() => open('ios', true), 1500);
+    });
   }
 
   function countPrints() {
