@@ -1675,6 +1675,9 @@ body {
     background: var(--color-surface);
     border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
     box-shadow: 0 -6px 20px -14px rgb(0 0 0 / 0.35);
+    /* Comes back a moment after a text field loses focus, so a tap that
+       started on the page (and closed the keyboard) never lands on a tab. */
+    transition: visibility 0s linear 0.4s;
   }
   .tab-bar__list {
     display: grid;
@@ -1748,7 +1751,8 @@ body {
         ):focus
       )
       .tab-bar {
-      display: none;
+      visibility: hidden;
+      transition-delay: 0s;
     }
   }
 
