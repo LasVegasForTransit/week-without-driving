@@ -1730,8 +1730,9 @@ body {
       text-decoration: underline;
     }
   }
-  /* Room under the page for the bar, and focus never lands behind it. */
-  @media (max-width: 71.99rem) {
+  /* Room under the page for the bar, and focus never lands behind it.
+     Screens only: a printed page is narrower than 72rem too. */
+  @media screen and (max-width: 71.99rem) {
     html {
       scroll-padding-bottom: 5rem;
     }
@@ -1759,7 +1760,7 @@ body {
   /* On very short screens (a phone on its side at large zoom) the bar
      would cover too much of the page; the ☰ menu and the header's sign-up
      button take over. */
-  @media (max-width: 71.99rem) and (max-height: 22rem) {
+  @media screen and (max-width: 71.99rem) and (max-height: 22rem) {
     .tab-bar {
       display: none;
     }
@@ -1770,7 +1771,7 @@ body {
       scroll-padding-bottom: 0;
     }
   }
-  @media (min-width: 21.5rem) and (max-width: 71.99rem) and (max-height: 22rem) {
+  @media screen and (min-width: 21.5rem) and (max-width: 71.99rem) and (max-height: 22rem) {
     .site-header .site-cta {
       display: inline-flex;
     }
