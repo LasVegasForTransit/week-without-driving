@@ -79,7 +79,9 @@ describe('admin draw', () => {
     expect(noticeOf(await draw())).toBe('draw-unchecked');
     expect(await draws()).toHaveLength(0);
     // The page doesn't offer the draw yet.
-    expect(await (await admin.get('/admin')).text()).not.toContain('action="/admin/draw"');
+    expect(await (await admin.get('/admin?section=draw')).text()).not.toContain(
+      'action="/admin/draw"',
+    );
   });
 
   it('draws only from checked entries that were not removed', async () => {
@@ -123,7 +125,9 @@ describe('admin draw', () => {
     expect(noticeOf(await draw())).toBe('drawn');
     expect(noticeOf(await draw(2))).toBe('draw-wait');
     expect(await draws()).toHaveLength(1);
-    expect(await (await admin.get('/admin')).text()).not.toContain('action="/admin/draw"');
+    expect(await (await admin.get('/admin?section=draw')).text()).not.toContain(
+      'action="/admin/draw"',
+    );
 
     vi.setSystemTime(new Date('2026-10-21T15:59:59Z'));
     expect(noticeOf(await draw(2))).toBe('draw-wait');
@@ -148,7 +152,7 @@ describe('admin draw', () => {
     vi.setSystemTime(new Date('2026-11-04T16:00:00Z'));
     expect(noticeOf(await draw(4))).toBe('draw-no-entries');
 
-    const page = await (await admin.get('/admin')).text();
+    const page = await (await admin.get('/admin?section=draw')).text();
     const latest = rounds[2]?.entrant ?? '';
     if (latest === ana) expect(page).toContain('ana@example.com');
     else if (latest === ben) expect(page).toContain('ben@example.com');

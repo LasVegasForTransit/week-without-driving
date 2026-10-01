@@ -40,38 +40,59 @@ function dayOptions(selected: string): Html[] {
 export function tagForm(prefill?: Prefill): Html {
   const value = (name: string) => valueOf(prefill, 'tag', name);
   return html`<section id="tag">
-    <h2>Log an Instagram tag</h2>
-    <p>
-      For a post or story about a trip without driving that tags @lasvegasfortransit. It counts as
-      that day’s entry for the eligible person who saved the handle in Your details. Reject
-      unmatched handles.
+    <h1>Instagram tags</h1>
+    <p class="intro">
+      Log a trip post or story from an eligible participant’s registered Instagram handle.
     </p>
-    <form method="post" action="/admin/tags" class="stack">
-      <label
-        >Instagram handle, as it appears
-        <input name="handle" required maxlength="100" autocomplete="off" value="${value('handle')}"
-      /></label>
-      <label
-        >Day it was posted
-        <select name="day" required>
-          ${dayOptions(value('day'))}
-        </select></label
-      >
-      <label
-        >Link to the post (if available)
-        <input
-          name="link"
-          type="url"
-          placeholder="https://www.instagram.com/p/…"
-          value="${value('link')}"
-      /></label>
-      <label
-        ><input type="checkbox" name="trip-confirmed" value="yes" required /> I checked that this
-        post or story came from the registered handle, tagged @lasvegasfortransit, appeared on the
-        selected day, described a trip without driving, and said it was a giveaway entry.</label
-      >
-      <button type="submit">Log the tag</button>
-    </form>
+    <div class="panel">
+      <h2>Entry requirements</h2>
+      <ul class="requirements">
+        <li>The post came from the registered handle and tagged @lasvegasfortransit.</li>
+        <li>It appeared on the selected day and described a trip without driving.</li>
+        <li>It stated that it was a giveaway entry.</li>
+      </ul>
+      <form method="post" action="/admin/tags" class="stack">
+        <label
+          >Instagram handle
+          <input
+            name="handle"
+            required
+            maxlength="100"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            value="${value('handle')}"
+        /></label>
+        <label
+          >Day it was posted
+          <select name="day" required>
+            ${dayOptions(value('day'))}
+          </select></label
+        >
+        <label
+          >Link to the post (if available)
+          <input
+            name="link"
+            type="url"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="https://www.instagram.com/p/…"
+            value="${value('link')}"
+        /></label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            name="trip-confirmed"
+            value="yes"
+            required
+            ${value('trip-confirmed') === 'yes' ? html`checked` : ''}
+          />
+          <span>I verified that this post meets all three requirements.</span></label
+        >
+        <button type="submit">Log Instagram entry</button>
+      </form>
+    </div>
   </section>`;
 }
 
@@ -116,7 +137,7 @@ function drawRecord(draw: DrawRow, latest: boolean): Html {
         : `@${draw.instagram ?? ''}`;
     return html`<li>${summary} Winner: ${draw.first_name ?? ''} ${who}</li>`;
   }
-  return html`<h3>Winner, round ${draw.round}</h3>
+  return html`<h2>Winner, round ${draw.round}</h2>
     ${winnerContact(draw)} ${winningEntry(draw)}
     <p class="muted">${summary}</p>`;
 }
@@ -125,10 +146,12 @@ function drawForm(data: PageData): Html {
   const again = data.draws.length > 0;
   const confirm = again
     ? 'The last winner didn’t reply within 7 days, or can’t take the prize.'
-    : 'Every entry has been checked, and I’m ready to draw.';
+    : 'Every entry has been reviewed, and I am ready to draw.';
   return html`<form method="post" action="/admin/draw" class="stack">
     ${hidden('round', data.draws.length + 1)}
-    <label><input type="checkbox" name="confirm" value="yes" required /> ${confirm}</label>
+    <label class="check"
+      ><input type="checkbox" name="confirm" value="yes" required /><span>${confirm}</span></label
+    >
     <button type="submit">${again ? 'Draw again' : 'Draw the winner'}</button>
   </form>`;
 }
@@ -141,22 +164,25 @@ export function drawSection(c: AdminContext, data: PageData): Html {
   if (!open) action = html`<p>The draw opens October 14, 2026.</p>`;
   else if (totals.to_check > 0) {
     action = html`<p>
-      Check or remove the ${counted(totals.to_check, 'entry', 'entries')} still waiting before the
+      Approve or remove the ${counted(totals.to_check, 'entry', 'entries')} still waiting before the
       draw.
     </p>`;
   } else if (latest && !replyPeriodEnded(latest.drawn_at, c.now)) {
     action = html`<p>
       The winner has seven days to reply. Come back after that period if another draw is needed.
     </p>`;
-  } else action = drawForm(data);
+  } else if (totals.eligible_entries === 0)
+    action = html`<p>No eligible entries are available for the draw.</p>`;
+  else action = drawForm(data);
   return html`<section id="draw">
-    <h2>Draw the winner</h2>
-    <p>
-      In the draw now: ${counted(totals.eligible_entries, 'checked entry', 'checked entries')} from
+    <h1>Prize draw</h1>
+    <p class="intro">
+      Eligible for the draw:
+      ${counted(totals.eligible_entries, 'approved entry', 'approved entries')} from
       ${counted(totals.eligible_entrants, 'entrant', 'entrants')}. Each entry is one equal chance.
       Volunteers and earlier winners are left out.
     </p>
-    ${latest ? drawRecord(latest, true) : ''}
+    ${latest ? html`<div class="panel">${drawRecord(latest, true)}</div>` : ''}
     ${
       earlier.length > 0
         ? html`<ul>
@@ -164,6 +190,6 @@ export function drawSection(c: AdminContext, data: PageData): Html {
           </ul>`
         : ''
     }
-    ${action}
+    <div class="panel">${action}</div>
   </section>`;
 }

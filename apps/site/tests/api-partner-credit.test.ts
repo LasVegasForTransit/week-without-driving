@@ -146,7 +146,10 @@ describe('partner credit and shared devices', () => {
     await signUp({ ref: EAST });
     await signUp({ ref: EAST, contact: 'luz@example.com' });
     await signUp({ contact: 'ana@example.com' });
-    const page = await platform.send(adminGet('/admin', await accessToken(keys)), ACCESS_ENV);
+    const page = await platform.send(
+      adminGet('/admin?section=counts', await accessToken(keys)),
+      ACCESS_ENV,
+    );
     expect(page.status).toBe(200);
     const html = (await page.text()).replace(/\s+/g, ' ');
     expect(html).toMatch(/East Las Vegas Neighbors<\/td> ?<td>2</);
@@ -155,12 +158,12 @@ describe('partner credit and shared devices', () => {
 
   it('still shows the admin page on a database not yet updated', async () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const page = await platform.send(adminGet('/admin', await accessToken(keys)), {
+    const page = await platform.send(adminGet('/admin?section=counts', await accessToken(keys)), {
       ...ACCESS_ENV,
       DB: withoutMigration(platform.env.DB),
     });
     expect(page.status).toBe(200);
-    expect(await page.text()).toMatch(/Sign-ups by partner aren’t ready yet/);
+    expect(await page.text()).toMatch(/Partner signup counts are unavailable/);
     expect(logged).toHaveBeenCalled();
     logged.mockRestore();
   });

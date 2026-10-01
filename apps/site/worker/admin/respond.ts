@@ -13,7 +13,7 @@ const done = (text: string): Notice => ({ text, problem: false });
 const problem = (text: string): Notice => ({ text, problem: true });
 
 export const NOTICES: Record<string, Notice> = {
-  checked: done('Marked checked. It is in the draw.'),
+  checked: done('Entry approved.'),
   removed: done('Entry removed. It no longer counts; you can restore it under Removed.'),
   restored: done('Entry restored.'),
   stale: problem(
@@ -21,23 +21,25 @@ export const NOTICES: Record<string, Notice> = {
   ),
   'no-reason': problem('Pick why you are removing the entry.'),
   'tag-entered': done('Tag logged as that day’s entry for the person who saved the handle.'),
-  drawn: done('Winner drawn. Their details are under Draw the winner.'),
+  drawn: done('Winner drawn. Contact details are below.'),
   'draw-confirm': problem('Tick the box to confirm, then draw.'),
   'draw-not-open': problem('The draw opens October 14, 2026.'),
   'draw-wait': problem(
     'The previous winner still has time to reply. Wait seven days after their draw.',
   ),
-  'draw-unchecked': problem('Some entries still need a check. Check or remove them, then draw.'),
-  'draw-no-entries': problem('There are no checked entries to draw from.'),
+  'draw-unchecked': problem(
+    'Some entries still await review. Approve or remove them before drawing.',
+  ),
+  'draw-no-entries': problem('There are no approved entries to draw from.'),
   'draw-stale': problem('Another volunteer drew at the same moment. Their draw is shown below.'),
-  'push-sent': done('Test reminder sent. It should show on that phone within a minute.'),
+  'push-sent': done('Test reminder sent. Check the phone to confirm it arrived.'),
   'push-gone': problem(
     'That browser no longer takes notifications, so it was taken off the list. Turn reminders on again on that phone, then try again.',
   ),
-  'push-failed': problem('The push service didn’t take the test reminder. Try again in a minute.'),
+  'push-failed': problem('The test reminder could not be sent. Try again in a minute.'),
   'push-missing': problem('That browser isn’t on the list anymore. Reload the page.'),
   'push-off': problem(
-    'Reminders aren’t set up: the Worker has no VAPID_PRIVATE_KEY. See Set up lvwwd.org’s production.',
+    'Reminders are unavailable. Contact the site administrator before testing again.',
   ),
 };
 

@@ -16,7 +16,7 @@ import { ELIGIBLE_SQL, PENDING_REVIEW_SQL, drawOpen, randomIndex, replyPeriodEnd
  */
 
 function back(notice: string): Response {
-  return seeOther(`/admin?notice=${notice}#draw`);
+  return seeOther(`/admin?notice=${notice}#admin-notice`);
 }
 
 type DrawGate = { round: number } | { problem: string };

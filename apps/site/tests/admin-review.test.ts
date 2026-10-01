@@ -245,8 +245,8 @@ describe('admin review', () => {
     await seedEntry(platform, { participantId: rosa, day: 2, modes: 'bike', removed: true });
     await seedEntry(platform, { instagram: 'solo.rider', day: 1, source: 'tag', modes: '' });
     expect(await countRows(platform, 'SELECT count(*) AS n FROM checkins')).toBe(3);
-    const page = await (await admin.get('/admin')).text();
-    const dayOne = /<tr>\s*<td>Oct 1<\/td>([\s\S]*?)<\/tr>/.exec(page)?.[1] ?? '';
+    const page = await (await admin.get('/admin?section=counts')).text();
+    const dayOne = /<tr>\s*<th scope="row">Oct 1<\/th>([\s\S]*?)<\/tr>/.exec(page)?.[1] ?? '';
     const cells = [...dayOne.matchAll(/<td>(\d+)<\/td>/g)].map((match) => Number(match[1]));
     // Entries, checked, bus, walk, bike, ride.
     expect(cells).toEqual([2, 0, 1, 1, 0, 0]);

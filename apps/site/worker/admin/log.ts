@@ -72,5 +72,5 @@ export async function logTag(c: AdminContext, form: FormData): Promise<Response>
     }))
   )
     return refused(c, { form: 'tag', values: form }, LOG_PROBLEMS.already, 409);
-  return seeOther('/admin?notice=tag-entered#tag');
+  return seeOther('/admin?notice=tag-entered#admin-notice');
 }
