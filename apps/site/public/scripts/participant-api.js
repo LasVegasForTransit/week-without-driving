@@ -20,6 +20,11 @@
   const OFFLINE = 'Couldn’t reach lvwwd.org. Check your connection and try again.';
   const BROKEN = 'Something went wrong on our side. Try again in a minute.';
   const BOT_FAILED = 'We couldn’t check that you’re a person. Reload the page and try again.';
+  // The check's script comes from challenges.cloudflare.com. Content
+  // blockers and school or work networks can block it on a working
+  // connection, so "check your connection" would send people the wrong way.
+  const BOT_BLOCKED =
+    'The check that keeps out bots didn’t load. A content blocker or a school or work network can stop it. Allow challenges.cloudflare.com or switch networks, then try again. Still stuck? Email wwd@lasvegasfortransit.org.';
   const TURNSTILE =
     'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=lvwwdTurnstileReady';
   // A challenge that needs a tap can take a while; past this, ask to try again.
@@ -61,7 +66,12 @@
       const script = document.createElement('script');
       script.src = TURNSTILE;
       script.async = true;
-      script.addEventListener('error', () => reject(new Error('Turnstile did not load')));
+      script.addEventListener('error', () => {
+        // Forget the failure so the next try loads the script again.
+        script.remove();
+        turnstileLoading = null;
+        reject(new Error('Turnstile did not load'));
+      });
       document.head.append(script);
     });
     return turnstileLoading;
@@ -74,7 +84,6 @@
   function botCheck(container, action) {
     const sitekey = container?.getAttribute('data-sitekey') ?? '';
     let current = '';
-    let failure = '';
     let widget = null;
     let waiting = [];
     const settle = (error) => {
@@ -102,8 +111,9 @@
           });
         })
         .catch(() => {
-          failure = OFFLINE;
-          settle(OFFLINE);
+          // Not a lasting failure: the next token() starts again.
+          started = false;
+          settle(navigator.onLine === false ? OFFLINE : BOT_BLOCKED);
         });
     };
     // Turnstile is the biggest download on these pages, so it loads when
@@ -122,7 +132,6 @@
         // No site key (a Worker without Turnstile set up): let the Worker answer.
         if (!sitekey || current) return Promise.resolve(current);
         start();
-        if (failure) return Promise.reject(new Error(failure));
         return new Promise((resolve, reject) => {
           waiting.push({ resolve, reject });
           window.setTimeout(() => reject(new Error(BOT_FAILED)), BOT_WAIT_MS);
