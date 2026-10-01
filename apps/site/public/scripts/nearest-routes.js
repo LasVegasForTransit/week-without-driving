@@ -5,8 +5,9 @@
  *
  * It gets a position from the phone or from a fixed list of seven places,
  * measures the straight-line (haversine) distance to every stop in
- * stops.json on the visitor's own phone, and shows the five nearest within
- * one mile. The position never leaves the phone: it is held in memory for
+ * stops.json on the visitor's own phone, and shows up to five stops within
+ * one mile: the nearest stop for each route and direction, so a busy
+ * corner shows five different buses rather than one route five times. The position never leaves the phone: it is held in memory for
  * this calculation only, never sent in a network request, and never
  * written to storage, a cookie or the address bar.
  */
@@ -193,13 +194,25 @@
     announce(announceText);
   }
 
+  // A stop earns a place only if it serves a route in a direction no nearer
+  // stop already covers. Stops named without a direction count on their own.
   function findNearest(lat, lng) {
     if (!stopsData) return [];
-    return stopsData.stops
+    const nearby = stopsData.stops
       .map((stop) => ({ ...stop, distance: haversineMiles(lat, lng, stop.lat, stop.lng) }))
       .filter((stop) => stop.distance <= MAX_DISTANCE_MILES)
-      .sort((a, b) => a.distance - b.distance || a.id.localeCompare(b.id))
-      .slice(0, MAX_RESULTS);
+      .sort((a, b) => a.distance - b.distance || a.id.localeCompare(b.id));
+    const covered = new Set();
+    const picked = [];
+    for (const stop of nearby) {
+      const direction = /^(NB|SB|EB|WB)\s/.exec(stop.name)?.[1] ?? `stop ${stop.id}`;
+      const added = stop.routes.filter((route) => !covered.has(`${route} ${direction}`));
+      if (added.length === 0) continue;
+      added.forEach((route) => covered.add(`${route} ${direction}`));
+      picked.push(stop);
+      if (picked.length === MAX_RESULTS) break;
+    }
+    return picked;
   }
 
   function searchFrom(lat, lng, headingText, announceLabel) {

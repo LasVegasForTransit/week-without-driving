@@ -5,8 +5,14 @@ import { destinations, finderPlaces } from '../lib/destinations';
 import { parseInlineLinks } from '../lib/inline-links';
 import { buildMapLinks } from '../lib/map-links';
 import { comparePublished } from '../lib/compare-release';
+import { fares, wwd } from '../lib/wwd';
+import { Icon } from 'astro-icon/components';
 
-// The Go page: "Find a bus" shows the bus stops nearest the visitor, or
+// The Go page. "Where to?" comes first: type a place and it opens transit
+// directions in Google Maps, Apple Maps or the Transit app, with a short
+// "Before you go" list (public/scripts/where-to.js). It needs no account,
+// and the places typed stay in the address of the map app the visitor
+// opens. "Find a bus" shows the bus stops nearest the visitor, or
 // nearest a place they pick without sharing their location, and "Places to
 // go" gives step-by-step directions to seven places across the valley. The
 // places, steps and map points live in src/lib/destinations.ts, with when
@@ -24,7 +30,7 @@ import { comparePublished } from '../lib/compare-release';
 // a real latitude and longitude.
 
 const description =
-  'Compare a trip by car and without one, find nearby bus stops, and choose a place to go in Las Vegas.';
+  'Get bus directions anywhere in Las Vegas, find nearby bus stops, and choose a place to go.';
 
 function slugify(label: string): string {
   return label
@@ -33,48 +39,166 @@ function slugify(label: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+// "Where to?" suggests the seven Places to go. Picking one sends its exact
+// point to the map apps and links its step-by-step directions below.
+const wherePlaces = destinations.map((destination) => {
+  const [point] = destination.buttonRows;
+  if (!point) throw new Error(`${destination.anchor} has no map point`);
+  return {
+    label: destination.heading,
+    lat: point.lat,
+    lng: point.lng,
+    anchor: destination.anchor,
+  };
+});
+
 const mapButtonClass =
   'press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-2.5 font-semibold no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface';
 ---
 
 <BaseLayout title="Plan a trip · Week Without Driving Las Vegas" description={description}>
   <section class="container-page page-top" aria-labelledby="plan-heading">
-    <p class="text-sm font-bold uppercase tracking-widest text-primary">Get moving</p>
     <h1 id="plan-heading" class="page-title">Plan a trip</h1>
-    <p class="page-lede">Where would you go without a car?</p>
-    <div class:list={['mt-8 grid gap-4', comparePublished ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
+    <p class="page-lede">Type where you’re going. We’ll open bus directions from where you are.</p>
+
+    {/* WHERE TO: shown by where-to.js. It needs no account and sends nothing to us. */}
+    <div class="where mt-8 max-w-2xl" data-where>
+      <noscript>
+        <p class="where__card leading-relaxed">
+          Open <a href="https://www.google.com/maps/dir/?api=1&travelmode=transit" class="body-link"
+            >bus directions in Google Maps</a
+          > or <a href={wwd.rtcTripPlannerUrl} class="body-link">RTC’s trip planner</a>.
+        </p>
+      </noscript>
+      <form class="where__card" data-where-form hidden>
+        <div class="form-field">
+          <label for="where-to" class="form-label">Where to?</label>
+          <input
+            id="where-to"
+            name="to"
+            class="form-input"
+            list="where-places"
+            autocomplete="off"
+            enterkeyhint="go"
+            placeholder="A place or an address"
+            required
+            data-where-to
+          />
+          <datalist id="where-places">
+            {
+              wherePlaces.map((place) => (
+                <option
+                  value={place.label}
+                  data-lat={place.lat}
+                  data-lng={place.lng}
+                  data-anchor={place.anchor}
+                />
+              ))
+            }
+          </datalist>
+          <p class="form-error" data-where-error role="alert"></p>
+        </div>
+        <div class="form-field">
+          <label for="where-from" class="form-label"
+            >Starting from <span class="form-optional">(optional)</span></label
+          >
+          <p class="form-help" id="where-from-help">Leave blank to start where you are.</p>
+          <input
+            id="where-from"
+            name="from"
+            class="form-input"
+            autocomplete="off"
+            enterkeyhint="go"
+            placeholder="Where you are now"
+            aria-describedby="where-from-help"
+            data-where-from
+          />
+        </div>
+        <button type="submit" class="btn btn--primary btn--block mt-6"
+          >Show me how to get there</button
+        >
+      </form>
+
+      <div class="where__result" data-where-result hidden>
+        <h2 class="where__title" tabindex="-1" data-where-title></h2>
+        <p class="mt-2 text-on-surface-variant">
+          Open bus directions. They show the route, the stop and when to be there.
+        </p>
+        <div class="where__apps">
+          <a class="btn btn--primary" target="_blank" rel="noopener noreferrer" data-where-google
+            >Google Maps</a
+          >
+          <a class="btn btn--outline" target="_blank" rel="noopener noreferrer" data-where-apple
+            >Apple Maps</a
+          >
+          <a class="btn btn--outline" data-where-transit hidden>Transit app</a>
+        </div>
+        <p class="mt-3 text-sm text-on-surface-variant">
+          Prefer RTC’s own tool? <a href={wwd.rtcTripPlannerUrl} class="body-link"
+            >RTC trip planner</a
+          >
+        </p>
+        <p class="mt-4" data-where-guide hidden>
+          <a class="arrow-link" data-where-guide-link></a>
+        </p>
+
+        <h3 class="where__subtitle">Before you go</h3>
+        <ol class="where__checklist">
+          <li>
+            <Icon name="mdi:cash" class="where__icon" aria-hidden="true" />
+            <span
+              >Bring {fares.singleRide} for one ride, or {fares.dayPass} for 24 hours of rides. Drivers
+              don’t carry change. <a href="/guides/pay-your-fare" class="body-link">Ways to pay</a
+              ></span
+            >
+          </li>
+          <li>
+            <Icon name="mdi:bus-stop" class="where__icon" aria-hidden="true" />
+            <span
+              >First time on the bus? <a href="/guides/first-ride" class="body-link"
+                >Ride the bus in three steps</a
+              ></span
+            >
+          </li>
+          <li>
+            <Icon name="mdi:water-outline" class="where__icon" aria-hidden="true" />
+            <span
+              >Bring water, and wait in the shade when you can. <a
+                href="/guides/heat"
+                class="body-link">Stay cool</a
+              ></span
+            >
+          </li>
+          <li>
+            <Icon name="mdi:gift-outline" class="where__icon" aria-hidden="true" />
+            <span
+              >After your trip, tell us about it for a chance to win a 30-day bus pass. <a
+                href="/sign-up"
+                class="body-link"
+                data-signup-link><span data-signup-label>Sign up to win</span></a
+              ></span
+            >
+          </li>
+        </ol>
+        <button type="button" class="btn btn--outline mt-6" data-where-again
+          >Plan another trip</button
+        >
+      </div>
+    </div>
+
+    <nav class="where__more" aria-label="More ways to plan">
       {
         comparePublished && (
-          <a
-            href="/go/compare"
-            class="group border-2 border-primary bg-surface-container p-6 no-underline hover:bg-primary hover:text-on-primary focus-visible:bg-primary focus-visible:text-on-primary"
-          >
-            <span class="text-3xl font-black">01</span>
-            <h2 class="mt-4 text-title-lg font-black">Compare ways to go →</h2>
-            <p class="mt-2 leading-relaxed">
-              See driving next to bus, walking, biking, or scooter.
-            </p>
+          <a href="/go/compare" class="where__chip">
+            Compare ways to go
           </a>
         )
       }
-      <a
-        href="#find-routes"
-        class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
-      >
-        <span class="text-3xl font-black">{comparePublished ? '02' : '01'}</span>
-        <h2 class="mt-4 text-title-lg font-black">Find a bus →</h2>
-        <p class="mt-2 leading-relaxed">See nearby stops and the routes that serve them.</p>
-      </a>
-      <a
-        href="#places-to-go"
-        class="border-2 border-outline bg-surface p-6 no-underline hover:border-primary focus-visible:border-primary"
-      >
-        <span class="text-3xl font-black">{comparePublished ? '03' : '02'}</span>
-        <h2 class="mt-4 text-title-lg font-black">Pick a place →</h2>
-        <p class="mt-2 leading-relaxed">Try one of seven places across the valley.</p>
-      </a>
-    </div>
-    <div class="mt-6 border-l-4 border-primary bg-surface-container p-5 leading-relaxed">
+      <a href="#find-routes" class="where__chip">Find a bus near you</a>
+      <a href="#places-to-go" class="where__chip">Step-by-step to 7 places</a>
+    </nav>
+
+    <div class="mt-8 border-l-4 border-primary bg-surface-container p-5 leading-relaxed">
       <p class="font-bold">Going to work or school?</p>
       <p class="mt-1">
         <a href="https://www.rtcsnv.com/ways-to-travel/club-ride/" class="body-link"
@@ -91,8 +215,8 @@ const mapButtonClass =
   >
     <h2 id="find-routes-heading" class="text-headline-lg">Find a bus</h2>
     <p class="page-lede">
-      See the five bus stops closest to you and the routes that stop there. Or pick a place you
-      already know.
+      See the closest stop for each bus near you, in each direction. Or pick a place you already
+      know.
     </p>
 
     <div data-finder class="mt-8 max-w-2xl">
@@ -284,7 +408,87 @@ const mapButtonClass =
     </div>
   </section>
 
+  <script is:inline src="/scripts/where-to.js" defer></script>
   <script is:inline src="/scripts/map-links.js" defer></script>
   <script is:inline src="/scripts/nearest-routes.js" defer></script>
   <WinBand />
 </BaseLayout>
+
+<style>
+  .where__card,
+  .where__result {
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
+  .where__title {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .where__title:focus {
+    outline: none;
+  }
+  .where__apps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+  .where__apps [hidden] {
+    display: none;
+  }
+  .where__subtitle {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+  }
+  .where__checklist {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 0.9rem;
+    line-height: 1.5;
+  }
+  .where__checklist li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .where__checklist :global(.where__icon) {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.45rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 999px;
+  }
+  .where__more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .where__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    font-weight: 700;
+    color: var(--color-on-surface);
+    text-decoration: none;
+    border: 2px solid color-mix(in srgb, var(--color-on-surface) 30%, transparent);
+    border-radius: 999px;
+  }
+  .where__chip::after {
+    content: '↓';
+    margin-left: 0.4rem;
+  }
+  .where__chip[href^='/']::after {
+    content: '→';
+  }
+  .where__chip:hover,
+  .where__chip:focus-visible {
+    border-color: var(--color-primary);
+    color: var(--color-primary-ink);
+  }
+</style>
