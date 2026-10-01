@@ -1,6 +1,6 @@
 ---
 title: 'Pay your bus fare'
-order: 1
+order: 2
 icon: 'mdi:cash-multiple'
 cardSummary: 'Ways to pay, with or without a smartphone or bank card, and who can pay less.'
 intro: >-

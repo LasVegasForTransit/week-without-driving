@@ -1,0 +1,18 @@
+---
+// "Ride the bus for the first time": one trip, start to finish, for someone
+// who has never ridden RTC. Content lives in
+// src/content/guides/first-ride.md; this file only wires it into the shared
+// GuideLayout.
+import { getEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getNextGuide, getSortedGuides } from '../../lib/guides';
+
+const guide = await getEntry('guides', 'first-ride');
+if (!guide) {
+  throw new Error('Guide "first-ride" is missing from src/content/guides.');
+}
+const guides = await getSortedGuides();
+const nextGuide = getNextGuide(guides, guide.id);
+---
+
+<GuideLayout guide={guide} nextGuide={nextGuide} />

@@ -59,8 +59,10 @@ const { title, intro, cardSummary, steps } = guide.data;
                         href={segment.href}
                         class="body-link font-semibold"
                         data-print-url={segment.href}
-                        target={segment.href.startsWith('mailto:') ? undefined : '_blank'}
-                        rel={segment.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                        target={segment.href.startsWith('https://') ? '_blank' : undefined}
+                        rel={
+                          segment.href.startsWith('https://') ? 'noopener noreferrer' : undefined
+                        }
                       >
                         {segment.text}
                       </a>

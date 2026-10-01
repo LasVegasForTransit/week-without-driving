@@ -1,6 +1,6 @@
 ---
 title: 'Put your bike on the bus'
-order: 4
+order: 5
 icon: 'mdi:bike'
 cardSummary: "Every RTC bus has a bike rack on the front. Here's how to use it."
 intro: >-

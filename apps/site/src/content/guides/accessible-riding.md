@@ -1,6 +1,6 @@
 ---
 title: 'Ride with a wheelchair, walker or stroller'
-order: 2
+order: 3
 icon: 'mdi:wheelchair-accessibility'
 cardSummary:
   'How to get on and off with a ramp or lift, where to ride, and what RTC Paratransit is.'

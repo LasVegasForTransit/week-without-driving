@@ -1,6 +1,6 @@
 ---
 // The Guides index (build-brief.md section 5.4): a heading, one sentence
-// of introduction, the five guide cards in a fixed order, and a link out
+// of introduction, the six guide cards in a fixed order, and a link out
 // to "Places to go" on the Go page. Card order and text come from each
 // guide's own file under src/content/guides, so this page never needs to
 // change when a guide's copy does.
@@ -11,7 +11,7 @@ import { getSortedGuides } from '../../lib/guides';
 
 const guides = await getSortedGuides();
 const description =
-  'Pay your bus fare, bring a bike, board with a wheelchair or stroller, and stay cool on the way to the bus.';
+  'Take your first bus ride, pay your fare, board with a wheelchair or stroller, stay cool and bring a bike.';
 ---
 
 <BaseLayout title="Rider guides · Week Without Driving Las Vegas" description={description}>
