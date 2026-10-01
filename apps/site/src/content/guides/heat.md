@@ -1,6 +1,6 @@
 ---
 title: 'Walk or roll in the heat'
-order: 3
+order: 4
 icon: 'mdi:weather-sunny'
 cardSummary: 'Stay cool and safe on the way to the bus, whether you walk or roll.'
 intro: >-

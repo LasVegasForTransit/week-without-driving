@@ -11,6 +11,7 @@ const PAGES = [
   '/how-it-works',
   '/go',
   '/guides',
+  '/guides/first-ride',
   '/guides/pay-your-fare',
   '/guides/accessible-riding',
   '/guides/heat',

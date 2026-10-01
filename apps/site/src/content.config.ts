@@ -2,7 +2,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { defineCollection } from 'astro:content';
 
-// The five "Guides" pages (/guides/<slug>) share one layout and one shape,
+// The six "Guides" pages (/guides/<slug>) share one layout and one shape,
 // so a copy edit is a Markdown frontmatter change, not a component change.
 // Each entry's `order` is the fixed order from the Guides index and also
 // drives "Next guide" (guides/index.ts wraps from the last entry to the

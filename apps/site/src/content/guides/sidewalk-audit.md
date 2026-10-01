@@ -1,6 +1,6 @@
 ---
 title: 'Do a sidewalk audit'
-order: 5
+order: 6
 icon: 'mdi:clipboard-text-outline'
 cardSummary: 'Note what makes a street hard to walk or roll, and tell someone who can fix it.'
 intro: >-

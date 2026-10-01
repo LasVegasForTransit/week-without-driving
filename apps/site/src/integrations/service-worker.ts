@@ -20,6 +20,7 @@ export const PRECACHE_PAGES = [
   '/offline',
   '/how-it-works',
   '/guides',
+  '/guides/first-ride',
   '/guides/pay-your-fare',
   '/guides/accessible-riding',
   '/guides/heat',

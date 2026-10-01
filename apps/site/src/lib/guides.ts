@@ -2,7 +2,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type Guide = CollectionEntry<'guides'>;
 
-// The five guide pages, in the fixed order from the Guides index (each
+// The six guide pages, in the fixed order from the Guides index (each
 // entry's own `order` field, set in its Markdown frontmatter, is the
 // source of truth). Sorting here means adding a guide is a new file, not a
 // list to update in two places.
@@ -12,8 +12,8 @@ export async function getSortedGuides(): Promise<Guide[]> {
 }
 
 // The guide that follows `currentId` in that fixed order, wrapping from
-// the last guide back to the first (Do a sidewalk audit -> Pay your bus
-// fare).
+// the last guide back to the first (Do a sidewalk audit -> Ride the bus
+// for the first time).
 export function getNextGuide(guides: Guide[], currentId: string): Guide {
   const index = guides.findIndex((guide) => guide.id === currentId);
   const next = guides[(index + 1) % guides.length];
