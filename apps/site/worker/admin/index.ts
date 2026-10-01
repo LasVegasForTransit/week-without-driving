@@ -87,7 +87,12 @@ export async function handleAdmin(
   if (request.method !== 'GET' && request.headers.get('Origin') !== url.origin) {
     return forbiddenPage();
   }
-  if (!hasDatabase(env)) return messagePage(503, 'Not set up yet', 'The database isn’t set up.');
+  if (!hasDatabase(env))
+    return messagePage(
+      503,
+      'Admin is unavailable',
+      'Try again in a minute. If this continues, contact the site administrator.',
+    );
   try {
     await env.DB.prepare(
       'INSERT INTO volunteers (email, first_seen_at) VALUES (?1, ?2) ON CONFLICT (email) DO NOTHING',

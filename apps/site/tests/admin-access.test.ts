@@ -51,6 +51,20 @@ describe('admin access', () => {
     expect(row).toEqual({ email: VOLUNTEER });
   });
 
+  it('shows a private, readable fallback when storage is unavailable', async () => {
+    const response = await platform.send(adminGet('/admin', await accessToken(keys)), {
+      ...ACCESS_ENV,
+      DB: undefined,
+    });
+    expect(response.status).toBe(503);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const body = await response.text();
+    expect(body).toContain('Admin is unavailable');
+    expect(body).toContain('Back to admin');
+    expect(body).not.toContain('database');
+    expect(body).not.toContain('binding');
+  });
+
   it('accepts an audience written as a single string', async () => {
     const response = await open(await accessToken(keys, { aud: ACCESS_ENV.ACCESS_AUD }));
     expect(response.status).toBe(200);
