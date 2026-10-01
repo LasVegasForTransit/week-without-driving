@@ -65,6 +65,14 @@ ul.plain{list-style:none;padding:0}
 form.stack{display:grid;gap:.75rem;max-width:32rem}
 .stack label>input:not([type=checkbox]),.stack label>select,.stack label>textarea{display:block;width:100%;margin-top:.25rem}
 caption{text-align:left}
+.table-scroll{max-width:100%;overflow-x:auto}
+.report-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:1.25rem 0}
+.report-metrics section{background:var(--container);padding:1rem;border-radius:.5rem}
+.report-metrics strong{display:block;font-size:2rem;line-height:1.1}
+.report-columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:1.5rem}
+.campaign-days{width:100%}.campaign-days th{white-space:nowrap}
+@media (max-width:600px){.campaign-days{font-size:.85rem}.campaign-days th,.campaign-days td{padding:.25rem .3rem}}
+@media (min-width:800px){.report-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}}
 label{display:block}
 input,select,textarea,button{font:inherit;color:inherit}
 input,select,textarea{background:var(--field);border:1px solid var(--line);border-radius:.25rem;padding:.35rem .5rem;max-width:100%}
