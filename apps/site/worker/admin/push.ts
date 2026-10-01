@@ -30,46 +30,60 @@ export const PUSH_COUNT_SQL = 'SELECT count(*) AS n FROM push_subscriptions';
 export function pushSection(pushes: { rows: PushRow[]; total: number } | null): Html {
   if (!pushes) {
     return html`<section id="reminders">
-      <h2>Browser reminders</h2>
+      <h1>Reminders</h1>
       <p class="notice problem">
-        The database doesn’t have the reminders table yet. A maintainer runs
-        <code>pnpm bootstrap --production</code>, which adds it.
+        Reminders are unavailable. Contact the site administrator before testing again.
       </p>
     </section>`;
   }
   const { rows, total } = pushes;
   const items = rows.map(
-    (row) =>
+    (row, index) =>
       html`<li class="entry">
+        <h2>Browser ${index + 1}</h2>
         <p>
           Turned on ${timeLabel(row.created_at)} ·
           ${row.last_sent_on ? `last reminder ${row.last_sent_on}` : 'no reminder sent yet'}
         </p>
         <form method="post" action="/admin/push/test" class="actions">
           <input type="hidden" name="id" value="${row.id}" />
-          <button type="submit">Send test reminder</button>
+          <button type="submit" aria-label="Send test reminder to browser ${index + 1}">
+            Send test reminder
+          </button>
         </form>
       </li>`,
   );
   return html`<section id="reminders">
-    <h2>Browser reminders</h2>
-    <p>
-      ${counted(total, 'browser has', 'browsers have')} daily reminders on. To test a phone, turn
-      reminders on in My week on that phone, then press "Send test reminder" on the newest one
-      below. It should show within a minute.
-    </p>
-    ${
-      items.length > 0
-        ? html`<ul class="plain">
-            ${items}
-          </ul>`
-        : html`<p class="muted">Nobody has turned reminders on yet.</p>`
-    }
+    <h1>Reminders</h1>
+    <p class="intro">${counted(total, 'browser has', 'browsers have')} daily reminders on.</p>
+    <div class="panel">
+      <h2>Test a phone notification</h2>
+      <ol class="requirements">
+        <li>Turn on reminders in My week on the phone.</li>
+        <li>Send a test to the most recently registered browser below.</li>
+        <li>Check that the notification arrives and opens My week.</li>
+      </ol>
+      <p class="muted">
+        Browsers are listed newest first. Delivery must be confirmed on the phone.
+      </p>
+    </div>
+    <div class="section-actions">
+      ${
+        items.length > 0
+          ? html`<ul class="plain">
+              ${items}
+            </ul>`
+          : html`<div class="empty-state">
+              <h2>No browsers registered</h2>
+              <p>Turn on reminders in My week on a phone to begin testing.</p>
+            </div>`
+      }
+    </div>
   </section>`;
 }
 
 function back(notice: string): Response {
-  return seeOther(`/admin?notice=${notice}#reminders`);
+  return seeOther(`/admin?notice=${notice}#admin-notice`);
 }
 
 /** POST /admin/push/test: one reminder to one browser, now. */

@@ -34,7 +34,7 @@ const SHORT_MODES: Record<string, string> = {
 
 export const REMOVAL_REASONS = {
   'no-trip': 'Not a trip without driving',
-  'our-picture': 'Post does not show the trip',
+  'our-picture': 'Post does not describe the trip',
   'not-theirs': 'Not their post',
   duplicate: 'Duplicate',
   other: 'Other',

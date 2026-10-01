@@ -81,7 +81,7 @@ describe('volunteer tag logging', () => {
   });
 
   it('tells reviewers to verify the account, tag, posted day and trip', async () => {
-    const page = (await (await admin.get('/admin')).text()).replace(/\s+/g, ' ');
+    const page = (await (await admin.get('/admin?section=tag')).text()).replace(/\s+/g, ' ');
     expect(page).toContain('came from the registered handle');
     expect(page).toContain('tagged @lasvegasfortransit');
     expect(page).toContain('on the selected day');

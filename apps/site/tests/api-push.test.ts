@@ -185,9 +185,9 @@ describe('browser reminders', () => {
     it('lists browsers newest first, with no address and no name', async () => {
       await subscribe(await makeBrowser());
       await subscribe(await makeBrowser());
-      const page = await (await admin.get('/admin')).text();
+      const page = await (await admin.get('/admin?section=reminders')).text();
       expect(page).toContain('2 browsers have daily reminders on');
-      expect(page.match(/<button type="submit">Send test reminder<\/button>/g)).toHaveLength(2);
+      expect(page.match(/aria-label="Send test reminder to browser \d+"/g)).toHaveLength(2);
       expect(page).not.toContain('fcm.googleapis.com');
       expect(page).not.toContain('Rosa');
     });
@@ -244,9 +244,9 @@ describe('browser reminders', () => {
         .all<{ sql: string | null }>();
       await db.prepare('DROP TABLE push_subscriptions').run();
       try {
-        const response = await admin.get('/admin');
+        const response = await admin.get('/admin?section=reminders');
         expect(response.status).toBe(200);
-        expect(await response.text()).toContain('pnpm bootstrap --production');
+        expect(await response.text()).toContain('Reminders are unavailable.');
       } finally {
         for (const { sql } of schema.results) if (sql) await db.prepare(sql).run();
       }

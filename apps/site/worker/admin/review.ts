@@ -22,7 +22,7 @@ import { seeOther } from './html';
 
 function back(form: FormData, notice: string): Response {
   const filters = readFilters(new URLSearchParams(field(form, 'back')));
-  return seeOther(`/admin${filterQuery(filters, notice)}#queue`);
+  return seeOther(`/admin${filterQuery(filters, notice)}#admin-notice`);
 }
 
 async function changed(statement: D1PreparedStatement): Promise<boolean> {
