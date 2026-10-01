@@ -3,14 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { Icon } from 'astro-icon/components';
 import { lvbt } from '../lib/site';
-import { wwd, wwdResources, WWD_DATE_RANGE } from '../lib/wwd';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 import { contactEmail } from '../lib/partners';
 
 // Press page: a one-stop start for reporters covering Week Without Driving
 // in Las Vegas. Everything here is real data from src/lib: dates, the
-// hashtag, and the links to LVBT and the national campaign. Add the press
-// release and download files here once LVBT has them. No quotes, names or
-// stats are invented.
+// hashtag, and the link to LVBT. No quotes, names or stats are invented.
 
 const title = 'Press · Week Without Driving Las Vegas';
 const description =
@@ -19,8 +17,6 @@ const description =
 const mediaMailto = `mailto:${contactEmail}?subject=${encodeURIComponent(
   'Press: Week Without Driving Las Vegas',
 )}`;
-
-const mediaAdvisory = wwdResources.find((r) => r.title === '2026 media advisory');
 
 const storyAngles = [
   "Las Vegans who don't drive, in their own words.",
@@ -50,29 +46,6 @@ const storyAngles = [
     </div>
   </section>
 
-  {/* NATIONAL MEDIA ADVISORY */}
-  <section class="container-page section mt-12" aria-labelledby="release-heading">
-    <h2 id="release-heading" class="section-title">National media advisory</h2>
-    <p class="section-intro">For local quotes or campaign details, email the media contact.</p>
-    {
-      mediaAdvisory && (
-        <p class="section-intro">
-          Read the national campaign's{' '}
-          <a
-            href={mediaAdvisory.url}
-            data-print-url={mediaAdvisory.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="body-link font-bold"
-          >
-            2026 media advisory
-          </a>
-          .
-        </p>
-      )
-    }
-  </section>
-
   {/* QUICK FACTS */}
   <section class="container-page section" aria-labelledby="facts-heading">
     <h2 id="facts-heading" class="section-title">Quick facts</h2>
@@ -93,26 +66,11 @@ const storyAngles = [
         <dd>Las Vegas Valley</dd>
       </div>
       <div>
-        <dt>Who runs it locally</dt>
+        <dt>Organizer</dt>
         <dd>
           <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-bold">{lvbt.name}</a>{
             ' '
           }(LVBT), a 501(c)(3) nonprofit.
-        </dd>
-      </div>
-      <div>
-        <dt>National campaign</dt>
-        <dd>
-          Co-hosted by {wwd.nationalOrganizer} and the Nondrivers Alliance.{' '}
-          <a
-            href={wwd.nationalUrl}
-            data-print-url={wwd.nationalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="body-link font-bold"
-          >
-            weekwithoutdriving.org
-          </a>
         </dd>
       </div>
       <div>

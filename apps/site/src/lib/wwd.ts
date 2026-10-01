@@ -10,8 +10,6 @@ export const wwd = {
   // ISO dates for structured data (no time component).
   startDate: '2026-10-01',
   endDate: '2026-10-08',
-  nationalUrl: 'https://weekwithoutdriving.org/',
-  nationalOrganizer: 'America Walks',
   rtcTripPlannerUrl: 'https://www.rtcsnv.com/tripplanner/',
   hashtag: '#WeekWithoutDriving',
   maxEntries: 8,
