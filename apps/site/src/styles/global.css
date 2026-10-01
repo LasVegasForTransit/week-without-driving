@@ -2099,38 +2099,22 @@ body {
     background: var(--color-primary);
   }
 
-  /* On phones, the update notice takes its own space below the header.
-     On wide screens it sits in the open upper-right corner. */
+  /* Keep update controls in one narrow band below the navigation. */
   .update-bar {
-    align-self: flex-end;
-    width: min(22rem, calc(100vw - 2 * var(--page-pad)));
-    margin-inline: var(--page-pad);
-    z-index: var(--z-mobile-nav);
+    width: 100%;
   }
   .update-bar:not(:empty) {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-start;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.25rem max(var(--page-pad), calc((100vw - 80rem) / 2 + var(--page-pad)));
     color: var(--color-on-slab);
     background: var(--color-slab);
-    border: 1px solid color-mix(in srgb, var(--color-on-slab) 20%, transparent);
-    border-radius: 1rem;
-    box-shadow: 0 0.75rem 2rem rgb(20 8 14 / 0.2);
-    margin-block: 0.75rem;
-  }
-  @media (min-width: 80rem) {
-    .update-bar {
-      position: fixed;
-      top: calc(5rem + env(safe-area-inset-top));
-      right: max(var(--page-pad), calc((100vw - 80rem) / 2 + var(--page-pad)));
-      margin: 0;
-    }
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-slab) 20%, transparent);
   }
   .update-bar p {
-    flex-basis: 100%;
+    flex: 1;
+    min-width: 6rem;
     margin: 0;
     font-weight: 600;
   }
