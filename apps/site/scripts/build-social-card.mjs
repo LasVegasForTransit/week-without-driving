@@ -19,7 +19,6 @@ const mark = await sharp(fileURLToPath(new URL('src/assets/wwd-campaign-mark.png
   .toBuffer();
 const markData = `data:image/png;base64,${mark.toString('base64')}`;
 const html = `<!doctype html><html lang="en"><head><style>
-  @font-face { font-family: Fraunces; src: url(${asset('src/fonts/fraunces-600.woff2', 'font/woff2')}); font-weight: 600; }
   @font-face { font-family: Atkinson; src: url(${asset('src/fonts/atkinson-next-400.woff2', 'font/woff2')}); font-weight: 400; }
   @font-face { font-family: Atkinson; src: url(${asset('src/fonts/atkinson-next-700.woff2', 'font/woff2')}); font-weight: 700; }
   * { box-sizing: border-box; }
@@ -27,16 +26,14 @@ const html = `<!doctype html><html lang="en"><head><style>
   body { background: #fff; color: #431a28; border-top: 10px solid #f75210; font-family: Atkinson, sans-serif; }
   main { display: grid; grid-template-columns: 380px 1px 1fr; gap: 48px; height: 620px; padding: 80px 76px 76px; align-items: center; }
   .mark { width: 380px; height: auto; display: block; }
-  .site { margin: 36px 0 0; font-size: 26px; font-weight: 700; letter-spacing: .015em; }
   .rule { height: 435px; background: #d2c0b7; }
   .details { align-self: center; }
-  h1 { font: 600 64px/1.07 Fraunces, Georgia, serif; letter-spacing: -.025em; margin: 0 0 48px; }
-  .date { margin: 0 0 9px; color: #b93619; font-size: 29px; font-weight: 700; }
-  .place { margin: 0; font-size: 28px; }
+  h1 { font: 700 65px/1.06 Atkinson, sans-serif; letter-spacing: -.035em; margin: 0 0 36px; }
+  .place { margin: 0; font-size: 31px; }
 </style></head><body><main>
-  <div><img class="mark" src="${markData}" alt="Week Without Driving" /><p class="site">lvwwd.org</p></div>
+  <div><img class="mark" src="${markData}" alt="Week Without Driving" /></div>
   <div class="rule" aria-hidden="true"></div>
-  <div class="details"><h1>Try a week<br>without driving.</h1><p class="date">October 1–8, 2026</p><p class="place">Las Vegas, Nevada</p></div>
+  <div class="details"><h1>October 1–8,<br>2026</h1><p class="place">Las Vegas, Nevada</p></div>
 </main></body></html>`;
 
 const browser = await chromium.launch();
@@ -51,7 +48,7 @@ try {
   const png = await sharp(screenshot)
     .png({ palette: true, quality: 100, compressionLevel: 9 })
     .toBuffer();
-  const output = fileURLToPath(new URL('public/og-wwd-2026-v2.png', site));
+  const output = fileURLToPath(new URL('public/og-wwd-2026-v3.png', site));
   writeFileSync(output, png);
   console.log(`${output}: 1200 × 630, ${png.length.toLocaleString()} bytes`);
 } finally {
