@@ -37,7 +37,7 @@
     const bar = document.querySelector('[data-update-bar]');
     if (!bar || bar.childElementCount || state.dismissed) return;
     const text = document.createElement('p');
-    text.textContent = 'A site update is ready.';
+    text.textContent = 'Update ready';
     const refresh = document.createElement('button');
     refresh.type = 'button';
     refresh.className = 'update-bar__button';
