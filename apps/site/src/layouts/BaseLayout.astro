@@ -196,14 +196,6 @@ const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
                     </li>
                   ))
                 }
-                <li>
-                  <a
-                    href="https://weekwithoutdriving.org/"
-                    data-print-url="https://weekwithoutdriving.org/"
-                    target="_blank"
-                    rel="noopener noreferrer">National campaign</a
-                  >
-                </li>
               </ul>
             </div>
             <div class="footer-group">
@@ -247,14 +239,7 @@ const canonical = new URL(path.replace(/(.)\/$/, '$1'), site.url).toString();
           <p class="footer-mission">
             An initiative by{' '}
             <a href={lvbt.url} data-print-url={lvbt.url} class="body-link">{lvbt.name}</a>, a
-            501(c)(3) nonprofit (EIN {lvbt.ein}). The national campaign is organized by{' '}
-            <a
-              href="https://weekwithoutdriving.org/"
-              data-print-url="https://weekwithoutdriving.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="body-link">America Walks</a
-            >.
+            501(c)(3) nonprofit (EIN {lvbt.ein}).
           </p>
           {/* Shown by /scripts/app.js where installing is possible. */}
           <button type="button" class="install-button footer-install" data-install-button hidden>
