@@ -5,7 +5,6 @@ import { entriesCsv, screenshot } from './files';
 import { forbiddenPage, previewLogin, volunteerFor } from './gate';
 import { messagePage } from './html';
 import { logTag } from './log';
-import { reportCsv, showReport } from './report';
 import { sendTestReminder } from './push';
 import { showAdmin } from './respond';
 import { markChecked, removeEntry, restoreEntry } from './review';
@@ -26,7 +25,6 @@ type Handler =
 
 const ROUTES: Record<string, Handler> = {
   '/admin': { method: 'GET', run: showAdmin },
-  '/admin/report': { method: 'GET', run: showReport },
   '/admin/entries/check': { method: 'POST', run: markChecked },
   '/admin/entries/remove': { method: 'POST', run: removeEntry },
   '/admin/entries/restore': { method: 'POST', run: restoreEntry },
@@ -34,7 +32,6 @@ const ROUTES: Record<string, Handler> = {
   '/admin/draw': { method: 'POST', run: drawWinner },
   '/admin/push/test': { method: 'POST', run: sendTestReminder },
   '/api/admin/entries.csv': { method: 'GET', run: entriesCsv },
-  '/api/admin/report.csv': { method: 'GET', run: reportCsv },
 };
 
 const SCREENSHOTS = '/api/admin/screenshot/';

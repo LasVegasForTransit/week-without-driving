@@ -19,15 +19,6 @@ whether analytics is enabled, and the analytics repository's
 [privacy contract](https://github.com/LasVegasForTransit/analytics/blob/main/docs/security/reference/privacy-contract.md)
 is the rule every event follows.
 
-Volunteers can open **Campaign report** from the protected `/admin` page. It counts saved signups,
-people with plans, people with entries, review status, entries by campaign day and mode, and signups
-by date and partner link. **Download aggregate CSV** gives the same counts for a spreadsheet. The
-report contains no participant contact details or trip locations. Its signup dates are in UTC;
-campaign entry days use the October 1–8 dates chosen by participants. The entry rate divides people
-with a current entry by all signups. It is not a visit-to-signup conversion rate. Cloudflare Web
-Analytics remains the source for visits and referrers; browser privacy settings can prevent those
-measurements, while saved campaign records remain authoritative for registrations and entries.
-
 ## When analytics run
 
 The analytics runtime is added only when a build has `PUBLIC_LVBT_CWA_TOKEN`, lvwwd.org's Web
