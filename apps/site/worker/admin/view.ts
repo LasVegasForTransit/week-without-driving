@@ -176,6 +176,7 @@ export function adminPage(
     <p class="tabs">
       <a href="#queue">Check entries</a><a href="#tag">Log a tag</a><a href="#draw">Draw</a
       ><a href="#counts">Counts</a><a href="#reminders">Reminders</a
+      ><a href="/admin/report">Campaign report</a
       ><a href="/api/admin/entries.csv">Download entries (CSV)</a>
     </p>
     ${queue(filters, data)} ${tagForm(prefill)} ${drawSection(c, data)} ${counts(data)}
