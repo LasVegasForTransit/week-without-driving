@@ -2,7 +2,7 @@ import type { ApiEnv, Env } from '../env';
 import type { AdminContext } from './common';
 import { drawWinner } from './draw';
 import { entriesCsv, screenshot } from './files';
-import { forbiddenPage, previewLogin, volunteerFor } from './gate';
+import { forbiddenPage, volunteerFor } from './gate';
 import { messagePage } from './html';
 import { logTag } from './log';
 import { sendTestReminder } from './push';
@@ -76,7 +76,6 @@ export async function handleAdmin(
   ctx: ExecutionContext,
 ): Promise<Response> {
   const url = new URL(request.url);
-  if (url.pathname === '/admin/preview-login') return previewLogin(url, env);
   const now = new Date();
   const volunteer = await volunteerFor(request, env, now);
   if (!volunteer) return forbiddenPage();
@@ -100,9 +99,9 @@ export async function handleAdmin(
       .bind(volunteer, now.toISOString())
       .run();
     return await run(route, { request, url, env, ctx, now, volunteer });
-  } catch (error) {
-    // The route, never the address: a screenshot's address names a participant.
-    console.error('Admin request failed', request.method, route.run.name, error);
+  } catch {
+    // Provider errors may include submitted values. Log only the fixed handler name.
+    console.error('Admin request failed', request.method, route.run.name);
     return messagePage(500, 'Something went wrong', 'Try again in a minute.');
   }
 }

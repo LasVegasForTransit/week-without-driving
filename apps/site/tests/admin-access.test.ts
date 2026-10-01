@@ -16,8 +16,7 @@ import {
 import { type Outbound, type Platform, fakeOutbound, startPlatform } from './support/platform';
 
 // Who can open the admin views: a volunteer Cloudflare Access signed in,
-// checked again by the Worker, or, on the preview only, a tester with the
-// preview key. Run through the real Worker against a local D1 database.
+// checked again by the Worker. Run through the real Worker against a local D1 database.
 describe('admin access', () => {
   let platform: Platform;
   let outbound: Outbound;
@@ -65,6 +64,29 @@ describe('admin access', () => {
     expect(body).not.toContain('binding');
   });
 
+  it('keeps provider errors and participant details out of responses and logs', async () => {
+    const privateDetail = 'private-person@example.test /photos/private-person/1-secret.png';
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const DB = {
+        prepare: () => {
+          throw new Error(privateDetail);
+        },
+      } as unknown as D1Database;
+      const response = await platform.send(adminGet('/admin', await accessToken(keys)), {
+        ...ACCESS_ENV,
+        DB,
+      });
+      expect(response.status).toBe(500);
+      expect(response.headers.get('Cache-Control')).toBe('no-store');
+      expect(await response.text()).not.toContain(privateDetail);
+      expect(log).toHaveBeenCalledWith('Admin request failed', 'GET', 'showAdmin');
+      expect(JSON.stringify(log.mock.calls)).not.toContain(privateDetail);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
   it('accepts an audience written as a single string', async () => {
     const response = await open(await accessToken(keys, { aud: ACCESS_ENV.ACCESS_AUD }));
     expect(response.status).toBe(200);
@@ -74,19 +96,30 @@ describe('admin access', () => {
     await seedEntry(platform, {
       participantId: await seedParticipant(platform, { contact: 'a@b.co' }),
     });
-    for (const path of ['/admin', '/admin/', '/api/admin/entries.csv', '/api/admin/screenshot/x']) {
+    for (const path of [
+      '/admin',
+      '/admin/',
+      '/api/admin/entries.csv',
+      '/api/admin/screenshot/x',
+      '/api/admin',
+      '/admin/unknown',
+    ]) {
       const response = await platform.send(adminGet(path), ACCESS_ENV);
       expect(response.status).toBe(403);
       expect(await response.text()).not.toContain('a@b.co');
     }
-    const post = await platform.send(
-      adminPost('/admin/entries/check', { id: '1', seen: '2026-10-03T18:00:00.000Z' }),
-      ACCESS_ENV,
-    );
-    expect(post.status).toBe(403);
-    expect(
-      await countRows(platform, 'SELECT count(*) AS n FROM checkins WHERE checked_at IS NOT NULL'),
-    ).toBe(0);
+    for (const path of [
+      '/admin/entries/check',
+      '/admin/entries/remove',
+      '/admin/entries/restore',
+      '/admin/tags',
+      '/admin/draw',
+      '/admin/push/test',
+    ]) {
+      const post = await platform.send(adminPost(path, {}), ACCESS_ENV);
+      expect(post.status).toBe(403);
+      expect(post.headers.get('Cache-Control')).toBe('no-store');
+    }
     expect(await countRows(platform, 'SELECT count(*) AS n FROM volunteers')).toBe(0);
   });
 
@@ -164,47 +197,55 @@ describe('admin access', () => {
     expect(response.headers.get('Referrer-Policy')).not.toBe('no-referrer');
   });
 
-  describe('the preview key', () => {
-    const login = (key: string, env: Record<string, string | undefined>) =>
-      platform.send(adminGet(`/admin/preview-login?key=${key}`), env);
-    const withCookie = (cookie: string, env: Record<string, string | undefined>) =>
-      platform.send(adminGet('/admin', undefined, cookie), env);
-
-    it('signs a tester in for 8 hours when the key matches', async () => {
-      const env = { PREVIEW_ADMIN_KEY: PREVIEW_KEY };
-      const response = await login(PREVIEW_KEY, env);
-      expect(response.status).toBe(303);
-      expect(response.headers.get('Location')).toBe('/admin');
-      const cookies = response.headers.getSetCookie();
-      expect(cookies.some((cookie) => /Path=\/admin(;|$)/.test(cookie))).toBe(true);
-      for (const cookie of cookies) {
-        expect(cookie).toMatch(/^lvwwd_admin_preview=/);
-        for (const part of ['HttpOnly', 'Secure', 'SameSite=Strict', 'Max-Age=28800']) {
-          expect(cookie).toContain(part);
-        }
-      }
-      const page = await withCookie(`lvwwd_admin_preview=${PREVIEW_KEY}`, env);
-      expect(page.status).toBe(200);
-      const row = await platform.env.DB.prepare('SELECT email FROM volunteers').first();
-      expect(row).toEqual({ email: 'preview@lvwwd.org' });
-    });
-
-    it('refuses a wrong key, and sets no cookie', async () => {
-      const response = await login('b'.repeat(64), { PREVIEW_ADMIN_KEY: PREVIEW_KEY });
+  it('rejects retired preview keys on every admin route, even if still bound', async () => {
+    const env = { ...ACCESS_ENV, PREVIEW_ADMIN_KEY: PREVIEW_KEY };
+    for (const path of [
+      '/admin',
+      '/api/admin/entries.csv',
+      '/api/admin/screenshot/x',
+      `/admin/preview-login?key=${PREVIEW_KEY}`,
+    ]) {
+      const response = await platform.send(
+        adminGet(path, undefined, `lvwwd_admin_preview=${PREVIEW_KEY}`),
+        env,
+      );
       expect(response.status).toBe(403);
       expect(response.headers.getSetCookie()).toHaveLength(0);
-      const page = await withCookie(`lvwwd_admin_preview=${'b'.repeat(64)}`, {
-        PREVIEW_ADMIN_KEY: PREVIEW_KEY,
-      });
-      expect(page.status).toBe(403);
-    });
+      expect(response.headers.get('Cache-Control')).toBe('no-store');
+    }
+    expect(await countRows(platform, 'SELECT count(*) AS n FROM volunteers')).toBe(0);
+  });
 
-    it('does not exist when the key is not set, or is too short to be safe', async () => {
-      for (const env of [{}, { PREVIEW_ADMIN_KEY: 'short' }]) {
-        const key = env.PREVIEW_ADMIN_KEY ?? PREVIEW_KEY;
-        expect((await login(key, env)).status).toBe(403);
-        expect((await withCookie(`lvwwd_admin_preview=${key}`, env)).status).toBe(403);
-      }
-    });
+  it.each([null, 'tomorrow', {}, [], 9e9].map((nbf) => ({ nbf })))(
+    'rejects malformed or future not-before claims: %j',
+    async ({ nbf }) => {
+      expect((await open(await accessToken(keys, { nbf }))).status).toBe(403);
+    },
+  );
+
+  it('rejects non-finite NumericDates even in a signed token', async () => {
+    const valid = await accessToken(keys);
+    const [head = '', body = ''] = valid.split('.');
+    const claims = JSON.parse(atob(body.replace(/-/g, '+').replace(/_/g, '/'))) as Record<
+      string,
+      unknown
+    >;
+    for (const field of ['exp', 'nbf']) {
+      const raw = JSON.stringify({ ...claims, [field]: 'overflow' }).replace('"overflow"', '1e400');
+      const encoded = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const payload = `${head}.${encoded}`;
+      const signed = new Uint8Array(
+        await crypto.subtle.sign(
+          'RSASSA-PKCS1-v1_5',
+          keys.privateKey,
+          new TextEncoder().encode(payload),
+        ),
+      );
+      const signature = btoa(String.fromCharCode(...signed))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+      expect((await open(`${payload}.${signature}`)).status).toBe(403);
+    }
   });
 });

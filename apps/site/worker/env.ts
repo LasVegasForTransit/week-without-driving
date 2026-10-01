@@ -37,12 +37,6 @@ export interface Env {
   ACCESS_TEAM_DOMAIN?: string;
   /** The Application Audience (AUD) tag of the lvwwd.org admin Access application. */
   ACCESS_AUD?: string;
-  /**
-   * Preview Worker only, and always a secret: a key that lets a tester into
-   * /admin without Access (see worker/admin/gate.ts). Production must never
-   * set it.
-   */
-  PREVIEW_ADMIN_KEY?: string;
   /** "true" on the preview Worker only: the draw can run before October 14. */
   PREVIEW_DRAW_ANYTIME?: string;
   /**

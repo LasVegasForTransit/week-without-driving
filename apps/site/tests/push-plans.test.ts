@@ -263,8 +263,14 @@ describe('event reminders for saved plans', () => {
   it('handles September 30 for one-day lead times', async () => {
     await plan(1440, 1);
     await subscribe();
-    await run('2026-09-30T17:00:00.000Z');
-    expect(service.requests).toHaveLength(1);
+    // Keep this historical execution independent of the machine's date.
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-09-30T17:00:00.000Z'));
+    try {
+      await run('2026-09-30T17:00:00.000Z');
+      expect(service.requests).toHaveLength(1);
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it('covers October 8 evening in Las Vegas, which is October 9 UTC', async () => {

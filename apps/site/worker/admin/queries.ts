@@ -167,8 +167,8 @@ async function partnerCounts(db: D1Database): Promise<PartnerCount[] | null> {
     return partners
       .map((partner) => ({ name: partner.name, signUps: counted.get(partner.slug) ?? 0 }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  } catch (error) {
-    console.error('Counting sign-ups by partner failed', error);
+  } catch {
+    console.error('Counting sign-ups by partner failed');
     return null;
   }
 }

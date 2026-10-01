@@ -10,6 +10,7 @@ export default defineConfig({
     entrypoint: '../site/worker/index.ts',
     observability: {
       enabled: true,
+      redactQueryString: true,
     },
     assets: {
       htmlHandling: 'drop-trailing-slash',
