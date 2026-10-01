@@ -89,6 +89,7 @@
   .section-anchor__glyph,
   [data-install-button],
   [data-update-bar],
+  [data-tab-bar],
   [data-screen-action] {
     display: none !important;
   }

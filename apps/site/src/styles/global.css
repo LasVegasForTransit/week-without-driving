@@ -1663,11 +1663,123 @@ body {
     color: var(--color-on-surface-variant);
   }
 
+  /* The tab bar: fixed to the bottom of phones and tablets, five tabs of
+     icon over label, like an app's. Below 72rem it carries the sign-up
+     button, so the header drops its own. Wide screens hide it and show the
+     header links instead. */
+  .tab-bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: var(--z-header);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--color-surface);
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
+    box-shadow: 0 -6px 20px -14px rgb(0 0 0 / 0.35);
+  }
+  .tab-bar__list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    max-width: 40rem;
+    margin-inline: auto;
+  }
+  .tab-bar__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 3.75rem;
+    padding: 0.4rem 0.15rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--color-on-surface-variant);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .tab-bar__icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0.1rem;
+    border-radius: 999px;
+  }
+  .tab-bar__link:hover {
+    color: var(--color-on-surface);
+  }
+  .tab-bar__link[aria-current='page'] {
+    color: var(--color-primary-ink);
+  }
+  .tab-bar__link[aria-current='page'] .tab-bar__icon {
+    width: 3.25rem;
+    padding-inline: 0.85rem;
+    background: var(--color-primary-soft);
+  }
+  .tab-bar__link:focus-visible {
+    outline: 3px solid var(--color-primary-warm);
+    outline-offset: -3px;
+  }
+  @media (forced-colors: active) {
+    .tab-bar {
+      border-top: 1px solid CanvasText;
+    }
+    .tab-bar__link[aria-current='page'] {
+      text-decoration: underline;
+    }
+  }
+  /* Room under the page for the bar, and focus never lands behind it. */
+  @media (max-width: 71.99rem) {
+    html {
+      scroll-padding-bottom: 5rem;
+    }
+    body {
+      padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+    }
+    .site-header .site-cta {
+      display: none;
+    }
+    /* A phone's keyboard pushes fixed bars up over the field being typed
+       in; the bar steps aside while a text field has focus. */
+    body:has(
+        :is(
+          input:not([type='checkbox'], [type='radio'], [type='button'], [type='submit']),
+          textarea,
+          select
+        ):focus
+      )
+      .tab-bar {
+      display: none;
+    }
+  }
+
+  /* On very short screens (a phone on its side at large zoom) the bar
+     would cover too much of the page; the ☰ menu and the header's sign-up
+     button take over. */
+  @media (max-width: 71.99rem) and (max-height: 22rem) {
+    .tab-bar {
+      display: none;
+    }
+    body {
+      padding-bottom: 0;
+    }
+    html {
+      scroll-padding-bottom: 0;
+    }
+  }
+  @media (min-width: 21.5rem) and (max-width: 71.99rem) and (max-height: 22rem) {
+    .site-header .site-cta {
+      display: inline-flex;
+    }
+  }
+
   @media (min-width: 72rem) {
     .site-topnav {
       display: block;
     }
     .site-menu-button {
+      display: none;
+    }
+    .tab-bar {
       display: none;
     }
     .site-header__row {
