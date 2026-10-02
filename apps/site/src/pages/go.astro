@@ -73,7 +73,9 @@ function badge(route: string) {
     route,
     label: route === 'DEUCE' ? 'Deuce' : route === 'RED LINE' ? 'Red Line' : route,
     color,
-    ink: onBlack >= onWhite ? '#111111' : '#FFFFFF',
+    // Pure black, not a softer near-black: RTC's red needs every bit of
+    // contrast to reach 4.5:1.
+    ink: onBlack >= onWhite ? '#000000' : '#FFFFFF',
   };
 }
 const MAX_BADGES = 4;
