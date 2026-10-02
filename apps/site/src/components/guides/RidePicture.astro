@@ -1,0 +1,241 @@
+---
+// Simple drawings for "Ride the bus for the first time", one per step, so
+// a rider can see what to do before reading about it. Each drawing is
+// decorative (aria-hidden); its caption says the same thing in words.
+// Colors come from the site's tokens, so the drawings follow light and
+// dark mode like the rest of the page.
+interface Props {
+  kind: 'ride-plan' | 'ride-board' | 'ride-stop' | 'ride-ramp';
+}
+
+const { kind } = Astro.props;
+
+const captions = {
+  'ride-plan': 'Your map app shows the bus number, the stop, and when to be there.',
+  'ride-board': 'Check the number on the front of the bus. Wave so the driver sees you.',
+  'ride-stop': 'One block before your stop, press the yellow strip or the stop button.',
+  'ride-ramp': 'Ask the driver to lower the bus and put out the ramp. Roll on at the front door.',
+} as const;
+---
+
+<figure class="ride-picture">
+  <svg viewBox="0 0 320 180" aria-hidden="true" focusable="false" class="ride-picture__svg">
+    {
+      kind === 'ride-plan' && (
+        <g>
+          {/* A phone with a map: a route line from you to a pin, and a bus on the way. */}
+          <rect x="104" y="8" width="112" height="164" rx="16" class="rp-ink" />
+          <rect x="112" y="22" width="96" height="136" rx="6" class="rp-paper" />
+          <path d="M126 140 C 150 120, 140 96, 168 88 S 196 58, 190 40" class="rp-route" />
+          <circle cx="126" cy="140" r="7" class="rp-warm" />
+          <circle cx="126" cy="140" r="3" class="rp-paper" />
+          <path
+            d="M190 26 c -9 0 -15 7 -15 15 c 0 11 15 24 15 24 s 15 -13 15 -24 c 0 -8 -6 -15 -15 -15 z"
+            class="rp-primary"
+          />
+          <circle cx="190" cy="41" r="5" class="rp-paper" />
+          <rect x="150" y="84" width="30" height="20" rx="4" class="rp-primary" />
+          <rect x="154" y="88" width="22" height="7" rx="1" class="rp-paper" />
+          <circle cx="156" cy="106" r="3" class="rp-ink" />
+          <circle cx="174" cy="106" r="3" class="rp-ink" />
+          {/* A time bubble: the bus comes in 8 minutes. */}
+          <rect x="226" y="62" width="82" height="44" rx="12" class="rp-warm" />
+          <path d="M226 84 l -12 8 l 12 2 z" class="rp-warm" />
+          <text x="267" y="92" text-anchor="middle" class="rp-big rp-on-warm">
+            8 min
+          </text>
+          {/* The route number, as the app shows it. */}
+          <rect x="12" y="62" width="80" height="44" rx="12" class="rp-primary" />
+          <text x="52" y="92" text-anchor="middle" class="rp-big rp-on-primary">
+            215
+          </text>
+          <path d="M92 84 l 12 6 l -12 4 z" class="rp-primary" />
+        </g>
+      )
+    }
+    {
+      kind === 'ride-board' && (
+        <g>
+          {/* A bus stop sign. */}
+          <rect x="34" y="40" width="6" height="128" class="rp-ink" />
+          <rect x="14" y="18" width="46" height="34" rx="6" class="rp-primary" />
+          <text x="37" y="41" text-anchor="middle" class="rp-small rp-on-primary">
+            BUS
+          </text>
+          {/* A rider waving. */}
+          <circle cx="86" cy="80" r="11" class="rp-ink" />
+          <path d="M86 92 L 86 134 M86 134 L 76 166 M86 134 L 96 166" class="rp-limb" />
+          <path d="M86 102 L 70 120 M86 102 L 104 76" class="rp-limb" />
+          <path d="M110 66 q 6 -6 12 0 M114 58 q 8 -8 16 0" class="rp-wave" />
+          {/* The front of the bus, with its sign. */}
+          <rect x="150" y="20" width="156" height="150" rx="18" class="rp-primary" />
+          <rect x="162" y="30" width="132" height="30" rx="5" class="rp-ink" />
+          <text x="228" y="52" text-anchor="middle" class="rp-sign">
+            215 Bonanza
+          </text>
+          <rect x="162" y="68" width="132" height="58" rx="6" class="rp-glass" />
+          <circle cx="178" cy="146" r="9" class="rp-warm" />
+          <circle cx="278" cy="146" r="9" class="rp-warm" />
+          <rect x="204" y="140" width="48" height="12" rx="3" class="rp-ink" />
+          {/* An arrow to the sign: look here. */}
+          <path d="M128 18 C 150 6, 176 8, 190 26" class="rp-arrow" />
+          <path d="M186 16 l 6 12 l -12 0 z" class="rp-warm" />
+        </g>
+      )
+    }
+    {
+      kind === 'ride-stop' && (
+        <g>
+          {/* Inside the bus: a window with the yellow stop strip under it. */}
+          <rect x="12" y="20" width="200" height="74" rx="8" class="rp-glass" />
+          <rect x="12" y="100" width="200" height="12" rx="6" class="rp-strip" />
+          {/* A hand pressing the strip. */}
+          <path
+            d="M100 160 L 100 124 q 0 -8 7 -8 q 7 0 7 8 L 114 136 q 0 -6 6 -6 q 6 0 6 6 L 126 140 q 0 -6 6 -6 q 6 0 6 6 L 138 160 z"
+            class="rp-hand"
+          />
+          <path d="M92 106 l -10 -6 M136 106 l 10 -6 M114 96 l 0 -10" class="rp-wave" />
+          {/* The stop button and the sign that lights up. */}
+          <rect x="232" y="20" width="76" height="40" rx="8" class="rp-ink" />
+          <text x="270" y="46" text-anchor="middle" class="rp-small rp-sign">
+            STOP
+          </text>
+          <text x="270" y="74" text-anchor="middle" class="rp-small rp-ink-text">
+            REQUESTED
+          </text>
+          <circle cx="270" cy="128" r="26" class="rp-primary" />
+          <circle cx="270" cy="128" r="16" class="rp-warm" />
+          <text x="270" y="133" text-anchor="middle" class="rp-tiny rp-on-warm">
+            STOP
+          </text>
+        </g>
+      )
+    }
+    {
+      kind === 'ride-ramp' && (
+        <g>
+          {/* The curb and street. */}
+          <rect x="0" y="150" width="320" height="30" class="rp-glass" />
+          <rect x="0" y="138" width="120" height="14" class="rp-ink" />
+          {/* The side of a lowered bus, front door open. */}
+          <rect x="150" y="34" width="166" height="110" rx="14" class="rp-primary" />
+          <rect x="166" y="48" width="36" height="88" rx="4" class="rp-paper" />
+          <rect x="214" y="48" width="92" height="40" rx="5" class="rp-glass" />
+          <circle cx="282" cy="150" r="14" class="rp-ink" />
+          <circle cx="282" cy="150" r="6" class="rp-paper" />
+          {/* The ramp, from the door down to the curb. */}
+          <path d="M166 136 L 116 140" class="rp-ramp" />
+          {/* A wheelchair rider on the curb. */}
+          <circle cx="70" cy="64" r="10" class="rp-ink" />
+          <path d="M70 76 L 70 104 L 92 104 L 98 124" class="rp-limb" />
+          <path d="M70 88 L 88 96" class="rp-limb" />
+          <circle cx="66" cy="118" r="18" class="rp-wheel" />
+          <circle cx="98" cy="132" r="5" class="rp-ink" />
+          {/* An arrow: lower the bus. */}
+          <path d="M136 30 L 136 70" class="rp-arrow" />
+          <path d="M128 62 l 8 12 l 8 -12 z" class="rp-warm" />
+        </g>
+      )
+    }
+  </svg>
+  <figcaption class="ride-picture__caption">{captions[kind]}</figcaption>
+</figure>
+
+<style>
+  .ride-picture {
+    max-width: 26rem;
+    padding: 1rem;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
+  .ride-picture__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .ride-picture__caption {
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .rp-ink {
+    fill: var(--color-on-surface);
+  }
+  .rp-ink-text {
+    fill: var(--color-on-surface);
+    font-weight: 800;
+  }
+  .rp-paper {
+    fill: var(--color-surface);
+  }
+  .rp-primary {
+    fill: var(--color-primary);
+  }
+  .rp-warm {
+    fill: var(--color-primary-warm);
+  }
+  .rp-glass {
+    fill: color-mix(in srgb, var(--color-surface) 80%, #8ec5e8);
+  }
+  .rp-strip {
+    fill: #f5c400;
+  }
+  .rp-hand {
+    fill: #c98a63;
+    stroke: var(--color-on-surface);
+    stroke-width: 2;
+  }
+  .rp-route {
+    fill: none;
+    stroke: var(--color-primary-warm);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 2 9;
+  }
+  .rp-limb {
+    fill: none;
+    stroke: var(--color-on-surface);
+    stroke-width: 7;
+    stroke-linecap: round;
+  }
+  .rp-ramp {
+    fill: none;
+    stroke: var(--color-primary-warm);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .rp-wheel {
+    fill: none;
+    stroke: var(--color-on-surface);
+    stroke-width: 6;
+  }
+  .rp-wave,
+  .rp-arrow {
+    fill: none;
+    stroke: var(--color-primary-warm);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .rp-big {
+    font: 800 22px var(--font-sans);
+  }
+  .rp-small {
+    font: 800 14px var(--font-sans);
+    letter-spacing: 0.06em;
+  }
+  .rp-tiny {
+    font: 800 10px var(--font-sans);
+  }
+  .rp-sign {
+    fill: #ffb547;
+    font: 800 17px var(--font-sans);
+    letter-spacing: 0.04em;
+  }
+  .rp-on-primary {
+    fill: var(--color-on-primary);
+  }
+  .rp-on-warm {
+    fill: var(--color-on-primary-warm);
+  }
+</style>

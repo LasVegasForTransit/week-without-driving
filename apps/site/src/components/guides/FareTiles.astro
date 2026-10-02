@@ -1,0 +1,65 @@
+---
+// The fares a first-time rider needs, as big numbers instead of a
+// sentence. Values come from `fares` in src/lib/wwd.ts, which matches the
+// fare guide's own text.
+import { Icon } from 'astro-icon/components';
+import { fares } from '../../lib/wwd';
+
+const tiles = [
+  { price: fares.singleRide, label: 'One ride', icon: 'mdi:bus' },
+  { price: fares.twoHourPass, label: '2 hours of rides', icon: 'mdi:timer-outline' },
+  { price: fares.dayPass, label: '24 hours of rides', icon: 'mdi:white-balance-sunny' },
+  { price: fares.monthPass, label: '30 days of rides', icon: 'mdi:calendar-month-outline' },
+] as const;
+---
+
+<ul class="fare-tiles" aria-label="Bus fares for local riders">
+  {
+    tiles.map((tile) => (
+      <li class="fare-tile">
+        <Icon name={tile.icon} class="fare-tile__icon" aria-hidden="true" />
+        <span class="fare-tile__price">{tile.price}</span>
+        <span class="fare-tile__label">{tile.label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .fare-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    max-width: 30rem;
+  }
+  .fare-tile {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.9rem 1rem;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
+  .fare-tile:first-child {
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+  }
+  .fare-tiles :global(.fare-tile__icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .fare-tile__price {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .fare-tile__label {
+    font-weight: 700;
+  }
+  @media (min-width: 40rem) {
+    .fare-tiles {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 44rem;
+    }
+  }
+</style>

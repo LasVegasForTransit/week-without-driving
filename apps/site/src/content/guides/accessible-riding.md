@@ -2,55 +2,54 @@
 title: 'Ride with a wheelchair, walker or stroller'
 order: 3
 icon: 'mdi:wheelchair-accessibility'
-cardSummary:
-  'How to get on and off with a ramp or lift, where to ride, and what RTC Paratransit is.'
+cardSummary: 'Get on and off with the ramp or lift, where to sit, and what RTC Paratransit is.'
 intro: >-
-  RTC, the Regional Transportation Commission of Southern Nevada, runs the buses in Las Vegas. Every
-  RTC bus has a ramp or lift, and the driver can lower the front of the bus to the curb. This guide
-  shows how to get on and off with a wheelchair, walker or stroller, what you can ask the driver,
-  and how RTC Paratransit works.
+  Every RTC bus has a ramp or lift. The driver can also lower the front of the bus to the curb.
+  Here's how to get on and off, what to ask the driver, and how RTC Paratransit works.
 steps:
   - heading: 'Get on the bus'
     icon: 'mdi:bus-side'
+    picture: 'ride-ramp'
     body:
       - >-
-        Wait where the driver can see you. Every RTC bus has a ramp or lift at the front door, and
-        the driver can lower the front step to the curb. This is called kneeling.
+        Wait where the driver can see you. The ramp or lift is at the front door. The driver can
+        lower the front step to the curb. This is called kneeling.
       - >-
-        You can ask the driver to kneel the bus or put out the ramp or lift if you use a wheelchair,
-        mobility scooter, walker or stroller.
+        Use a wheelchair, scooter, walker or stroller? Ask the driver to kneel the bus or put out
+        the ramp or lift.
       - >-
-        If you bring a child in a stroller, take the child out and fold the stroller once you board.
-        Keep it out of the aisle. RTC does not allow a child to ride in an open stroller on the bus.
+        Have a child in a stroller? Take the child out and fold the stroller once you get on. Keep
+        it out of the aisle. A child can't ride in an open stroller on the bus.
       - >-
-        If you're not sure your wheelchair or scooter fits the ramp, ask the driver. They can tell
-        you before you try to board.
-    note: 'Ask RTC Customer Care about a particular mobility device before your trip: 702-228-7433.'
+        Not sure your wheelchair or scooter fits the ramp? Ask the driver before you try to get on.
+    note:
+      'Have a question about your wheelchair or scooter? Call RTC Customer Care before your trip.'
+    links:
+      - label: 'Call RTC: 702-228-7433'
+        href: 'tel:+17022287433'
   - heading: 'Ride at the front and get off'
     icon: 'mdi:seat-passenger'
     body:
       - >-
-        The securement area is the open space at the front of the bus with straps that hold a
-        wheelchair or scooter in place. The seats nearest it are priority seats for older adults and
-        people with disabilities.
+        The open space at the front has straps that hold a wheelchair or scooter in place. The seats
+        next to it are for older adults and people with disabilities.
       - >-
-        You can ask the driver for help, including to call out your stop. RTC drivers announce major
-        stops, transfer points and other key places along the route. Service animals are welcome on
-        board.
+        You can ask the driver for help, like calling out your stop. Drivers call out big stops and
+        places to change buses. Service animals are welcome.
       - >-
-        To get off, press the stop request, tell the driver you need the ramp or lift, and wait for
-        the bus to kneel before you move to the door.
+        To get off, press the stop button. Tell the driver you need the ramp or lift. Wait for the
+        bus to kneel, then go to the door.
   - heading: 'Know about RTC Paratransit'
     icon: 'mdi:car-multiple'
     body:
       - >-
-        RTC Paratransit is a door-to-door shared ride for people whose disability keeps them from
-        using the regular bus some or all of the time.
+        RTC Paratransit is a shared ride from your door to where you're going. It's for people whose
+        disability keeps them from using the regular bus some or all of the time.
       - >-
-        You apply to RTC first to be found eligible, then book each ride in advance. A ride on RTC
-        Paratransit counts as not driving during the week, the same as a ride on the bus.
+        First, apply to RTC. Once you're approved, book each ride ahead of time. A Paratransit ride
+        counts as a trip without driving, just like the bus.
       - >-
-        Check RTC's Paratransit pages for how to apply, book a ride and pay your fare.
+        RTC's Paratransit pages show how to apply, book a ride and pay.
     links:
       - label: 'RTC riding and accessibility guidance'
         href: 'https://www.rtcsnv.com/ways-to-travel/how-to-ride/'

@@ -28,6 +28,11 @@ const guides = defineCollection({
           // A valid `mdi:*` name, or "shade-diagram" for the heat guide's
           // custom morning/afternoon shade illustration.
           icon: z.string(),
+          // A drawing or set of big numbers shown above the step's words,
+          // for readers who take in a picture faster than a paragraph.
+          picture: z
+            .enum(['ride-plan', 'ride-board', 'ride-stop', 'ride-ramp', 'fares', 'audit-list'])
+            .optional(),
           body: z.array(z.string()).min(1),
           note: z.string().optional(),
           links: z

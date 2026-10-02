@@ -22,7 +22,9 @@ export const wwd = {
 // together.
 export const fares = {
   singleRide: '$2',
+  twoHourPass: '$3',
   dayPass: '$5',
+  monthPass: '$65',
 } as const;
 
 // Links out to the national campaign and local tools, grouped by who they
