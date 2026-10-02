@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WinBand from '../components/WinBand.astro';
-import { destinations, finderPlaces } from '../lib/destinations';
+import { destinations, finderPlaces, routesIn } from '../lib/destinations';
+import routeData from '../../public/data/routes.json';
 import { parseInlineLinks } from '../lib/inline-links';
 import { buildMapLinks } from '../lib/map-links';
 import { comparePublished } from '../lib/compare-release';
@@ -52,8 +53,38 @@ const wherePlaces = destinations.map((destination) => {
   };
 });
 
+// Each place's buses as colored badges, in RTC's own route colors, so a
+// rider can spot "215" on a bus sign before reading a sentence. Text on a
+// badge is black or white, whichever contrasts more with the color.
+const routeColors = new Map(routeData.routes.map((route) => [route.shortName, route.color]));
+function luminance(hex: string): number {
+  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function badge(route: string) {
+  const color = routeColors.get(route) ?? '#6B6E75';
+  const light = luminance(color);
+  const onBlack = (light + 0.05) / 0.05;
+  const onWhite = 1.05 / (light + 0.05);
+  return {
+    route,
+    label: route === 'DEUCE' ? 'Deuce' : route === 'RED LINE' ? 'Red Line' : route,
+    color,
+    ink: onBlack >= onWhite ? '#111111' : '#FFFFFF',
+  };
+}
+const MAX_BADGES = 4;
+function placeBadges(steps: readonly string[]) {
+  const routes = [...new Set(steps.flatMap(routesIn))];
+  const shown = routes.length > MAX_BADGES ? routes.slice(0, MAX_BADGES - 1) : routes;
+  return { badges: shown.map(badge), more: routes.length - shown.length };
+}
+
 const mapButtonClass =
-  'press inline-flex min-h-11 items-center gap-2 border border-outline px-5 py-2.5 font-semibold no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface';
+  'press inline-flex min-h-11 items-center gap-2 rounded-full border border-outline px-4 py-2 text-sm font-semibold no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface';
 ---
 
 <BaseLayout title="Plan a trip · Week Without Driving Las Vegas" description={description}>
@@ -143,43 +174,35 @@ const mapButtonClass =
         </p>
 
         <h3 class="where__subtitle">Before you go</h3>
-        <ol class="where__checklist">
-          <li>
-            <Icon name="mdi:cash" class="where__icon" aria-hidden="true" />
-            <span
-              >Bring {fares.singleRide} for one ride, or {fares.dayPass} for 24 hours of rides. Drivers
-              don’t carry change. <a href="/guides/pay-your-fare" class="body-link">Ways to pay</a
-              ></span
-            >
+        <ul class="where__tiles">
+          <li class="where__tile where__tile--fare">
+            <span class="where__price">{fares.singleRide}</span>
+            <span>one ride</span>
+            <span class="where__price where__price--second">{fares.dayPass}</span>
+            <span>24 hours</span>
+            <a href="/guides/pay-your-fare" class="body-link where__tile-link">Ways to pay</a>
           </li>
-          <li>
+          <li class="where__tile">
             <Icon name="mdi:bus-stop" class="where__icon" aria-hidden="true" />
-            <span
-              >First time on the bus? <a href="/guides/first-ride" class="body-link"
-                >Ride the bus in three steps</a
-              ></span
-            >
+            <span>First time on the bus?</span>
+            <a href="/guides/first-ride" class="body-link where__tile-link">3 easy steps</a>
           </li>
-          <li>
+          <li class="where__tile">
             <Icon name="mdi:water-outline" class="where__icon" aria-hidden="true" />
-            <span
-              >Bring water, and wait in the shade when you can. <a
-                href="/guides/heat"
-                class="body-link">Stay cool</a
-              ></span
-            >
+            <span>Bring water. Wait in the shade.</span>
+            <a href="/guides/heat" class="body-link where__tile-link">Stay cool</a>
           </li>
-          <li>
+          <li class="where__tile">
             <Icon name="mdi:gift-outline" class="where__icon" aria-hidden="true" />
-            <span
-              >After your trip, tell us about it for a chance to win a 30-day bus pass. <a
-                href="/sign-up"
-                class="body-link"
-                data-signup-link><span data-signup-label>Sign up to win</span></a
-              ></span
+            <span>Tell us about your trip. You could win a bus pass.</span>
+            <a href="/sign-up" class="body-link where__tile-link" data-signup-link
+              ><span data-signup-label>Sign up to win</span></a
             >
           </li>
-        </ol>
+        </ul>
+        <p class="mt-3 text-sm text-on-surface-variant">
+          Drivers don’t have change. Bring the exact amount.
+        </p>
         <button type="button" class="btn btn--outline mt-6" data-where-again
           >Plan another trip</button
         >
@@ -194,18 +217,9 @@ const mapButtonClass =
           </a>
         )
       }
-      <a href="#find-routes" class="where__chip">Find a bus near you</a>
-      <a href="#places-to-go" class="where__chip">Step-by-step to 7 places</a>
+      <a href="#find-routes" class="where__chip">Stops near you</a>
+      <a href="#places-to-go" class="where__chip">Step-by-step trips</a>
     </nav>
-
-    <div class="mt-8 border-l-4 border-primary bg-surface-container p-5 leading-relaxed">
-      <p class="font-bold">Going to work or school?</p>
-      <p class="mt-1">
-        <a href="https://www.rtcsnv.com/ways-to-travel/club-ride/" class="body-link"
-          >RTC Club Ride</a
-        > can help you plan another way there. Its rewards are separate from the LVBT giveaway.
-      </p>
-    </div>
   </section>
   {/* FIND A BUS — the nearest-route finder, straight under the title */}
   <section
@@ -313,102 +327,136 @@ const mapButtonClass =
   >
     <div class="container-page border-t border-outline-variant/15 py-16 md:py-24">
       <h2 id="places-to-go-heading" class="text-headline-lg">Places to go</h2>
+      <p class="page-lede">Seven trips across the valley, step by step. Tap one to open it.</p>
 
-      <div class="mt-12 space-y-16">
+      <div class="places mt-8">
         {
           destinations.map((destination) => (
-            <article id={destination.anchor} class="scroll-mt-24 border-t-2 border-outline pt-8">
-              <h3 class="text-headline-md">{destination.heading}</h3>
-              <p class="mt-3 max-w-2xl leading-relaxed text-pretty">{destination.intro}</p>
-
-              <h4 class="mt-6 text-title-md">How to get there</h4>
-              <ol class="mt-3 max-w-2xl list-decimal space-y-3 pl-5 leading-relaxed text-pretty">
-                {destination.steps.map((step) => (
-                  <li>
-                    {parseInlineLinks(step).map((segment) =>
-                      segment.href ? (
-                        <a href={segment.href} class="body-link">
-                          {segment.text}
-                        </a>
-                      ) : (
-                        segment.text
-                      ),
-                    )}
-                  </li>
-                ))}
-              </ol>
-
-              <div class="mt-6 space-y-4">
-                {destination.buttonRows.map((row) => {
-                  const links = buildMapLinks(row.lat, row.lng, row.placeName);
-                  return (
-                    <div>
-                      {row.rowLabel && (
-                        <p class="mb-2 text-sm font-bold text-on-surface-variant">{row.rowLabel}</p>
+            <details id={destination.anchor} class="place scroll-mt-24" name="places" data-place>
+              <summary class="place__summary">
+                <span class="place__text">
+                  <h3 class="place__name">{destination.heading}</h3>
+                  <span class="place__intro">{destination.intro}</span>
+                  {(() => {
+                    const { badges, more } = placeBadges(destination.steps);
+                    return badges.length > 0 ? (
+                      <span class="place__buses">
+                        <span class="sr-only">Buses: </span>
+                        {badges.map((b) => (
+                          <span
+                            class="route-badge"
+                            style={`--route:${b.color};--route-ink:${b.ink}`}
+                          >
+                            {b.label}
+                          </span>
+                        ))}
+                        {more > 0 && <span class="place__more">+{more} more</span>}
+                      </span>
+                    ) : null;
+                  })()}
+                </span>
+                <Icon name="mdi:chevron-down" class="place__chevron" aria-hidden="true" />
+              </summary>
+              <div class="place__body">
+                <h4 class="text-title-md">How to get there</h4>
+                <ol class="mt-3 max-w-2xl list-decimal space-y-3 pl-5 leading-relaxed text-pretty">
+                  {destination.steps.map((step) => (
+                    <li>
+                      {parseInlineLinks(step).map((segment) =>
+                        segment.href ? (
+                          <a href={segment.href} class="body-link">
+                            {segment.text}
+                          </a>
+                        ) : (
+                          segment.text
+                        ),
                       )}
-                      <div class="flex flex-wrap gap-2">
-                        <a
-                          href={links.google}
-                          aria-label={links.labels.google}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class={mapButtonClass}
-                        >
-                          Google Maps
-                        </a>
-                        <a
-                          href={links.apple}
-                          aria-label={links.labels.apple}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class={mapButtonClass}
-                        >
-                          Apple Maps
-                        </a>
-                        <a
-                          href={links.transit}
-                          aria-label={links.labels.transit}
-                          class={mapButtonClass}
-                        >
-                          Transit app
-                        </a>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <p class="mt-3 text-sm text-on-surface-variant">
-                The Transit app button needs the Transit app installed.
-              </p>
+                    </li>
+                  ))}
+                </ol>
 
-              {destination.note && (
-                <div class="mt-6 border-l-4 border-primary bg-surface py-3 pl-5">
-                  <p class="font-bold">{destination.note.heading}</p>
-                  <p class="mt-1 leading-relaxed text-pretty">{destination.note.text}</p>
-                  {destination.note.details && (
-                    <ul class="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-pretty">
-                      {destination.note.details.map((detail) => (
-                        <li>{detail}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {destination.note.source && (
-                    <p class="mt-3">
-                      <a href={destination.note.source.href} class="body-link">
-                        {destination.note.source.label}
-                      </a>
-                    </p>
-                  )}
+                <div class="mt-6 space-y-4">
+                  {destination.buttonRows.map((row) => {
+                    const links = buildMapLinks(row.lat, row.lng, row.placeName);
+                    return (
+                      <div>
+                        {row.rowLabel && (
+                          <p class="mb-2 text-sm font-bold text-on-surface-variant">
+                            {row.rowLabel}
+                          </p>
+                        )}
+                        <div class="flex flex-wrap gap-2">
+                          <a
+                            href={links.google}
+                            aria-label={links.labels.google}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={mapButtonClass}
+                          >
+                            Google Maps
+                          </a>
+                          <a
+                            href={links.apple}
+                            aria-label={links.labels.apple}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={mapButtonClass}
+                          >
+                            Apple Maps
+                          </a>
+                          <a
+                            href={links.transit}
+                            aria-label={links.labels.transit}
+                            class={mapButtonClass}
+                          >
+                            Transit app
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </article>
+                {destination.note && (
+                  <div class="mt-6 border-l-4 border-primary bg-surface py-3 pl-5">
+                    <p class="font-bold">{destination.note.heading}</p>
+                    <p class="mt-1 leading-relaxed text-pretty">{destination.note.text}</p>
+                    {destination.note.details && (
+                      <ul class="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-pretty">
+                        {destination.note.details.map((detail) => (
+                          <li>{detail}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {destination.note.source && (
+                      <p class="mt-3">
+                        <a href={destination.note.source.href} class="body-link">
+                          {destination.note.source.label}
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </details>
           ))
         }
+      </div>
+      <p class="mt-6 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
+        The Transit app buttons open the Transit app, so they need it installed.
+      </p>
+      <div class="mt-10 max-w-2xl border-l-4 border-primary bg-surface p-5 leading-relaxed">
+        <p class="font-bold">Going to work or school?</p>
+        <p class="mt-1">
+          <a href="https://www.rtcsnv.com/ways-to-travel/club-ride/" class="body-link"
+            >RTC Club Ride</a
+          > can help you plan another way there. Its rewards are separate from the LVBT giveaway.
+        </p>
       </div>
     </div>
   </section>
 
   <script is:inline src="/scripts/where-to.js" defer></script>
+  <script is:inline src="/scripts/open-place.js" defer></script>
   <script is:inline src="/scripts/map-links.js" defer></script>
   <script is:inline src="/scripts/nearest-routes.js" defer></script>
   <WinBand />
@@ -442,38 +490,59 @@ const mapButtonClass =
     margin-top: 2rem;
     font-size: 1.25rem;
   }
-  .where__checklist {
+  .where__tiles {
     display: grid;
-    gap: 0.9rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
     margin-top: 0.9rem;
-    line-height: 1.5;
   }
-  .where__checklist li {
+  .where__tile {
     display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    background: var(--color-surface);
+    border-radius: 0.9rem;
   }
-  .where__checklist :global(.where__icon) {
-    flex: none;
+  .where__tile-link {
+    margin-top: auto;
+    padding-top: 0.25rem;
+  }
+  .where__tiles :global(.where__icon) {
     width: 2.25rem;
     height: 2.25rem;
-    padding: 0.45rem;
+    padding: 0.4rem;
     color: var(--color-primary-ink);
     background: var(--color-primary-soft);
     border-radius: 999px;
   }
+  .where__price {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .where__price--second {
+    margin-top: 0.35rem;
+  }
   .where__more {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
     gap: 0.6rem;
-    margin-top: 1.5rem;
+    max-width: 42rem;
+    margin-top: 1.25rem;
   }
   .where__chip {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     min-height: 44px;
-    padding: 0.4rem 1rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
     font-weight: 700;
+    text-align: center;
     color: var(--color-on-surface);
     text-decoration: none;
     border: 2px solid color-mix(in srgb, var(--color-on-surface) 30%, transparent);
@@ -490,5 +559,94 @@ const mapButtonClass =
   .where__chip:focus-visible {
     border-color: var(--color-primary);
     color: var(--color-primary-ink);
+  }
+  /* Places to go: one row per place, opened one at a time. */
+  .places {
+    max-width: 44rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+  }
+  .place {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+  }
+  .place__summary {
+    /* Clear of the sticky header when scrolled or tabbed to. */
+    scroll-margin-top: 6rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 44px;
+    padding-block: 1.1rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .place__summary::-webkit-details-marker {
+    display: none;
+  }
+  .place__summary:focus-visible {
+    outline: 3px solid var(--color-primary-warm);
+    outline-offset: 2px;
+  }
+  .place__text {
+    flex: 1;
+    min-width: 0;
+  }
+  .place__name {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .place__intro {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--color-on-surface-variant);
+  }
+  .place__buses {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+  }
+  .route-badge {
+    display: inline-flex;
+    align-items: center;
+    min-width: 2.5rem;
+    justify-content: center;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--route-ink);
+    background: var(--route);
+    border-radius: 0.4rem;
+  }
+  @media (forced-colors: active) {
+    .route-badge {
+      border: 1px solid CanvasText;
+    }
+  }
+  .place__more {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-on-surface-variant);
+  }
+  .place :global(.place__chevron) {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-primary-ink);
+    transition: transform 150ms ease;
+  }
+  .place[open] :global(.place__chevron) {
+    transform: rotate(180deg);
+  }
+  .place__body {
+    padding-bottom: 1.75rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .place :global(.place__chevron) {
+      transition: none;
+    }
   }
 </style>

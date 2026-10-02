@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 import { destinations, finderPlaces } from '../../src/lib/destinations';
 import { buildMapLinks } from '../../src/lib/map-links';
@@ -7,15 +7,28 @@ import { buildMapLinks } from '../../src/lib/map-links';
 // meets them. The expected links come from the same builder and data the
 // page is made from, so a copy or coordinate change needs no test change.
 
+// Each place is a closed <details> that opens one at a time; a test opens
+// the one it checks by tapping its row, as a visitor would.
+async function openPlace(page: Page, anchor: string) {
+  const place = page.locator(`#${anchor}`);
+  if (!(await place.evaluate((el) => (el as HTMLDetailsElement).open))) {
+    await place.locator('summary').click();
+  }
+  await expect(place).toHaveAttribute('open', '');
+  return place;
+}
+
 test.describe('Places to go', () => {
-  test('lists every destination with steps and map buttons that match its places', async ({
+  test('lists every destination closed, with steps and map buttons inside that match its places', async ({
     page,
   }) => {
     await page.goto('/go');
     await expect(page.getByRole('heading', { name: 'Places to go', level: 2 })).toBeVisible();
     for (const destination of destinations) {
       const section = page.locator(`#${destination.anchor}`);
-      await expect(section.getByRole('heading', { level: 3 })).toHaveText(destination.heading);
+      await expect(section).not.toHaveAttribute('open');
+      await expect(section.locator('summary')).toContainText(destination.heading);
+      await openPlace(page, destination.anchor);
       // The three steps; a note's own list (Water Street's stop changes) is extra.
       await expect(section.locator('ol > li')).toHaveCount(3);
       for (const row of destination.buttonRows) {
@@ -30,18 +43,30 @@ test.describe('Places to go', () => {
     }
   });
 
+  test('shows each place’s buses as badges', async ({ page }) => {
+    await page.goto('/go');
+    await expect(page.locator('#east-las-vegas-library .route-badge')).toHaveText(['215', '110']);
+    await expect(page.locator('#unlv .route-badge')).toHaveText(['Red Line', '201']);
+    // Downtown names many routes: three badges, then a count.
+    await expect(page.locator('#downtown .route-badge')).toHaveCount(3);
+    await expect(page.locator('#downtown .place__more')).toHaveText(/^\+\d+ more$/);
+  });
+
   test('opens a destination from its own address', async ({ page }) => {
     for (const anchor of ['places-to-go', ...destinations.map((d) => d.anchor)]) {
       // A fresh visit each time, as when someone opens a shared link.
       await page.goto('about:blank');
       await page.goto(`/go#${anchor}`);
       await expect(page.locator(`#${anchor} :is(h2, h3)`).first()).toBeInViewport();
+      if (anchor !== 'places-to-go') {
+        await expect(page.locator(`#${anchor}`)).toHaveAttribute('open', '');
+      }
     }
   });
 
   test('keeps the Go page open behind Google Maps and Apple Maps', async ({ page }) => {
     await page.goto('/go');
-    const sunsetPark = page.locator('#sunset-park');
+    const sunsetPark = await openPlace(page, 'sunset-park');
     for (const name of [/in Google Maps$/, /in Apple Maps$/]) {
       await expect(sunsetPark.getByRole('link', { name })).toHaveAttribute('target', '_blank');
     }
@@ -53,12 +78,13 @@ test.describe('Places to go', () => {
 
   test('gives every map button room for a thumb', async ({ page }) => {
     await page.goto('/go');
-    const buttons = page.locator('#places-to-go').getByRole('link', { name: /^Directions to / });
-    await expect(buttons.first()).toBeVisible();
-    for (const button of await buttons.all()) {
-      const box = await button.boundingBox();
-      expect(box?.width).toBeGreaterThanOrEqual(44);
-      expect(box?.height).toBeGreaterThanOrEqual(44);
+    for (const destination of destinations) {
+      const place = await openPlace(page, destination.anchor);
+      for (const button of await place.getByRole('link', { name: /^Directions to / }).all()) {
+        const box = await button.boundingBox();
+        expect(box?.width).toBeGreaterThanOrEqual(44);
+        expect(box?.height).toBeGreaterThanOrEqual(44);
+      }
     }
   });
 });
@@ -66,11 +92,11 @@ test.describe('Places to go', () => {
 test.describe('Places to go without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('still shows every destination and its map buttons', async ({ page }) => {
+  test('still opens every destination and shows its map buttons', async ({ page }) => {
     await page.goto('/go');
     for (const destination of destinations) {
       const section = page.locator(`#${destination.anchor}`);
-      await expect(section.getByRole('heading', { name: destination.heading })).toBeVisible();
+      await section.locator('summary').click();
       await expect(section.getByRole('link', { name: /in Google Maps$/ }).first()).toBeVisible();
     }
   });
@@ -128,7 +154,7 @@ test.describe('Where to?', () => {
     await expect(
       page.getByRole('link', { name: `Step-by-step directions to ${destination.heading}` }),
     ).toHaveAttribute('href', `#${destination.anchor}`);
-    await expect(page.getByRole('link', { name: 'Ride the bus in three steps' })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: '3 easy steps' })).toHaveAttribute(
       'href',
       '/guides/first-ride',
     );

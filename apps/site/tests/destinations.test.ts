@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { destinations, finderPlaces } from '../src/lib/destinations';
+import { destinations, finderPlaces, routesIn } from '../src/lib/destinations';
 import { parseInlineLinks } from '../src/lib/inline-links';
 import { buildMapLinks } from '../src/lib/map-links';
 
@@ -32,17 +32,6 @@ function miles(lat1: number, lng1: number, lat2: number, lng2: number): number {
 }
 
 /** Route names a step mentions: "Route 215", "routes 105, 106 and 401", the RED LINE, the Deuce. */
-function routesIn(step: string): string[] {
-  const found = [...step.matchAll(/\bRoute (\d+)/g)].map((match) => match[1] ?? '');
-  for (const [list] of step.matchAll(/\broutes (?:\d+(?:, | and ))*\d+/g)) {
-    found.push(...(list.match(/\d+/g) ?? []));
-  }
-  for (const named of ['RED LINE', 'BHX', 'CX', 'DVX', 'SX']) {
-    if (new RegExp(`\\b${named}\\b`).test(step)) found.push(named);
-  }
-  if (/\bDeuce\b/.test(step)) found.push('DEUCE');
-  return found;
-}
 
 describe('Places to go', () => {
   it('gives every destination its own anchor and three steps', () => {
