@@ -1,12 +1,9 @@
-import { readFileSync } from 'node:fs';
-import vm from 'node:vm';
-
 import { describe, expect, it } from 'vitest';
 
 import { BINGO_SQUARES } from '../src/lib/bingo';
 
 /**
- * Runs the real public/scripts/bingo-picture.js in a sandbox and checks the
+ * Imports the real public/scripts/bingo-picture.js and checks the
  * picture definition, the count line, the image description, how labels
  * fit their tiles, and the contrast of every text color. The drawing itself
  * is checked in a real browser by tests/e2e/bingo-share.spec.ts.
@@ -37,18 +34,7 @@ interface Picture {
   FREE_LABEL_TOP: number;
 }
 
-function load(): Picture {
-  const source = readFileSync(
-    new URL('../public/scripts/bingo-picture.js', import.meta.url),
-    'utf8',
-  );
-  const window: { lvwwdBingoPicture?: Picture } = {};
-  vm.runInNewContext(source, { window });
-  if (!window.lvwwdBingoPicture) throw new Error('The script did not set window.lvwwdBingoPicture');
-  return window.lvwwdBingoPicture;
-}
-
-const picture = load();
+const picture = (await import('../public/scripts/bingo-picture.js')) as unknown as Picture;
 // The test's own copy of a square list in the documented shape: the real
 // labels, so the example description reads exactly as written.
 const squares = BINGO_SQUARES.map((square) => ({

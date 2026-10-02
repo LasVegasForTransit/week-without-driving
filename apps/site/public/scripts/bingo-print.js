@@ -9,12 +9,13 @@
  * sends on load and after every change, { marks, progress, locked }, so it
  * must load before bingo.js. It makes no request and stores nothing.
  */
-(() => {
-  const FREE = 12;
-  const controls = document.querySelector('[data-bingo-print-controls]');
-  const sheet = document.querySelector('[data-bingo-print-sheet]');
-  if (!controls || !sheet) return;
+const FREE = 12;
+const controls = document.querySelector('[data-bingo-print-controls]');
+const sheet = document.querySelector('[data-bingo-print-sheet]');
+if (controls && sheet) startPage();
 
+/** Starts the page once its markup is known to be there. */
+function startPage() {
   const marksField = controls.querySelector('[data-print-marks-field]');
   const marksBox = controls.querySelector('[data-print-marks]');
   const largeBox = controls.querySelector('[data-print-large]');
@@ -62,4 +63,4 @@
   if (largeBox) largeBox.checked = false;
   sheet.dataset.layout = 'card';
   controls.hidden = false;
-})();
+}

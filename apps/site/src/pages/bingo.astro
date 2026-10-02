@@ -343,12 +343,9 @@ const description =
   <ShareScreen />
   <script is:inline type="application/json" id="bingo-squares" set:html={squaresJson} />
   {/* bingo-print.js listens for bingo.js's first event, so it loads first. */}
-  <script is:inline src="/scripts/participant-api.js" defer></script>
-  <script is:inline src="/scripts/share-screen.js" defer></script>
-  <script is:inline src="/scripts/bingo-picture.js" defer></script>
-  <script is:inline src="/scripts/bingo-print.js" defer></script>
-  <script is:inline src="/scripts/bingo.js" defer></script>
-  <script is:inline src="/scripts/bingo-sync.js" defer></script>
+  <script is:inline type="module" src="/scripts/bingo-print.js"></script>
+  <script is:inline type="module" src="/scripts/bingo.js"></script>
+  <script is:inline type="module" src="/scripts/bingo-sync.js"></script>
   <WinBand />
   <BingoPrintSheet />
 </BaseLayout>

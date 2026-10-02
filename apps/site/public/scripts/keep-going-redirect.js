@@ -4,9 +4,7 @@
  * page otherwise. It replaces the page rather than adding a step, so the
  * Back button doesn't come back here.
  */
-(() => {
-  const join = document.querySelector('[data-keep-going-join]');
-  const signedIn = /(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie);
-  const next = signedIn ? '/my-week#keep-going' : join?.getAttribute('href');
-  if (next) window.location.replace(next);
-})();
+const join = document.querySelector('[data-keep-going-join]');
+const signedIn = /(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie);
+const next = signedIn ? '/my-week#keep-going' : join?.getAttribute('href');
+if (next) window.location.replace(next);

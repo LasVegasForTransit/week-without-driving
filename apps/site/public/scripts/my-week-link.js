@@ -4,15 +4,17 @@
  * /scripts/participant-api.js). The Worker answers the same whether or not
  * the contact matches a sign-up, so the page does too.
  */
-(() => {
-  const api = window.lvwwdApi;
-  const form = document.querySelector('[data-link-form]');
-  const sent = document.querySelector('[data-link-sent]');
-  const error = document.querySelector('[data-link-error]');
-  const status = document.querySelector('[data-link-status]');
-  const submit = document.querySelector('[data-link-submit]');
-  if (!api || !(form instanceof HTMLFormElement) || !sent || !error) return;
+import { api } from './participant-api.js';
 
+const form = document.querySelector('[data-link-form]');
+const sent = document.querySelector('[data-link-sent]');
+const error = document.querySelector('[data-link-error]');
+const status = document.querySelector('[data-link-status]');
+const submit = document.querySelector('[data-link-submit]');
+if (form instanceof HTMLFormElement && sent && error) startPage();
+
+/** Starts the page once its markup is known to be there. */
+function startPage() {
   if (new URLSearchParams(window.location.search).get('expired') === '1') {
     const expired = document.querySelector('[data-link-expired]');
     if (expired) expired.hidden = false;
@@ -71,4 +73,4 @@
     sent.hidden = false;
     api.showPreviewLink(sent.querySelector('[data-preview-link]'), data.previewLink);
   });
-})();
+}

@@ -5,13 +5,20 @@ import { describe, expect, it } from 'vitest';
 import { minifyScript } from '../src/integrations/minify-scripts';
 
 describe('minifying the page scripts', () => {
-  it('drops comments and keeps top-level names, since the scripts share a page', async () => {
+  it('drops comments and keeps the names a module exports and imports', async () => {
     const code = await minifyScript(
       'shared.js',
-      '// Explains the helper.\nfunction printLinkParts(value) {\n  return value.trim();\n}\nprintLinkParts(" a ");\n',
+      "// Explains the helper.\nimport { api } from './participant-api.js';\nexport function printLinkParts(value) {\n  return api.trim(value);\n}\n",
     );
     expect(code).not.toContain('Explains');
-    expect(code).toContain('function printLinkParts(');
+    expect(code).toContain('printLinkParts');
+    expect(code).toContain('./participant-api.js');
+    expect(code).toMatch(/import\s*\{\s*api\b/);
+  });
+
+  it('leaves the classic head script parsed as a script', async () => {
+    const code = await minifyScript('old-links.js', '{\n  const to = 1;\n  window.x = to;\n}\n');
+    expect(code).toContain('window.x');
   });
 
   it('minifies every script in public/scripts without errors', async () => {

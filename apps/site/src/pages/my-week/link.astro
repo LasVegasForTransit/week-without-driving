@@ -80,9 +80,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </p>
   </section>
 
-  <script is:inline src="/scripts/participant-api.js" defer></script>
-  <script is:inline src="/scripts/my-week-link.js" defer></script>
-  <script is:inline src="/scripts/needs-connection.js" defer></script>
+  <script is:inline type="module" src="/scripts/my-week-link.js"></script>
+  <script is:inline type="module" src="/scripts/needs-connection.js"></script>
 </BaseLayout>
 
 <style>

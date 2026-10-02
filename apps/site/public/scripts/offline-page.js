@@ -8,14 +8,15 @@
  * open the link again, and tries it again by itself as soon as the phone
  * is back online: the Worker then signs the phone in and opens My week.
  */
-(() => {
-  const text = document.querySelector('[data-offline-text]');
-  const privateText = document.querySelector('[data-offline-private]');
-  const openLink = document.querySelector('[data-offline-open-link]');
-  const none = document.querySelector('[data-offline-none]');
-  const list = document.querySelector('[data-offline-list]');
-  if (!text || !privateText || !openLink || !none || !list) return;
+const text = document.querySelector('[data-offline-text]');
+const privateText = document.querySelector('[data-offline-private]');
+const openLink = document.querySelector('[data-offline-open-link]');
+const none = document.querySelector('[data-offline-none]');
+const list = document.querySelector('[data-offline-list]');
+if (text && privateText && openLink && none && list) startPage();
 
+/** Starts the page once its markup is known to be there. */
+function startPage() {
   const path = window.location.pathname;
   const isLink =
     /^\/my-week\/?$/.test(path) && new URLSearchParams(window.location.search).has('t');
@@ -54,4 +55,4 @@
     .catch(() => {
       items.forEach((item) => (item.hidden = false));
     });
-})();
+}

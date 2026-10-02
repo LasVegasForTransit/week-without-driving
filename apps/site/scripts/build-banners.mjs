@@ -17,16 +17,18 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import icons from '@iconify-json/mdi/icons.json' with { type: 'json' };
 import { chromium } from '@playwright/test';
 
 import { BANNER_COLORS as COLORS, BANNER_LINES as LINES, BANNERS } from '../src/lib/banners.ts';
 
 const site = new URL('../', import.meta.url);
-const require = createRequire(import.meta.url);
-const sharp = createRequire(import.meta.resolve('astro'))('sharp');
-const icons = require('@iconify-json/mdi/icons.json');
+// sharp is Astro's dependency, not this package's, so it is found from
+// Astro's folder and then imported.
+const sharpPath = createRequire(import.meta.resolve('astro')).resolve('sharp');
+const { default: sharp } = await import(pathToFileURL(sharpPath).href);
 
 const font = (file) =>
   `url(data:font/woff2;base64,${readFileSync(new URL(`src/fonts/${file}`, site)).toString('base64')}) format('woff2')`;

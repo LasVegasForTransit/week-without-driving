@@ -37,8 +37,13 @@ interface PictureApi {
   tileBox: (i: number) => Box;
 }
 interface DrawnWindow {
-  lvwwdBingoPicture: PictureApi;
   drawn?: { canvas: HTMLCanvasElement; context: CanvasRenderingContext2D };
+}
+
+/** The page's own picture module, as the Bingo page loads it. */
+function pictureModule(): Promise<PictureApi> {
+  const url = '/scripts/bingo-picture.js';
+  return import(url) as Promise<PictureApi>;
 }
 
 function squaresOnPage(): unknown[] {
@@ -50,11 +55,17 @@ function squaresOnPage(): unknown[] {
  * on the page for the checks below, and returns every text it drew.
  */
 async function draw(page: Page, marked: number[]) {
-  await page.addScriptTag({ content: `window.squaresOnPage = ${squaresOnPage.toString()};` });
+  await page.addScriptTag({
+    content: `window.squaresOnPage = ${squaresOnPage.toString()}; window.pictureModule = ${pictureModule.toString()};`,
+  });
   return page.evaluate(async (indexes) => {
-    const w = window as unknown as DrawnWindow & { squaresOnPage: () => unknown[] };
+    const w = window as unknown as DrawnWindow & {
+      squaresOnPage: () => unknown[];
+      pictureModule: () => Promise<PictureApi>;
+    };
     const marks = Array.from({ length: 25 }, (_, i) => i === 12 || indexes.includes(i));
-    const definition = w.lvwwdBingoPicture.make(marks, w.squaresOnPage());
+    const picture = await w.pictureModule();
+    const definition = picture.make(marks, w.squaresOnPage());
     await Promise.all(definition.fonts.map((font) => document.fonts.load(font)));
     const canvas = document.createElement('canvas');
     canvas.width = definition.width;
@@ -114,11 +125,11 @@ async function strayPixels(page: Page): Promise<number> {
 }
 
 async function tileBoxes(page: Page): Promise<Box[]> {
-  return page.evaluate(() =>
-    Array.from({ length: 25 }, (_, i) =>
-      (window as unknown as DrawnWindow).lvwwdBingoPicture.tileBox(i),
-    ),
-  );
+  return page.evaluate(async () => {
+    const url = '/scripts/bingo-picture.js';
+    const picture = (await import(url)) as PictureApi;
+    return Array.from({ length: 25 }, (_, i) => picture.tileBox(i));
+  });
 }
 
 /** For each tile: its fill low on the left, its left edge, and white pixels where a check goes. */

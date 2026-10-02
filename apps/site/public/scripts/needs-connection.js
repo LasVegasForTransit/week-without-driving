@@ -20,103 +20,102 @@
  * A personal "Open my week" link opened offline gets the offline page
  * from the service worker, and offline-page.js gives it its own notice.
  */
-(() => {
-  const NOTICES = {
-    'sign-up': 'You’re offline. You can sign up as soon as you’re back online.',
-    trip: 'You’re offline. My week needs a connection to show entries and submit your trip.',
-    'edit-details': 'You’re offline. You can save your details as soon as you’re back online.',
-    'send-link': 'You’re offline. Try requesting your link when you’re back online.',
-    'get-link': 'You’re offline. Try requesting your link when you’re back online.',
-    reminders: 'You’re offline. You can sign up for reminders when you’re back online.',
-  };
-  const TRIPS_END = Date.parse('2026-10-09T07:00:00Z');
-  const ENDS = {
-    'sign-up': TRIPS_END,
-    trip: TRIPS_END,
-    reminders: Date.parse('2026-10-08T15:00:00Z'),
-  };
-  const BACK_ONLINE = 'You’re back online.';
-  const CLEAR_AFTER_MS = 3000;
-  const BUTTON = '[data-needs-connection-button]';
-  const DIMMED = '[data-needs-connection-button][aria-disabled="true"]';
+const NOTICES = {
+  'sign-up': 'You’re offline. You can sign up as soon as you’re back online.',
+  trip: 'You’re offline. My week needs a connection to show entries and submit your trip.',
+  'edit-details': 'You’re offline. You can save your details as soon as you’re back online.',
+  'send-link': 'You’re offline. Try requesting your link when you’re back online.',
+  'get-link': 'You’re offline. Try requesting your link when you’re back online.',
+  reminders: 'You’re offline. You can sign up for reminders when you’re back online.',
+};
+const TRIPS_END = Date.parse('2026-10-09T07:00:00Z');
+const ENDS = {
+  'sign-up': TRIPS_END,
+  trip: TRIPS_END,
+  reminders: Date.parse('2026-10-08T15:00:00Z'),
+};
+const BACK_ONLINE = 'You’re back online.';
+const CLEAR_AFTER_MS = 3000;
+const BUTTON = '[data-needs-connection-button]';
+const DIMMED = '[data-needs-connection-button][aria-disabled="true"]';
+const places = () => [...document.querySelectorAll('[data-needs-connection]')];
 
-  const places = () => [...document.querySelectorAll('[data-needs-connection]')];
-  if (places().length === 0) return;
+// Read politely when the connection returns, then emptied so the same
+// words are read again next time.
+const announcer = document.createElement('p');
+let clearing = 0;
 
-  // Read politely when the connection returns, then emptied so the same
-  // words are read again next time.
-  const announcer = document.createElement('p');
+function textFor(place) {
+  const key = place.getAttribute('data-needs-connection') ?? '';
+  if (Date.now() >= (ENDS[key] ?? Infinity)) return null;
+  return NOTICES[key] ?? null;
+}
+
+// Directly above the first button, as a child of the form itself, so a
+// button inside a label or a row keeps its row together.
+function spotFor(place) {
+  let spot = place.querySelector(BUTTON);
+  if (!spot) return null;
+  while (spot.parentElement && spot.parentElement !== place) spot = spot.parentElement;
+  return spot;
+}
+
+function noticeFor(place) {
+  const existing = place.querySelector('[data-offline-notice]');
+  if (existing) return existing;
+  const notice = document.createElement('p');
+  notice.className = 'offline-notice';
+  notice.setAttribute('data-offline-notice', '');
+  notice.setAttribute('aria-live', 'assertive');
+  const icon = document.createElement('span');
+  icon.className = 'offline-notice__icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '!';
+  notice.append(icon, document.createElement('span'));
+  const spot = spotFor(place);
+  if (spot) spot.before(notice);
+  else place.prepend(notice);
+  return notice;
+}
+
+// Emptying the words and writing them again a moment later makes screen
+// readers read them again. A notice already there when the page opens is
+// read in page order instead.
+function say(notice, text, aloud) {
+  const words = notice.lastElementChild;
+  if (!words) return;
+  if (!aloud) {
+    words.textContent = text;
+    return;
+  }
+  words.textContent = '';
+  window.setTimeout(() => (words.textContent = text), 100);
+}
+
+function goOffline(aloud) {
+  places().forEach((place) => {
+    const text = textFor(place);
+    if (!text) return;
+    say(noticeFor(place), text, aloud);
+    place.querySelectorAll(BUTTON).forEach((button) => {
+      button.setAttribute('aria-disabled', 'true');
+    });
+  });
+}
+
+function goOnline() {
+  document.querySelectorAll('[data-offline-notice]').forEach((notice) => notice.remove());
+  document.querySelectorAll(DIMMED).forEach((button) => button.removeAttribute('aria-disabled'));
+  announcer.textContent = BACK_ONLINE;
+  window.clearTimeout(clearing);
+  clearing = window.setTimeout(() => (announcer.textContent = ''), CLEAR_AFTER_MS);
+}
+
+/** Starts the page once its markup is known to be there. */
+function startPage() {
   announcer.className = 'sr-only';
   announcer.setAttribute('aria-live', 'polite');
   document.body.append(announcer);
-  let clearing = 0;
-
-  function textFor(place) {
-    const key = place.getAttribute('data-needs-connection') ?? '';
-    if (Date.now() >= (ENDS[key] ?? Infinity)) return null;
-    return NOTICES[key] ?? null;
-  }
-
-  // Directly above the first button, as a child of the form itself, so a
-  // button inside a label or a row keeps its row together.
-  function spotFor(place) {
-    let spot = place.querySelector(BUTTON);
-    if (!spot) return null;
-    while (spot.parentElement && spot.parentElement !== place) spot = spot.parentElement;
-    return spot;
-  }
-
-  function noticeFor(place) {
-    const existing = place.querySelector('[data-offline-notice]');
-    if (existing) return existing;
-    const notice = document.createElement('p');
-    notice.className = 'offline-notice';
-    notice.setAttribute('data-offline-notice', '');
-    notice.setAttribute('aria-live', 'assertive');
-    const icon = document.createElement('span');
-    icon.className = 'offline-notice__icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '!';
-    notice.append(icon, document.createElement('span'));
-    const spot = spotFor(place);
-    if (spot) spot.before(notice);
-    else place.prepend(notice);
-    return notice;
-  }
-
-  // Emptying the words and writing them again a moment later makes screen
-  // readers read them again. A notice already there when the page opens is
-  // read in page order instead.
-  function say(notice, text, aloud) {
-    const words = notice.lastElementChild;
-    if (!words) return;
-    if (!aloud) {
-      words.textContent = text;
-      return;
-    }
-    words.textContent = '';
-    window.setTimeout(() => (words.textContent = text), 100);
-  }
-
-  function goOffline(aloud) {
-    places().forEach((place) => {
-      const text = textFor(place);
-      if (!text) return;
-      say(noticeFor(place), text, aloud);
-      place.querySelectorAll(BUTTON).forEach((button) => {
-        button.setAttribute('aria-disabled', 'true');
-      });
-    });
-  }
-
-  function goOnline() {
-    document.querySelectorAll('[data-offline-notice]').forEach((notice) => notice.remove());
-    document.querySelectorAll(DIMMED).forEach((button) => button.removeAttribute('aria-disabled'));
-    announcer.textContent = BACK_ONLINE;
-    window.clearTimeout(clearing);
-    clearing = window.setTimeout(() => (announcer.textContent = ''), CLEAR_AFTER_MS);
-  }
-
   // A dimmed button sends nothing: its click (which a tap, Enter or Space
   // on it makes) is stopped before the page's own handlers see it.
   document.addEventListener(
@@ -142,8 +141,9 @@
     },
     true,
   );
-
   window.addEventListener('offline', () => goOffline(true));
   window.addEventListener('online', goOnline);
   if (!navigator.onLine) goOffline(false);
-})();
+}
+
+if (places().length > 0) startPage();
