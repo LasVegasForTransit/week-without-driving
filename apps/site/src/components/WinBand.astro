@@ -57,6 +57,22 @@ import { WWD_DATE_RANGE } from '../lib/wwd';
   .win-band__btn:focus-visible {
     background: var(--color-on-slab);
   }
+  /* On phones the band is a short reminder, not a second hero: the tab
+     bar already carries Sign up. */
+  @media (max-width: 47.99rem) {
+    .win-band {
+      padding-block: 1.75rem;
+    }
+    .win-band :global(.win-band__icon) {
+      display: none;
+    }
+    .win-band__title {
+      font-size: 1.4rem;
+    }
+    .win-band__text p {
+      font-size: 1rem;
+    }
+  }
   @media (min-width: 48rem) {
     .win-band__inner {
       grid-template-columns: auto 1fr auto;

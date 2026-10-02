@@ -69,6 +69,7 @@ test('a saved trip sends only its day and entry method', async ({ page }) => {
   await page
     .getByLabel('Where did you go, and how did you get there?')
     .fill('I took the bus to the grocery store.');
+  await page.getByText('Add a post (optional)').click();
   await page.getByLabel('Link to your post').fill('https://www.instagram.com/p/C0mmuteByBus/');
   await page.locator('[data-trip-submit]').click();
 

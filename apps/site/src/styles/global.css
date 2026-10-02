@@ -1208,6 +1208,37 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
     flex: none;
   }
 
+  /* On phones the tab bar does the navigating, so the footer is a short
+     list of links: no second wordmark, and each group's links run across
+     the line instead of down it. */
+  @media (max-width: 47.99rem) {
+    .site-footer__inner {
+      padding-block: 1.75rem 1.25rem;
+    }
+    .footer-brand {
+      display: none;
+    }
+    .footer-utilities {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .footer-group h2 {
+      margin-bottom: 0.1rem;
+    }
+    .footer-group ul,
+    .footer-group--details ul {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 1.25rem;
+    }
+    .footer-group--details {
+      padding-top: 1rem;
+    }
+    .footer-meta {
+      margin-top: 1.25rem;
+    }
+  }
+
   @media (min-width: 48rem) {
     .footer-utilities {
       grid-template-columns: repeat(3, minmax(0, 1fr));

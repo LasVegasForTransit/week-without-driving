@@ -149,81 +149,87 @@ const shortcuts = [
               placeholder="A stop with no shade, a sidewalk that ends, a long wait…"></textarea>
           </fieldset>
 
-          <div class="trip__step" data-share-step>
-            <p class="trip__q">
-              <span class="trip__n" aria-hidden="true">3</span> Add a post, if you want.
-            </p>
-            <p class="trip__help">
-              A post is optional. If you share one, say “Week Without Driving giveaway entry” at the
-              start of the caption or on the story itself. Tag @lasvegasfortransit on Instagram or
-              use #WeekWithoutDriving. You can add our picture to your post.
-            </p>
-            <button type="button" class="btn shared__save mt-3" data-make-picture>
-              <Icon name="mdi:image-outline" class="size-5" aria-hidden="true" />
-              Add our picture
-            </button>
-            <div data-share-kit hidden>
-              <img
-                data-share-preview
-                alt=""
-                hidden
-                class="shared__preview"
-                width="1080"
-                height="1350"
-              />
-              <div class="shared__actions">
-                <button type="button" class="btn shared__share" data-share-image>
-                  <Icon name="mdi:share-variant" class="size-5" aria-hidden="true" />
-                  Share
-                </button>
-                <button type="button" class="btn shared__save" data-save-image>
-                  <Icon name="mdi:download" class="size-5" aria-hidden="true" />
-                  Save
-                </button>
+          {/* The post is optional, so it waits behind one tap. */}
+          <details class="trip__step trip__optional">
+            <summary class="trip__q trip__optional-summary">
+              <span class="trip__n" aria-hidden="true">3</span> Add a post (optional)
+              <Icon name="mdi:chevron-down" class="trip__optional-chevron" aria-hidden="true" />
+            </summary>
+            <div data-share-step>
+              <p class="trip__help">
+                A post is optional. If you share one, say “Week Without Driving giveaway entry” at
+                the start of the caption or on the story itself. Tag @lasvegasfortransit on
+                Instagram or use #WeekWithoutDriving. You can add our picture to your post.
+              </p>
+              <button type="button" class="btn shared__save mt-3" data-make-picture>
+                <Icon name="mdi:image-outline" class="size-5" aria-hidden="true" />
+                Add our picture
+              </button>
+              <div data-share-kit hidden>
+                <img
+                  data-share-preview
+                  alt=""
+                  hidden
+                  class="shared__preview"
+                  width="1080"
+                  height="1350"
+                />
+                <div class="shared__actions">
+                  <button type="button" class="btn shared__share" data-share-image>
+                    <Icon name="mdi:share-variant" class="size-5" aria-hidden="true" />
+                    Share
+                  </button>
+                  <button type="button" class="btn shared__save" data-save-image>
+                    <Icon name="mdi:download" class="size-5" aria-hidden="true" />
+                    Save
+                  </button>
+                </div>
+                <p class="shared__caption-label">Caption to paste</p>
+                <p class="shared__caption" data-share-caption></p>
+                <button type="button" class="shared__copy" data-copy-caption
+                  >Copy the caption</button
+                >
+                <p class="shared__status" data-share-status aria-live="polite"></p>
               </div>
-              <p class="shared__caption-label">Caption to paste</p>
-              <p class="shared__caption" data-share-caption></p>
-              <button type="button" class="shared__copy" data-copy-caption>Copy the caption</button>
-              <p class="shared__status" data-share-status aria-live="polite"></p>
             </div>
-          </div>
 
-          <fieldset class="trip__step">
-            <legend class="sr-only">Optional post details</legend>
-            <label for="trip-link" class="log__hard-label"
-              >Link to your post <span class="log__optional">(optional)</span></label
-            >
-            <input
-              id="trip-link"
-              name="link"
-              type="url"
-              inputmode="url"
-              autocomplete="off"
-              class="trip__link"
-              placeholder="https://www.instagram.com/p/…"
-            />
-            <label class="trip__screenshot">
-              <input
-                type="file"
-                name="screenshot"
-                accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
-                class="sr-only"
-                data-screenshot-input
-              />
-              <Icon name="mdi:cellphone-screenshot" class="size-6" aria-hidden="true" />
-              <span data-screenshot-label
-                >Private account? You can add a screenshot of your post.</span
+            <fieldset class="trip__post-fields">
+              <legend class="sr-only">Optional post details</legend>
+              <label for="trip-link" class="log__hard-label"
+                >Link to your post <span class="log__optional">(optional)</span></label
               >
-            </label>
-            <label class="trip__consent">
-              <input type="checkbox" name="share" />
-              <span>LVBT may share my post or screenshot on Instagram and lvwwd.org.</span>
-            </label>
-            <p class="trip__help" data-tag-note hidden>
-              A tag from your registered Instagram handle may count after volunteer review. Enter
-              here to make sure your trip is submitted.
-            </p>
-          </fieldset>
+              <input
+                id="trip-link"
+                name="link"
+                type="url"
+                inputmode="url"
+                autocomplete="off"
+                class="trip__link"
+                placeholder="https://www.instagram.com/p/…"
+              />
+              <label class="trip__screenshot">
+                <input
+                  type="file"
+                  name="screenshot"
+                  accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+                  class="sr-only"
+                  data-screenshot-input
+                />
+                <Icon name="mdi:cellphone-screenshot" class="size-6" aria-hidden="true" />
+                <span data-screenshot-label
+                  >Private account? You can add a screenshot of your post.</span
+                >
+              </label>
+              <label class="trip__consent">
+                <input type="checkbox" name="share" />
+                <span>LVBT may share my post or screenshot on Instagram and lvwwd.org.</span>
+              </label>
+            </fieldset>
+          </details>
+          <p class="trip__help" data-tag-note hidden>
+            A tag from your registered Instagram handle may count after volunteer review. Enter here
+            to make sure your trip is submitted.
+          </p>
 
           <button
             type="submit"
@@ -551,23 +557,31 @@ const shortcuts = [
   }
   .entries__days {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.5rem;
     margin-block: 1.25rem;
   }
+  /* One short row per day: the day and date, what happened, and the
+     check. Saved plans and travel modes run underneath when there are any. */
   .entries__day {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'number mark'
+      'date mark'
+      'state mark'
+      'modes modes'
+      'plans plans';
+    align-items: center;
+    column-gap: 0.75rem;
     min-width: 0;
-    padding: 0.9rem 1rem;
+    padding: 0.6rem 0.9rem;
     color: var(--color-on-slab);
     border: 2px dashed color-mix(in srgb, var(--color-on-slab) 40%, transparent);
     border-radius: 0.75rem;
   }
   .entries__day-number {
+    grid-area: number;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -575,19 +589,18 @@ const shortcuts = [
     color: var(--color-on-slab-variant);
   }
   .entries__date {
+    grid-area: date;
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
     line-height: 1.2;
   }
   .entries__mark {
-    position: absolute;
-    top: 0.8rem;
-    right: 0.8rem;
+    grid-area: mark;
     display: grid;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: 50%;
     border: 2px solid color-mix(in srgb, var(--color-on-slab) 35%, transparent);
   }
@@ -617,14 +630,16 @@ const shortcuts = [
     border-color: var(--color-on-slab);
   }
   .entries__state {
-    margin-top: 0.3rem;
-    font-size: 0.9rem;
+    grid-area: state;
+    font-size: 0.85rem;
     font-weight: 700;
   }
   .entries__modes {
+    grid-area: modes;
     font-size: 0.85rem;
   }
   .entries__plans {
+    grid-area: plans;
     width: 100%;
     margin-top: 0.55rem;
     padding-top: 0.55rem;
@@ -808,6 +823,31 @@ const shortcuts = [
   .trip__step {
     padding-block: 1.1rem;
     border-top: 1px solid color-mix(in srgb, var(--color-on-slab) 22%, transparent);
+  }
+  .trip__optional-summary {
+    cursor: pointer;
+    list-style: none;
+    min-height: 44px;
+  }
+  .trip__optional-summary::-webkit-details-marker {
+    display: none;
+  }
+  .trip__optional :global(.trip__optional-chevron) {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: auto;
+    transition: transform 150ms ease;
+  }
+  .trip__optional[open] :global(.trip__optional-chevron) {
+    transform: rotate(180deg);
+  }
+  .trip__post-fields {
+    margin-top: 1rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trip__optional :global(.trip__optional-chevron) {
+      transition: none;
+    }
   }
   .trip__q {
     display: flex;
