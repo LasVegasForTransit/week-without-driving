@@ -75,11 +75,11 @@ export const destinations: readonly Destination[] = [
     anchor: 'downtown',
     heading: 'Downtown Las Vegas and the Arts District',
     intro:
-      'Fremont Street and the Arts District (also called 18b) sit side by side downtown, about a 15-minute walk or roll apart.',
+      'Fremont Street and the Arts District (also called 18b) are next to each other downtown. They are about a 15-minute walk or roll apart.',
     steps: [
-      "From elsewhere in the valley, take any route that stops at Bonneville Transit Center, downtown's main RTC bus station. These include the RED LINE, BHX, CX, DVX and routes 105, 106, 108, 113, 206, 207, 208, 214, 215 and 401.",
-      'From the Strip, take the Deuce north. It runs along Las Vegas Boulevard 24 hours a day and ends downtown. The Deuce can cost more than other routes; see [Pay your bus fare](/guides/pay-your-fare).',
-      'For the Arts District, get off the Deuce at Casino Center at Coolidge, in the middle of the district, or walk or roll about 10 minutes south from Bonneville Transit Center. For Fremont Street, stay on the Deuce past Bonneville Transit Center and get off at 4th Street at Fremont Street Experience, or walk or roll about 10 minutes north from Bonneville Transit Center. Route 108 also runs through the Arts District on Main Street and Commerce Street.',
+      "Take any bus that stops at Bonneville Transit Center. It is downtown's main bus station. Many buses stop there, like the RED LINE, BHX, CX, DVX and routes 105, 106, 108, 113, 206, 207, 208, 214, 215 and 401.",
+      'From the Strip, take the Deuce north. It runs on Las Vegas Boulevard all day and all night, and it ends downtown. The Deuce can cost more. See [Pay your bus fare](/guides/pay-your-fare).',
+      'Arts District: get off the Deuce at Casino Center at Coolidge. Or walk or roll about 10 minutes south from Bonneville Transit Center. Route 108 also goes through the Arts District, on Main Street and Commerce Street. Fremont Street: stay on the Deuce past Bonneville Transit Center. Get off at 4th Street at Fremont Street Experience. Or walk or roll about 10 minutes north from Bonneville Transit Center.',
     ],
     buttonRows: [
       { rowLabel: 'Fremont Street', placeName: 'Fremont Street', lat: 36.17048, lng: -115.14353 },
@@ -96,9 +96,9 @@ export const destinations: readonly Destination[] = [
     heading: 'East Las Vegas Library',
     intro: 'A public library at 2851 E Bonanza Rd in East Las Vegas.',
     steps: [
-      'Take Route 215 (Bonanza) along Bonanza Road. Going east, get off at Bonanza after 28th. Going west, get off at Bonanza after Wardelle. Both stops are within 0.1 mile of the library, a short walk or roll.',
-      "Route 215 starts at Bonneville Transit Center, downtown's main RTC bus station. If you're on Route 110 (Eastern), change to Route 215 at Eastern Avenue and Bonanza Road.",
-      'To head home, catch Route 215 from the stop across the street, going the other way. The library is a cool place to rest while you wait.',
+      'Take Route 215 (Bonanza) on Bonanza Road. Going east, get off at Bonanza after 28th. Going west, get off at Bonanza after Wardelle. The library is a short walk or roll from either stop.',
+      "Route 215 starts at Bonneville Transit Center, downtown's main bus station. On Route 110 (Eastern)? Change to Route 215 at Eastern Avenue and Bonanza Road.",
+      'To go home, take Route 215 from the stop across the street. The library is a cool place to wait.',
     ],
     buttonRows: [{ placeName: 'East Las Vegas Library', lat: 36.1729, lng: -115.1105 }],
   },
@@ -106,11 +106,11 @@ export const destinations: readonly Destination[] = [
     anchor: 'craig-ranch-park',
     heading: 'Craig Ranch Regional Park, North Las Vegas',
     intro:
-      'A large city park on Craig Road in North Las Vegas, with paths, playgrounds and an amphitheater.',
+      'A big city park on Craig Road in North Las Vegas. It has paths, playgrounds and an outdoor stage.',
     steps: [
-      'Take Route 219 (Craig Rd) along Craig Road and get off at Craig after Revere. There is a stop on each side of the road, and the park is about 0.1 mile away, a short walk or roll.',
-      'From downtown, take Route 105 (Martin L. King) north from Bonneville Transit Center. Get off at Camino Al Norte after Craig and change to Route 219 going east.',
-      'To head home, take the same routes going the other way, from the stops across the street.',
+      'Take Route 219 (Craig Rd) on Craig Road. Get off at Craig after Revere. There is a stop on each side of the road. The park is a short walk or roll away.',
+      'From downtown, take Route 105 (Martin L. King) north from Bonneville Transit Center. Get off at Camino Al Norte after Craig. Change to Route 219 going east.',
+      'To go home, take the same buses from the stops across the street.',
     ],
     buttonRows: [{ placeName: 'Craig Ranch Regional Park', lat: 36.2403, lng: -115.154 }],
   },
@@ -119,14 +119,14 @@ export const destinations: readonly Destination[] = [
     heading: 'Water Street District, Henderson',
     intro: 'Downtown Henderson, with shops and places to eat along Water Street.',
     steps: [
-      'Take the BHX (Boulder Highway Express), which runs between Bonneville Transit Center downtown and Henderson along Boulder Highway. Only some BHX buses stop near Water Street: take a bus marked BHX-A. The usual stop is Basic after Water, about 0.2 mile from Water Street. Check the temporary stop change below if you travel October 1–4.',
-      'From elsewhere in the valley, change to the BHX at Bonneville Transit Center or at any BHX stop on Boulder Highway.',
-      'To head home, the usual BHX-A stop is Basic after Texas, going west. Check the temporary stop change below if you travel October 1–4.',
+      'Take the BHX (Boulder Highway Express). It runs on Boulder Highway between Bonneville Transit Center and Henderson. Only some BHX buses stop near Water Street. Look for BHX-A on the sign. The usual stop is Basic after Water, a short walk or roll from Water Street. Going October 1–4? See the stop change below.',
+      'Coming from somewhere else? Change to the BHX at Bonneville Transit Center, or at any BHX stop on Boulder Highway.',
+      'To go home, the usual BHX-A stop is Basic after Texas, going west. Going October 1–4? See the stop change below.',
     ],
     buttonRows: [{ placeName: 'Water Street District', lat: 36.0306, lng: -114.982 }],
     note: {
       heading: 'BHX-A stop changes October 1–4',
-      text: 'RTC plans to close four BHX-A stops from 11 pm October 1 until 1 am October 4 for Henderson Hot Rod Days. Use these stops instead:',
+      text: 'RTC plans to close four BHX-A stops for Henderson Hot Rod Days. The closing runs from 11 pm October 1 to 1 am October 4. Use these stops instead:',
       details: [
         'Toward Water Street: Basic after Water (stop 149) → southbound Boulder Highway after Basic (stop 246).',
         'Toward Water Street: Water after Victory (stop 6247) → southbound Boulder Highway before Lake Mead (stop 6253).',
@@ -143,10 +143,10 @@ export const destinations: readonly Destination[] = [
     anchor: 'unlv',
     heading: 'UNLV campus',
     intro:
-      'The University of Nevada, Las Vegas (UNLV) campus is on Maryland Parkway between Flamingo Road and Tropicana Avenue.',
+      'The University of Nevada, Las Vegas. It is on Maryland Parkway, between Flamingo Road and Tropicana Avenue.',
     steps: [
-      "Take the RED LINE, RTC's rapid bus along Maryland Parkway, and get off at University Road. Going north, the stop is Maryland after University Rd. Going south, it is Maryland before University Rd.",
-      'Or take Route 201 (Tropicana) and get off at Tropicana after Maryland, at the south end of campus.',
+      "Take the RED LINE, RTC's fast bus on Maryland Parkway. Get off at University Road. Going north, the stop is Maryland after University Rd. Going south, it is Maryland before University Rd.",
+      'Or take Route 201 (Tropicana). Get off at Tropicana after Maryland, at the south end of campus.',
       'From Maryland Parkway and University Road, walk or roll west into campus. The Student Union is about 3 minutes away.',
     ],
     buttonRows: [{ placeName: 'the UNLV campus', lat: 36.10605, lng: -115.1387 }],
@@ -155,28 +155,52 @@ export const destinations: readonly Destination[] = [
     anchor: 'sunset-park',
     heading: 'Sunset Park',
     intro:
-      'A large county park with shady picnic areas, a lake and paths, at Eastern Avenue and Sunset Road.',
+      'A big county park at Eastern Avenue and Sunset Road. It has a lake, paths and shady picnic spots.',
     steps: [
       "Take Route 110 (Eastern). Going north, get off at Eastern at Sunset Park. Going south, get off at Eastern after Pama. Both stops are on the park's west side.",
-      "Or take Route 212 (Sunset) along Sunset Road and get off at Eastern Avenue, at the park's northwest corner.",
-      "To head home, catch the same route from the stop across the street, going the other way. Bring water, because the park's paths are long and some are in full sun. [Walk or roll in the heat](/guides/heat) has more tips.",
+      "Or take Route 212 (Sunset) on Sunset Road. Get off at Eastern Avenue, at the park's northwest corner.",
+      'To go home, take the same bus from the stop across the street. Bring water. The paths are long, and some have no shade. [Walk or roll in the heat](/guides/heat) has more tips.',
     ],
     buttonRows: [{ placeName: 'Sunset Park', lat: 36.06431, lng: -115.11359 }],
   },
   {
     anchor: 'allegiant-stadium',
     heading: 'Allegiant Stadium on Raiders game day',
-    intro:
-      'The Raiders play the Kansas City Chiefs at Allegiant Stadium on Sunday, October 4, at 1:25 pm, during the week.',
+    intro: 'The Raiders play the Kansas City Chiefs on Sunday, October 4, at 1:25 pm.',
     steps: [
-      "Take RTC's Game Day Express, RTC's special event bus service to stadium games. On Raiders home game days it runs from six casinos: Red Rock (Summerlin), Santa Fe Station (Centennial Hills), Aliante (North Las Vegas), Sam's Town (East Las Vegas), Green Valley Ranch (Henderson) and M Resort (West Henderson). A round trip costs $4. Buy it in the rideRTC, Transit or Uber app up to seven days ahead, or pay $4 when you board with cash. If you pay by debit card, credit card or phone wallet, tap twice when you board to get a return pass.",
-      "For the scheduled 1:25 pm kickoff, RTC says buses begin three hours before the game and stop one hour before it. Check [RTC's Game Day Express page](https://www.rtcsnv.com/ways-to-travel/transit-services/game-day-express-raiders/) for current times. Buses drop you at the southeast corner of the stadium on Dean Martin Drive, next to Gate 11.",
-      "After the game, buses leave from the same corner for up to 40 minutes after it ends. If you're heading to the Strip instead, walk or roll east over the Hacienda Avenue bridge to Las Vegas Boulevard, about 20 minutes, and catch the Deuce at Mandalay Bay.",
+      "Take RTC's Game Day Express, a special bus to the game. It leaves from six casinos: Red Rock (Summerlin), Santa Fe Station (Centennial Hills), Aliante (North Las Vegas), Sam's Town (East Las Vegas), Green Valley Ranch (Henderson) and M Resort (West Henderson). A round trip costs $4. Buy it in the rideRTC, Transit or Uber app, up to seven days early. Or pay $4 in cash when you get on. Paying by card or phone? Tap twice when you get on, to get a ride back.",
+      "For the 1:25 pm game, buses run from three hours before kickoff until one hour before it. Check [RTC's Game Day Express page](https://www.rtcsnv.com/ways-to-travel/transit-services/game-day-express-raiders/) for the latest times. Buses drop you off on Dean Martin Drive, next to Gate 11.",
+      'After the game, buses leave from the same spot for up to 40 minutes. Going to the Strip instead? Walk or roll east over the Hacienda Avenue bridge to Las Vegas Boulevard. It takes about 20 minutes. Then catch the Deuce at Mandalay Bay.',
     ],
     buttonRows: [{ placeName: 'Allegiant Stadium', lat: 36.09074, lng: -115.18333 }],
     note: {
       heading: 'Getting there by wheelchair or walker',
-      text: "The Hacienda Avenue bridge in step 3 is long and slopes up and down. If that's hard for you, take the Game Day Express back from the stadium instead.",
+      text: 'The Hacienda Avenue bridge in step 3 is long, with hills. If that is hard for you, take the Game Day Express back instead.',
     },
   },
 ];
+
+/**
+ * The routes a step names, in the order it names them: "Route 215",
+ * "routes 105, 106 and 108", the lettered routes (RED LINE, BHX, CX, DVX,
+ * SX) and the Deuce. Places to go shows them as colored badges, and the
+ * tests check each one against RTC's stop data.
+ */
+export function routesIn(step: string): string[] {
+  const found: Array<{ at: number; route: string }> = [];
+  for (const match of step.matchAll(/\bRoute (\d+)/g)) {
+    found.push({ at: match.index, route: match[1] ?? '' });
+  }
+  for (const match of step.matchAll(/\broutes (?:\d+(?:, | and ))*\d+/g)) {
+    for (const number of match[0].matchAll(/\d+/g)) {
+      found.push({ at: match.index + number.index, route: number[0] });
+    }
+  }
+  for (const named of ['RED LINE', 'BHX', 'CX', 'DVX', 'SX']) {
+    const match = new RegExp(`\\b${named}\\b`).exec(step);
+    if (match) found.push({ at: match.index, route: named });
+  }
+  const deuce = /\bDeuce\b/.exec(step);
+  if (deuce) found.push({ at: deuce.index, route: 'DEUCE' });
+  return found.sort((a, b) => a.at - b.at).map((item) => item.route);
+}
