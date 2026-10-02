@@ -71,6 +71,17 @@ export async function updateMe(c: ApiContext, me: Participant): Promise<Response
 /** Signs this phone out: its session is deleted, other phones stay signed in. */
 export async function signOut(c: ApiContext): Promise<Response> {
   const hash = await sessionHash(c.request);
-  if (hash) await c.env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?1').bind(hash).run();
+  if (hash) {
+    const body = await readJsonObject(c.request);
+    const endpoint = typeof body?.endpoint === 'string' ? body.endpoint : null;
+    await c.env.DB.batch([
+      c.env.DB.prepare(
+        `DELETE FROM push_subscriptions
+         WHERE session_hash = ?1 OR (session_hash IS NULL AND endpoint = ?2
+           AND participant_id = (SELECT participant_id FROM sessions WHERE token_hash = ?1))`,
+      ).bind(hash, endpoint),
+      c.env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?1').bind(hash),
+    ]);
+  }
   return json({ signedOut: true }, 200, signOutCookies());
 }

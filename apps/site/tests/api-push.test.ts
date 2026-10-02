@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { newSession } from '../worker/session';
+
 import {
   ACCESS_ENV,
   type AccessKeys,
@@ -148,11 +150,13 @@ describe('browser reminders', () => {
     }
   });
 
-  it('stops taking sign-ups at 8:00 am on October 8', async () => {
+  it('takes event opt-ins throughout October 8 and closes at campaign end', async () => {
     at('2026-10-08T15:00:00Z');
-    expect((await subscribe(await makeBrowser())).status).toBe(410);
-    at('2026-10-08T14:59:59Z');
     expect((await subscribe(await makeBrowser())).status).toBe(201);
+    at('2026-10-09T06:59:59Z');
+    expect((await subscribe(await makeBrowser())).status).toBe(201);
+    at('2026-10-09T07:00:00Z');
+    expect((await subscribe(await makeBrowser())).status).toBe(410);
   });
 
   it('stops reminders for an address without a sign-in, and says so twice', async () => {
@@ -169,10 +173,105 @@ describe('browser reminders', () => {
     expect(empty.status).toBe(400);
   });
 
-  it('keeps reminders on a phone that signs out', async () => {
+  async function anotherSession(): Promise<string> {
+    const id = await participantId('rosa@example.com');
+    if (!id) throw new Error('Missing participant');
+    const session = await newSession(platform.env.DB, id, new Date());
+    await session.insert.run();
+    return `__Host-lvwwd_session=${session.token}; lvwwd_signed_in=1`;
+  }
+
+  const pushStatus = (endpoint: string, as: string | null = cookie) =>
+    platform.send(
+      apiRequest('POST', '/api/push/status', {
+        ...(as ? { cookie: as } : {}),
+        body: { endpoint },
+      }),
+    );
+
+  it('reports only whether the current participant owns this endpoint', async () => {
     const browser = await makeBrowser();
     await subscribe(browser);
+    expect(await (await pushStatus(browser.endpoint)).json()).toEqual({ subscribed: true });
+    const second = await signUpAs(platform, { contact: 'sam@example.com', firstName: 'Sam' });
+    const foreign = await pushStatus(browser.endpoint, second);
+    const missing = await pushStatus('https://fcm.googleapis.com/fcm/send/missing', second);
+    expect(foreign.status).toBe(200);
+    expect(await foreign.json()).toEqual({ subscribed: false });
+    expect(await missing.json()).toEqual({ subscribed: false });
+  });
+
+  it('requires sign-in and a push endpoint to check subscription status', async () => {
+    expect((await pushStatus('https://fcm.googleapis.com/fcm/send/test', null)).status).toBe(401);
+    expect((await pushStatus('https://example.com/private')).status).toBe(400);
+    const empty = await platform.send(apiRequest('POST', '/api/push/status', { cookie, body: {} }));
+    expect(empty.status).toBe(400);
+  });
+
+  it('removes only this session’s reminders when a phone signs out', async () => {
+    const here = await makeBrowser();
+    const elsewhere = await makeBrowser();
+    const otherCookie = await anotherSession();
+    await subscribe(here);
+    await subscribe(elsewhere, otherCookie);
     await platform.send(apiRequest('POST', '/api/signout', { cookie, body: {} }));
+    expect((await rows()).results.map((row) => row.endpoint)).toEqual([elsewhere.endpoint]);
+    expect(await (await pushStatus(elsewhere.endpoint, otherCookie)).json()).toEqual({
+      subscribed: true,
+    });
+  });
+
+  it('reattaches an owned subscription after recovery on the same phone', async () => {
+    const browser = await makeBrowser();
+    await subscribe(browser);
+    const recovered = await anotherSession();
+    expect(await (await pushStatus(browser.endpoint, recovered)).json()).toEqual({
+      subscribed: true,
+    });
+    await platform.send(apiRequest('POST', '/api/signout', { cookie, body: {} }));
+    expect((await rows()).results).toHaveLength(1);
+    await platform.send(apiRequest('POST', '/api/signout', { cookie: recovered, body: {} }));
+    expect((await rows()).results).toHaveLength(0);
+  });
+
+  it('removes an owned legacy endpoint on logout without touching another phone', async () => {
+    const browser = await makeBrowser();
+    const other = await makeBrowser();
+    const id = await participantId('rosa@example.com');
+    for (const phone of [browser, other]) {
+      await platform.env.DB.prepare(
+        `INSERT INTO push_subscriptions (id, participant_id, endpoint, p256dh, auth, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+      )
+        .bind(
+          crypto.randomUUID(),
+          id,
+          phone.endpoint,
+          phone.keys.p256dh,
+          phone.keys.auth,
+          new Date().toISOString(),
+        )
+        .run();
+    }
+    await platform.send(
+      apiRequest('POST', '/api/signout', {
+        cookie,
+        body: { endpoint: browser.endpoint },
+      }),
+    );
+    expect((await rows()).results.map((row) => row.endpoint)).toEqual([other.endpoint]);
+  });
+
+  it('never removes another participant’s endpoint supplied at logout', async () => {
+    const browser = await makeBrowser();
+    await subscribe(browser);
+    const second = await signUpAs(platform, { contact: 'sam@example.com', firstName: 'Sam' });
+    await platform.send(
+      apiRequest('POST', '/api/signout', {
+        cookie: second,
+        body: { endpoint: browser.endpoint },
+      }),
+    );
     expect((await rows()).results).toHaveLength(1);
   });
 

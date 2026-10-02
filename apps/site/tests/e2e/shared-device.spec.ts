@@ -115,7 +115,7 @@ test('My week explains a failed signup email while keeping this phone signed in'
   await page.goto('/my-week?welcome=1&email=failed');
   await expect(page.getByRole('heading', { name: /Hi, Luz/ })).toBeVisible();
   await expect(page.locator('[data-me-welcome-text]')).toHaveText(
-    'You’re signed up on this phone, but we couldn’t email your link. Keep this phone signed in and try Get my link later.',
+    'You’re signed up on this phone, but we couldn’t email a sign-in link. Keep using this phone and try again later.',
   );
 });
 
@@ -211,5 +211,24 @@ test('after October 8, direct visitors see closed entries and link recovery', as
   await page.goto('/sign-up');
   await expect(page.getByRole('heading', { name: 'Entries are closed.' })).toBeVisible();
   await expect(page.locator('[data-signup-form]')).toBeHidden();
-  await expect(page.getByRole('link', { name: 'Get my link' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Email me a sign-in link' })).toBeVisible();
+});
+
+test('normal sign-out clears the participant’s local bingo marks and plan draft', async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await standInApi(page, context);
+  await signInTablet(context, baseURL);
+  await page.goto('/my-week');
+  await expect(page.getByRole('heading', { name: /Hi, Luz/ })).toBeVisible();
+  await page.evaluate(() => {
+    localStorage.setItem('lvwwd_bingo_2026', '[true]');
+    sessionStorage.setItem('wwd-trip-plan-draft', '{"destination":"test trip"}');
+  });
+  await page.getByRole('button', { name: 'Sign out of this phone', exact: true }).click();
+  await expect(page).toHaveURL('/');
+  expect(await page.evaluate(() => localStorage.getItem('lvwwd_bingo_2026'))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem('wwd-trip-plan-draft'))).toBeNull();
 });

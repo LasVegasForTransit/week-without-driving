@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Build } from '../src/integrations/service-worker';
-import { BUILD, ORIGIN, load, navigate, page } from './support/service-worker';
+import { BUILD, MemoryCaches, ORIGIN, load, navigate, page } from './support/service-worker';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -169,6 +169,50 @@ describe('installing', () => {
 });
 
 describe('activating', () => {
+  it('does not serve legacy pages after their classic scripts are removed in a module upgrade', async () => {
+    const caches = new MemoryCaches();
+    await (
+      await caches.open('wwd-pages-v1')
+    ).put('/partners', page('<h1>Partners</h1><script src="/scripts/partners.js" defer></script>'));
+    await (
+      await caches.open('wwd-static-v1')
+    ).put('/scripts/partners.js?__rev=old', new Response('oldPartners()'));
+    await (
+      await caches.open('wwd-precache-v1')
+    ).put('/scripts/app.js?__rev=old', new Response('oldApp()'));
+    const moduleBuild: Build = {
+      ...BUILD,
+      precache: [
+        ...BUILD.precache.filter((entry) => !entry.url.startsWith('/scripts/')),
+        { url: '/modules/app.js', revision: 'app2', bytes: 10, core: true },
+      ],
+      files: {
+        ...Object.fromEntries(
+          Object.entries(BUILD.files).filter(([url]) => !url.startsWith('/scripts/')),
+        ),
+        '/modules/app.js': 'app2',
+      },
+    };
+    const next = load(moduleBuild, {
+      caches,
+      running: true,
+      routes: { '/modules/app.js': () => new Response('newApp()') },
+    });
+    await next.extendable('install');
+    await next.extendable('activate');
+    next.net.state.offline = true;
+
+    expect(await (await next.request('/partners', navigate).settled())?.text()).toBe(
+      '<h1>You’re offline</h1>',
+    );
+    expect(await (await next.request('/', navigate).settled())?.text()).toBe(
+      '<h1>Try a week without driving</h1>',
+    );
+    expect(await (await next.request('/modules/app.js').settled())?.text()).toBe('newApp()');
+    expect(await caches.match('/scripts/partners.js', { ignoreSearch: true })).toBeUndefined();
+    expect(await caches.match('/scripts/app.js', { ignoreSearch: true })).toBeUndefined();
+  });
+
   it('deletes old wwd- caches and entries the build no longer has, and leaves other caches', async () => {
     const { caches, extendable, self } = load(BUILD);
     await extendable('install');
@@ -217,7 +261,7 @@ describe('answering pages', () => {
     });
     const response = await request('/giveaway?ref=partner', navigate).settled();
     expect(await response?.text()).toBe('<h1>Win prizes</h1>');
-    expect(caches.everything()).toEqual(['wwd-pages-v1: /giveaway']);
+    expect(caches.everything()).toEqual(['wwd-pages-v2: /giveaway']);
   });
 
   it('shows the saved copy offline, and the offline page for a page never saved', async () => {

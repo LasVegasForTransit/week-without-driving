@@ -190,18 +190,45 @@ function whereFrom() {
   };
 }
 
-async function signUpSomeoneElse() {
-  const { ok, status, data } = await call('POST', '/api/signout', {});
-  // 401: the session had already ended, which is the same result.
+/** Ends this device’s session and removes its local participant state. */
+async function signOut() {
+  let registration;
+  let subscription;
+  try {
+    registration = await navigator.serviceWorker?.getRegistration();
+    subscription = await registration?.pushManager.getSubscription();
+  } catch {
+    // The server also knows which subscriptions belong to this session.
+  }
+  const { ok, status, data } = await call('POST', '/api/signout', {
+    ...(subscription ? { endpoint: subscription.endpoint } : {}),
+  });
   if (!ok && status !== 401) return { ok: false, message: status ? data.message : UNREACHABLE };
-  // The last person's bingo marks are saved with their sign-up; the next
-  // person starts a fresh card. The key is bingo.js's STORAGE_KEY.
   store('localStorage', 'lvwwd_bingo_2026', null);
+  store('localStorage', 'lvwwd_bingo_owner', null);
   store('sessionStorage', 'lvwwd_preview_link', null);
+  store('sessionStorage', 'wwd-trip-plan-draft', null);
+  document.dispatchEvent(new CustomEvent('lvwwd:signed-out'));
+  // Server cancellation has succeeded. Clear any browser subscription and
+  // already displayed notifications as well, without delaying sign-out.
+  if (subscription) void subscription.unsubscribe().catch(() => undefined);
+  if (registration) {
+    void registration
+      .getNotifications()
+      .then((notifications) => {
+        notifications.forEach((notification) => notification.close());
+      })
+      .catch(() => undefined);
+  }
+  return { ok: true, message: '' };
+}
+
+async function signUpSomeoneElse() {
+  const result = await signOut();
+  if (!result.ok) return result;
   store('sessionStorage', SHARED_KEY, '1');
   store('sessionStorage', NEXT_KEY, '1');
-  document.dispatchEvent(new CustomEvent('lvwwd:signed-out'));
-  return { ok: true, message: '' };
+  return result;
 }
 
 /** True once, on the first sign-up form shown after "Sign up someone else". */
@@ -216,6 +243,7 @@ export const api = {
   botCheck,
   showPreviewLink,
   whereFrom,
+  signOut,
   signUpSomeoneElse,
   readyForNextPerson,
   OFFLINE,

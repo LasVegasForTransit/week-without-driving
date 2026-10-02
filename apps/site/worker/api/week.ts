@@ -55,6 +55,7 @@ export const WEEK_REPLIES = {
   badLink: 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.',
   badPlan: 'Choose one of your plans for today, or log this trip without a plan.',
   bingoTooBig: 'That bingo card is too big to save.',
+  bingoOwnerChanged: 'This phone’s sign-in changed. Reload Bingo before saving.',
 } as const;
 
 interface TripInput {
@@ -273,13 +274,15 @@ export async function getBingo(c: ApiContext, me: Participant): Promise<Response
   const row = await c.env.DB.prepare('SELECT state FROM bingo WHERE participant_id = ?1')
     .bind(me.id)
     .first<{ state: string }>();
-  return json({ state: row ? (JSON.parse(row.state) as unknown) : null });
+  return json({ participantId: me.id, state: row ? (JSON.parse(row.state) as unknown) : null });
 }
 
-/** Keeps one bingo card per person, as the page's own JSON, up to 4 KB. */
+/** Keeps a reconciled participant's card, refusing stale tabs after account recovery. */
 export async function putBingo(c: ApiContext, me: Participant): Promise<Response> {
   const body = await readJsonObject(c.request);
-  if (!body || !('state' in body)) return problem(400, MESSAGES.badRequest);
+  if (!body || !('state' in body) || typeof body.participantId !== 'string' || !body.participantId)
+    return problem(400, MESSAGES.badRequest);
+  if (body.participantId !== me.id) return problem(409, WEEK_REPLIES.bingoOwnerChanged);
   const state = JSON.stringify(body.state);
   if (new TextEncoder().encode(state).length > MAX_BINGO_BYTES) {
     return problem(413, WEEK_REPLIES.bingoTooBig);

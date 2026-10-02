@@ -195,12 +195,90 @@ describe('my week', () => {
   });
 
   it('keeps a bingo card of up to 4 KB', async () => {
+    const participant = await platform.env.DB.prepare(
+      "SELECT id FROM participants WHERE contact = 'rosa@example.com'",
+    ).first<{ id: string }>();
     const put = (state: unknown) =>
-      platform.send(apiRequest('PUT', '/api/bingo', { cookie, body: { state } }));
+      platform.send(
+        apiRequest('PUT', '/api/bingo', {
+          cookie,
+          body: { participantId: participant?.id, state },
+        }),
+      );
     expect((await put({ marked: [0, 5, 12] })).status).toBe(200);
     const got = await platform.send(apiRequest('GET', '/api/bingo', { cookie }));
-    expect(await got.json()).toEqual({ state: { marked: [0, 5, 12] } });
+    expect(await got.json()).toEqual({
+      participantId: participant?.id,
+      state: { marked: [0, 5, 12] },
+    });
     expect((await put({ big: 'x'.repeat(5000) })).status).toBe(413);
+  });
+
+  it('rejects Bingo writes that have not reconciled a participant identity', async () => {
+    for (const participantId of [undefined, null, 42, '']) {
+      const response = await platform.send(
+        apiRequest('PUT', '/api/bingo', {
+          cookie,
+          body: { participantId, state: [true] },
+        }),
+      );
+      expect(response.status).toBe(400);
+    }
+    expect(await platform.env.DB.prepare('SELECT count(*) AS n FROM bingo').first()).toEqual({
+      n: 0,
+    });
+  });
+
+  it('rejects a stale Bingo tab after account recovery without changing either saved card', async () => {
+    const firstOwner = await (
+      await platform.send(apiRequest('GET', '/api/bingo', { cookie }))
+    ).json<{ participantId: string }>();
+    const secondCookie = await signUpAs(platform, { contact: 'sam@example.com', firstName: 'Sam' });
+    const secondOwner = await (
+      await platform.send(
+        apiRequest('GET', '/api/bingo', {
+          cookie: secondCookie,
+        }),
+      )
+    ).json<{ participantId: string }>();
+    for (const card of [
+      { cookie, participantId: firstOwner.participantId, state: [true, false] },
+      { cookie: secondCookie, participantId: secondOwner.participantId, state: [false, true] },
+    ]) {
+      expect(
+        (
+          await platform.send(
+            apiRequest('PUT', '/api/bingo', {
+              cookie: card.cookie,
+              body: { participantId: card.participantId, state: card.state },
+            }),
+          )
+        ).status,
+      ).toBe(200);
+    }
+    const before = await platform.env.DB.prepare(
+      'SELECT * FROM bingo ORDER BY participant_id',
+    ).all();
+    const stale = await platform.send(
+      apiRequest('PUT', '/api/bingo', {
+        cookie: secondCookie,
+        body: { participantId: firstOwner.participantId, state: [true, true] },
+      }),
+    );
+    expect(stale.status).toBe(409);
+    expect(
+      (await platform.env.DB.prepare('SELECT * FROM bingo ORDER BY participant_id').all()).results,
+    ).toEqual(before.results);
+  });
+
+  it('identifies only the authenticated Bingo owner when a phone switches accounts', async () => {
+    const second = await signUpAs(platform, { contact: 'sam@example.com', firstName: 'Sam' });
+    const participant = await platform.env.DB.prepare(
+      "SELECT id FROM participants WHERE contact = 'sam@example.com'",
+    ).first<{ id: string }>();
+    const got = await platform.send(apiRequest('GET', '/api/bingo', { cookie: second }));
+    expect(await got.json()).toEqual({ participantId: participant?.id, state: null });
+    expect((await platform.send(apiRequest('GET', '/api/bingo'))).status).toBe(401);
   });
 
   it('enters a text trip without a post and keeps the hardship note separate', async () => {

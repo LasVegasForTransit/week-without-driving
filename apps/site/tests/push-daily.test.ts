@@ -201,7 +201,7 @@ describe('the daily reminder by browser notification', () => {
     expect(claims.exp - Date.parse(at) / 1000).toBeLessThanOrEqual(12 * 60 * 60);
   });
 
-  it('keeps sending to a phone that signed out, and stops once reminders are stopped', async () => {
+  it('stops sending to a phone when it signs out', async () => {
     const cookie = await signUpAs(platform);
     const browser = await makeBrowser();
     await platform.send(
@@ -212,16 +212,15 @@ describe('the daily reminder by browser notification', () => {
       VAPID_ENV,
     );
     await platform.send(apiRequest('POST', '/api/signout', { cookie, body: {} }));
-    // The subscription was saved on the real clock, before October.
     await run('2026-10-07T15:01:00Z');
-    expect(sentTo()).toEqual([browser.endpoint]);
+    expect(sentTo()).toEqual([]);
 
     await platform.send(
       apiRequest('POST', '/api/push/unsubscribe', { body: { endpoint: browser.endpoint } }),
       VAPID_ENV,
     );
     await run('2026-10-08T15:01:00Z');
-    expect(sentTo()).toEqual([browser.endpoint]);
+    expect(sentTo()).toEqual([]);
   });
 
   it('sends nothing without the private key', async () => {

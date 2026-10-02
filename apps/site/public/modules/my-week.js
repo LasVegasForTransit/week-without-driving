@@ -367,11 +367,11 @@ function bindTrip() {
 // Signs out this phone only; other phones stay signed in.
 function bindSignOut() {
   document.querySelector('[data-signout]')?.addEventListener('click', async () => {
-    const { ok, status, data } = await api.call('POST', '/api/signout', {});
-    if (ok || status === 401) {
+    const { ok, message } = await api.signOut();
+    if (ok) {
       clearPlanDraft();
       window.location.href = '/';
-    } else setText('[data-signout-status]', data.message);
+    } else setText('[data-signout-status]', message);
   });
 }
 
