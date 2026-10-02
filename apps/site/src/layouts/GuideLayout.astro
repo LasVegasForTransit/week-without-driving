@@ -3,6 +3,9 @@ import { Icon } from 'astro-icon/components';
 import BaseLayout from './BaseLayout.astro';
 import WinBand from '../components/WinBand.astro';
 import ShadeDiagram from '../components/guides/ShadeDiagram.astro';
+import RidePicture from '../components/guides/RidePicture.astro';
+import FareTiles from '../components/guides/FareTiles.astro';
+import AuditList from '../components/guides/AuditList.astro';
 import type { Guide } from '../lib/guides';
 import { parseInlineLinks } from '../lib/inline-links';
 
@@ -50,6 +53,17 @@ const { title, intro, cardSummary, steps } = guide.data;
                 {step.heading}
               </h2>
             </div>
+            {step.picture && (
+              <div class="mt-5">
+                {step.picture === 'fares' ? (
+                  <FareTiles />
+                ) : step.picture === 'audit-list' ? (
+                  <AuditList />
+                ) : (
+                  <RidePicture kind={step.picture} />
+                )}
+              </div>
+            )}
             <div class="mt-4 max-w-2xl space-y-3 leading-relaxed text-pretty">
               {step.body.map((paragraph) => (
                 <p>
@@ -89,8 +103,8 @@ const { title, intro, cardSummary, steps } = guide.data;
                           href={link.href}
                           class="body-link font-semibold"
                           data-print-url={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          target={link.href.startsWith('https://') ? '_blank' : undefined}
+                          rel={link.href.startsWith('https://') ? 'noopener noreferrer' : undefined}
                         >
                           {link.label}
                         </a>

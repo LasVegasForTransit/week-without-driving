@@ -4,41 +4,38 @@ order: 5
 icon: 'mdi:bike'
 cardSummary: "Every RTC bus has a bike rack on the front. Here's how to use it."
 intro: >-
-  Every RTC bus has a bike rack on the front. You load and unload your own bike, and this guide
-  shows how.
+  Every RTC bus has a bike rack on the front. You load and unload your own bike. Here's how.
 steps:
   - heading: 'Get ready before the bus arrives'
     icon: 'mdi:bike'
     body:
       - >-
-        RTC's bike racks hold two or three bikes, with no extra charge for the rack. Take anything
-        loose off your bike, such as a water bottle or bag, before the bus gets there.
+        Each rack holds two or three bikes. The rack is free. Before the bus comes, take off
+        anything loose, like a water bottle or bag.
       - >-
-        When the bus arrives, let the driver see you're loading a bike, and stay where they can see
-        you while you load it.
+        When the bus stops, let the driver see you have a bike. Stay where the driver can see you.
       - >-
-        If the rack is already full, tell the driver. They can tell you what to do, such as waiting
-        for the next bus.
+        Rack full? Tell the driver. They will tell you what to do, like wait for the next bus.
   - heading: 'Load your bike'
     icon: 'mdi:bike-fast'
     body:
       - >-
         Lower the rack, then lift your bike into an open slot.
       - >-
-        Raise the support arm over your front tire to hold the bike in place, and give it a gentle
-        push to make sure it's secure.
+        Pull the support arm up and over your front tire. Give the bike a gentle push to check it is
+        tight.
       - >-
-        Board and pay your fare as usual. Keep an eye on your bike through the window if you can.
+        Get on and pay as usual. Watch your bike through the window if you can.
   - heading: 'Unload at your stop'
     icon: 'mdi:hand-back-right-outline'
     body:
       - >-
-        Tell the driver you're getting off with a bike before your stop comes up.
+        Before your stop, tell the driver you are getting off with a bike.
       - >-
-        Lift your bike out of the rack, then fold the rack back up if you're the last bike on it.
+        Lift your bike out. If no other bikes are on the rack, fold it back up.
       - >-
         Step back to the curb before the bus pulls away.
-    note: 'Check RTC’s current bike-rack instructions and restrictions before you ride.'
+    note: 'Rules can change. Check RTC’s bike-rack instructions before you ride.'
     links:
       - label: 'RTC bike-rack instructions'
         href: 'https://www.rtcsnv.com/ways-to-travel/how-to-ride/'

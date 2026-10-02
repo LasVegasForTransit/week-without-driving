@@ -1,0 +1,52 @@
+---
+// What to look for on a sidewalk audit, as pictures with one or two words
+// each, in place of a long list in a sentence.
+import { Icon } from 'astro-icon/components';
+
+const problems = [
+  { icon: 'mdi:road-variant', label: 'Sidewalk missing or broken' },
+  { icon: 'mdi:sign-caution', label: 'Something in the way' },
+  { icon: 'mdi:wheelchair-accessibility', label: 'No curb ramp' },
+  { icon: 'mdi:dots-grid', label: 'No bumpy warning strip' },
+  { icon: 'mdi:walk', label: 'Crossing signal too short or silent' },
+  { icon: 'mdi:weather-sunny-alert', label: 'No shade' },
+  { icon: 'mdi:bus-stop-uncovered', label: 'Bus stop with no bench or shelter' },
+  { icon: 'mdi:human-wheelchair', label: 'No room to wait with a wheelchair' },
+] as const;
+---
+
+<ul class="audit-list" aria-label="Problems to look for">
+  {
+    problems.map((problem) => (
+      <li class="audit-list__item">
+        <Icon name={problem.icon} class="audit-list__icon" aria-hidden="true" />
+        <span>{problem.label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .audit-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 36rem;
+  }
+  .audit-list__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.75rem;
+    font-weight: 700;
+    line-height: 1.25;
+    background: var(--color-surface-container);
+    border-radius: 0.75rem;
+  }
+  .audit-list :global(.audit-list__icon) {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-primary-ink);
+  }
+</style>
