@@ -13,11 +13,16 @@ import { minify } from 'vite';
  * readable, and keeps every public page well under its budget of 12 KB of
  * JavaScript, gzipped.
  *
- * They are classic scripts that share a page, not modules, so top-level
- * names are left alone. The service worker (sw.js) is not minified.
+ * They are ES modules, so names inside a file may be shortened while its
+ * imports and exports keep theirs. old-links.js is the one classic script
+ * (it runs in the head, before the page shows), so its names are left
+ * alone. The service worker (sw.js) is not minified.
  */
+export const CLASSIC_SCRIPTS = new Set(['old-links.js']);
+
 export async function minifyScript(name: string, source: string): Promise<string> {
-  const result = await minify(name, source, { module: false, compress: true, mangle: true });
+  const module = !CLASSIC_SCRIPTS.has(name);
+  const result = await minify(name, source, { module, compress: true, mangle: true });
   if (result.errors.length > 0) {
     throw new Error(`Couldn’t minify ${name}: ${result.errors.map((e) => e.message).join('; ')}`);
   }

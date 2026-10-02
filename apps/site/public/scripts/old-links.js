@@ -5,8 +5,11 @@
  * of Home, before the page shows. It replaces the address rather than
  * adding one, so Back returns to where the visitor came from. Any other
  * section link, or none, stays on Home. Without JavaScript, Home opens.
+ *
+ * The one classic script on the site: a module can't run before the page
+ * shows. The block keeps its names out of the page's global scope.
  */
-(() => {
+{
   const MOVED = {
     '#how-to-participate': '/how-it-works',
     '#giveaway': '/giveaway',
@@ -15,4 +18,4 @@
   };
   const to = MOVED[window.location.hash.toLowerCase()];
   if (to) window.location.replace(to + window.location.search);
-})();
+}

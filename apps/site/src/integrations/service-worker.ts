@@ -125,6 +125,26 @@ export function referencedByHtml(html: string): string[] {
   return [...found];
 }
 
+/**
+ * The modules a script imports, as site paths: `import ... from './x.js'`,
+ * `import './x.js'` and `import('./x.js')`, resolved against the script's
+ * own path. Only literal paths on this site count; a page's scripts import
+ * each other this way, so their offline copies must be saved too.
+ */
+export function referencedByScript(source: string, scriptPath: string): string[] {
+  const found = new Set<string>();
+  const specifiers = [
+    ...source.matchAll(/\bimport\s*(?:[\w*{}\s,$]+\s*from\s*)?(["'])([^"']+)\1/g),
+    ...source.matchAll(/\bimport\s*\(\s*(["'])([^"']+)\1\s*\)/g),
+  ].map((match) => match[2] ?? '');
+  for (const specifier of specifiers) {
+    if (!specifier.startsWith('.') && !specifier.startsWith('/')) continue;
+    const path = localPath(new URL(specifier, `https://lvwwd.org${scriptPath}`).pathname);
+    if (path) found.add(path);
+  }
+  return [...found];
+}
+
 /** The files a stylesheet asks for with url(), such as its fonts. */
 export function referencedByCss(css: string): string[] {
   const found = new Set<string>();
@@ -200,15 +220,21 @@ class PrecacheList {
     for (const file of referencedByHtml(text(html)).filter((f) => this.exists(f))) {
       const content = this.read(file);
       this.add(file, content, core);
+      if (file.endsWith('.js')) this.addImports(file, content, core);
       if (!file.endsWith('.css')) continue;
       for (const asset of referencedByCss(text(content))) {
         if (this.exists(asset)) this.add(asset, this.read(asset), core);
       }
     }
-    // The comparison script imports its estimate module; HTML does not name it.
-    if (url === '/go/compare') {
-      const estimates = '/scripts/compare-estimates.js';
-      if (this.exists(estimates)) this.add(estimates, this.read(estimates), core);
+  }
+
+  /** Adds the modules a script imports, and theirs, which the HTML doesn't name. */
+  private addImports(script: string, content: Uint8Array, core: boolean): void {
+    for (const module of referencedByScript(text(content), script)) {
+      if (this.entries.has(module) || !this.exists(module)) continue;
+      const source = this.read(module);
+      this.add(module, source, core);
+      this.addImports(module, source, core);
     }
   }
 }

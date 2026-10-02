@@ -1,29 +1,13 @@
-import { readFileSync } from 'node:fs';
-import vm from 'node:vm';
-
 import { describe, expect, it } from 'vitest';
 
 /**
- * Runs the real public/scripts/keep-going.js in a sandbox and checks the
+ * Imports the real public/scripts/keep-going.js and checks the
  * email rule and the message for every reply of POST /api/newsletter. The
  * card itself is checked in a browser by tests/e2e/keep-going.spec.ts.
  */
 
-interface KeepGoing {
-  checkEmail(value: string): string;
-  messageFor(status: number, error?: string): string;
-  CLOSES: number;
-}
-
-function load(): KeepGoing {
-  const source = readFileSync(new URL('../public/scripts/keep-going.js', import.meta.url), 'utf8');
-  const window: { lvwwdKeepGoing?: KeepGoing } = {};
-  vm.runInNewContext(source, { window });
-  if (!window.lvwwdKeepGoing) throw new Error('The script did not set window.lvwwdKeepGoing');
-  return window.lvwwdKeepGoing;
-}
-
-const card = load();
+// The real module; its page setup is skipped in Node, where there is no document.
+const card = await import('../public/scripts/keep-going.js');
 const WRONG = 'Something went wrong. Please try again.';
 
 describe('the keep-going card', () => {

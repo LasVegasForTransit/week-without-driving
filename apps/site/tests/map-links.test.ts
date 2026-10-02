@@ -1,18 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { runInNewContext } from 'node:vm';
-
 import { describe, expect, it } from 'vitest';
 
+import * as browser from '../public/scripts/map-links.js';
 import { buildMapLinks, type MapLinks } from '../src/lib/map-links';
-
-/** The browser copy in public/scripts/map-links.js, run the way a page runs it. */
-function browserBuilder(): typeof buildMapLinks {
-  const source = readFileSync(new URL('../public/scripts/map-links.js', import.meta.url), 'utf8');
-  const window: { LVWWD_MAP_LINKS?: { buildMapLinks: typeof buildMapLinks } } = {};
-  runInNewContext(source, { window });
-  if (!window.LVWWD_MAP_LINKS) throw new Error('map-links.js did not define LVWWD_MAP_LINKS');
-  return window.LVWWD_MAP_LINKS.buildMapLinks;
-}
 
 describe('the map-link builder', () => {
   it('builds the three map links and their names for a place', () => {
@@ -44,15 +33,7 @@ describe('the map-link builder', () => {
     expect(() => buildMapLinks(lat, lng, 'Nowhere')).toThrow(named);
   });
 
-  it('gives the same links and names in the browser as at build time', () => {
-    const inBrowser = browserBuilder();
-    for (const [lat, lng, name] of [
-      [36.06431, -115.11359, 'Sunset Park'],
-      [36.090736, -115.18333, 'Allegiant Stadium'],
-      [36.19399, -115.14734, 'D after Alexander (northbound)'],
-    ] as const) {
-      expect(inBrowser(lat, lng, name)).toEqual(buildMapLinks(lat, lng, name));
-    }
-    expect(() => inBrowser(91, 0, 'Nowhere')).toThrow('91');
+  it('is the one builder the browser imports, not a copy', () => {
+    expect(buildMapLinks).toBe(browser.buildMapLinks);
   });
 });

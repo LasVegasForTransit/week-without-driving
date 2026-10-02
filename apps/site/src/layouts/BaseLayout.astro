@@ -337,9 +337,9 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
         `script-src 'self'` in public/_headers; an inline block would be
         rejected in production and leave every reveal element hidden. */
     }
-    <script is:inline src="/scripts/reveal-on-scroll.js" defer></script>
-    <script is:inline src="/scripts/site-nav.js" defer></script>
-    <script is:inline src="/scripts/print-links.js" defer></script>
-    <script is:inline src="/scripts/app.js" defer></script>
+    <script is:inline type="module" src="/scripts/reveal-on-scroll.js"></script>
+    <script is:inline type="module" src="/scripts/site-nav.js"></script>
+    <script is:inline type="module" src="/scripts/print-links.js"></script>
+    <script is:inline type="module" src="/scripts/app.js"></script>
   </body>
 </html>

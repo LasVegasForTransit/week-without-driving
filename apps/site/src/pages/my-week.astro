@@ -438,13 +438,10 @@ const shortcuts = [
     </noscript>
   </div>
 
-  <script is:inline src="/scripts/participant-api.js" defer></script>
-  <script is:inline src="/scripts/share-trip.js" defer></script>
-  <script is:inline src="/scripts/reminders.js" defer></script>
-  <script is:inline src="/scripts/my-week-plan-cards.js" defer></script>
-  <script is:inline src="/scripts/my-week.js" defer></script>
-  <script is:inline src="/scripts/needs-connection.js" defer></script>
-  <script is:inline src="/scripts/keep-going.js" defer></script>
+  <script is:inline type="module" src="/scripts/reminders.js"></script>
+  <script is:inline type="module" src="/scripts/my-week.js"></script>
+  <script is:inline type="module" src="/scripts/needs-connection.js"></script>
+  <script is:inline type="module" src="/scripts/keep-going.js"></script>
 </BaseLayout>
 
 <style>

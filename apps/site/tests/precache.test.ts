@@ -15,6 +15,7 @@ import {
   injectBuild,
   referencedByCss,
   referencedByHtml,
+  referencedByScript,
   revisionOf,
   serviceWorker,
 } from '../src/integrations/service-worker';
@@ -57,7 +58,9 @@ function site() {
   write('scripts/home.js', 'console.log("home")');
   write('icons/home.svg', '<svg/>');
   write('scripts/app.js', 'console.log(1)');
-  write('scripts/finder.js', 'console.log(2)');
+  write('scripts/finder.js', 'import{b as l}from"./links.js";console.log(2,l)');
+  write('scripts/links.js', 'import"./coords.js";export const b=1;');
+  write('scripts/coords.js', 'export const c=1;');
   write('icons/fare.svg', '<svg/>');
   write('photos/bus-480.webp', 'small');
   write('photos/bus-960.webp', 'large');
@@ -99,6 +102,18 @@ describe('what a page references', () => {
     ]);
   });
 
+  it('finds the modules a script imports, statically or when first needed', () => {
+    const minified =
+      'import{api as e}from"./participant-api.js";import"./me.js";import*as t from"../lib/x.js";' +
+      'const o=()=>import("./later.js");import("https://cdn.test/y.js");export{e};';
+    expect(referencedByScript(minified, '/scripts/keep-going.js').sort()).toEqual([
+      '/lib/x.js',
+      '/scripts/later.js',
+      '/scripts/me.js',
+      '/scripts/participant-api.js',
+    ]);
+  });
+
   it('finds the fonts a stylesheet asks for', () => {
     expect(
       referencedByCss(
@@ -128,8 +143,10 @@ describe('the precache manifest', () => {
       '/icons/home.svg',
       '/offline',
       '/scripts/app.js',
+      '/scripts/coords.js',
       '/scripts/finder.js',
       '/scripts/home.js',
+      '/scripts/links.js',
     ]);
     for (const url of [
       '/',
@@ -145,6 +162,8 @@ describe('the precache manifest', () => {
     expect(byUrl['/fonts/body.woff2']?.core).toBe(true);
     expect(byUrl['/fonts/head.woff2']?.core).toBe(true);
     expect(byUrl['/guides']?.core).toBe(true);
+    // Go's finder imports links.js, which imports coords.js; both are saved.
+    expect(byUrl['/scripts/coords.js']?.core).toBe(true);
     expect(byUrl['/how-it-works']).toBeDefined();
     expect(byUrl['/scripts/app.js']?.revision).toBe(
       revisionOf(new TextEncoder().encode('console.log(1)')),

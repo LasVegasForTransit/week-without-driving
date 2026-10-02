@@ -9,9 +9,10 @@
  * left every reveal element stuck at its initial hidden state. Same
  * pattern as header-stuck.js / share-button.js / newsletter-subscribe.js.
  */
-(() => {
-  const targets = document.querySelectorAll('.reveal, .reveal-stat, .reveal-quote');
-  if (!targets.length) return;
+const targets = document.querySelectorAll('.reveal, .reveal-stat, .reveal-quote');
+if (targets.length) observe(targets);
+
+function observe(targets) {
   const obs = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -24,4 +25,4 @@
     { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
   );
   targets.forEach((el) => obs.observe(el));
-})();
+}
