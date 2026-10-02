@@ -5,6 +5,7 @@ import icon from 'astro-icon';
 import { defineConfig } from 'astro/config';
 
 import { minifyScripts } from './src/integrations/minify-scripts';
+import { preloadModules } from './src/integrations/preload-modules';
 import { reminderCheck } from './src/integrations/reminder-check';
 import { serviceWorker } from './src/integrations/service-worker';
 import { comparePublished } from './src/lib/compare-release';
@@ -19,9 +20,10 @@ export default defineConfig({
   // reminderCheck() stops the build when a daily reminder in
   // src/data/reminders.json breaks one of its rules. Iconify-backed icons
   // are tree-shaken to the names the page references. After the build,
-  // minifyScripts() shrinks dist/scripts, then serviceWorker() writes the
-  // offline precache list into dist/sw.js (in that order, so the list
-  // fingerprints the files phones download).
+  // minifyScripts() shrinks dist/modules and dist/scripts, preloadModules()
+  // lists each page's imported modules in its head, then serviceWorker()
+  // writes the offline precache list into dist/sw.js (in that order, so the
+  // list fingerprints the files phones download).
   //
   // The sitemap leaves out the pages that ask search engines not to list
   // them (BaseLayout's `noindex`): My week, Get my link and the offline page.
@@ -39,6 +41,7 @@ export default defineConfig({
     icon(),
     lvbtAnalytics({ site: 'lvwwd.org', exclude: ['^/admin'] }),
     minifyScripts(),
+    preloadModules(),
     serviceWorker(),
   ],
   vite: {

@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 // Email a sign-in link: sends the "Open My Week" link again to the email
 // someone signed up with. The confirmation is the same whether or
 // not the contact matches a sign-up, so the page never reveals who signed
-// up. The behaviour is in /scripts/my-week-link.js. A link that has
+// up. The behaviour is in /modules/my-week-link.js. A link that has
 // expired or doesn't work lands here with ?expired=1.
 ---
 
@@ -80,8 +80,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </p>
   </section>
 
-  <script is:inline type="module" src="/scripts/my-week-link.js"></script>
-  <script is:inline type="module" src="/scripts/needs-connection.js"></script>
+  <script is:inline type="module" src="/modules/my-week-link.js"></script>
+  <script is:inline type="module" src="/modules/needs-connection.js"></script>
 </BaseLayout>
 
 <style>

@@ -10,7 +10,7 @@ import { partners, contactEmail, joinMailto } from '../lib/partners';
 // the page opens with "Bring your organization".
 //
 // After the week ends (12:00 am October 9, 2026, Las Vegas time, by the
-// phone's clock), /scripts/partners.js swaps "Bring your organization" for
+// phone's clock), /modules/partners.js swaps "Bring your organization" for
 // a note about next year. Without JavaScript the page keeps its
 // during-the-week text.
 
@@ -130,7 +130,7 @@ const whatPartnersDo = [
           </a>
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-semibold">{contactEmail}</span>
-            {/* Shown by /scripts/partners.js; the address stays visible as text without it. */}
+            {/* Shown by /modules/partners.js; the address stays visible as text without it. */}
             <button
               type="button"
               class="press inline-flex min-h-11 min-w-11 items-center gap-1.5 border border-outline px-3 py-2 text-sm font-semibold"
@@ -150,8 +150,8 @@ const whatPartnersDo = [
     <PartnerKit />
   </div>
 
-  <script is:inline type="module" src="/scripts/partners.js"></script>
-  <script is:inline type="module" src="/scripts/partner-kit.js"></script>
+  <script is:inline type="module" src="/modules/partners.js"></script>
+  <script is:inline type="module" src="/modules/partner-kit.js"></script>
 </BaseLayout>
 
 <style>

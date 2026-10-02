@@ -1,7 +1,8 @@
 ---
 // Simple drawings for "Ride the bus for the first time", one per step, so
-// a rider can see what to do before reading about it. Each drawing is
-// decorative (aria-hidden); its caption says the same thing in words.
+// a rider can see what to do before reading about it. The step's own text
+// says the same thing, so the whole figure, caption too, is hidden from
+// screen readers (aria-hidden) and they hear each step once.
 // Colors come from the site's tokens, so the drawings follow light and
 // dark mode like the rest of the page.
 interface Props {
@@ -18,7 +19,7 @@ const captions = {
 } as const;
 ---
 
-<figure class="ride-picture">
+<figure class="ride-picture" aria-hidden="true">
   <svg viewBox="0 0 320 180" aria-hidden="true" focusable="false" class="ride-picture__svg">
     {
       kind === 'ride-plan' && (

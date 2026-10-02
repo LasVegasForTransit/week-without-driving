@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 /**
- * Imports the real public/scripts/keep-going.js and checks the
+ * Imports the real public/modules/keep-going.js and checks the
  * email rule and the message for every reply of POST /api/newsletter. The
  * card itself is checked in a browser by tests/e2e/keep-going.spec.ts.
  */
 
 // The real module; its page setup is skipped in Node, where there is no document.
-const card = await import('../public/scripts/keep-going.js');
+const card = await import('../public/modules/keep-going.js');
 const WRONG = 'Something went wrong. Please try again.';
 
 describe('the keep-going card', () => {

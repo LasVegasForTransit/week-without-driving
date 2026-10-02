@@ -14,6 +14,8 @@
  * Campaign analytics events are listed in docs/operations/reference/analytics.md.
  * Without JavaScript the button stays hidden and every page still works.
  */
+import { isAppleTouch } from './device.js';
+
 const DISMISSED = 'wwd-ios-install-dismissed';
 // Holds only "1" after an install has been counted on this phone.
 const INSTALL_COUNTED = 'wwd-install-counted';
@@ -131,8 +133,7 @@ function hideFailedHeroPhoto() {
 /** What this browser can do about installing the site. */
 function browser() {
   const ua = navigator.userAgent;
-  const apple =
-    /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const apple = isAppleTouch();
   return {
     standalone:
       window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
@@ -161,6 +162,18 @@ function rememberDismissal() {
   }
 }
 
+function isShown(element) {
+  return (
+    element instanceof HTMLElement &&
+    element !== document.body &&
+    element.getClientRects().length > 0
+  );
+}
+
+function firstShownHeading() {
+  return [...document.querySelectorAll('main h1')].find(isShown) ?? null;
+}
+
 /** The instruction sheet: open(which, byItself) shows the iPhone or general steps. */
 function installSheet(sheet) {
   const shown = { kind: 'general', auto: false, opener: null };
@@ -173,9 +186,12 @@ function installSheet(sheet) {
   });
   sheet.addEventListener('close', () => {
     if (shown.kind === 'ios') rememberDismissal();
-    // After opening by itself, focus goes to the page's heading.
-    const back = shown.auto ? document.querySelector('main h1') : shown.opener;
-    if (shown.auto) back?.setAttribute('tabindex', '-1');
+    // After opening by itself, focus goes back where the visitor was if that
+    // is still on the page, or else to the first heading they can see (My
+    // week's signed-out heading is in the page but hidden).
+    const shownOpener = isShown(shown.opener) ? shown.opener : null;
+    const back = shown.auto ? (shownOpener ?? firstShownHeading()) : shown.opener;
+    if (shown.auto && back !== shownOpener) back?.setAttribute('tabindex', '-1');
     if (back instanceof HTMLElement) back.focus();
   });
   return (which, byItself) => {

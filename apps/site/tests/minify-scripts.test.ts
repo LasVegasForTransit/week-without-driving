@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { minifyScript } from '../src/integrations/minify-scripts';
+import { SCRIPT_FOLDERS, minifyScript } from '../src/integrations/minify-scripts';
 
 describe('minifying the page scripts', () => {
   it('drops comments and keeps the names a module exports and imports', async () => {
@@ -17,17 +17,23 @@ describe('minifying the page scripts', () => {
   });
 
   it('leaves the classic head script parsed as a script', async () => {
-    const code = await minifyScript('old-links.js', '{\n  const to = 1;\n  window.x = to;\n}\n');
+    const code = await minifyScript(
+      'old-links.js',
+      '{\n  const to = 1;\n  window.x = to;\n}\n',
+      false,
+    );
     expect(code).toContain('window.x');
   });
 
-  it('minifies every script in public/scripts without errors', async () => {
-    const directory = new URL('../public/scripts/', import.meta.url);
-    for (const name of readdirSync(directory).filter((file) => file.endsWith('.js'))) {
-      const source = readFileSync(new URL(name, directory), 'utf8');
-      const code = await minifyScript(name, source);
-      expect(code.length, name).toBeGreaterThan(0);
-      expect(code.length, name).toBeLessThan(source.length);
+  it('minifies every module and script without errors', async () => {
+    for (const { folder, module } of SCRIPT_FOLDERS) {
+      const directory = new URL(`../public/${folder}/`, import.meta.url);
+      for (const name of readdirSync(directory).filter((file) => file.endsWith('.js'))) {
+        const source = readFileSync(new URL(name, directory), 'utf8');
+        const code = await minifyScript(name, source, module);
+        expect(code.length, name).toBeGreaterThan(0);
+        expect(code.length, name).toBeLessThan(source.length);
+      }
     }
   });
 

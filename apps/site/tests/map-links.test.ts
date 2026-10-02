@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import * as browser from '../public/scripts/map-links.js';
+import * as browser from '../public/modules/map-links.js';
 import { buildMapLinks, type MapLinks } from '../src/lib/map-links';
 
 describe('the map-link builder', () => {
@@ -31,6 +31,23 @@ describe('the map-link builder', () => {
     ['36.1' as unknown as number, -115, '36.1'],
   ])('refuses latitude %s, longitude %s, naming the bad value', (lat, lng, named) => {
     expect(() => buildMapLinks(lat, lng, 'Nowhere')).toThrow(named);
+  });
+
+  it('builds directions to a typed place, from the phone or from a typed start', () => {
+    const here = browser.buildDirectionLinks('Meadows Mall, NV', 'Meadows Mall');
+    expect(here.google).toBe(
+      'https://www.google.com/maps/dir/?api=1&destination=Meadows%20Mall,%20NV&travelmode=transit',
+    );
+    expect(here.apple).toBe('https://maps.apple.com/?daddr=Meadows%20Mall,%20NV&dirflg=r');
+    expect(here.transit).toBe('');
+    const fromThere = browser.buildDirectionLinks('36.06431,-115.11359', 'Sunset Park', {
+      from: 'Charleston & Decatur, NV',
+      point: '36.06431,-115.11359',
+    });
+    expect(new URL(fromThere.google).searchParams.get('origin')).toBe('Charleston & Decatur, NV');
+    expect(new URL(fromThere.apple).searchParams.get('saddr')).toBe('Charleston & Decatur, NV');
+    // The Transit app always starts from the phone, so a typed start leaves it out.
+    expect(fromThere.transit).toBe('');
   });
 
   it('is the one builder the browser imports, not a copy', () => {

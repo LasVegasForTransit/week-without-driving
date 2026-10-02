@@ -12,9 +12,9 @@ import { wwd } from '../lib/wwd';
 // entries as the eight days of the week, the form that sends today's
 // shared trip, daily reminders, their details, and, at the foot, "Sign up
 // someone else" for a volunteer signing people up on one tablet. The page
-// is the same for everyone; /scripts/my-week.js fills it in from the
+// is the same for everyone; /modules/my-week.js fills it in from the
 // Worker's API for the person signed in on this phone, or shows the
-// signed-out state. /scripts/needs-connection.js says so, and grays out
+// signed-out state. /modules/needs-connection.js says so, and grays out
 // the buttons that send something, while the phone is offline. Opening an
 // "Open my week" link (/my-week?t=...) is handled by the Worker before
 // this page loads.
@@ -313,7 +313,7 @@ const shortcuts = [
       {
         /*
         REMINDERS: the intro, then one part for each way to get them.
-        /scripts/reminders.js shows the parts and switches the whole
+        /modules/reminders.js shows the parts and switches the whole
         section to its closing line once sign-up for reminders closes.
       */
       }
@@ -438,10 +438,10 @@ const shortcuts = [
     </noscript>
   </div>
 
-  <script is:inline type="module" src="/scripts/reminders.js"></script>
-  <script is:inline type="module" src="/scripts/my-week.js"></script>
-  <script is:inline type="module" src="/scripts/needs-connection.js"></script>
-  <script is:inline type="module" src="/scripts/keep-going.js"></script>
+  <script is:inline type="module" src="/modules/reminders.js"></script>
+  <script is:inline type="module" src="/modules/my-week.js"></script>
+  <script is:inline type="module" src="/modules/needs-connection.js"></script>
+  <script is:inline type="module" src="/modules/keep-going.js"></script>
 </BaseLayout>
 
 <style>
@@ -554,7 +554,7 @@ const shortcuts = [
   }
   .entries__days {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
     margin-block: 1.25rem;
   }

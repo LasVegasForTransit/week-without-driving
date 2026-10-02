@@ -1999,7 +1999,7 @@ body {
   }
 
   /* The notice above a form's buttons while the phone is offline
-     (public/scripts/needs-connection.js). It wraps at any text size. */
+     (public/modules/needs-connection.js). It wraps at any text size. */
   .offline-notice {
     display: flex;
     align-items: flex-start;
@@ -2141,7 +2141,7 @@ body {
 
 /* Installing the site and the offline service worker: the footer's "Add to
    home screen" button, its instruction sheet, and the bar that offers a
-   new version (all run by /scripts/app.js). */
+   new version (all run by /modules/app.js). */
 @layer components {
   .install-button {
     display: inline-flex;

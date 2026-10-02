@@ -1,6 +1,6 @@
 /**
  * Sign up to win: checks the form, then sends it to the Worker
- * (POST /api/signup, through /scripts/participant-api.js).
+ * (POST /api/signup, through /modules/participant-api.js).
  *
  * A new sign-up is signed in on this phone by the Worker's cookies and
  * goes to My week. An email that already has a sign-up is

@@ -1,9 +1,11 @@
-const siteOrigin = 'https://lasvegasfortransit.org';
-const siteHost = 'lasvegasfortransit.org';
+// Links on this site print as its own address, so a printed page reads
+// "lvwwd.org/go"; phone numbers already show their number.
+const siteOrigin = window.location.origin;
+const siteHost = window.location.hostname.replace(/^www\./, '');
 
 function printLinkParts(value, href) {
   const candidate = value || href;
-  if (!candidate) return undefined;
+  if (!candidate || /^(?:tel|sms):/i.test(candidate)) return undefined;
 
   if (
     !candidate.includes('://') &&

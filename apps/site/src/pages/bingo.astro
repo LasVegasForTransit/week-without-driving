@@ -16,7 +16,7 @@ import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 // The day line and the "Sign up to win" link below the card depend on
 // today's date, which this static page cannot know at build time. The
 // server-rendered text below is a reasonable starting state (correct as of
-// this build); /scripts/bingo.js corrects it immediately for the visitor's
+// this build); /modules/bingo.js corrects it immediately for the visitor's
 // actual clock. This mirrors the approach in index.astro's date-derived
 // copy.
 const now = new Date();
@@ -177,7 +177,7 @@ const description =
         </button>
       </div>
 
-      {/* Print section, shown by /scripts/bingo-print.js. */}
+      {/* Print section, shown by /modules/bingo-print.js. */}
       <div class="bingo-print-controls mt-6" data-bingo-print-controls hidden>
         <label class="bingo-print-check" data-print-marks-field hidden>
           <input type="checkbox" data-print-marks />
@@ -343,9 +343,9 @@ const description =
   <ShareScreen />
   <script is:inline type="application/json" id="bingo-squares" set:html={squaresJson} />
   {/* bingo-print.js listens for bingo.js's first event, so it loads first. */}
-  <script is:inline type="module" src="/scripts/bingo-print.js"></script>
-  <script is:inline type="module" src="/scripts/bingo.js"></script>
-  <script is:inline type="module" src="/scripts/bingo-sync.js"></script>
+  <script is:inline type="module" src="/modules/bingo-print.js"></script>
+  <script is:inline type="module" src="/modules/bingo.js"></script>
+  <script is:inline type="module" src="/modules/bingo-sync.js"></script>
   <WinBand />
   <BingoPrintSheet />
 </BaseLayout>

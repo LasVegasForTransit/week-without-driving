@@ -31,8 +31,6 @@ function miles(lat1: number, lng1: number, lat2: number, lng2: number): number {
   return 2 * 3958.8 * Math.asin(Math.sqrt(a));
 }
 
-/** Route names a step mentions: "Route 215", "routes 105, 106 and 401", the RED LINE, the Deuce. */
-
 describe('Places to go', () => {
   it('gives every destination its own anchor and three steps', () => {
     const anchors = destinations.map((destination) => destination.anchor);

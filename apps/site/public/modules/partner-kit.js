@@ -7,7 +7,7 @@
  *
  * From 12:00 am October 9, 2026, Las Vegas time, by the phone's clock, the
  * kit shows only its closing message. The copy buttons are run by
- * /scripts/partners.js. Nothing is fetched or stored.
+ * /modules/partners.js. Nothing is fetched or stored.
  */
 const ENDED = Date.parse('2026-10-09T07:00:00Z');
 const GENERAL = 'general';

@@ -11,7 +11,7 @@ import { Icon } from 'astro-icon/components';
 
 // The Go page. "Where to?" comes first: type a place and it opens transit
 // directions in Google Maps, Apple Maps or the Transit app, with a short
-// "Before you go" list (public/scripts/where-to.js). It needs no account,
+// "Before you go" list (public/modules/where-to.js). It needs no account,
 // and the places typed stay in the address of the map app the visitor
 // opens. "Find a bus" shows the bus stops nearest the visitor, or
 // nearest a place they pick without sharing their location, and "Places to
@@ -19,8 +19,8 @@ import { Icon } from 'astro-icon/components';
 // places, steps and map points live in src/lib/destinations.ts, with when
 // and where their facts were checked.
 //
-// The finder runs in the browser (public/scripts/nearest-routes.js, with
-// public/scripts/map-links.js for its map buttons) against
+// The finder runs in the browser (public/modules/nearest-routes.js, with
+// public/modules/map-links.js for its map buttons) against
 // public/data/stops.json and public/data/routes.json, which
 // scripts/build-stops.mjs makes from RTC's GTFS feed. Nothing here calls an
 // API or sends the visitor's location anywhere.
@@ -84,6 +84,11 @@ function placeBadges(steps: readonly string[]) {
   const shown = routes.length > MAX_BADGES ? routes.slice(0, MAX_BADGES - 1) : routes;
   return { badges: shown.map(badge), more: routes.length - shown.length };
 }
+
+const placesWithBuses = destinations.map((destination) => ({
+  ...destination,
+  buses: placeBadges(destination.steps),
+}));
 
 const mapButtonClass =
   'press inline-flex min-h-11 items-center gap-2 rounded-full border border-outline px-4 py-2 text-sm font-semibold no-underline hover:bg-on-surface hover:text-surface focus-visible:bg-on-surface focus-visible:text-surface';
@@ -333,30 +338,24 @@ const mapButtonClass =
 
       <div class="places mt-8">
         {
-          destinations.map((destination) => (
+          placesWithBuses.map((destination) => (
             <details id={destination.anchor} class="place scroll-mt-24" name="places" data-place>
               <summary class="place__summary">
-                <span class="place__text">
-                  <h3 class="place__name">{destination.heading}</h3>
-                  <span class="place__intro">{destination.intro}</span>
-                  {(() => {
-                    const { badges, more } = placeBadges(destination.steps);
-                    return badges.length > 0 ? (
-                      <span class="place__buses">
-                        <span class="sr-only">Buses: </span>
-                        {badges.map((b) => (
-                          <span
-                            class="route-badge"
-                            style={`--route:${b.color};--route-ink:${b.ink}`}
-                          >
-                            {b.label}
-                          </span>
-                        ))}
-                        {more > 0 && <span class="place__more">+{more} more</span>}
+                <h3 class="place__name">{destination.heading}</h3>
+                <span class="place__intro">{destination.intro}</span>
+                {destination.buses.badges.length > 0 && (
+                  <span class="place__buses">
+                    <span class="sr-only">Buses: </span>
+                    {destination.buses.badges.map((b) => (
+                      <span class="route-badge" style={`--route:${b.color};--route-ink:${b.ink}`}>
+                        {b.label}
                       </span>
-                    ) : null;
-                  })()}
-                </span>
+                    ))}
+                    {destination.buses.more > 0 && (
+                      <span class="place__more">+{destination.buses.more} more</span>
+                    )}
+                  </span>
+                )}
                 <Icon name="mdi:chevron-down" class="place__chevron" aria-hidden="true" />
               </summary>
               <div class="place__body">
@@ -457,9 +456,9 @@ const mapButtonClass =
     </div>
   </section>
 
-  <script is:inline type="module" src="/scripts/where-to.js"></script>
-  <script is:inline type="module" src="/scripts/open-place.js"></script>
-  <script is:inline type="module" src="/scripts/nearest-routes.js"></script>
+  <script is:inline type="module" src="/modules/where-to.js"></script>
+  <script is:inline type="module" src="/modules/open-place.js"></script>
+  <script is:inline type="module" src="/modules/nearest-routes.js"></script>
   <WinBand />
 </BaseLayout>
 
@@ -569,12 +568,15 @@ const mapButtonClass =
   .place {
     border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
   }
+  /* The place's name, a line about it and its buses, with the open/close
+     arrow in a column of its own on the right. */
   .place__summary {
     /* Clear of the sticky header when scrolled or tabbed to. */
     scroll-margin-top: 6rem;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 1rem;
+    column-gap: 1rem;
     min-height: 44px;
     padding-block: 1.1rem;
     cursor: pointer;
@@ -587,9 +589,10 @@ const mapButtonClass =
     outline: 3px solid var(--color-primary-warm);
     outline-offset: 2px;
   }
-  .place__text {
-    flex: 1;
-    min-width: 0;
+  .place__name,
+  .place__intro,
+  .place__buses {
+    grid-column: 1;
   }
   .place__name {
     font-size: 1.25rem;
@@ -633,7 +636,8 @@ const mapButtonClass =
     color: var(--color-on-surface-variant);
   }
   .place :global(.place__chevron) {
-    flex: none;
+    grid-column: 2;
+    grid-row: 1 / span 3;
     width: 1.75rem;
     height: 1.75rem;
     color: var(--color-primary-ink);

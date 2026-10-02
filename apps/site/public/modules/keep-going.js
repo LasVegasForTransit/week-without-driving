@@ -7,7 +7,7 @@
  * sign-up is on (data-one-tap="on"), this script swaps that link for "Join
  * the newsletter": on My week, with the signed-in participant's own
  * address when their contact is an email, from the GET /api/me that
- * /scripts/my-week.js already made; otherwise, and on Home, with an email
+ * /modules/my-week.js already made; otherwise, and on Home, with an email
  * field. A tap asks Turnstile for a token, then sends POST /api/newsletter.
  *
  * On Home, from 12:00 am October 9, 2026, Las Vegas time, by the phone's
@@ -71,12 +71,24 @@ function switchHome() {
   });
 }
 
-/** The participant API (participant-api.js), loaded when first needed. */
+/**
+ * The participant API (participant-api.js), loaded when first needed. A
+ * browser remembers a failed import for the rest of the page's life, so a
+ * try after one fails asks for the file at a new address.
+ */
+let apiLoad = null;
+let apiTries = 0;
 function participantApi() {
-  return import('./participant-api.js').then(
-    (module) => module.api,
-    () => Promise.reject(new Error('unreachable')),
-  );
+  apiLoad ??= import(
+    apiTries === 0 ? './participant-api.js' : `./participant-api.js?try=${apiTries}`
+  )
+    .then((module) => module.api)
+    .catch(() => {
+      apiLoad = null;
+      apiTries += 1;
+      return Promise.reject(new Error('unreachable'));
+    });
+  return apiLoad;
 }
 
 function tokenWithin(bot) {
