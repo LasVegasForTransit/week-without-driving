@@ -2,7 +2,7 @@ import type { AgeGroup, ContactType } from './env';
 
 /**
  * The sign-up rules, checked again on the server. The rules and the words
- * match public/scripts/sign-up.js, so a person sees the same message
+ * match public/modules/sign-up.js, so a person sees the same message
  * whichever side catches the mistake.
  */
 export const FIELD_MESSAGES = {

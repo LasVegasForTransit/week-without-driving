@@ -6,7 +6,7 @@ import {
   METERS_PER_MILE,
   estimateCarbon,
   estimateCost,
-} from '../public/scripts/compare-estimates.js';
+} from '../public/modules/compare-estimates.js';
 
 describe('one-way comparison estimates', () => {
   it('uses the published EPA factors and fuel formula', () => {

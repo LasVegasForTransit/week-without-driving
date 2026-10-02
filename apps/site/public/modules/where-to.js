@@ -8,6 +8,9 @@
  * to /go?to=<place> fills in the place and shows the directions, so a
  * partner can share a trip to their door.
  */
+import { isAppleTouch } from './device.js';
+import { buildDirectionLinks } from './map-links.js';
+
 const root = document.querySelector('[data-where]');
 const form = root?.querySelector('[data-where-form]');
 const result = root?.querySelector('[data-where-result]');
@@ -24,10 +27,7 @@ const again = result?.querySelector('[data-where-again]');
 
 // iPhones open Apple Maps by default, so it goes first there.
 function putAppleFirst() {
-  const ua = navigator.userAgent;
-  const iPhone =
-    /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  if (!iPhone) return;
+  if (!isAppleTouch()) return;
   apple.classList.replace('btn--outline', 'btn--primary');
   google.classList.replace('btn--primary', 'btn--outline');
   apple.after(google);
@@ -64,22 +64,17 @@ function pointOf(place) {
 
 // Without a starting point, each app starts from where the phone is.
 function setMapLinks(name, destination, origin, point) {
-  const googleQuery = new URLSearchParams({ api: '1', destination, travelmode: 'transit' });
-  if (origin) googleQuery.set('origin', origin);
-  google.href = `https://www.google.com/maps/dir/?${googleQuery}`;
-  google.setAttribute('aria-label', `Directions to ${name} in Google Maps`);
-
-  const appleQuery = new URLSearchParams({ daddr: destination, dirflg: 'r' });
-  if (origin) appleQuery.set('saddr', origin);
-  apple.href = `https://maps.apple.com/?${appleQuery}`;
-  apple.setAttribute('aria-label', `Directions to ${name} in Apple Maps`);
-
-  // The Transit app takes only a map point, and starts from the phone.
-  transit.hidden = !point || Boolean(origin);
-  if (point) {
-    transit.href = `transit://directions?to=${point}`;
-    transit.setAttribute('aria-label', `Directions to ${name} in the Transit app`);
+  const links = buildDirectionLinks(destination, name, { from: origin, point });
+  for (const [app, link] of [
+    ['google', google],
+    ['apple', apple],
+    ['transit', transit],
+  ]) {
+    link.href = links[app] || '#';
+    link.setAttribute('aria-label', links.labels[app]);
   }
+  // The Transit app takes only a map point, and starts from the phone.
+  transit.hidden = !links.transit;
 }
 
 function setGuide(anchor, name) {

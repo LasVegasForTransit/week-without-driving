@@ -1,6 +1,6 @@
 /**
  * My week's "Remind me to share my trip" section. It sits inside My week's
- * signed-in view, so nobody sees it until /scripts/my-week.js has
+ * signed-in view, so nobody sees it until /modules/my-week.js has
  * confirmed who is signed in.
  *
  * From 8:00 am on October 8 (the section's data-closes-at) the section
@@ -20,6 +20,7 @@
  *
  * Loading the page makes no request; only the two buttons do.
  */
+import { isAppleTouch } from './device.js';
 import { api } from './participant-api.js';
 
 const section = document.querySelector('[data-remind]');
@@ -69,11 +70,6 @@ function showClosed() {
   if (intro) intro.hidden = true;
   if (closed) closed.hidden = false;
   part.hidden = true;
-}
-
-function apple() {
-  const ua = navigator.userAgent;
-  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 }
 
 function fromHomeScreen() {
@@ -161,7 +157,7 @@ async function stop() {
 async function start() {
   if (!(Date.now() < closesAt)) return showClosed();
   part.hidden = false;
-  if (apple() && !fromHomeScreen()) return show({ line: 'iphone', buttons: ['how'] });
+  if (isAppleTouch() && !fromHomeScreen()) return show({ line: 'iphone', buttons: ['how'] });
   if (!canNotify()) return show({ message: SAY.unsupported });
   if (Notification.permission === 'denied') return show({ message: SAY.blocked });
   if (await currentSubscription()) return showOn();

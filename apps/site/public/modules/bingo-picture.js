@@ -3,7 +3,7 @@
  * of a phone story, with its written description for screen readers.
  *
  * make(marks, squares) returns a picture
- * definition for the share screen (/scripts/share-screen.js):
+ * definition for the share screen (/modules/share-screen.js):
  * { heading, fileName, width, height, choices, note, draw(canvas), describe() }.
  * `marks` is the card's 25 true or false values in card order (row 1 left
  * to right, then row 2, and so on; index 12 is the free square), and

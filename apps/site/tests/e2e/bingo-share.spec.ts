@@ -42,7 +42,7 @@ interface DrawnWindow {
 
 /** The page's own picture module, as the Bingo page loads it. */
 function pictureModule(): Promise<PictureApi> {
-  const url = '/scripts/bingo-picture.js';
+  const url = '/modules/bingo-picture.js';
   return import(url) as Promise<PictureApi>;
 }
 
@@ -126,7 +126,7 @@ async function strayPixels(page: Page): Promise<number> {
 
 async function tileBoxes(page: Page): Promise<Box[]> {
   return page.evaluate(async () => {
-    const url = '/scripts/bingo-picture.js';
+    const url = '/modules/bingo-picture.js';
     const picture = (await import(url)) as PictureApi;
     return Array.from({ length: 25 }, (_, i) => picture.tileBox(i));
   });

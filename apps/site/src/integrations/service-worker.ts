@@ -131,11 +131,15 @@ export function referencedByHtml(html: string): string[] {
  * own path. Only literal paths on this site count; a page's scripts import
  * each other this way, so their offline copies must be saved too.
  */
-export function referencedByScript(source: string, scriptPath: string): string[] {
+export function referencedByScript(
+  source: string,
+  scriptPath: string,
+  { dynamic = true } = {},
+): string[] {
   const found = new Set<string>();
   const specifiers = [
     ...source.matchAll(/\bimport\s*(?:[\w*{}\s,$]+\s*from\s*)?(["'])([^"']+)\1/g),
-    ...source.matchAll(/\bimport\s*\(\s*(["'])([^"']+)\1\s*\)/g),
+    ...(dynamic ? source.matchAll(/\bimport\s*\(\s*(["'])([^"']+)\1\s*\)/g) : []),
   ].map((match) => match[2] ?? '');
   for (const specifier of specifiers) {
     if (!specifier.startsWith('.') && !specifier.startsWith('/')) continue;

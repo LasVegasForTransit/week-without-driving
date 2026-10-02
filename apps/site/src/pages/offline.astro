@@ -5,7 +5,7 @@ import { getSortedGuides } from '../lib/guides';
 
 // The offline page. The service worker (public/sw.js) shows it, at the
 // address the visitor asked for, when there is no connection and that page
-// isn't saved on the phone. /scripts/offline-page.js keeps only the pages
+// isn't saved on the phone. /modules/offline-page.js keeps only the pages
 // in this list that are saved, and says so when none are yet. For a
 // personal "Open my week" link it says to open the link again, and opens
 // it by itself once the phone is back online.
@@ -55,7 +55,7 @@ const saved = [
     {/* An empty href is this address, so this works without JavaScript. */}
     <a href="" class="btn btn--primary offline__retry">Try again</a>
   </section>
-  <script is:inline type="module" src="/scripts/offline-page.js"></script>
+  <script is:inline type="module" src="/modules/offline-page.js"></script>
 </BaseLayout>
 
 <style>

@@ -1,7 +1,7 @@
 /**
  * Email a sign-in link: checks the email address, runs the bot check, and
  * asks the Worker to send the "Open my week" link (POST /api/link, through
- * /scripts/participant-api.js). The Worker answers the same whether or not
+ * /modules/participant-api.js). The Worker answers the same whether or not
  * the contact matches a sign-up, so the page does too.
  */
 import { api } from './participant-api.js';

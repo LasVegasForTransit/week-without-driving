@@ -5,7 +5,7 @@
  * styles, so the browser's own Print menu prints the same card with the
  * same choices, and prints the blank card with JavaScript off.
  *
- * It reads the card only from the `bingochange` event that /scripts/bingo.js
+ * It reads the card only from the `bingochange` event that /modules/bingo.js
  * sends on load and after every change, { marks, progress, locked }, so it
  * must load before bingo.js. It makes no request and stores nothing.
  */

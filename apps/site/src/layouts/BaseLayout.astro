@@ -242,7 +242,7 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
             <a href={lvbt.url} data-print-url={lvbt.url} class="body-link">{lvbt.name}</a>, a
             501(c)(3) nonprofit (EIN {lvbt.ein}).
           </p>
-          {/* Shown by /scripts/app.js where installing is possible. */}
+          {/* Shown by /modules/app.js where installing is possible. */}
           <button type="button" class="install-button footer-install" data-install-button hidden>
             <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />
             Add to home screen
@@ -279,7 +279,7 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
       </ul>
     </nav>
     {
-      /* The instructions for adding the site to the home screen. /scripts/app.js
+      /* The instructions for adding the site to the home screen. /modules/app.js
       opens it with the iPhone steps (data-install-ios) or the steps for
       other phone browsers (data-install-general). */
     }
@@ -337,9 +337,9 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
         `script-src 'self'` in public/_headers; an inline block would be
         rejected in production and leave every reveal element hidden. */
     }
-    <script is:inline type="module" src="/scripts/reveal-on-scroll.js"></script>
-    <script is:inline type="module" src="/scripts/site-nav.js"></script>
-    <script is:inline type="module" src="/scripts/print-links.js"></script>
-    <script is:inline type="module" src="/scripts/app.js"></script>
+    <script is:inline type="module" src="/modules/reveal-on-scroll.js"></script>
+    <script is:inline type="module" src="/modules/site-nav.js"></script>
+    <script is:inline type="module" src="/modules/print-links.js"></script>
+    <script is:inline type="module" src="/modules/app.js"></script>
   </body>
 </html>

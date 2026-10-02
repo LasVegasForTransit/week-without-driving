@@ -213,7 +213,8 @@ function findNearest(lat, lng) {
 
 function searchFrom(lat, lng, headingText, announceLabel) {
   const stops = findNearest(lat, lng);
-  showResults(stops, headingText, `${stops.length} stops found near ${announceLabel}.`);
+  const found = stops.length === 1 ? '1 stop' : `${stops.length} stops`;
+  showResults(stops, headingText, `${found} found near ${announceLabel}.`);
 }
 
 function useMyLocation(ready) {

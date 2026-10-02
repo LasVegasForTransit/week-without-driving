@@ -27,7 +27,7 @@ test.describe('Places to go', () => {
     for (const destination of destinations) {
       const section = page.locator(`#${destination.anchor}`);
       await expect(section).not.toHaveAttribute('open');
-      await expect(section.locator('summary')).toContainText(destination.heading);
+      await expect(section.getByRole('heading', { level: 3 })).toHaveText(destination.heading);
       await openPlace(page, destination.anchor);
       // The three steps; a note's own list (Water Street's stop changes) is extra.
       await expect(section.locator('ol > li')).toHaveCount(3);
@@ -145,7 +145,7 @@ test.describe('Where to?', () => {
     ).toBeFocused();
     await expect(page.getByRole('link', { name: links.labels.google })).toHaveAttribute(
       'href',
-      `https://www.google.com/maps/dir/?api=1&destination=${row.lat.toFixed(5)}%2C${row.lng.toFixed(5)}&travelmode=transit`,
+      links.google,
     );
     await expect(page.getByRole('link', { name: links.labels.transit })).toHaveAttribute(
       'href',

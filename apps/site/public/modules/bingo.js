@@ -8,14 +8,14 @@
 // file if the card ever changes.
 //
 // Marks are saved in this browser's localStorage. For someone signed in,
-// /scripts/bingo-sync.js also keeps the card on their sign-up, so it
+// /modules/bingo-sync.js also keeps the card on their sign-up, so it
 // follows them to another phone; it talks to this file through
 // the exported `bingo` handle and the lvwwd:bingo-saved event.
 //
 // After loading and after every change, this file sends a `bingochange`
 // event on the document with { marks, progress, locked }: the 25 marks, the
 // progress line's text, and whether the week is over. The Print section
-// (/scripts/bingo-print.js) listens to it, so that script loads first.
+// (/modules/bingo-print.js) listens to it, so that script loads first.
 import { make as makePicture } from './bingo-picture.js';
 import { shareScreen } from './share-screen.js';
 
@@ -265,8 +265,8 @@ function fireConfetti() {
 }
 
 // --- share ----------------------------------------------------------
-// Opens the share screen (/scripts/share-screen.js) with a picture of the
-// card as it is now (/scripts/bingo-picture.js). Focus comes back to the
+// Opens the share screen (/modules/share-screen.js) with a picture of the
+// card as it is now (/modules/bingo-picture.js). Focus comes back to the
 // "Share your card" button below the card, even when the "Bingo!"
 // message's own button opened it.
 function shareCard() {

@@ -22,7 +22,7 @@
  * body. Tapping it opens My week, in a window that is already open if there
  * is one. Nothing about the reminder is stored.
  *
- * public/scripts/app.js registers this file and shows the update bar.
+ * public/modules/app.js registers this file and shows the update bar.
  */
 
 /**

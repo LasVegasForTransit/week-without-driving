@@ -3,8 +3,17 @@
  * it and brings it into view. Without JavaScript the places still open by
  * tapping them. Loaded under the site's `script-src 'self'` policy.
  */
+function idFrom(hash) {
+  try {
+    return decodeURIComponent(hash.slice(1));
+  } catch {
+    // A malformed address such as /go#%E0 names no place.
+    return '';
+  }
+}
+
 function open(hash) {
-  const id = decodeURIComponent(hash.slice(1));
+  const id = idFrom(hash);
   const place = id ? document.getElementById(id) : null;
   if (!(place instanceof HTMLDetailsElement) || !place.hasAttribute('data-place')) return;
   place.open = true;

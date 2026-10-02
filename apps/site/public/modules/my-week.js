@@ -1,9 +1,9 @@
 /**
  * My week: fills in the page for the person signed in on this phone, from
- * the Worker (GET /api/me, through /scripts/participant-api.js), and sends
+ * the Worker (GET /api/me, through /modules/participant-api.js), and sends
  * shared trips (the giveaway entries) and sign-out back to it.
- * /scripts/share-trip.js makes the picture people can post, and
- * /scripts/reminders.js runs the daily reminders section.
+ * /modules/share-trip.js makes the picture people can post, and
+ * /modules/reminders.js runs the daily reminders section.
  *
  * The Worker decides which day it is, in Las Vegas time, so a phone with
  * the wrong clock can't enter a trip early. The preview Worker pins the day
@@ -267,6 +267,15 @@ function bindScreenshot(form) {
   });
 }
 
+// The link field can be in the closed "Add a post" section: open it, so the
+// message points at something the visitor can see.
+function showLinkField(field) {
+  const section = field.closest('details');
+  if (section) section.open = true;
+  field.focus();
+  return 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.';
+}
+
 // The entry as a form for the Worker, or an error message to show.
 function tripForm(form) {
   const modes = chosenModes(form);
@@ -280,9 +289,7 @@ function tripForm(form) {
   const link = linkField instanceof HTMLInputElement ? linkField.value.trim() : '';
   const shot = form.querySelector('[data-screenshot-input]');
   const file = shot instanceof HTMLInputElement ? shot.files?.[0] : undefined;
-  if (link && !isPostLink(link)) {
-    return 'Paste the link to a post on Instagram, Facebook, TikTok, Threads, X or Bluesky.';
-  }
+  if (link && !isPostLink(link)) return showLinkField(linkField);
   const body = new FormData();
   modes.forEach((mode) => body.append('mode', mode));
   body.set('description', description);
@@ -405,7 +412,7 @@ async function start() {
   renderBanners();
   renderEntries();
   inside.hidden = false;
-  // For the "Keep going after the week" card (/scripts/keep-going.js).
+  // For the "Keep going after the week" card (/modules/keep-going.js).
   setMe(me);
   bindTrip();
   bindSignOut();

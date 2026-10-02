@@ -1,8 +1,8 @@
 // The map-link builder, typed for build-time code (src/pages/go.astro and
-// the tests). The builder itself is public/scripts/map-links.js, so the
+// the tests). The builder itself is public/modules/map-links.js, so the
 // browser can import the same code; read that file's header for the link
 // formats.
-import { buildMapLinks as build } from '../../public/scripts/map-links.js';
+import { buildMapLinks as build } from '../../public/modules/map-links.js';
 
 export interface MapLinks {
   google: string;
