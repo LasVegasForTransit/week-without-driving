@@ -79,7 +79,7 @@ test('Get my link says it needs a connection, and keeps the typed email', async 
   await page.getByLabel('Email address').fill('luz@example.com');
   await goOffline(context);
   await expect(page.getByText(GET_LINK_NOTICE)).toBeVisible();
-  const button = page.getByRole('button', { name: 'Send my link' });
+  const button = page.getByRole('button', { name: 'Email me a sign-in link' });
   await expect(button).toHaveAttribute('aria-disabled', 'true');
   await button.click({ force: true });
   await expect(page.getByLabel('Email address')).toHaveValue('luz@example.com');
@@ -145,7 +145,7 @@ test('My week says which of its parts need a connection', async ({ page, context
   await page.keyboard.press('Enter');
   await expect(bus).toBeChecked();
 
-  const again = page.getByRole('link', { name: 'Send my link again' });
+  const again = page.getByRole('link', { name: 'Email a sign-in link' });
   await again.focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL('/my-week');
@@ -178,5 +178,7 @@ test('a personal link opened offline says to open it again, and does once back o
   // The link is opened again. (This test server has no Worker to sign the
   // phone in, so it shows My week signed out.)
   await expect(notice).toBeHidden();
-  await expect(page.getByRole('heading', { level: 1, name: 'My week' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Your Week Without Driving' }),
+  ).toBeVisible();
 });

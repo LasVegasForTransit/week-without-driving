@@ -6,7 +6,8 @@ import {
 } from '@lasvegasfortransit/analytics/testing';
 import { expect, test, type Page } from '@playwright/test';
 
-const production = serveAsProduction('http://127.0.0.1:4322', 'lvwwd.org');
+const port = Number(process.env.LVWWD_E2E_PORT ?? '4322');
+const production = serveAsProduction(`http://127.0.0.1:${port}`, 'lvwwd.org');
 test.use({ baseURL: production.url, launchOptions: { args: production.chromiumArgs } });
 
 interface EventPayload {

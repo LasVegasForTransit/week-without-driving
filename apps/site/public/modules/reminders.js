@@ -1,25 +1,4 @@
-/**
- * My week's "Remind me to share my trip" section. It sits inside My week's
- * signed-in view, so nobody sees it until /modules/my-week.js has
- * confirmed who is signed in.
- *
- * From 8:00 am on October 8 (the section's data-closes-at) the section
- * shows only its closing line. Before that, the "Browser notifications"
- * part shows the one state that fits this browser: iPhone help outside the
- * Home Screen app, a line when the browser can't show notifications or has
- * them blocked, "on" with Stop reminders, or the consent line with Turn on
- * notifications.
- *
- * Turning on asks the browser's own question only after a tap, subscribes
- * with the Worker's public key (GET /api/push/key) and saves the
- * subscription for the person signed in (POST /api/push/subscribe). If
- * saving fails, the browser's subscription is cancelled again, so the
- * phone and the Worker never disagree. Stopping cancels the browser's
- * subscription first, which stops reminders on this phone even offline,
- * then tells the Worker (POST /api/push/unsubscribe).
- *
- * Loading the page makes no request; only the two buttons do.
- */
+/** Event reminder controls for the signed-in participant on this device. */
 import { isAppleTouch } from './device.js';
 import { api } from './participant-api.js';
 
@@ -39,7 +18,9 @@ const SAY = {
     'This browser can’t show notifications from lvwwd.org. Open My week in your phone’s own browser, such as Chrome, to turn them on.',
   blocked:
     'Notifications are blocked for lvwwd.org in this browser. To allow them, change this site’s settings in your browser.',
-  failed: 'Something went wrong, and reminders are not on. Try again in a minute.',
+  failed: 'Reminders aren’t on yet. Try again in a minute.',
+  stopFailed: 'Reminders may still be on. Try stopping them again.',
+  unknown: 'We couldn’t check your reminders. Reconnect and try again.',
 };
 
 const pick = (name) => part?.querySelector(`[data-push-${name}]`);
@@ -62,14 +43,15 @@ function show({ line = null, message = '', buttons: shown = [] }) {
 }
 
 const showOn = () => show({ message: SAY.on, buttons: ['stop'] });
-const showReady = (message = '') => show({ line: 'consent', message, buttons: ['on'] });
+const enrollmentOpen = () => Date.now() < closesAt;
+const showReady = (message = '') =>
+  enrollmentOpen() ? show({ line: 'consent', message, buttons: ['on'] }) : showClosed(message);
 
-function showClosed() {
-  const intro = section.querySelector('[data-remind-intro]');
+function showClosed(message = '') {
   const closed = section.querySelector('[data-remind-closed]');
-  if (intro) intro.hidden = true;
   if (closed) closed.hidden = false;
-  part.hidden = true;
+  part.hidden = !message;
+  show({ message });
 }
 
 function fromHomeScreen() {
@@ -84,12 +66,22 @@ const timeout = (ms) =>
   new Promise((_, reject) => setTimeout(() => reject(new Error('timed out')), ms));
 
 async function currentSubscription() {
-  try {
-    const registration = await navigator.serviceWorker.getRegistration();
-    return (await registration?.pushManager.getSubscription()) ?? null;
-  } catch {
-    return null;
-  }
+  const registration = await navigator.serviceWorker.getRegistration();
+  return (await registration?.pushManager.getSubscription()) ?? null;
+}
+
+/** Either confirmed cancellation is sufficient to stop future delivery. */
+async function cancel(subscription) {
+  const [browser, server] = await Promise.all([
+    Promise.race([subscription.unsubscribe(), timeout(STOP_WAIT_MS)]).catch(() => false),
+    navigator.onLine === false
+      ? Promise.resolve({ ok: false })
+      : Promise.race([
+          api.call('POST', '/api/push/unsubscribe', { endpoint: subscription.endpoint }),
+          timeout(STOP_WAIT_MS),
+        ]).catch(() => ({ ok: false })),
+  ]);
+  return browser === true || server.ok;
 }
 
 // The public key as bytes: every browser takes these, not all take text.
@@ -110,6 +102,7 @@ async function subscribe(publicKey) {
 }
 
 async function turnOn() {
+  if (!enrollmentOpen()) return showClosed();
   if (buttons.on instanceof HTMLButtonElement) buttons.on.disabled = true;
   let permission = 'default';
   try {
@@ -129,12 +122,12 @@ async function turnOn() {
     return showReady(navigator.onLine === false ? api.OFFLINE : SAY.failed);
   }
   const saved = await api.call('POST', '/api/push/subscribe', subscription.toJSON());
-  if (saved.ok) {
-    // Analytics: the `reminder_opt_in` event, channel "push", is sent
-    // here once LVBT's analytics allow lvwwd.org's events.
-    return showOn();
-  }
-  await subscription.unsubscribe().catch(() => undefined);
+  if (saved.ok) return showOn();
+  return rollback(saved, subscription);
+}
+
+async function rollback(saved, subscription) {
+  if (!(await cancel(subscription))) return show({ message: SAY.stopFailed, buttons: ['stop'] });
   if (saved.status === 401) return window.location.reload();
   if (saved.status === 410) return showClosed();
   return showReady(saved.status === 0 ? api.OFFLINE : SAY.failed);
@@ -142,25 +135,36 @@ async function turnOn() {
 
 async function stop() {
   if (buttons.stop instanceof HTMLButtonElement) buttons.stop.disabled = true;
-  const subscription = await currentSubscription();
-  if (subscription) {
-    // Without a connection the browser may take a while to confirm, but
-    // it has already stopped showing this site's pushes.
-    await Promise.race([subscription.unsubscribe(), timeout(STOP_WAIT_MS)]).catch(() => undefined);
+  if (status) status.textContent = 'Stopping reminders…';
+  try {
+    const subscription = await Promise.race([currentSubscription(), timeout(STOP_WAIT_MS)]);
+    if (!subscription || (await cancel(subscription))) return showReady(SAY.off);
+  } catch {
+    // Keep the Stop control available when cancellation cannot be confirmed.
   }
-  showReady(SAY.off);
-  if (subscription) {
-    void api.call('POST', '/api/push/unsubscribe', { endpoint: subscription.endpoint });
-  }
+  return show({ message: SAY.stopFailed, buttons: ['stop'] });
 }
 
 async function start() {
-  if (!(Date.now() < closesAt)) return showClosed();
   part.hidden = false;
+  if (!canNotify()) return enrollmentOpen() ? show({ message: SAY.unsupported }) : showClosed();
+  let subscription;
+  try {
+    subscription = await Promise.race([currentSubscription(), timeout(WAIT_MS)]);
+  } catch {
+    return show({ message: SAY.unknown });
+  }
+  if (subscription) {
+    const owner = await api.call('POST', '/api/push/status', { endpoint: subscription.endpoint });
+    if (!owner.ok) return show({ message: SAY.unknown, buttons: ['stop'] });
+    if (owner.data.subscribed === true) return showOn();
+    // A browser permission belongs to the device, not its next participant.
+    // Cancel the previous subscription and ask for a fresh opt-in.
+    if (!(await cancel(subscription))) return show({ message: SAY.stopFailed, buttons: ['stop'] });
+  }
+  if (!enrollmentOpen()) return showClosed();
   if (isAppleTouch() && !fromHomeScreen()) return show({ line: 'iphone', buttons: ['how'] });
-  if (!canNotify()) return show({ message: SAY.unsupported });
   if (Notification.permission === 'denied') return show({ message: SAY.blocked });
-  if (await currentSubscription()) return showOn();
   return showReady();
 }
 

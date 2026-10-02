@@ -27,8 +27,12 @@ steps:
       - >-
         Stand where the driver can see you. Let people get off first. Then get on at the front door.
       - >-
-        Pay as you get on: $2 for one ride, or $5 for 24 hours of rides. Drivers don't have change.
-        [Pay your bus fare](/guides/pay-your-fare) shows every way to pay.
+        On residential routes, pay $2 for one ride or $5 for 24 hours of rides. Drivers don't have
+        change. [Pay your bus fare](/guides/pay-your-fare) shows every way to pay.
+      - >-
+        Taking the Deuce on the Strip? One ride costs $4, or $8 for 24 hours. A residential pass
+        works there if you show local ID. [Check RTC's current
+        fares](https://www.rtcsnv.com/ways-to-travel/fares-passes/).
       - >-
         Hold on as you find a seat. The bus may move before you sit down.
   - heading: 'Get off at your stop'

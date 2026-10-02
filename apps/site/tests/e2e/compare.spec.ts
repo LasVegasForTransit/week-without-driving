@@ -204,9 +204,26 @@ test('carries a destination, day, time, and mode into My week for review', async
   await page.getByLabel('Bike', { exact: true }).check();
   await page.getByRole('button', { name: 'Compare my trip' }).click();
   await page.getByRole('link', { name: 'Save to My week' }).click();
-  await expect(page.getByLabel('My own destination')).toBeChecked();
+  await expect(page.getByLabel('Enter another place')).toBeChecked();
+  await expect(page.getByLabel('Where will you start?')).toHaveValue(
+    'Bonneville Transit Center, Las Vegas',
+  );
   await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park, Las Vegas');
+  await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByLabel('Day of the week')).toHaveValue('3');
   await expect(page.getByLabel('About what time?')).toHaveValue('17:30');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/available$/);
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/try$/);
   await expect(page.locator('input[name="willingMode"][value="bike"]')).toBeChecked();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page).toHaveURL(/\/my-week\/plan\/review$/);
+  await expect(page.locator('[data-plan-summary-origin]')).toHaveText(
+    'Bonneville Transit Center, Las Vegas',
+  );
+  await expect(page.locator('[data-plan-summary-where]')).toHaveText('Sunset Park, Las Vegas');
+  await expect(page.locator('[data-plan-summary-when]')).toContainText('Oct 3');
+  await expect(page.locator('[data-plan-summary-when]')).toContainText('5:30 pm');
+  await expect(page.locator('[data-plan-summary-modes]')).toHaveText('Bike');
 });

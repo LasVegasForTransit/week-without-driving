@@ -4,7 +4,7 @@ import { MESSAGES, isSameOriginWrite, json, problem } from '../http';
 import { signedInParticipant } from '../session';
 import { getMe, signOut, updateMe } from './me';
 import { createPlan, deletePlan, getPlans, updatePlan } from './plans';
-import { pushKey, subscribe, unsubscribe } from './push';
+import { pushKey, subscribe, subscriptionStatus, unsubscribe } from './push';
 import { sendMyLink, signUp } from './sign-up';
 import { checkIn, getBingo, putBingo } from './week';
 import { compareTrip } from './compare';
@@ -35,6 +35,7 @@ const ROUTES: Route[] = [
   { method: 'POST', path: '/api/checkin', signedIn: true, multipart: true, handler: checkIn },
   { method: 'GET', path: '/api/push/key', signedIn: false, handler: pushKey },
   { method: 'POST', path: '/api/push/subscribe', signedIn: true, handler: subscribe },
+  { method: 'POST', path: '/api/push/status', signedIn: true, handler: subscriptionStatus },
   { method: 'POST', path: '/api/push/unsubscribe', signedIn: false, handler: unsubscribe },
   { method: 'GET', path: '/api/bingo', signedIn: true, handler: getBingo },
   { method: 'PUT', path: '/api/bingo', signedIn: true, handler: putBingo },

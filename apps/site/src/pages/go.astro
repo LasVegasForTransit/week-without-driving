@@ -183,6 +183,7 @@ const mapButtonClass =
         <h3 class="where__subtitle">Before you go</h3>
         <ul class="where__tiles">
           <li class="where__tile where__tile--fare">
+            <span>Residential routes</span>
             <span class="where__price">{fares.singleRide}</span>
             <span>one ride</span>
             <span class="where__price where__price--second">{fares.dayPass}</span>
@@ -209,6 +210,15 @@ const mapButtonClass =
         </ul>
         <p class="mt-3 text-sm text-on-surface-variant">
           Drivers don’t have change. Bring the exact amount.
+        </p>
+        <p class="mt-3 text-sm text-on-surface-variant">
+          Taking the Deuce on the Strip? One ride costs $4, or $8 for 24 hours. A residential pass
+          works there if you show local ID. <a
+            href="https://www.rtcsnv.com/ways-to-travel/fares-passes/"
+            class="body-link"
+            target="_blank"
+            rel="noopener noreferrer">Check RTC’s current fares</a
+          >.
         </p>
         <button type="button" class="btn btn--outline mt-6" data-where-again
           >Plan another trip</button

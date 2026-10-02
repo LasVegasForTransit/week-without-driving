@@ -37,7 +37,9 @@ const BUILD = /* __WWD_BUILD__ */ null;
 // activate deletes every other cache whose name starts with "wwd-".
 const CACHES = {
   precache: 'wwd-precache-v1',
-  pages: 'wwd-pages-v1',
+  // Legacy pages reference /scripts files removed by the module migration.
+  // Drop those pages together with their assets; the new public bundle stays.
+  pages: 'wwd-pages-v2',
   static: 'wwd-static-v1',
   data: 'wwd-data-v1',
 };

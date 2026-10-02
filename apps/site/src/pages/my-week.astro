@@ -5,7 +5,6 @@ import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { days } from '../lib/campaign';
 import { comparePublished } from '../lib/compare-release';
 import { KEEP_GOING } from '../lib/newsletter';
-import { REMINDERS } from '../lib/reminders';
 import { wwd } from '../lib/wwd';
 
 // My week: the page a signed-up person comes back to. It shows their
@@ -321,7 +320,7 @@ const shortcuts = [
         class="myweek__card"
         aria-labelledby="remind-heading"
         data-remind
-        data-closes-at={REMINDERS.signupClosesAt}
+        data-closes-at={new Date(wwd.end.getTime() + 1000).toISOString()}
         data-needs-connection="reminders"
       >
         <div data-remind-intro>
@@ -332,7 +331,7 @@ const shortcuts = [
           </p>
         </div>
         <p class="myweek__p remind__closed" data-remind-closed hidden>
-          Daily reminders have ended. Thanks for taking part!
+          Event reminders have ended.
         </p>
         <div class="remind__part" data-push hidden>
           <h3 class="remind__h3">Browser notifications</h3>
@@ -359,13 +358,7 @@ const shortcuts = [
             >
               Turn on notifications
             </button>
-            <button
-              type="button"
-              class="btn btn--outline"
-              data-push-stop
-              data-needs-connection-button
-              hidden
-            >
+            <button type="button" class="btn btn--outline" data-push-stop hidden>
               Stop reminders
             </button>
             <button
