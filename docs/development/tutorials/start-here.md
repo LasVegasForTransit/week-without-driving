@@ -84,8 +84,9 @@ template asks for a TL;DR, an overview of changes, and follow-ups. CI runs `pnpm
 
 ## Where to go next
 
-- `pnpm dev` starts the app; `pnpm build` builds it; `pnpm run deploy` publishes it to Cloudflare
-  (`.github/workflows/deploy.yml` does that on every push to `main`).
+- `pnpm dev` starts the app; `pnpm build` builds it. `pnpm run deploy` uses the experimental `cf`
+  builder, which currently stalls. On each push to `main`, `.github/workflows/deploy.yml` builds the
+  site and publishes through the validated Wrangler mirror, tagging the release with its commit.
 - If you maintain lvwwd.org's production,
   [Set up lvwwd.org's production](../../operations/how-to/set-up-production.md) shows how to check
   and complete it with `pnpm preflight --production` and `pnpm bootstrap --production`.
