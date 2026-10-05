@@ -7,6 +7,7 @@ import { checkDetails, maskContact } from '../validate';
 import { REPLIES } from './sign-up';
 import { listPlans } from './plans';
 import { listTrips } from './week';
+import { smsConfigured } from '../sms/twilio';
 
 /**
  * My week's own data: GET and PATCH /api/me, and POST /api/signout. The
@@ -32,6 +33,7 @@ export async function getMe(c: ApiContext, me: Participant): Promise<Response> {
     plans,
     today: todayNumber(c.env.CHECKIN_PREVIEW_DAY, c.now),
     eventRemindersEnabled: c.env.EVENT_REMINDERS_ENABLED === 'true',
+    smsRemindersAvailable: smsConfigured(c.env),
   });
 }
 

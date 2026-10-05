@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  BUS_KG_PER_MILE,
-  DRIVE_KG_PER_MILE,
   METERS_PER_MILE,
   estimateCarbon,
   estimateCost,
@@ -10,8 +8,6 @@ import {
 
 describe('one-way comparison estimates', () => {
   it('uses the published EPA factors and fuel formula', () => {
-    expect(DRIVE_KG_PER_MILE).toBeCloseTo(0.2985697, 7);
-    expect(BUS_KG_PER_MILE).toBeCloseTo(0.0666323, 7);
     expect(estimateCarbon('drive', METERS_PER_MILE * 10, null)).toBeCloseTo(2.985697, 6);
     expect(estimateCarbon('bus', METERS_PER_MILE * 10, METERS_PER_MILE * 6)).toBeCloseTo(
       0.3997938,

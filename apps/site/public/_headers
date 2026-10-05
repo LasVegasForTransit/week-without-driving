@@ -22,3 +22,8 @@
 
 /*.png
   Cache-Control: public, max-age=86400
+
+# Private SMS links use a fragment and are never saved by the service worker.
+/open
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer

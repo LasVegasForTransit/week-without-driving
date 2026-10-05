@@ -1,5 +1,5 @@
 import type { Env } from '../env';
-import { eachLimited, PUSHES_AT_ONCE, PUSHES_PER_RUN } from './daily';
+import { eachLimited, PUSHES_AT_ONCE, PUSHES_PER_RUN } from './batch';
 import { TTL_SECONDS, type StoredSubscription, authorizer, pushHost, sendPush } from './send';
 import { loadVapid } from './vapid';
 
@@ -76,18 +76,18 @@ function currentTime(runStarted: Date): Date {
 }
 
 /** Sends only explicitly requested plan notifications after the release switch is enabled. */
-export async function sendPlanReminders(env: Env, now: Date): Promise<void> {
-  if (env.EVENT_REMINDERS_ENABLED !== 'true' || !env.DB) return;
-  if (now.getTime() < CAMPAIGN_REMINDERS_START || now.getTime() >= CAMPAIGN_REMINDERS_END) return;
+export async function sendPlanReminders(env: Env, now: Date): Promise<number> {
+  if (env.EVENT_REMINDERS_ENABLED !== 'true' || !env.DB) return 0;
+  if (now.getTime() < CAMPAIGN_REMINDERS_START || now.getTime() >= CAMPAIGN_REMINDERS_END) return 0;
   const vapid = await loadVapid(env);
-  if (!vapid) return;
+  if (!vapid) return 0;
   const db = env.DB;
   const nowIso = now.toISOString();
   const staleBefore = new Date(now.getTime() - CLAIM_LEASE_MS).toISOString();
   const claim = `pending:${nowIso}:${crypto.randomUUID()}`;
   await db.prepare(CLAIM_SQL).bind(nowIso, staleBefore, claim, PUSHES_PER_RUN).run();
   const due = await db.prepare(CLAIMED_SQL).bind(claim, nowIso).all<DuePlan>();
-  if (due.results.length === 0) return;
+  if (due.results.length === 0) return 0;
 
   const authorize = authorizer(vapid, now);
   const sent: SentPair[] = [];
@@ -142,4 +142,7 @@ export async function sendPlanReminders(env: Env, now: Date): Promise<void> {
   console.log(
     `Event reminders: ${sent.length} sent, ${gone.length} expired, ${retry.length} to retry.`,
   );
+  // Reserve the attempted batch, including failures, before sharing this run's
+  // remaining subrequest budget with daily reminders.
+  return due.results.length;
 }

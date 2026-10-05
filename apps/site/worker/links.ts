@@ -108,7 +108,7 @@ function redirect(location: string, cookies: string[] = []): Response {
 export async function openLink(request: Request, env: Env, now: Date): Promise<Response> {
   const expired = redirect('/my-week/link?expired=1');
   const token = new URL(request.url).searchParams.get('t') ?? '';
-  if (!env.DB || !TOKEN_PATTERN.test(token)) return expired;
+  if (!env.DB || !(TOKEN_PATTERN.test(token) || /^[A-Za-z0-9_-]{22}$/.test(token))) return expired;
   const row = await env.DB.prepare(
     'SELECT participant_id FROM link_tokens WHERE token_hash = ?1 AND expires_at > ?2',
   )

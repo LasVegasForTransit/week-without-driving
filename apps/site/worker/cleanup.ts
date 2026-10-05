@@ -18,7 +18,7 @@ export const CLEANUP_CRON = '0 13 * * *';
 // calls per run. Anything left is picked up the next day.
 const PHOTO_PAGES_PER_RUN = 20;
 
-// Rate-limit windows are at most an hour; a day old is long gone.
+// Rate-limit windows are at most a day.
 const DAY_MINUTES = 24 * 60;
 
 async function deleteAllPhotos(bucket: R2Bucket): Promise<void> {
@@ -42,12 +42,18 @@ export async function dailyCleanup(env: Env, now: Date): Promise<void> {
     .prepare('DELETE FROM rate_limits WHERE window_start < ?1')
     .bind(currentMinute(now) - DAY_MINUTES)
     .run();
+  await db
+    .prepare('DELETE FROM sms_verifications WHERE expires_at <= ?1')
+    .bind(now.toISOString())
+    .run();
   if (now < DELETE_FROM) return;
 
   if (env.PHOTOS) await deleteAllPhotos(env.PHOTOS);
   // Children first, then the people, in one transaction.
   await db.batch(
     [
+      'sms_subscriptions',
+      'sms_verifications',
       'draws',
       'volunteers',
       'checkins',

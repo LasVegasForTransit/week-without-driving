@@ -14,6 +14,8 @@ import worker from '../../worker/index';
  */
 
 const TABLES = [
+  'sms_subscriptions',
+  'sms_verifications',
   'draws',
   'volunteers',
   'checkins',

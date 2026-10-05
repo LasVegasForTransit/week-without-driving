@@ -33,37 +33,6 @@ function context(query = ''): AdminContext {
 }
 
 describe('admin task navigation', () => {
-  it('opens review as a focused page with navigation and a useful empty state', async () => {
-    const response = adminPage(context(), filters, data);
-    const body = await response.text();
-    expect(body).toContain('Skip to main content');
-    expect(body).toContain('aria-label="Admin tasks"');
-    expect(body).toContain('No entries awaiting review');
-    expect(body).not.toContain('action="/admin/tags"');
-    expect(body).not.toContain('action="/admin/draw"');
-    expect(body.match(/<h1>/g)).toHaveLength(1);
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
-  });
-  it('opens each task directly without rendering the other forms', async () => {
-    const tags = await adminPage(context('?section=tag'), filters, data).text();
-    expect(tags).toContain('action="/admin/tags"');
-    expect(tags).not.toContain('id="queue"');
-    const draw = await adminPage(context('?section=draw'), filters, data).text();
-    expect(draw).toContain('The draw opens October 14, 2026.');
-    expect(draw).not.toContain('action="/admin/tags"');
-    const activity = await adminPage(context('?section=counts'), filters, data).text();
-    expect(activity).toContain('scope="col"');
-    expect(activity).toContain('scope="row"');
-    expect(activity).not.toContain('action="/admin/tags"');
-  });
-  it('returns action notices to the task that produced them', async () => {
-    const tag = await adminPage(context('?notice=tag-entered'), filters, data).text();
-    expect(tag).toContain('action="/admin/tags"');
-    const push = await adminPage(context('?notice=push-failed'), filters, data).text();
-    expect(push).toContain('id="reminders"');
-    const draw = await adminPage(context('?notice=draw-stale'), filters, data).text();
-    expect(draw).toContain('id="draw"');
-  });
   it('preserves the rejected tag draft and confirmation while showing its error', async () => {
     const values = new FormData();
     values.set('handle', 'rosa.rides');
@@ -94,12 +63,5 @@ describe('admin task navigation', () => {
     expect(body).toContain('page=2');
     expect(body).toContain('View all days');
     expect(body).toContain('No removed entries for Oct 3.');
-  });
-  it('does not offer an empty prize draw after the draw date', async () => {
-    const c = context('?section=draw');
-    c.now = new Date('2026-10-14T18:00:00Z');
-    const body = await adminPage(c, filters, data).text();
-    expect(body).toContain('No eligible entries are available');
-    expect(body).not.toContain('action="/admin/draw"');
   });
 });

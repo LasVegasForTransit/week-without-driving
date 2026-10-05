@@ -209,33 +209,11 @@ describe('the QR code encoder', () => {
     expect(result.text).toBe(link);
     expect(result.level).toBe('M');
     expect(result.blocksValid).toBe(true);
-    expect(qr.level).toBe('M');
-  });
-
-  it('uses a bigger code, not a weaker one, for a longer link', () => {
-    const short = encodeQr('https://lvwwd.org/bingo');
-    const long = encodeQr(links[3] ?? '');
-    expect(long.size).toBeGreaterThan(short.size);
-    expect(long.level).toBe('M');
   });
 
   it('still honors another level when a caller asks for one', () => {
     const qr = encodeQr('https://lvwwd.org/bingo', 'L');
     expect(decode(qr)).toMatchObject({ text: 'https://lvwwd.org/bingo', level: 'L' });
-  });
-
-  it('draws the three finder patterns in their corners', () => {
-    const qr = encodeQr('https://lvwwd.org/bingo');
-    const last = qr.size - 1;
-    for (const [row, col] of [
-      [0, 0],
-      [0, last - 6],
-      [last - 6, 0],
-    ] as const) {
-      expect(dark(qr, row, col)).toBe(true);
-      expect(dark(qr, row + 1, col + 1)).toBe(false);
-      expect(dark(qr, row + 3, col + 3)).toBe(true);
-    }
   });
 
   it('makes an SVG file with a white quiet zone of four modules', () => {

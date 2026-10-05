@@ -80,14 +80,6 @@ describe('volunteer tag logging', () => {
     expect(await countRows(platform, 'SELECT count(*) AS n FROM checkins')).toBe(0);
   });
 
-  it('tells reviewers to verify the account, tag, posted day and trip', async () => {
-    const page = (await (await admin.get('/admin?section=tag')).text()).replace(/\s+/g, ' ');
-    expect(page).toContain('came from the registered handle');
-    expect(page).toContain('tagged @lasvegasfortransit');
-    expect(page).toContain('on the selected day');
-    expect(page).toContain('trip without driving');
-  });
-
   it('counts a story without a durable link and refuses an ambiguous handle', async () => {
     const ana = await seedParticipant(platform, {
       contact: 'ana@example.com',

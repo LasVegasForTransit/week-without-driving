@@ -374,6 +374,54 @@ const shortcuts = [
         </div>
       </section>
 
+      <section class="myweek__card" aria-labelledby="sms-heading" data-sms hidden>
+        <h2 id="sms-heading" class="myweek__h2">Morning text reminders</h2>
+        <p class="myweek__p">
+          Get a morning reminder to log your car-free trip, October 1–8. Texts are optional and
+          separate from event notifications and the newsletter.
+        </p>
+        <form data-sms-request novalidate class="sms__form">
+          <label for="sms-phone" class="log__hard-label">Mobile number</label>
+          <input
+            id="sms-phone"
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            required
+            class="sms__input"
+          />
+          <label class="trip__consent">
+            <input type="checkbox" name="consent" />
+            <span>
+              I agree to receive automated Week Without Driving texts from LVBT at my own US mobile
+              number: a confirmation code and up to eight morning reminders. Message and data rates
+              may apply. Reply STOP to stop or HELP for help. Consent is optional and is not
+              required to enter the giveaway. See <a href="/privacy" class="body-link">Privacy</a>.
+            </span>
+          </label>
+          <div class="bot-check" data-turnstile data-sitekey=""></div>
+          <button type="submit" class="btn btn--primary mt-4">Send confirmation code</button>
+        </form>
+        <form data-sms-confirm hidden novalidate class="sms__form">
+          <label for="sms-code" class="log__hard-label">Confirmation code</label>
+          <input
+            id="sms-code"
+            name="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            required
+            class="sms__input"
+          />
+          <button type="submit" class="btn btn--primary mt-4">Confirm text reminders</button>
+        </form>
+        <p class="remind__status" data-sms-status role="status"></p>
+        <button type="button" class="btn btn--outline mt-3" data-sms-stop hidden
+          >Stop text reminders</button
+        >
+      </section>
+
       <div class="myweek__card">
         <KeepGoingCard
           id="keep-going"
@@ -432,12 +480,26 @@ const shortcuts = [
   </div>
 
   <script is:inline type="module" src="/modules/reminders.js"></script>
+  <script is:inline type="module" src="/modules/sms-reminders.js"></script>
   <script is:inline type="module" src="/modules/my-week.js"></script>
   <script is:inline type="module" src="/modules/needs-connection.js"></script>
   <script is:inline type="module" src="/modules/keep-going.js"></script>
 </BaseLayout>
 
 <style>
+  .sms__form {
+    margin-top: 1rem;
+  }
+  .sms__input {
+    display: block;
+    width: 100%;
+    margin-block: 0.5rem 1rem;
+    padding: 0.75rem;
+    border: 2px solid var(--color-outline);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-on-surface);
+  }
   .myweek {
     padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
   }

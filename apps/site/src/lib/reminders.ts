@@ -4,7 +4,7 @@ import list from '../data/reminders.json';
  * The daily reminders: one message for each morning of the week, October 1
  * to 8, 2026, in src/data/reminders.json. That file is the only place the
  * wording lives. The Worker sends each day's notification from it, and a
- * future text message sender reads each day's text from it.
+ * text message sender reads each day's text from it.
  *
  * Every build runs reminderProblems() over the file (see
  * src/integrations/reminder-check.ts) and stops with the date and the rule

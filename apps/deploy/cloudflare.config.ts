@@ -37,6 +37,13 @@ export default defineConfig({
       VAPID_SUBJECT: bindings.text('mailto:wwd@lasvegasfortransit.org'),
       TURNSTILE_SITE_KEY: bindings.text('0x4AAAAAAFJwyZWXSScAitjH'),
       RESEND_API_KEY: bindings.secret(),
+      GOOGLE_ROUTES_API_KEY: bindings.secret(),
+      LVBT_BEEHIIV_API_KEY: bindings.secret(),
+      LVBT_BEEHIIV_PUBLICATION_ID: bindings.secret(),
+      TWILIO_ACCOUNT_SID: bindings.secret(),
+      TWILIO_AUTH_TOKEN: bindings.secret(),
+      TWILIO_MESSAGING_SERVICE_SID: bindings.secret(),
+      TWILIO_VERIFY_SERVICE_SID: bindings.secret(),
       TURNSTILE_SECRET: bindings.secret(),
       ACCESS_TEAM_DOMAIN: bindings.secret(),
       ACCESS_AUD: bindings.secret(),
@@ -44,6 +51,8 @@ export default defineConfig({
       // A release switch, not a credential. Keep event-specific reminders off
       // until a real production phone has received and opened a test push.
       EVENT_REMINDERS_ENABLED: bindings.text('false'),
+      SMS_REMINDERS_ENABLED: bindings.text('false'),
+      SMS_ORIGIN: bindings.text('https://lvwwd.org'),
       DB: bindings.d1({
         name: 'lvwwd',
         id: 'a3a6c177-f000-4a64-8bc8-a4aad6d07cf1',

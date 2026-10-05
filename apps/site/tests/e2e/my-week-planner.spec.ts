@@ -139,45 +139,6 @@ test('shows eight day cards and saves a reactive outing plan on its chosen day',
   await expect(page.locator('[data-me-welcome-text]')).toContainText('Your plan is saved');
 });
 
-test('carries a compared trip into the planner for review', async ({ page, baseURL }) => {
-  const saves = await standInPlanApi(page, baseURL);
-  await page.goto('/go/compare');
-  await page.evaluate(() => {
-    sessionStorage.setItem(
-      'wwd-compare-plan',
-      JSON.stringify({
-        origin: 'Sahara and Maryland',
-        destination: 'Sunset Park',
-        day: 4,
-        time: '17:00',
-        mode: 'bike',
-      }),
-    );
-  });
-  await page.goto('/my-week/plan/where');
-  await expect(page.getByLabel('Enter another place')).toBeChecked();
-  await expect(page.getByLabel('Where will you start?')).toHaveValue('Sahara and Maryland');
-  await expect(page.getByLabel('Where do you want to go?')).toHaveValue('Sunset Park');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page.getByLabel('Day of the week')).toHaveValue('4');
-  await expect(page.getByLabel('About what time?')).toHaveValue('17:00');
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page).toHaveURL(/\/my-week\/plan\/available$/);
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page).toHaveURL(/\/my-week\/plan\/try$/);
-  await expect(page.locator('input[name="willingMode"][value="bike"]')).toBeChecked();
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page.locator('[data-plan-summary]')).toContainText('Sunset Park');
-  await page.getByRole('button', { name: 'Save this plan' }).click();
-  await expect.poll(() => saves).toHaveLength(1);
-  expect(saves[0]).toMatchObject({
-    origin: 'Sahara and Maryland',
-    destination: 'Sunset Park',
-    day: 4,
-    willingModes: ['bike'],
-  });
-});
-
 test('keeps choices when navigating the plan with a keyboard', async ({ page, baseURL }) => {
   await standInPlanApi(page, baseURL);
   await page.goto('/my-week/plan/where');

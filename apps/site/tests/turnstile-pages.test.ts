@@ -151,3 +151,28 @@ describe('Turnstile pages', () => {
     expect(FakeHTMLRewriter.latest?.handlers.has('[data-email-unavailable]')).toBe(false);
   });
 });
+
+describe('newsletter availability in served pages', () => {
+  it('enables the existing signup UI only with a database, provider configuration and a bot check', async () => {
+    vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);
+    const { env, assetRequests } = page('public-test-key', 'server-secret');
+    Object.assign(env, {
+      DB: {},
+      LVBT_BEEHIIV_API_KEY: 'test-key',
+      LVBT_BEEHIIV_PUBLICATION_ID: 'pub_00000000-0000-0000-0000-000000000000',
+    });
+    await withSiteKey(
+      new Request('https://lvwwd.org/', { headers: { 'If-None-Match': '"old-config"' } }),
+      env,
+    );
+    expect(changed('[data-keep-going]').get('data-one-tap')).toBe('on');
+    expect(assetRequests[0]?.headers.get('If-None-Match')).toBeNull();
+  });
+
+  it('keeps the external joining link when the newsletter service is unavailable', async () => {
+    vi.stubGlobal('HTMLRewriter', FakeHTMLRewriter);
+    const { env } = page('public-test-key', 'server-secret');
+    await withSiteKey(new Request('https://lvwwd.org/'), env);
+    expect(changed('[data-keep-going]', { 'data-one-tap': 'on' }).has('data-one-tap')).toBe(false);
+  });
+});

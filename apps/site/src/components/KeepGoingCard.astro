@@ -1,13 +1,13 @@
 ---
 import { lvbt } from '../lib/site';
-import { NEWSLETTER_PAGE, ONE_TAP_NEWSLETTER } from '../lib/newsletter';
+import { NEWSLETTER_PAGE } from '../lib/newsletter';
 
 // The invitation to join LVBT after the campaign. My week shows it as
 // "Keep going after the week"; Home shows it as "Stay involved with LVBT"
 // once the giveaway closes.
 //
 // Everyone sees a link to LVBT's membership page.
-// When the one-tap sign-up is on (src/lib/newsletter.ts), /modules/keep-going.js
+// When the Worker enables signup with its configured newsletter service, /modules/keep-going.js
 // swaps the link for "Join the newsletter": with the signed-in participant's
 // own address on My week, or an email field.
 
@@ -30,7 +30,6 @@ const headingId = `${id}-heading`;
   aria-labelledby={headingId}
   data-keep-going
   data-source={source}
-  data-one-tap={ONE_TAP_NEWSLETTER ? 'on' : undefined}
 >
   <h2 id={headingId} class="keep-going__heading" tabindex="-1">{heading}</h2>
   <p class="keep-going__text">{text}</p>

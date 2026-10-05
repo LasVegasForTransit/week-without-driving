@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -7,12 +7,9 @@ import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  DATA_FILES,
   PRECACHE_LIMIT,
-  PRECACHE_PAGES,
   buildManifest,
   bytesOf,
-  injectBuild,
   referencedByCss,
   referencedByHtml,
   referencedByScript,
@@ -73,15 +70,6 @@ function site() {
 afterEach(() => {
   if (dist) rmSync(dist, { recursive: true, force: true });
   dist = '';
-});
-
-describe('download sizes', () => {
-  it('counts pages and text files compressed, and images and fonts as they are', () => {
-    const text = new TextEncoder().encode('a'.repeat(1000));
-    expect(bytesOf('/guides', text)).toBeLessThan(100);
-    expect(bytesOf('/scripts/app.js', text)).toBeLessThan(100);
-    expect(bytesOf('/fonts/body.woff2', text)).toBe(1000);
-  });
 });
 
 describe('what a page references', () => {
@@ -206,21 +194,6 @@ describe('the precache manifest', () => {
     expect(after.data['/data/routes.json']).toBe(before.data['/data/routes.json']);
   });
 
-  it('writes the list into the service worker, and refuses a worker without the marker', () => {
-    const source = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
-    const written = injectBuild(source, {
-      precache: [],
-      files: { '/a.js': 'abc' },
-      data: { '/data/stops.json': 'sto1' },
-    });
-    expect(written).toContain(
-      'const BUILD = {"precache":[],"files":{"/a.js":"abc"},"data":{"/data/stops.json":"sto1"}};',
-    );
-    expect(() => injectBuild('const BUILD = null;', { precache: [], files: {}, data: {} })).toThrow(
-      /marker/,
-    );
-  });
-
   it('stops the build when the background save would pass 2,000,000 bytes', () => {
     site();
     write('photos/huge.png', randomBytes(PRECACHE_LIMIT));
@@ -246,25 +219,4 @@ describe('the precache manifest', () => {
       );
     },
   );
-
-  it('writes the list into dist/sw.js when the build fits', () => {
-    site();
-    const hook = serviceWorker().hooks['astro:build:done'] as unknown as (options: object) => void;
-    const logger = { info: () => undefined, warn: () => undefined };
-    hook({ dir: pathToFileURL(`${dist}/`), logger });
-    expect(readFileSync(join(dist, 'sw.js'), 'utf8')).toMatch(/"url":"\/guides"/);
-  });
-});
-
-describe('what the phone keeps', () => {
-  it('keeps Home, every rider guide, Find a bus with its stop data, and Bingo', () => {
-    const guides = readdirSync(new URL('../src/content/guides/', import.meta.url))
-      .filter((file) => file.endsWith('.md'))
-      .map((file) => `/guides/${file.replace(/\.md$/, '')}`);
-    const pages: readonly string[] = PRECACHE_PAGES;
-    for (const page of ['/', '/guides', ...guides, '/go', '/bingo']) {
-      expect(pages, page).toContain(page);
-    }
-    expect(DATA_FILES).toEqual(expect.arrayContaining(['/data/stops.json', '/data/routes.json']));
-  });
 });

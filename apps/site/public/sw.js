@@ -54,7 +54,7 @@ const NETWORK_ONLY = [/^\/api\//, /^\/admin(?:\/|$)/, /^\/sw\.js$/, /^\/cdn-cgi\
 // Pages that show a person's own details or need a connection to work. They
 // always come from the network, are never stored, and fall back to the
 // offline page.
-const PRIVATE_PAGES = [/^\/my-week(?:\/|$)/, /^\/sign-up(?:\/|$)/];
+const PRIVATE_PAGES = [/^\/my-week(?:\/|$)/, /^\/sign-up(?:\/|$)/, /^\/open(?:\/|$)/];
 
 // Past this, a page on a weak connection is shown from the phone instead.
 const NETWORK_WAIT_MS = 4000;

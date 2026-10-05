@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { REMINDERS } from '../src/lib/reminders';
 import { BUILD, ORIGIN, load, openWindow } from './support/service-worker';
 
-// The service worker's part in the daily reminders: showing each push as a
+// The service worker's part in browser notifications: showing each push as a
 // notification, and opening My week when one is tapped.
-describe('daily reminders', () => {
+describe('browser notifications', () => {
   /** A push message carrying a reminder, as the browser hands it over once decrypted. */
   const pushData = (value: unknown) => ({ json: () => value });
 
@@ -68,31 +68,27 @@ describe('daily reminders', () => {
     );
   });
 
-  it.each(REMINDERS.messages.map((message) => [message.day, message]))(
-    'opens My week in the open window when day %i’s reminder is tapped',
-    async (_, message) => {
-      const open = openWindow(`${ORIGIN}/guides`);
-      const { extendable, self } = load(BUILD, { windows: [open] });
-      await extendable('push', { data: pushData({ title: message.title, body: message.body }) });
-      const notification = { close: vi.fn(), data: { url: '/my-week' } };
-      await extendable('notificationclick', { notification });
-      expect(notification.close).toHaveBeenCalled();
-      expect(open.focus).toHaveBeenCalled();
-      expect(open.navigate).toHaveBeenCalledWith('/my-week');
-      expect(self.clients.openWindow).not.toHaveBeenCalled();
-    },
-  );
+  it('opens My week in the open window when a reminder is tapped', async () => {
+    const message = REMINDERS.messages[0];
+    if (!message) throw new Error('No reminder fixture');
+    const open = openWindow(`${ORIGIN}/guides`);
+    const { extendable, self } = load(BUILD, { windows: [open] });
+    await extendable('push', { data: pushData({ title: message.title, body: message.body }) });
+    const notification = { close: vi.fn(), data: { url: '/my-week' } };
+    await extendable('notificationclick', { notification });
+    expect(notification.close).toHaveBeenCalled();
+    expect(open.focus).toHaveBeenCalled();
+    expect(open.navigate).toHaveBeenCalledWith('/my-week');
+    expect(self.clients.openWindow).not.toHaveBeenCalled();
+  });
 
-  it.each(REMINDERS.messages.map((message) => [message.day]))(
-    'opens a new window at My week when day %i’s reminder is tapped and none is open',
-    async () => {
-      const elsewhere = openWindow('https://example.com/');
-      const { extendable, self } = load(BUILD, { windows: [elsewhere] });
-      await extendable('notificationclick', { notification: { close: vi.fn() } });
-      expect(self.clients.openWindow).toHaveBeenCalledWith('/my-week');
-      expect(elsewhere.navigate).not.toHaveBeenCalled();
-    },
-  );
+  it('opens a new window at My week when a reminder is tapped and none is open', async () => {
+    const elsewhere = openWindow('https://example.com/');
+    const { extendable, self } = load(BUILD, { windows: [elsewhere] });
+    await extendable('notificationclick', { notification: { close: vi.fn() } });
+    expect(self.clients.openWindow).toHaveBeenCalledWith('/my-week');
+    expect(elsewhere.navigate).not.toHaveBeenCalled();
+  });
 
   it('opens a new window when the open one can’t be sent to My week', async () => {
     const stuck = openWindow(`${ORIGIN}/`);

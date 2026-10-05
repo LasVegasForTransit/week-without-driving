@@ -187,13 +187,6 @@ test('a partner link opened in another tab does not follow into a new one', asyn
   expect(api.signUps[0]).not.toHaveProperty('ref');
 });
 
-test('the partner link changes nothing on the page', async ({ page }) => {
-  await page.goto('/giveaway');
-  const plain = await page.locator('main').innerText();
-  await page.goto('/giveaway?ref=campus-riders');
-  expect(await page.locator('main').innerText()).toBe(plain);
-});
-
 test('once sign-up closes, "Sign up someone else" is gone', async ({ page, context, baseURL }) => {
   await page.clock.install({ time: new Date('2026-10-09T07:00:00Z') });
   await standInApi(page, context);

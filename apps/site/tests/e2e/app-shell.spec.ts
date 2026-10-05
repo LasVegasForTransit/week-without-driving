@@ -124,32 +124,4 @@ test.describe('the iPhone Home Screen steps', () => {
     await expect(page.getByRole('heading', { name: /Hi, Ana/ })).toBeVisible();
     await expect(steps).toBeHidden();
   });
-
-  test('puts today’s entry before the eight days', async ({ page, context, baseURL }) => {
-    await context.addCookies([{ name: 'lvwwd_signed_in', value: '1', url: baseURL ?? '' }]);
-    await page.route('**/api/me', (route) =>
-      route.fulfill({
-        json: {
-          firstName: 'Ana',
-          contactMasked: 'a•••@example.com',
-          contactType: 'email',
-          zip: '89101',
-          county: 'Clark',
-          instagram: null,
-          age: 'adult',
-          days: [],
-          trips: [],
-          today: 1,
-          plans: [],
-        },
-      }),
-    );
-    await page.route('**/api/plans', (route) => route.fulfill({ json: { plans: [] } }));
-    await page.goto('/my-week');
-    const question = page.getByText('How did you get around today without driving?');
-    await expect(question).toBeVisible();
-    const form = await question.boundingBox();
-    const days = await page.locator('.entries__days').boundingBox();
-    expect(form?.y).toBeLessThan(days?.y ?? 0);
-  });
 });

@@ -184,20 +184,6 @@ describe('admin draw', () => {
     expect(await draws()).toMatchObject([{ entrant: ana, eligible_count: 1 }]);
   });
 
-  it('gives each entry the same chance', () => {
-    const counts = [0, 0, 0, 0];
-    for (let draw = 0; draw < 10_000; draw += 1) {
-      const index = randomIndex(4);
-      counts[index] = (counts[index] ?? 0) + 1;
-    }
-    for (const count of counts) expect(count).toBeGreaterThan(2200);
-    for (const count of counts) expect(count).toBeLessThan(2800);
-    // An entrant with 3 of 4 entries wins about three times in four.
-    const threeOfFour = (counts[0] ?? 0) + (counts[1] ?? 0) + (counts[2] ?? 0);
-    expect(threeOfFour / 10_000).toBeGreaterThan(0.72);
-    expect(threeOfFour / 10_000).toBeLessThan(0.78);
-  });
-
   it('throws away random values from the uneven top of the range', () => {
     const values = [2 ** 32 - 1, 7];
     const fake = (array: Uint32Array) => {

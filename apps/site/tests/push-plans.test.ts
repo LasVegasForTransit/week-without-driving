@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PLAN_PUSH_CRONS } from '../worker/push/plans';
 import {
@@ -34,11 +34,14 @@ describe('event reminders for saved plans', () => {
     await platform.dispose();
   });
   beforeEach(async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-09-29T12:00:00.000Z'));
     await platform.reset();
     service.requests.length = 0;
+    service.mostAtOnce = 0;
     service.statusFor = () => 201;
     cookie = await signUpAs(platform);
   });
+  afterEach(() => vi.restoreAllMocks());
 
   async function plan(
     lead = 60,
@@ -86,6 +89,19 @@ describe('event reminders for saved plans', () => {
   }
 
   const run = (at: string, env: object = enabled) => platform.cron(PLAN_PUSH_CRONS[0], at, env);
+
+  it('sends a bounded batch and reaches the remaining browsers on the next run', async () => {
+    await plan();
+    for (let n = 0; n < 50; n += 1) await subscribe();
+    await run('2026-10-03T16:00:00.000Z');
+    expect(service.requests).toHaveLength(40);
+    expect(service.mostAtOnce).toBeLessThanOrEqual(6);
+    await run('2026-10-03T16:05:00.000Z');
+    expect(service.requests).toHaveLength(50);
+    expect(new Set(service.requests.map((push) => push.endpoint)).size).toBe(50);
+    await run('2026-10-03T16:10:00.000Z');
+    expect(service.requests).toHaveLength(50);
+  });
 
   it('sends an event-specific push to each phone once when the lead time arrives', async () => {
     const planId = await plan();

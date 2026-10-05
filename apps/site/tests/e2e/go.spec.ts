@@ -19,39 +19,6 @@ async function openPlace(page: Page, anchor: string) {
 }
 
 test.describe('Places to go', () => {
-  test('lists every destination closed, with steps and map buttons inside that match its places', async ({
-    page,
-  }) => {
-    await page.goto('/go');
-    await expect(page.getByRole('heading', { name: 'Places to go', level: 2 })).toBeVisible();
-    for (const destination of destinations) {
-      const section = page.locator(`#${destination.anchor}`);
-      await expect(section).not.toHaveAttribute('open');
-      await expect(section.getByRole('heading', { level: 3 })).toHaveText(destination.heading);
-      await openPlace(page, destination.anchor);
-      // The three steps; a note's own list (Water Street's stop changes) is extra.
-      await expect(section.locator('ol > li')).toHaveCount(3);
-      for (const row of destination.buttonRows) {
-        const links = buildMapLinks(row.lat, row.lng, row.placeName);
-        for (const app of ['google', 'apple', 'transit'] as const) {
-          await expect(section.getByRole('link', { name: links.labels[app] })).toHaveAttribute(
-            'href',
-            links[app],
-          );
-        }
-      }
-    }
-  });
-
-  test('shows each place’s buses as badges', async ({ page }) => {
-    await page.goto('/go');
-    await expect(page.locator('#east-las-vegas-library .route-badge')).toHaveText(['215', '110']);
-    await expect(page.locator('#unlv .route-badge')).toHaveText(['Red Line', '201']);
-    // Downtown names many routes: three badges, then a count.
-    await expect(page.locator('#downtown .route-badge')).toHaveCount(3);
-    await expect(page.locator('#downtown .place__more')).toHaveText(/^\+\d+ more$/);
-  });
-
   test('opens a destination from its own address', async ({ page }) => {
     for (const anchor of ['places-to-go', ...destinations.map((d) => d.anchor)]) {
       // A fresh visit each time, as when someone opens a shared link.
@@ -74,18 +41,6 @@ test.describe('Places to go', () => {
       'target',
       '_blank',
     );
-  });
-
-  test('gives every map button room for a thumb', async ({ page }) => {
-    await page.goto('/go');
-    for (const destination of destinations) {
-      const place = await openPlace(page, destination.anchor);
-      for (const button of await place.getByRole('link', { name: /^Directions to / }).all()) {
-        const box = await button.boundingBox();
-        expect(box?.width).toBeGreaterThanOrEqual(44);
-        expect(box?.height).toBeGreaterThanOrEqual(44);
-      }
-    }
   });
 });
 

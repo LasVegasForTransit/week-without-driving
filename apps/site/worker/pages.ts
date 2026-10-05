@@ -1,4 +1,5 @@
 import type { Env } from './env';
+import { newsletterConfigured } from './api/newsletter';
 
 /**
  * The site key differs between preview and production, so the Worker writes
@@ -19,28 +20,23 @@ function canShowForm(path: string, env: Env, key: string | undefined): boolean {
 export async function withSiteKey(request: Request, env: Env): Promise<Response> {
   const path = new URL(request.url).pathname;
   const privateForm = path === '/sign-up' || path === '/my-week/link';
-  const assetRequest = privateForm
-    ? new Request(request, { headers: new Headers(request.headers) })
-    : request;
-  if (privateForm) {
-    assetRequest.headers.delete('If-None-Match');
-    assetRequest.headers.delete('If-Modified-Since');
-  }
+  // Availability comes from current Worker bindings, not the static asset's ETag.
+  const assetRequest = new Request(request, { headers: new Headers(request.headers) });
+  assetRequest.headers.delete('If-None-Match');
+  assetRequest.headers.delete('If-Modified-Since');
   const response = await env.ASSETS.fetch(assetRequest);
   if (!response.headers.get('Content-Type')?.includes('text/html')) return response;
 
   const headers = new Headers(response.headers);
+  headers.delete('ETag');
   if (privateForm) {
     headers.set('Cache-Control', 'no-store');
-    headers.delete('ETag');
   }
-  const page = privateForm
-    ? new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-      })
-    : response;
+  const page = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 
   const key = env.TURNSTILE_SITE_KEY?.trim();
   const available = canShowForm(path, env, key);
@@ -87,6 +83,12 @@ export async function withSiteKey(request: Request, env: Env): Promise<Response>
   const rewriter = new HTMLRewriter().on('[data-turnstile]', {
     element(element) {
       element.setAttribute('data-sitekey', key ?? '');
+    },
+  });
+  rewriter.on('[data-keep-going]', {
+    element(element) {
+      if (env.DB && newsletterConfigured(env)) element.setAttribute('data-one-tap', 'on');
+      else element.removeAttribute('data-one-tap');
     },
   });
   if (path === '/sign-up' && !env.RESEND_API_KEY?.trim()) {

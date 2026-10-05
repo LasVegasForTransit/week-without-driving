@@ -49,6 +49,8 @@ export function reminderRun(env: Env, now: Date): ReminderRun | null {
   }
   const date = lasVegasDate(now);
   const message = REMINDERS.messages.find((candidate) => candidate.date === date);
+  // The shared production trigger also runs outside the morning window.
+  if (now.getUTCHours() !== 15) return null;
   return message
     ? { day: message.day, date, message, dueBefore: `${date}${SEND_START_UTC}` }
     : null;

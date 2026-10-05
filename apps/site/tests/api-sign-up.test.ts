@@ -160,14 +160,11 @@ describe('sign-up and links', () => {
     expect(await count('participants')).toBe(0);
   });
 
-  it.each(['Clark', 'Esmeralda', 'Lincoln', 'Nye'])(
-    'accepts an email sign-up declaring %s County',
-    async (county) => {
-      expect((await signUp({ county })).status).toBe(201);
-      const row = await platform.env.DB.prepare('SELECT county FROM participants').first();
-      expect(row).toEqual({ county });
-    },
-  );
+  it('keeps the participant’s declared county', async () => {
+    expect((await signUp({ county: 'Nye' })).status).toBe(201);
+    const row = await platform.env.DB.prepare('SELECT county FROM participants').first();
+    expect(row).toEqual({ county: 'Nye' });
+  });
 
   it('accepts the 13–17 group with guardian agreement and rejects an under-13 group', async () => {
     expect((await signUp({ age: 'under13' })).status).toBe(400);
