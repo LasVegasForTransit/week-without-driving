@@ -11,11 +11,11 @@
   //
   // Reminders: VAPID_PRIVATE_KEY is a test key used only here
   // (`wrangler secret put VAPID_PRIVATE_KEY -c ...`), never production's.
-  // Besides the daily cleanup, the reminder send runs every five minutes
-  // ("*/5 * * * *", worker/push/daily.ts) with the pinned day, so a
-  // browser that turns reminders on gets Day 3's notification once, within
-  // five minutes. The "Send test reminder" button in /admin sends one
-  // straight away.
+  // The shared reminder trigger matches production. Browser notifications
+  // concern saved plans; daily texts require separately confirmed consent.
+  // Enable either release switch only for a controlled test. SMS also needs
+  // preview-only Twilio services and this preview's HTTPS SMS_ORIGIN.
+  // The "Send test reminder" button in /admin sends a push straight away.
   //
   // Admin views require Cloudflare Access, including on this isolated preview.
   // Configure ACCESS_TEAM_DOMAIN and ACCESS_AUD for a restricted preview Access
@@ -50,8 +50,10 @@
     "PREVIEW_DRAW_ANYTIME": "true",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
     "VAPID_SUBJECT": "mailto:wwd@lasvegasfortransit.org",
+    "EVENT_REMINDERS_ENABLED": "false",
+    "SMS_REMINDERS_ENABLED": "false",
   },
-  "triggers": { "crons": ["0 13 * * *", "*/5 * * * *"] },
+  "triggers": { "crons": ["0 13 * * *", "2-59/5 * * * *"] },
   "observability": {
     "enabled": true,
     "redact_query_string": true,

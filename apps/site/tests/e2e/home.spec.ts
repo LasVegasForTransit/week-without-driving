@@ -1,11 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-test('the home page has one title and a way to sign up to win', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-  await expect(page.getByRole('link', { name: /sign up to win/i }).first()).toBeVisible();
-});
-
 test('the home hero stays readable when its photo is unavailable', async ({ page }) => {
   await page.route('**/photos/hero*', (route) => route.abort());
   await page.goto('/');

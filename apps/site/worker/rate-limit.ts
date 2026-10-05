@@ -14,11 +14,18 @@ import { sha256 } from './tokens';
 const MINUTE_MS = 60_000;
 
 export const LIMITS = {
+  smsPerIp: { scope: 'sms-ip', max: 20, minutes: 60 },
+  smsPerParticipant: { scope: 'sms-participant', max: 3, minutes: 60 },
+  smsPerPhone: { scope: 'sms-phone', max: 3, minutes: 60 },
+  smsPerDay: { scope: 'sms-day', max: 100, minutes: 1440 },
+  smsCodeChecks: { scope: 'sms-code', max: 5, minutes: 10 },
   signupPerIp: { scope: 'signup-ip', max: 20, minutes: 1 },
   linkPerIp: { scope: 'link-ip', max: 10, minutes: 60 },
   linkPerContact: { scope: 'link-contact', max: 3, minutes: 60 },
   comparePerIp: { scope: 'compare-ip', max: 30, minutes: 60 },
   routesPerDay: { scope: 'google-routes-day', max: 1000, minutes: 1440 },
+  newsletterPerIp: { scope: 'newsletter-ip', max: 20, minutes: 1 },
+  newsletterPerEmail: { scope: 'newsletter-email', max: 3, minutes: 60 },
 } as const;
 
 export type Limit = (typeof LIMITS)[keyof typeof LIMITS];

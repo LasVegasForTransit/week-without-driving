@@ -16,13 +16,12 @@ import { type Html, html, seeOther } from './html';
 export interface PushRow {
   id: string;
   created_at: string;
-  last_sent_on: string | null;
 }
 
 /** How many of the newest subscriptions the page lists. */
 export const PUSH_ROWS = 20;
 
-export const PUSH_LIST_SQL = `SELECT id, created_at, last_sent_on FROM push_subscriptions
+export const PUSH_LIST_SQL = `SELECT id, created_at FROM push_subscriptions
   ORDER BY created_at DESC, id DESC LIMIT ${PUSH_ROWS}`;
 
 export const PUSH_COUNT_SQL = 'SELECT count(*) AS n FROM push_subscriptions';
@@ -41,10 +40,7 @@ export function pushSection(pushes: { rows: PushRow[]; total: number } | null): 
     (row, index) =>
       html`<li class="entry">
         <h2>Browser ${index + 1}</h2>
-        <p>
-          Turned on ${timeLabel(row.created_at)} ·
-          ${row.last_sent_on ? `last reminder ${row.last_sent_on}` : 'no reminder sent yet'}
-        </p>
+        <p>Turned on ${timeLabel(row.created_at)}</p>
         <form method="post" action="/admin/push/test" class="actions">
           <input type="hidden" name="id" value="${row.id}" />
           <button type="submit" aria-label="Send test reminder to browser ${index + 1}">
@@ -55,7 +51,9 @@ export function pushSection(pushes: { rows: PushRow[]; total: number } | null): 
   );
   return html`<section id="reminders">
     <h1>Reminders</h1>
-    <p class="intro">${counted(total, 'browser has', 'browsers have')} daily reminders on.</p>
+    <p class="intro">
+      ${counted(total, 'browser has', 'browsers have')} saved-plan notifications on.
+    </p>
     <div class="panel">
       <h2>Test a phone notification</h2>
       <ol class="requirements">

@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Open My week · Week Without Driving Las Vegas"
+  description="Open your private Week Without Driving page."
+  noindex
+>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <section class="container-page page-top reading">
+    <h1 class="page-title">Opening My week…</h1>
+    <p class="page-lede">Keep this private link to yourself.</p>
+    <noscript
+      ><p>
+        Opening this link needs JavaScript. <a href="/my-week/link" class="body-link"
+          >Email me a sign-in link</a
+        >.
+      </p></noscript
+    >
+  </section>
+  <script is:inline type="module" src="/modules/open-week.js"></script>
+</BaseLayout>

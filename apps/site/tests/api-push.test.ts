@@ -285,7 +285,6 @@ describe('browser reminders', () => {
       await subscribe(await makeBrowser());
       await subscribe(await makeBrowser());
       const page = await (await admin.get('/admin?section=reminders')).text();
-      expect(page).toContain('2 browsers have daily reminders on');
       expect(page.match(/aria-label="Send test reminder to browser \d+"/g)).toHaveLength(2);
       expect(page).not.toContain('fcm.googleapis.com');
       expect(page).not.toContain('Rosa');

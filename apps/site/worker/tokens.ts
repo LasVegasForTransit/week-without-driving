@@ -16,6 +16,11 @@ function hex(bytes: Uint8Array): string {
   return [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+/** A 128-bit token for short SMS links; sessions retain their 256-bit tokens. */
+export function newShortToken(): string {
+  return base64url(crypto.getRandomValues(new Uint8Array(16)));
+}
+
 export function newToken(): string {
   return base64url(crypto.getRandomValues(new Uint8Array(32)));
 }

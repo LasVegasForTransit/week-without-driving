@@ -3,14 +3,8 @@
 
 import { lvbt } from './site';
 
-/**
- * Whether the card can add someone to LVBT's newsletter in one tap, through
- * the Worker's POST /api/newsletter. That route, and the Beehiiv key it
- * needs in production, are not built yet, so the card links to LVBT's own
- * newsletter page instead; the one-tap sign-up is built and tested, and
- * turning this on is the only change the card needs once the route works.
- */
-export const ONE_TAP_NEWSLETTER = false;
+// The Worker enables direct newsletter signup only when Beehiiv and the
+// bot check are configured. Otherwise this external link remains usable.
 
 /** LVBT's membership page, carrying the campaign referral for onboarding. */
 export const NEWSLETTER_PAGE = lvbt.joinUrl;

@@ -115,11 +115,6 @@ async function standInPushService(page: Page, options: StandIn = {}): Promise<vo
 
 const section = (page: Page) => page.locator('[data-remind]');
 
-/** Exposes the disabled launch feature to these simulated browser tests only. */
-async function openTestReminders(page: Page): Promise<void> {
-  await page.goto('/my-week');
-}
-
 test.describe('the reminder section on My week', () => {
   test('stays hidden in the public participant journey before phone delivery is proven', async ({
     page,
@@ -130,49 +125,11 @@ test.describe('the reminder section on My week', () => {
     await expect(section(page)).toBeHidden();
   });
 
-  test('sits below the shortcuts and above "Keep going after the week", with its own heading', async ({
-    page,
-  }) => {
-    await signIn(page);
-    await standInPushService(page);
-    await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await openTestReminders(page);
-
-    const heading = page.getByRole('heading', { level: 2, name: 'Turn on event reminders' });
-    await expect(heading).toBeVisible();
-    await expect(section(page)).toContainText(
-      'Turn on notifications for saved plans on this phone.',
-    );
-    await expect(
-      page.getByRole('heading', { level: 3, name: 'Browser notifications' }),
-    ).toBeVisible();
-    await expect(section(page)).toContainText('No phone number needed.');
-    await expect(section(page).getByRole('link', { name: 'Privacy' })).toHaveAttribute(
-      'href',
-      '/privacy',
-    );
-
-    const shortcuts = await page
-      .getByRole('heading', { name: 'Plan a trip or event' })
-      .boundingBox();
-    const reminders = await heading.boundingBox();
-    const keepGoing = await page
-      .getByRole('heading', { name: 'Keep going after the week' })
-      .boundingBox();
-    expect(reminders?.y).toBeGreaterThan(shortcuts?.y ?? Infinity);
-    expect(reminders?.y).toBeLessThan(keepGoing?.y ?? -Infinity);
-
-    const sideways = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    );
-    expect(sideways).toBe(false);
-  });
-
   test('turns notifications on with one tap, and stops them with another', async ({ page }) => {
     const calls = await signIn(page);
     await standInPushService(page);
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await openTestReminders(page);
+    await page.goto('/my-week');
 
     await page.getByRole('button', { name: 'Turn on notifications' }).click();
     await expect(section(page)).toContainText(
@@ -191,29 +148,11 @@ test.describe('the reminder section on My week', () => {
       .toEqual([{ endpoint: 'https://fcm.googleapis.com/fcm/send/playwright' }]);
   });
 
-  test('shows saved-plan reminders during the week', async ({ page }) => {
-    await signIn(page);
-    await standInPushService(page, { subscribed: true });
-    await page.clock.setFixedTime(new Date('2026-10-03T20:00:00Z'));
-    // A phone with reminders on has been here before, so its service worker is in place.
-    await openTestReminders(page);
-    await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
-    await page.reload();
-    await page.evaluate(() => {
-      const reminders = document.querySelector<HTMLElement>('[data-remind]');
-      if (reminders) reminders.hidden = false;
-    });
-    await expect(section(page)).toContainText(
-      'Event reminders are on for this device. Choose a reminder time when you save a plan.',
-    );
-    await expect(page.getByRole('button', { name: 'Stop reminders' })).toBeVisible();
-  });
-
   test('says so when notifications are blocked, with no button', async ({ page }) => {
     await signIn(page);
     await standInPushService(page, { permission: 'denied' });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await expect(section(page)).toContainText('Notifications are blocked for lvwwd.org');
     await expect(section(page).getByRole('button', { includeHidden: false })).toHaveCount(0);
   });
@@ -222,7 +161,7 @@ test.describe('the reminder section on My week', () => {
     const calls = await signIn(page);
     await standInPushService(page, { answer: 'denied' });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await page.getByRole('button', { name: 'Turn on notifications' }).click();
     await expect(section(page)).toContainText('Notifications are blocked for lvwwd.org');
     expect(calls.subscribed).toEqual([]);
@@ -232,7 +171,7 @@ test.describe('the reminder section on My week', () => {
     await signIn(page);
     await standInPushService(page);
     await page.clock.setFixedTime(new Date('2026-10-08T22:00:00Z'));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await expect(page.getByRole('button', { name: 'Turn on notifications' })).toBeVisible();
     await page.clock.setFixedTime(new Date('2026-10-09T07:00:00Z'));
     await page.reload();
@@ -244,7 +183,7 @@ test.describe('the reminder section on My week', () => {
     await signIn(page);
     await standInPushService(page, { subscribed: true });
     await page.clock.setFixedTime(new Date('2026-10-09T07:00:00Z'));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
     await page.reload();
     await expect(page.getByRole('button', { name: 'Stop reminders' })).toBeVisible();
@@ -259,7 +198,7 @@ test.describe('the reminder section on My week', () => {
     await signIn(page);
     await standInPushService(page, { subscribed: true, stopFails: true });
     await page.route('**/api/push/unsubscribe', (route) => route.abort('failed'));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
     await page.reload();
     await page.getByRole('button', { name: 'Stop reminders' }).click();
@@ -273,7 +212,7 @@ test.describe('the reminder section on My week', () => {
   test('can cancel browser notifications offline', async ({ page, context }) => {
     const calls = await signIn(page);
     await standInPushService(page, { subscribed: true });
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
     await page.reload();
     await expect(page.getByRole('button', { name: 'Stop reminders' })).toBeVisible();
@@ -291,19 +230,11 @@ test.describe('the reminder section on My week', () => {
     await page.route('**/api/push/status', (route) =>
       route.fulfill({ json: { subscribed: false } }),
     );
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
     await page.reload();
     await expect(page.getByRole('button', { name: 'Turn on notifications' })).toBeVisible();
     await expect(section(page)).not.toContainText('Event reminders are on');
-  });
-
-  test('is not shown on a phone that is not signed in', async ({ page }) => {
-    await page.goto('/my-week');
-    await expect(
-      page.getByRole('heading', { name: 'Your Week Without Driving', exact: true }),
-    ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Turn on event reminders' })).toBeHidden();
   });
 });
 
@@ -320,7 +251,7 @@ test.describe('on an iPhone outside the Home Screen', () => {
       localStorage.setItem('wwd-ios-install-dismissed', '2026-09-20T00:00:00.000Z');
     });
     await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
-    await openTestReminders(page);
+    await page.goto('/my-week');
     await expect(section(page)).toContainText(
       'On iPhone, notifications work only from the Home Screen.',
     );

@@ -60,17 +60,46 @@
     {
       "name": "GOOGLE_ROUTES_API_KEY",
       "purpose": "Lets the Worker compare driving with bus, walking, biking, or scooter routes. The key stays server-side and never appears in a page.",
-      "use": "future",
+      "use": "live",
       "neededFor": "live route comparisons on /go/compare",
       "url": "https://console.cloud.google.com/apis/credentials",
       "steps": [
         "In the LVBT Google Cloud project, enable the Routes API and billing for the project.",
         "Create a server API key named lvwwd.org Routes. Set Application restrictions to None because Cloudflare Worker egress IPs are not fixed and website referrer restrictions do not apply to server calls. Under API restrictions, allow only Routes API. The key stays in a Worker secret; do not put it in site vars or browser code.",
         "In Google Cloud Quotas, set the Routes API Compute Routes daily quota to 1,000 requests. The Worker also caps usage at 1,000 provider requests per day and 30 comparisons per IP per hour.",
-        "Paste the key at this command's prompt. Test a real comparison after deployment before sharing the page."
+        "Paste the key at this command's prompt. After deployment, verify a real comparison on /go/compare."
       ],
       "pattern": "^\\S{20,}$",
       "patternHint": "A Google API key has at least 20 characters and no spaces."
+    },
+    {
+      "name": "LVBT_BEEHIIV_API_KEY",
+      "purpose": "Enrolls people who explicitly choose the LVBT newsletter on Home or My week, with an email confirmation step. Never sent to a browser.",
+      "use": "live",
+      "neededFor": "direct LVBT newsletter signup",
+      "url": "https://app.beehiiv.com/settings/integrations",
+      "steps": [
+        "Sign in to the existing LVBT Beehiiv account and open Settings, then Integrations and API keys.",
+        "Use an API key with subscription write access to the existing LVBT publication. A maintainer can reuse the authorized LVBT key or create a key for lvwwd.org.",
+        "Paste the key at this command's prompt. Never put it in site vars or browser code.",
+        "After deployment, subscribe an address you control, confirm the email, and verify that Beehiiv shows it as active."
+      ],
+      "pattern": "^\\S{20,}$",
+      "patternHint": "A Beehiiv API key has at least 20 characters and no spaces."
+    },
+    {
+      "name": "LVBT_BEEHIIV_PUBLICATION_ID",
+      "purpose": "Selects the existing LVBT newsletter publication for explicit subscription requests.",
+      "use": "live",
+      "neededFor": "direct LVBT newsletter signup",
+      "url": "https://app.beehiiv.com/settings/integrations",
+      "steps": [
+        "In the existing LVBT Beehiiv publication, open Settings, then Integrations.",
+        "Copy the Publication ID shown there; it starts with pub_. Use the existing LVBT publication, not a new campaign newsletter.",
+        "Paste that ID at this command's prompt. Preview Workers should use a separate test publication if direct signup is enabled there."
+      ],
+      "pattern": "^pub_[0-9a-fA-F-]+$",
+      "patternHint": "A Beehiiv publication ID starts with pub_ followed by its UUID."
     },
     {
       "name": "RESEND_API_KEY",
@@ -126,8 +155,8 @@
       "neededFor": "the volunteer admin views at lvwwd.org/admin",
       "url": "https://one.dash.cloudflare.com/",
       "steps": [
-        "First, the Google Group that decides who gets in. At https://admin.google.com, go to Menu → Directory → Groups. If wwd-admin@lasvegasfortransit.org is listed, go on. Otherwise click \"Create group\": Group name lvwwd.org volunteer admin, Group email wwd-admin (domain lasvegasfortransit.org), Description \"Volunteers who can open the lvwwd.org admin pages\", Group owner yourself. Click \"Next\", tick \"Security\", click \"Next\", choose \"Restricted\", set \"Who can join the group\" to \"Only invited users\", leave external members off, and click \"Create Group\". Then \"Add members\" with each volunteer's @lasvegasfortransit.org address, and your own so you can test the sign-in. Personal Gmail addresses cannot sign in, even in the group.",
-        "Open Cloudflare One at https://one.dash.cloudflare.com/ with the \"Las Vegans for Better Transit\" account and go to Access controls → Applications. If \"lvwwd.org volunteer admin\" is listed, skip to the last step.",
+        "First, the Google Group that decides who gets in. At https://admin.google.com, go to Menu \u2192 Directory \u2192 Groups. If wwd-admin@lasvegasfortransit.org is listed, go on. Otherwise click \"Create group\": Group name lvwwd.org volunteer admin, Group email wwd-admin (domain lasvegasfortransit.org), Description \"Volunteers who can open the lvwwd.org admin pages\", Group owner yourself. Click \"Next\", tick \"Security\", click \"Next\", choose \"Restricted\", set \"Who can join the group\" to \"Only invited users\", leave external members off, and click \"Create Group\". Then \"Add members\" with each volunteer's @lasvegasfortransit.org address, and your own so you can test the sign-in. Personal Gmail addresses cannot sign in, even in the group.",
+        "Open Cloudflare One at https://one.dash.cloudflare.com/ with the \"Las Vegans for Better Transit\" account and go to Access controls \u2192 Applications. If \"lvwwd.org volunteer admin\" is listed, skip to the last step.",
         "Click \"Create new application\" at the top right (an account with no applications shows only a list of prerequisites; the button is still there). In the \"Add an application\" dialog, under \"Self-hosted and private\", choose the \"Public DNS\" tab (not \"Private destinations\"), then \"Continue with Self-hosted and private\".",
         "Under \"Destinations\", fill in three public hostname rows (\"+ Add public hostname\" adds a row), each with Subdomain empty and lvwwd.org chosen in the Domain dropdown, and the paths admin, admin/* and api/admin/*. A path does not cover the paths under it, so all three are needed. If you see a \"Private IPs\" row instead, click \"+ Add public hostname\" and remove the empty private row. Leave \"Allow access through browser-based RDP, SSH, or VNC sessions\" off.",
         "Under \"Access policies\", pick lvwwd.org volunteer admin allow in \"Add current policies\" if it exists; otherwise click \"Create new policy\", name it exactly lvwwd.org volunteer admin allow, set the action to \"Allow\", and add the Include rule \"Google Workspace groups\" = wwd-admin@lasvegasfortransit.org. If \"Google Workspace groups\" is not offered, Google Workspace sign-in is not connected yet; use an \"Emails\" rule with the volunteers' addresses for now.",
@@ -140,9 +169,9 @@
     },
     {
       "name": "VAPID_PRIVATE_KEY",
-      "purpose": "Signs every daily reminder notification, so push services deliver it as coming from lvwwd.org. The Worker works out the public key from it, and a new key would stop every browser's reminders, so setup generates it only when it is missing.",
+      "purpose": "Signs every saved-plan reminder notification, so push services deliver it as coming from lvwwd.org. The Worker works out the public key from it, and a new key would stop every browser's reminders, so setup generates it only when it is missing.",
       "use": "live",
-      "neededFor": "daily reminders by browser notification",
+      "neededFor": "saved-plan reminders by browser notification",
       "generate": true,
       "pattern": "^[A-Za-z0-9_-]{43}$",
       "patternHint": "A VAPID private key is 32 bytes in base64url: 43 letters, digits, - and _."
@@ -156,7 +185,7 @@
       "url": "https://dash.cloudflare.com/",
       "steps": [
         "Make it an account API token, which belongs to the LVBT account rather than to you, so deploys keep working after you leave. Creating one needs the Super Administrator role or the API Token Provisioning capability on the account.",
-        "In the Cloudflare dashboard, choose the \"Las Vegans for Better Transit\" account and go to Manage Account → \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
+        "In the Cloudflare dashboard, choose the \"Las Vegans for Better Transit\" account and go to Manage Account \u2192 \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
         "Name it lvwwd.org deploy (GitHub Actions).",
         "Under \"Permissions\", add three rows: \"Account\", \"Workers Scripts\", \"Edit\"; \"Account\", \"Account Settings\", \"Read\"; and \"Zone\", \"Workers Routes\", \"Edit\". The deploy applies no migrations, so it needs no D1 permission.",
         "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
@@ -172,6 +201,57 @@
       "neededFor": "deploying lvwwd.org from GitHub",
       "targets": ["github:production"],
       "from": "cloudflare.accountId"
+    },
+    {
+      "name": "TWILIO_ACCOUNT_SID",
+      "purpose": "Identifies the LVBT Twilio account for phone confirmation and morning texts.",
+      "use": "live",
+      "neededFor": "optional confirmed morning text reminders",
+      "url": "https://console.twilio.com/",
+      "steps": [
+        "Open https://console.twilio.com in the LVBT account. Copy the Account SID from Account Info. Use an LVBT-owned account, not a personal account."
+      ],
+      "pattern": "^AC[a-fA-F0-9]{32}$",
+      "patternHint": "An account SID starts with AC and has 32 hexadecimal characters."
+    },
+    {
+      "name": "TWILIO_AUTH_TOKEN",
+      "purpose": "Authenticates Twilio requests and verifies signed STOP and delivery callbacks.",
+      "use": "live",
+      "neededFor": "optional confirmed morning text reminders",
+      "url": "https://console.twilio.com/",
+      "steps": [
+        "In the LVBT Twilio console, open Account Info and reveal the Auth Token. Paste it only at this setup prompt."
+      ],
+      "pattern": "^\\S+$",
+      "patternHint": "Use the Auth Token from the same LVBT Twilio account."
+    },
+    {
+      "name": "TWILIO_MESSAGING_SERVICE_SID",
+      "purpose": "Uses the registered LVBT sender and Advanced Opt-Out for daily reminders.",
+      "use": "live",
+      "neededFor": "optional confirmed morning text reminders",
+      "url": "https://console.twilio.com/",
+      "steps": [
+        "In Twilio Messaging \u2192 Services, select or create the Week Without Driving service. Add an LVBT-owned SMS sender and complete its required US sender registration before enabling reminders.",
+        "Enable Advanced Opt-Out with STOP, START and HELP responses. The HELP response should name LVBT and wwd@lasvegasfortransit.org. Set incoming messages to POST https://lvwwd.org/api/sms/webhook. The Worker also sets this URL as each message status callback.",
+        "Copy the Messaging Service SID. Keep SMS_REMINDERS_ENABLED=false until the real-phone checks in docs/operations/how-to/set-up-production.md pass."
+      ],
+      "pattern": "^MG[a-fA-F0-9]{32}$",
+      "patternHint": "A messaging service SID starts with MG and has 32 hexadecimal characters."
+    },
+    {
+      "name": "TWILIO_VERIFY_SERVICE_SID",
+      "purpose": "Confirms ownership of a mobile number before storing a text reminder subscription.",
+      "use": "live",
+      "neededFor": "optional confirmed morning text reminders",
+      "url": "https://console.twilio.com/",
+      "steps": [
+        "In Twilio Verify \u2192 Services, select or create the LVBT Week Without Driving service. Set the friendly name to LVBT Week Without Driving, use six-digit SMS codes, enable Fraud Guard, and restrict SMS verification geography to the United States.",
+        "Copy the Verify Service SID. The Verify service and Messaging service must belong to the Account SID configured above."
+      ],
+      "pattern": "^VA[a-fA-F0-9]{32}$",
+      "patternHint": "A Verify service SID starts with VA and has 32 hexadecimal characters."
     }
   ],
   "vars": [
@@ -185,13 +265,25 @@
       "name": "VAPID_SUBJECT",
       "purpose": "The contact push services use to reach LVBT about its reminder notifications: mailto:wwd@lasvegasfortransit.org.",
       "use": "live",
-      "neededFor": "daily reminders by browser notification"
+      "neededFor": "saved-plan reminders by browser notification"
     },
     {
       "name": "EVENT_REMINDERS_ENABLED",
       "purpose": "Keeps saved-plan browser reminders off until a real production phone has received and opened a test notification.",
       "use": "live",
       "neededFor": "preventing event-specific notifications before their delivery test passes"
+    },
+    {
+      "name": "SMS_REMINDERS_ENABLED",
+      "purpose": "Keeps phone enrollment and daily texts disabled until a registered Twilio sender and real-phone acceptance checks are complete.",
+      "use": "live",
+      "neededFor": "releasing optional morning texts after provider acceptance"
+    },
+    {
+      "name": "SMS_ORIGIN",
+      "purpose": "Canonical origin for private My week SMS links and signed Twilio callbacks. Production uses https://lvwwd.org; an isolated SMS preview must use its own HTTPS origin.",
+      "use": "live",
+      "neededFor": "opening the same database-backed My week session that sent a text"
     }
   ],
   "github": {

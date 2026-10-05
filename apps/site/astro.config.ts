@@ -33,7 +33,7 @@ export default defineConfig({
       filter: (page) => {
         const path = new URL(page).pathname;
         return (
-          !/\/(?:my-week|offline|get-involved)(?:\/|$)/.test(path) &&
+          !/\/(?:my-week|open|offline|get-involved)(?:\/|$)/.test(path) &&
           (comparePublished || path !== '/go/compare')
         );
       },

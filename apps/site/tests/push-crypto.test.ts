@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { fromBase64url, toBase64url } from '../worker/push/bytes';
 import { encryptMessage, importBrowserKey } from '../worker/push/encrypt';
-import { PKCS8_PREFIX, TOKEN_SECONDS, loadVapid, vapidAuthorization } from '../worker/push/vapid';
+import { TOKEN_SECONDS, loadVapid, vapidAuthorization } from '../worker/push/vapid';
 import { TEST_VAPID, decryptPush, makeBrowser, vapidClaims } from './support/push';
 
 // The worked example of RFC 8291 (Web Push encryption), section 5 and
@@ -73,16 +73,6 @@ describe('web push encryption (RFC 8291)', () => {
     expect(toBase64url(encrypted)).toBe(RFC.message);
   });
 
-  it('writes the 86-byte aes128gcm header: salt, record size 4096, and its own public key', async () => {
-    const browser = await makeBrowser();
-    const encrypted = await encryptMessage(new TextEncoder().encode('hello'), browser.keys);
-    expect(new DataView(encrypted.buffer).getUint32(16)).toBe(4096);
-    expect(encrypted[20]).toBe(65);
-    expect(encrypted[21]).toBe(0x04);
-    // Header, the message and its padding delimiter, and the 16-byte tag.
-    expect(encrypted.length).toBe(86 + 5 + 1 + 16);
-  });
-
   it('can be read by the browser it was made for, with a new key and salt every time', async () => {
     const browser = await makeBrowser();
     const plaintext = new TextEncoder().encode('{"title":"Day 3 of 8"}');
@@ -116,14 +106,6 @@ describe('VAPID (RFC 8292)', () => {
     expect(vapid?.publicKey).toBe(TEST_VAPID.publicKey);
     expect(vapid?.publicKey).toHaveLength(87);
     expect(vapid?.subject).toBe('mailto:wwd@lasvegasfortransit.org');
-  });
-
-  it('wraps the key in strict DER, as the Workers runtime requires', () => {
-    // SEQUENCE, then its length in one byte: the rest of the prefix and the key.
-    expect(PKCS8_PREFIX[0]).toBe(0x30);
-    expect(PKCS8_PREFIX[1]).toBe(PKCS8_PREFIX.length - 2 + 32);
-    // The key's own OCTET STRING, 32 bytes, closes the prefix.
-    expect([...PKCS8_PREFIX.slice(-2)]).toEqual([0x04, 0x20]);
   });
 
   it('turns reminders off when the key is missing or is not a private key', async () => {

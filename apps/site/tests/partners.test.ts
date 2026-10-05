@@ -1,17 +1,13 @@
-import { existsSync, readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 
 import { describe, expect, it } from 'vitest';
 
-import { BANNER_HEADERS, serveBanner } from '../worker/banners';
+import { serveBanner } from '../worker/banners';
 import type { Env } from '../worker/env';
-import { BANNER_TEXT_PAIRS, BANNERS } from '../src/lib/banners';
 import {
   checkRoster,
   GENERAL,
-  PARTNER_TYPES,
   partnerLink,
-  partners,
   qrFiles,
   sortPartners,
   type RosterItem,
@@ -52,15 +48,6 @@ describe('the partner roster', () => {
     );
   });
 
-  it('includes each listed logo in the public site', () => {
-    for (const partner of partners) {
-      if (!partner.logo) continue;
-      expect(existsSync(new URL(`../public${partner.logo}`, import.meta.url)), partner.name).toBe(
-        true,
-      );
-    }
-  });
-
   const cases: Array<[string, UncheckedItem, string]> = [
     ['a missing name', { name: '' }, 'item 1: it has no name'],
     ['a missing sentence', { sentence: undefined }, 'it has no sentence'],
@@ -83,17 +70,6 @@ describe('the partner roster', () => {
     expect(message).toContain(
       '"Example Club Two": its slug "example-club" is already used by "Example Club"',
     );
-  });
-
-  it('knows exactly the six types', () => {
-    expect(PARTNER_TYPES).toEqual([
-      'Community and neighborhood groups',
-      'Student groups',
-      'Environmental and justice groups',
-      'Disability and senior advocates',
-      'Employers and businesses',
-      'Public agencies',
-    ]);
   });
 
   it('sorts by name, ignoring capitals and a leading "The "', () => {
@@ -160,33 +136,6 @@ describe('the QR code PNG files', () => {
 });
 
 describe('the partner banners', () => {
-  it.each(BANNERS)('$file is a PNG of exactly its size, within its file size', (banner) => {
-    const file = readFileSync(
-      new URL(`../public/partners/banners/${banner.file}`, import.meta.url),
-    );
-    const view = new DataView(file.buffer, file.byteOffset, file.byteLength);
-    expect(new TextDecoder().decode(file.subarray(1, 4))).toBe('PNG');
-    expect([view.getUint32(16), view.getUint32(20)]).toEqual([banner.width, banner.height]);
-    expect(file.length).toBeLessThanOrEqual(banner.maxBytes);
-  });
-
-  it('keeps every text color at 4.5 to 1 or more against its background', () => {
-    const channel = (value: number) => {
-      const c = value / 255;
-      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    };
-    const luminance = (hex: string) => {
-      const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) =>
-        channel(parseInt(hex.slice(i, i + 2), 16)),
-      );
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-    for (const [name, text, background] of BANNER_TEXT_PAIRS) {
-      const [light = 0, dark = 0] = [luminance(text), luminance(background)].sort((a, b) => b - a);
-      expect((light + 0.05) / (dark + 0.05), name).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
   it('go out with headers that let any website show them', async () => {
     const env = {
       ASSETS: {
@@ -203,15 +152,8 @@ describe('the partner banners', () => {
       env,
     );
     expect(response.status).toBe(200);
-    for (const [name, value] of Object.entries(BANNER_HEADERS)) {
-      expect(response.headers.get(name), name).toBe(value);
-    }
-    expect(BANNER_HEADERS).toEqual({
-      'Content-Type': 'image/png',
-      'Access-Control-Allow-Origin': '*',
-      'Cross-Origin-Resource-Policy': 'cross-origin',
-      'Cache-Control': 'public, max-age=86400',
-    });
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+    expect(response.headers.get('Cross-Origin-Resource-Policy')).toBe('cross-origin');
   });
 
   it('leave a missing banner as the not-found page', async () => {

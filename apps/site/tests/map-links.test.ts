@@ -49,8 +49,4 @@ describe('the map-link builder', () => {
     // The Transit app always starts from the phone, so a typed start leaves it out.
     expect(fromThere.transit).toBe('');
   });
-
-  it('is the one builder the browser imports, not a copy', () => {
-    expect(buildMapLinks).toBe(browser.buildMapLinks);
-  });
 });

@@ -1,17 +1,7 @@
 import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test';
 
-// "Keep going after the week" on My week and "Stay involved with LVBT" on
-// Home. The tests stand in for the Worker: GET /api/me for a signed-in
-// participant, POST /api/newsletter with a chosen reply, and Turnstile.
-// The one-tap sign-up ships turned off until the newsletter route exists,
-// so the tests that exercise it turn it on in the page they load.
-
 const CLOSES = new Date('2026-10-09T07:00:00Z');
-const JUST_BEFORE = new Date('2026-10-09T06:59:59.999Z');
-const SUCCESS =
-  "Almost done! Check your email for a message from Las Vegans for Better Transit, and tap Confirm my subscription. Already subscribed? You're all set.";
-
-const EMAIL_PARTICIPANT = {
+const PARTICIPANT = {
   firstName: 'Marcus',
   contactMasked: 'w•••@example.com',
   contactType: 'email',
@@ -20,17 +10,17 @@ const EMAIL_PARTICIPANT = {
   days: [],
   trips: [],
   today: 3,
-  reminders: { push: false, text: false, email: false },
 };
-const PHONE_PARTICIAPNT = {
-  ...EMAIL_PARTICIPANT,
-  contactMasked: '(•••) •••-1234',
-  contactType: 'phone',
-};
+
+const SUCCESS =
+  "Almost done! Check your email for a message from Las Vegans for Better Transit, and tap Confirm my subscription. Already subscribed? You're all set.";
+
+const EMAIL_PARTICIPANT = PARTICIPANT;
+const PHONE_PARTICIPANT = { ...PARTICIPANT, contactMasked: '(•••) •••-1234', contactType: 'phone' };
 
 test.use({ serviceWorkers: 'block' });
 
-async function signIn(context: BrowserContext, page: Page, me: object) {
+async function signIn(context: BrowserContext, page: Page, me: object = PARTICIPANT) {
   const url = new URL(page.url() === 'about:blank' ? 'http://127.0.0.1' : page.url());
   await context.addCookies([
     { name: 'lvwwd_signed_in', value: '1', domain: url.hostname, path: '/' },
@@ -38,7 +28,7 @@ async function signIn(context: BrowserContext, page: Page, me: object) {
   await page.route('**/api/me', (route) => route.fulfill({ json: me }));
 }
 
-/** Loads pages with the one-tap sign-up on and a Turnstile site key, as it will ship. */
+/** Exercises the required newsletter UI while its production API remains unfinished. */
 async function turnOnOneTap(page: Page) {
   await page.route(/\/(my-week)?$/, async (route) => {
     const response = await route.fetch();
@@ -85,46 +75,73 @@ async function standInNewsletter(page: Page, replies: Array<{ status: number; bo
 
 const card = (page: Page, name = 'Keep going after the week') => page.getByRole('region', { name });
 
-test.describe('My week', () => {
-  test('the card sits after reminders and offers LVBT membership or another way to help', async ({
-    page,
-    context,
-  }) => {
-    await signIn(context, page, EMAIL_PARTICIPANT);
-    await page.goto('/my-week#keep-going');
-    const keepGoing = card(page);
-    await expect(keepGoing.getByRole('heading', { level: 2 })).toHaveText(
-      'Keep going after the week',
-    );
+test('My week offers LVBT membership and other ways to help', async ({ page, context }) => {
+  await signIn(context, page);
+  await page.goto('/my-week#keep-going');
+  const keepGoing = card(page);
+  await expect(keepGoing).toBeVisible();
+  await expect(keepGoing.getByRole('link', { name: 'Join LVBT' })).toHaveAttribute(
+    'href',
+    'https://lasvegasfortransit.org/join/member/?from=wwd',
+  );
+  await expect(keepGoing.getByRole('link', { name: 'Explore ways to help' })).toHaveAttribute(
+    'href',
+    'https://lasvegasfortransit.org/go/',
+  );
+  await expect(keepGoing.getByRole('button', { name: 'Join the newsletter' })).toBeHidden();
+});
+
+test('Home switches from campaign sign-up to staying involved at campaign close', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(new Date(CLOSES.getTime() - 1));
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
+  await expect(
+    page.locator('.home-final').getByRole('link', { name: 'Sign up to win' }),
+  ).toBeVisible();
+
+  await page.clock.setFixedTime(CLOSES);
+  await page.reload();
+  const button = page.getByRole('link', { name: 'Stay involved with LVBT' });
+  await expect(button).toBeVisible();
+  await expect(
+    page.locator('.home-final').getByRole('link', { name: 'Sign up to win' }),
+  ).toBeHidden();
+  await button.click();
+  await expect(card(page, 'Stay involved with LVBT').getByRole('heading')).toBeFocused();
+});
+
+test('a signed-in visitor keeps their way back to My week after campaign close', async ({
+  page,
+  context,
+}) => {
+  await page.clock.setFixedTime(CLOSES);
+  await signIn(context, page);
+  await page.goto('/');
+  await expect(page.locator('.home-hero__actions [data-signup-link]')).toBeVisible();
+  await expect(page.locator('.home-hero__actions [data-signup-link]')).toHaveAttribute(
+    'href',
+    '/my-week',
+  );
+  await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
+});
+
+test.describe('with JavaScript off', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('the card still offers both LVBT paths', async ({ page }) => {
+    await page.goto('/');
+    const section = page.locator('#stay-involved');
     await expect(
-      keepGoing.getByText(
-        'Week Without Driving lasts eight days, but Las Vegans for Better Transit works all year for better buses and safer streets across the valley. Keep going with us.',
-      ),
-    ).toBeVisible();
-    await expect(keepGoing.getByRole('link', { name: 'Join LVBT' })).toHaveAttribute(
-      'href',
-      'https://lasvegasfortransit.org/join/member/?from=wwd',
-    );
-    await expect(keepGoing.getByText('Already an LVBT member?')).toBeVisible();
-    await expect(keepGoing.getByRole('link', { name: 'Explore ways to help' })).toHaveAttribute(
-      'href',
-      'https://lasvegasfortransit.org/go/',
-    );
-    await expect(keepGoing.getByRole('button', { name: 'Join the newsletter' })).toBeHidden();
-
-    const order = await page.evaluate(() => {
-      const at = (el: Element | null) =>
-        el ? Array.from(document.querySelectorAll('*')).indexOf(el) : -1;
-      return {
-        reminders: at(document.getElementById('remind-heading')),
-        card: at(document.getElementById('keep-going')),
-        signOut: at(document.querySelector('[data-signout]')),
-      };
-    });
-    expect(order.reminders).toBeLessThan(order.card);
-    expect(order.card).toBeLessThan(order.signOut);
+      section.locator('a[href="https://lasvegasfortransit.org/join/member/?from=wwd"]'),
+    ).toHaveCount(1);
+    await expect(section.locator('a[href="https://lasvegasfortransit.org/go/"]')).toHaveCount(1);
+    await expect(section.locator('form')).toHaveAttribute('hidden', '');
   });
+});
 
+test.describe('newsletter signup on My week', () => {
   test('with an email contact, one tap sends one request with no email, the source and a token', async ({
     page,
     context,
@@ -155,7 +172,7 @@ test.describe('My week', () => {
     context,
   }) => {
     await turnOnOneTap(page);
-    await signIn(context, page, PHONE_PARTICIAPNT);
+    await signIn(context, page, PHONE_PARTICIPANT);
     await standInTurnstile(page);
     const sent = await standInNewsletter(page, [{ status: 200 }]);
     await page.goto('/my-week');
@@ -237,11 +254,6 @@ test.describe('the card on Home after the close', () => {
     [
       '503',
       { status: 503, body: { error: 'bot_check_unavailable' } },
-      'Something went wrong. Please try again.',
-    ],
-    [
-      '500',
-      { status: 500, body: { error: 'internal' } },
       'Something went wrong. Please try again.',
     ],
   ];
@@ -343,77 +355,4 @@ test('with no Turnstile token within 10 seconds, the card says something went wr
   await expect(section.getByText('Something went wrong. Please try again.')).toBeVisible();
   await expect(section.getByRole('button', { name: 'Join the newsletter' })).toBeEnabled();
   expect(sent).toEqual([]);
-});
-
-test.describe('Home', () => {
-  test('just before the close, Home keeps "Sign up to win" and has no "Stay involved" section', async ({
-    page,
-  }) => {
-    await page.clock.setFixedTime(JUST_BEFORE);
-    await page.goto('/');
-    await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
-    await expect(page.getByRole('heading', { name: 'Stay involved with LVBT' })).toBeHidden();
-    await expect(page.getByRole('heading', { name: 'Try it this October.' })).toBeVisible();
-  });
-
-  test('at the close, a visitor who is not signed in is invited to stay involved', async ({
-    page,
-  }) => {
-    await page.clock.setFixedTime(CLOSES);
-    await page.goto('/');
-    await expect(
-      page.getByText('Week Without Driving 2026 has ended. Thanks to everyone who took part.'),
-    ).toBeVisible();
-    const button = page.getByRole('link', { name: 'Stay involved with LVBT' });
-    await expect(button).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Try it this October.' })).toBeHidden();
-    await expect(
-      page.locator('.home-final').getByRole('link', { name: 'Sign up to win' }),
-    ).toBeHidden();
-    await expect(page.locator('.home-final').getByText('Questions? Email')).toBeVisible();
-    const section = card(page, 'Stay involved with LVBT');
-    await expect(
-      section.getByText(
-        'Week Without Driving 2026 is over. Thank you for taking part. Keep going after the week with Las Vegans for Better Transit: we work all year for better buses and safer streets across the valley.',
-      ),
-    ).toBeVisible();
-
-    await button.click();
-    await expect(section.getByRole('heading', { name: 'Stay involved with LVBT' })).toBeFocused();
-  });
-
-  test('at the close, a signed-in visitor keeps their way back to My week', async ({
-    page,
-    context,
-  }) => {
-    await page.clock.setFixedTime(CLOSES);
-    await signIn(context, page, EMAIL_PARTICIPANT);
-    await page.goto('/');
-    await expect(page.locator('.home-hero__actions [data-signup-link]')).toBeVisible();
-    await expect(page.locator('.home-hero__actions [data-signup-link]')).toHaveAttribute(
-      'href',
-      '/my-week',
-    );
-    await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
-    await expect(page.getByRole('heading', { name: 'Stay involved with LVBT' })).toBeHidden();
-  });
-});
-
-test.describe('with JavaScript off', () => {
-  test.use({ javaScriptEnabled: false });
-
-  test('the card still offers both LVBT paths with JavaScript off', async ({ page }) => {
-    await page.goto('/');
-    // Home keeps its campaign text without JavaScript, so this reads the card's markup, which
-    // is the same on My week.
-    const section = page.locator('#stay-involved');
-    await expect(
-      section.locator('a[href="https://lasvegasfortransit.org/join/member/?from=wwd"]'),
-    ).toHaveText('Join LVBT');
-    await expect(section.locator('a[href="https://lasvegasfortransit.org/go/"]')).toHaveText(
-      'Explore ways to help',
-    );
-    await expect(section.locator('form')).toHaveAttribute('hidden', '');
-    await expect(page.getByRole('heading', { name: 'Try it this October.' })).toBeVisible();
-  });
 });

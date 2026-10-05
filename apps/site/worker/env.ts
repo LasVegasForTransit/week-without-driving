@@ -52,6 +52,18 @@ export interface Env {
   EVENT_REMINDERS_ENABLED?: string;
   /** Server-only Google Routes key. Never sent to the browser. */
   GOOGLE_ROUTES_API_KEY?: string;
+  /** Beehiiv subscription write key; never exposed in a page or response. */
+  LVBT_BEEHIIV_API_KEY?: string;
+  /** The existing LVBT newsletter publication, as pub_<UUID>. */
+  LVBT_BEEHIIV_PUBLICATION_ID?: string;
+  /** Enabled only after sender registration and a real SMS acceptance test. */
+  SMS_REMINDERS_ENABLED?: string;
+  /** Canonical SMS link/callback origin; isolated previews must set their own. */
+  SMS_ORIGIN?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
+  TWILIO_MESSAGING_SERVICE_SID?: string;
+  TWILIO_VERIFY_SERVICE_SID?: string;
 }
 
 /** The environment once the API has checked the database is there. */
