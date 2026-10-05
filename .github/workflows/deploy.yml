@@ -39,7 +39,12 @@ jobs:
         uses: ./.github/actions/setup-node-pnpm
 
       - name: Deploy
-        run: pnpm run deploy
+        # The cf beta's experimental Worker build stalls. The checked-in
+        # Wrangler mirror is validated against the same production resources.
+        run: |
+          pnpm build
+          pnpm --dir apps/site exec wrangler deploy \
+            --tag "$GITHUB_SHA" --message "Commit $GITHUB_SHA"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
