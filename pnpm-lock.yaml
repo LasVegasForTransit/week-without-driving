@@ -84,10 +84,14 @@ catalogs:
 
 overrides:
   brace-expansion: 5.0.12
+  http-cache-semantics: 4.3.0
   miniflare>undici: 7.29.1
   sharp: 0.35.4
   smol-toml: 1.8.0
   svgo: 4.1.0
+
+patchedDependencies:
+  braces@3.0.3: 4c695a9914e7cb073c81c32b224fc2ec2ac6462f3892099572304fc7dd05d194
 
 importers:
 
@@ -2246,8 +2250,8 @@ packages:
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
 
-  http-cache-semantics@4.2.0:
-    resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
+  http-cache-semantics@4.3.0:
+    resolution: {integrity: sha512-M5t5LlJpS1UHMjvwRQVdFHvPISGeLAxNcrWuJkeGh0KxsqCHZ1O3NXZU/8x7cD0BDcGW8kapxMKTvwlqrNkHkA==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -4919,7 +4923,7 @@ snapshots:
       get-tsconfig: 5.0.0-beta.4
       github-slugger: 2.0.0
       html-escaper: 3.0.3
-      http-cache-semantics: 4.2.0
+      http-cache-semantics: 4.3.0
       js-yaml: 4.3.2
       jsonc-parser: 3.3.1
       magic-string: 1.2.3
@@ -5001,7 +5005,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  braces@3.0.3:
+  braces@3.0.3(patch_hash=4c695a9914e7cb073c81c32b224fc2ec2ac6462f3892099572304fc7dd05d194):
     dependencies:
       fill-range: 7.1.1
 
@@ -5510,7 +5514,7 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
-  http-cache-semantics@4.2.0: {}
+  http-cache-semantics@4.3.0: {}
 
   ignore@5.3.2: {}
 
@@ -5972,7 +5976,7 @@ snapshots:
 
   micromatch@4.0.8:
     dependencies:
-      braces: 3.0.3
+      braces: 3.0.3(patch_hash=4c695a9914e7cb073c81c32b224fc2ec2ac6462f3892099572304fc7dd05d194)
       picomatch: 2.3.2
 
   mime@4.1.0: {}
