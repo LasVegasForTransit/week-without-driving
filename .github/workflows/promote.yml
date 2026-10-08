@@ -1,0 +1,61 @@
+name: Promote Week Without Driving release
+run-name:
+  "Promote Week Without Driving: ${{ inputs.request_id || inputs.run_id || 'current preview' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Optional successful main Deploy staging run; omit to promote current preview
+        type: string
+        required: false
+      request_id:
+        description: Optional correlation ID supplied by pnpm promote
+        type: string
+        required: false
+      expected_version:
+        description:
+          Optional current production version; required if production has no release marker
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+  deployments: write
+  packages: read
+
+concurrency:
+  group: lvwwd-production
+  cancel-in-progress: false
+
+jobs:
+  source:
+    name: Resolve the reviewed staging release
+    if:
+      github.ref == 'refs/heads/main' && github.repository ==
+      'LasVegasForTransit/week-without-driving'
+    uses: LasVegasForTransit/repository-tooling/.github/workflows/release-source.yml@ac987b64a242c142b668abed03fb0aca73632767
+    with:
+      run-id: ${{ inputs.run_id }}
+      preview-environment: worker-preview
+    secrets: inherit
+
+  promote:
+    name: Verify and publish the selected release
+    needs: source
+    uses: LasVegasForTransit/repository-tooling/.github/workflows/release-publish.yml@ac987b64a242c142b668abed03fb0aca73632767
+    with:
+      target: production
+      expected-version: ${{ inputs.expected_version }}
+      production-environment: production
+      preview-environment: worker-preview
+      release-id: ${{ needs.source.outputs.release-id }}
+      commit: ${{ needs.source.outputs.commit }}
+      artifact-prefix: lvwwd-release
+      attestation-prefix: attestation-lvwwd-release
+      app-directory: apps/site
+      url: https://lvwwd.org
+      smoke-script: release:smoke
+      browser-script: release:browser
+    secrets: inherit

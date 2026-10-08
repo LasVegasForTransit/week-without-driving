@@ -306,8 +306,8 @@ API Token Provisioning capability. It works with `cf` because the workflow also 
    then "Account API Tokens". Click "Create Token", then "Create Custom Token".
 2. Name it `lvwwd.org deploy (GitHub Actions)`.
 3. Under "Permissions", add three rows: "Account", "Workers Scripts", "Edit"; "Account", "Account
-   Settings", "Read"; and "Zone", "Workers Routes", "Edit". The deploy applies no migrations, so it
-   needs no D1 permission.
+   Settings", "Read"; and "Zone", "Workers Routes", "Edit". Saved releases apply their frozen SQL
+   migrations, so also grant D1 Edit for the selected database.
 4. Under "Zone Resources", choose "Include", then "Specific zone", then `lvwwd.org`.
 5. Leave the expiration empty, click "Continue to summary", then "Create Token", and copy it;
    Cloudflare shows it only once.
@@ -323,10 +323,10 @@ Store it in the repository's `production` GitHub environment one of two ways:
   the account's Cloudflare dashboard at the prompt. Only a repository admin can set environment
   secrets.
 
-The Deploy workflow (`.github/workflows/deploy.yml`) cannot publish lvwwd.org until both secrets
-exist in the `production` environment; a push to `main` fails at the Deploy step until they do. The
-setup token stays a personal token that expires the next day, because account API tokens cannot
-manage Turnstile.
+The explicit promotion workflow cannot publish lvwwd.org until both secrets exist in the
+`production` environment. Main pushes update protected staging through a separate preview credential
+environment; see [Publish a reviewed release](publish-a-reviewed-release.md). The setup token stays
+a personal token that expires the next day, because account API tokens cannot manage Turnstile.
 
 ### Resend
 

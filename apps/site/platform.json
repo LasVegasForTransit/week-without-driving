@@ -17,12 +17,23 @@
       "binding": "DB",
       "name": "lvwwd",
       "migrations": "migrations"
+    },
+    {
+      "binding": "DB",
+      "name": "lvwwd-preview",
+      "migrations": "migrations",
+      "environment": "preview"
     }
   ],
   "r2": [
     {
       "binding": "PHOTOS",
       "name": "lvwwd-photos"
+    },
+    {
+      "binding": "PHOTOS",
+      "name": "lvwwd-preview-photos",
+      "environment": "preview"
     }
   ],
   "turnstile": [
@@ -178,7 +189,7 @@
     },
     {
       "name": "CLOUDFLARE_API_TOKEN",
-      "purpose": "Lets the Deploy workflow publish the Worker on every merge to main.",
+      "purpose": "Publishes reviewed production versions and applies their saved D1 migrations through the existing production GitHub environment.",
       "use": "live",
       "neededFor": "deploying lvwwd.org from GitHub",
       "targets": ["github:production"],
@@ -187,16 +198,16 @@
         "Make it an account API token, which belongs to the LVBT account rather than to you, so deploys keep working after you leave. Creating one needs the Super Administrator role or the API Token Provisioning capability on the account.",
         "In the Cloudflare dashboard, choose the \"Las Vegans for Better Transit\" account and go to Manage Account \u2192 \"Account API Tokens\". Click \"Create Token\", then \"Create Custom Token\".",
         "Name it lvwwd.org deploy (GitHub Actions).",
-        "Under \"Permissions\", add three rows: \"Account\", \"Workers Scripts\", \"Edit\"; \"Account\", \"Account Settings\", \"Read\"; and \"Zone\", \"Workers Routes\", \"Edit\". The deploy applies no migrations, so it needs no D1 permission.",
+        "Review the existing token before changing it. Publication needs Account / Workers Scripts / Edit, Account / Account Settings / Read, Zone / Workers Routes / Edit, and Account / D1 / Edit for applying the exact saved SQL migrations. Keep the selected LVBT account and lvwwd.org zone scopes; do not rotate or replace an authorized token merely for this migration.",
         "Under \"Zone Resources\", choose \"Include\", then \"Specific zone\", then lvwwd.org.",
-        "Leave the expiration empty, so deploys keep working. Click \"Continue to summary\", then \"Create Token\". Copy the token, which Cloudflare shows only once, and paste it at this command's prompt; it is stored as the production environment secret CLOUDFLARE_API_TOKEN in GitHub. The Deploy workflow also sets CLOUDFLARE_ACCOUNT_ID, which cf uses to select the LVBT account."
+        "Keep the existing CLOUDFLARE_API_TOKEN in the production GitHub environment. A maintainer supplies a missing token only through the authorized setup prompt. Explicit promotion also reads the existing CLOUDFLARE_ACCOUNT_ID selector from that environment."
       ],
       "pattern": "^\\S{40,}$",
       "patternHint": "A Cloudflare API token is at least 40 characters with no spaces."
     },
     {
       "name": "CLOUDFLARE_ACCOUNT_ID",
-      "purpose": "Tells the Deploy workflow which Cloudflare account owns the Worker.",
+      "purpose": "Selects the existing LVBT account during explicit production publication.",
       "use": "live",
       "neededFor": "deploying lvwwd.org from GitHub",
       "targets": ["github:production"],
@@ -252,6 +263,37 @@
       ],
       "pattern": "^VA[a-fA-F0-9]{32}$",
       "patternHint": "A Verify service SID starts with VA and has 32 hexadecimal characters."
+    },
+    {
+      "name": "CLOUDFLARE_API_TOKEN",
+      "purpose": "Uploads and activates staging versions and applies only staging D1 migrations; retain the existing production token separately.",
+      "use": "live",
+      "targets": ["github:worker-preview"],
+      "steps": [
+        "A maintainer creates or selects an account-owned token scoped to the preview Worker, preview D1 database and required Worker/domain reads.",
+        "Store it as CLOUDFLARE_API_TOKEN in the worker-preview GitHub environment. Do not copy the production credential or write it into configuration."
+      ]
+    },
+    {
+      "name": "CF_ACCESS_CLIENT_ID",
+      "purpose": "Identifies the verification service for protected staging and its versioned candidates.",
+      "use": "live",
+      "targets": ["github:worker-preview"],
+      "steps": [
+        "Configure Cloudflare Access for the lvwwd-preview Worker with All traffic coverage, including versioned workers.dev URLs, and the approved staff policy.",
+        "Create or select a dedicated service token and a Service Auth policy scoped only to that preview Worker.",
+        "Store the service token Client ID in worker-preview as CF_ACCESS_CLIENT_ID."
+      ]
+    },
+    {
+      "name": "CF_ACCESS_CLIENT_SECRET",
+      "purpose": "Authenticates release verification only to the configured protected staging Worker.",
+      "use": "live",
+      "targets": ["github:worker-preview"],
+      "steps": [
+        "Use the same dedicated service token and preview-only Service Auth policy as CF_ACCESS_CLIENT_ID.",
+        "Store its secret in worker-preview as CF_ACCESS_CLIENT_SECRET; never put it in Worker vars or public repository configuration."
+      ]
     }
   ],
   "vars": [
@@ -287,7 +329,23 @@
     }
   ],
   "github": {
-    "repository": "LasVegasForTransit/week-without-driving"
+    "repository": "LasVegasForTransit/week-without-driving",
+    "variables": [
+      {
+        "name": "LVBT_PREVIEW_URL",
+        "purpose": "The reviewed HTTPS custom origin for protected staging, separate from lvwwd.org."
+      },
+      {
+        "name": "LVBT_PREVIEW_BINDINGS",
+        "purpose": "Explicit complete preview binding declarations; DB must use lvwwd-preview with its own UUID and PHOTOS must use lvwwd-preview-photos; secret declarations contain no values."
+      },
+      {
+        "name": "CLOUDFLARE_ACCOUNT_ID",
+        "environment": "worker-preview",
+        "from": "cloudflare.accountId",
+        "purpose": "Selects the same LVBT account for staging."
+      }
+    ]
   },
   "forbidden": [
     {

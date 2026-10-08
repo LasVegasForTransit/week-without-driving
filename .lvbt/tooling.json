@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "local": {
+    "optional": [
+      {
+        "name": "GOOGLE_ROUTES_API_KEY",
+        "purpose": "Live route comparisons; basic local pages and fallback links work without it."
+      },
+      {
+        "name": "PUBLIC_LVBT_CWA_TOKEN",
+        "purpose": "Production analytics; optional for local development."
+      }
+    ]
+  },
+  "audits": {
+    "workflow": ".github/workflows/audit-scheduled.yml",
+    "artifactName": "lvbt-audit-report",
+    "dependencies": {
+      "local": {
+        "command": ["pnpm", "audit", "--audit-level=high", "--json"],
+        "format": "pnpm"
+      },
+      "production": {
+        "command": ["pnpm", "audit", "--prod", "--audit-level=high", "--json"],
+        "format": "pnpm"
+      }
+    }
+  },
+  "release": {
+    "repository": "LasVegasForTransit/week-without-driving",
+    "appDirectory": "apps/deploy",
+    "productionUrl": "https://lvwwd.org",
+    "previewUrlEnv": "LVBT_PREVIEW_URL",
+    "productionWorker": "lvwwd",
+    "previewWorker": "lvwwd-preview",
+    "workersDevSubdomain": "las-vegas-for-better-transit",
+    "artifactPrefix": "lvwwd-release",
+    "artifactSource": "typed-worker",
+    "typedConfig": "cloudflare.config.ts",
+    "assetsDirectory": "../site/dist",
+    "previewBindingsEnv": "LVBT_PREVIEW_BINDINGS",
+    "migrations": [
+      {
+        "binding": "DB",
+        "directory": "../site/migrations"
+      }
+    ],
+    "smoke": {
+      "path": "/",
+      "status": 200
+    },
+    "stagingWorkflow": {
+      "name": "Deploy staging",
+      "path": ".github/workflows/deploy.yml",
+      "branch": "main"
+    },
+    "promotionWorkflow": {
+      "file": "promote.yml",
+      "titlePrefix": "Promote Week Without Driving",
+      "branch": "main"
+    },
+    "attestation": {
+      "signerWorkflow": "LasVegasForTransit/repository-tooling/.github/workflows/release-attest.yml",
+      "signerCommit": "ac987b64a242c142b668abed03fb0aca73632767"
+    }
+  }
+}

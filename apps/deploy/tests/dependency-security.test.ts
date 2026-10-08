@@ -10,7 +10,7 @@ const braces = matchRequire('braces') as {
   expand: (pattern: string) => string[];
 };
 
-void test('patched brace walkers reject hostile nesting while ordinary globs still work', () => {
+void test('reviewed shared brace walkers reject hostile nesting while ordinary globs still work', () => {
   for (const evaluate of [braces, braces.expand]) {
     for (const [open, close] of [
       ['{', '}'],
@@ -19,7 +19,7 @@ void test('patched brace walkers reject hostile nesting while ordinary globs sti
       const pattern = open.repeat(4000) + 'x,y' + close.repeat(4000);
       assert.throws(() => evaluate(pattern), {
         name: 'SyntaxError',
-        message: 'Input exceeds maximum nesting depth (100)',
+        message: 'Input depth (101), exceeds max depth (100)',
       });
     }
   }
