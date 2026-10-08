@@ -14,11 +14,13 @@
     "stops": "node scripts/build-stops.mjs --download",
     "photos": "node scripts/build-photos.mjs",
     "fonts": "node scripts/build-fonts.mjs",
-    "check-types": "astro check",
+    "check-types": "astro check && tsc --project tsconfig.scripts.json",
     "check-types:worker": "tsc --project worker",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "validate": "lvbt-analytics csp --check public/_headers"
+    "validate": "lvbt-analytics csp --check public/_headers",
+    "release:smoke": "pnpm --dir ../.. exec lvbt release smoke",
+    "release:browser": "tsx scripts/release/browser.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "catalog:",
@@ -44,6 +46,8 @@
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "catalog:",
+    "tsx": "catalog:",
+    "@lasvegasfortransit/web-platform": "file:../../.lvbt/web-platform/packages/web-platform"
   }
 }

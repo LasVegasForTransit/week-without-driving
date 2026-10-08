@@ -1,0 +1,7 @@
+{
+  "extends": "@lasvegasfortransit/typescript-config/base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["scripts/release/**/*.ts"]
+}

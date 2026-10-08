@@ -53,9 +53,11 @@ including how to let volunteers into the admin views.
   release switches start off, with separate preview provider configuration for testing. Deploy it
   with `pnpm build && pnpm exec wrangler deploy -c wrangler.api-preview.jsonc` from `apps/site`
 
-`pnpm run deploy` builds and runs `cf deploy`; `.github/workflows/deploy.yml` does the same on every
-push to `main` with the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets of the
-`production` environment, which `pnpm bootstrap --production` sets.
+Merging to `main` builds a retained artifact and updates protected staging. Production changes only
+through `pnpm promote` or an explicit promotion workflow, using the existing `production` credential
+environment. See [Publish a reviewed release](docs/operations/how-to/publish-a-reviewed-release.md)
+for required isolated staging configuration and acceptance. `pnpm run deploy` remains an explicit
+recovery command.
 
 Lint, format, TypeScript, and test settings extend the `@lasvegasfortransit/*` packages from
 [`LasVegasForTransit/repository-tooling`](https://github.com/LasVegasForTransit/repository-tooling).

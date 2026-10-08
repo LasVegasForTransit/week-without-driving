@@ -7,7 +7,10 @@
     "LVBT_REQUIRE_ANALYTICS",
     "LVWWD_E2E_PORT",
     "PUBLIC_LVBT_ANALYTICS_COLLECTOR",
-    "PUBLIC_LVBT_CWA_TOKEN"
+    "PUBLIC_LVBT_CWA_TOKEN",
+    "LVBT_PREVIEW_URL",
+    "LVBT_PREVIEW_BINDINGS",
+    "PLAYWRIGHT_BASE_URL"
   ],
   "tasks": {
     "build": {
@@ -48,6 +51,23 @@
       "dependsOn": ["build"],
       "cache": false,
       "persistent": true
+    },
+    "check-types:worker": {},
+    "@lasvegasfortransit/site#validate": {
+      "dependsOn": [
+        "^build",
+        "check-types:worker",
+        "//#security:dependencies",
+        "//#security:secrets"
+      ]
+    },
+    "//#security:dependencies": {
+      "cache": false
+    },
+    "//#security:secrets": {
+      "cache": false
     }
-  }
+  },
+  "globalPassThroughEnv": ["CF_ACCESS_CLIENT_ID", "CF_ACCESS_CLIENT_SECRET"],
+  "globalDependencies": [".lvbt/web-platform.json", ".lvbt/tooling.json", ".github/workflows/**"]
 }

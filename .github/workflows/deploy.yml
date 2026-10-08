@@ -1,8 +1,4 @@
-# Deploys every app with a Cloudflare config on each push to main, after the
-# same check pull requests run. Needs the CLOUDFLARE_API_TOKEN (Edit Cloudflare
-# Workers) and CLOUDFLARE_ACCOUNT_ID secrets of the production environment;
-# `pnpm bootstrap --production` sets both (see apps/site/platform.json).
-name: Deploy
+name: Deploy staging
 
 on:
   push:
@@ -11,46 +7,54 @@ on:
 
 permissions:
   contents: read
-  # Installs @lasvegasfortransit packages from GitHub Packages.
+  actions: read
+  deployments: write
   packages: read
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: lvwwd-staging
   cancel-in-progress: false
 
 jobs:
-  validate:
-    name: Validate
-    uses: ./.github/workflows/ci.yml
+  build:
+    name: Build
+    uses: LasVegasForTransit/repository-tooling/.github/workflows/release-build.yml@ac987b64a242c142b668abed03fb0aca73632767
+    with:
+      artifact-source: typed-worker
+      require-analytics: true
+      build-environment: production
+      app-directory: apps/site
+      validation-browser-directory: apps/site
+      artifact-prefix: lvwwd-release
+    secrets: inherit
 
-  deploy:
-    name: Deploy
-    needs: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment: production
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
+  attest:
+    name: Sign retained release
+    needs: build
+    permissions:
+      contents: read
+      actions: read
+      packages: read
+      attestations: write
+      id-token: write
+    uses: LasVegasForTransit/repository-tooling/.github/workflows/release-attest.yml@ac987b64a242c142b668abed03fb0aca73632767
+    with:
+      artifact-prefix: lvwwd-release
 
-      - name: Setup Node + pnpm
-        uses: ./.github/actions/setup-node-pnpm
-
-      - name: Deploy
-        # The cf beta's experimental Worker build stalls. The checked-in
-        # Wrangler mirror is validated against the same production resources.
-        run: |
-          pnpm build
-          pnpm --dir apps/site exec wrangler deploy \
-            --tag "$GITHUB_SHA" --message "Commit $GITHUB_SHA"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # lvwwd.org's Cloudflare Web Analytics token, a variable of the
-          # production environment. The build adds LVBT's analytics only
-          # when it is set; see docs/operations/reference/analytics.md.
-          PUBLIC_LVBT_CWA_TOKEN: ${{ vars.PUBLIC_LVBT_CWA_TOKEN }}
-          # Set only after a real production comparison and its fallback links pass.
-          COMPARE_PUBLISHED: ${{ vars.COMPARE_PUBLISHED }}
+  staging:
+    name: Verify and update staging
+    needs: [build, attest]
+    uses: LasVegasForTransit/repository-tooling/.github/workflows/release-publish.yml@ac987b64a242c142b668abed03fb0aca73632767
+    with:
+      target: preview
+      preview-environment: worker-preview
+      production-environment: production
+      release-id: ${{ github.run_id }}
+      commit: ${{ github.sha }}
+      artifact-prefix: lvwwd-release
+      attestation-prefix: attestation-lvwwd-release
+      app-directory: apps/site
+      url: ${{ vars.LVBT_PREVIEW_URL }}
+      smoke-script: release:smoke
+      browser-script: release:browser
+    secrets: inherit

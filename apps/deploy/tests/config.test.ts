@@ -4,9 +4,18 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import ts from 'typescript';
+import type {
+  ReleaseConfiguration,
+  WorkerBindings,
+} from '@lasvegasfortransit/web-platform/release';
 
-import cloudflare from '../cloudflare.config.ts';
+import cloudflareFactory from '../cloudflare.config.ts';
+const cloudflare =
+  typeof cloudflareFactory === 'function'
+    ? cloudflareFactory({ mode: 'production', isPreview: false })
+    : cloudflareFactory;
 import wranglerBuild from '../wrangler.config.ts';
+const productionBindings = cloudflare.worker.env as WorkerBindings;
 
 interface WranglerMirror {
   name: string;
@@ -80,9 +89,9 @@ void test('both production configs publish the same routes, schedules, and resou
     })),
   );
   assert.deepEqual(
-    cloudflare.worker.triggers
-      .filter((trigger) => trigger.type === 'scheduled')
-      .map((trigger) => trigger.schedule),
+    cloudflare.worker.triggers.flatMap((trigger) =>
+      trigger.type === 'scheduled' ? [trigger.schedule] : [],
+    ),
     wrangler.triggers.crons,
   );
   assert.deepEqual(cloudflare.worker.env.DB, {
@@ -97,7 +106,7 @@ void test('both production configs publish the same routes, schedules, and resou
   });
   assert.equal(mirrorR2.binding, 'PHOTOS');
   assert.deepEqual(
-    Object.entries(cloudflare.worker.env).flatMap(([name, binding]) =>
+    Object.entries(productionBindings).flatMap(([name, binding]) =>
       binding.type === 'text' ? [[name, binding.value]] : [],
     ),
     Object.entries(wrangler.vars),
@@ -111,7 +120,7 @@ void test('production secret declarations cover the Worker secrets in the setup 
   assert.equal('accountId' in cloudflare, false);
   assert.equal(cloudflare.worker.name, inventory.cloudflare.worker);
   assert.deepEqual(
-    Object.entries(cloudflare.worker.env)
+    Object.entries(productionBindings)
       .filter(([, binding]) => binding.type === 'secret')
       .map(([name]) => name)
       .sort(),
@@ -126,7 +135,7 @@ void test('both deploy configs include every production var from the setup inven
   const inventory = JSON.parse(
     await readFile(path.join(siteDir, 'platform.json'), 'utf8'),
   ) as SetupInventory;
-  const configured = Object.entries(cloudflare.worker.env).flatMap(([name, binding]) =>
+  const configured = Object.entries(productionBindings).flatMap(([name, binding]) =>
     binding.type === 'text' ? [name] : [],
   );
   assert.deepEqual(configured.sort(), inventory.vars.map((variable) => variable.name).sort());
@@ -134,4 +143,88 @@ void test('both deploy configs include every production var from the setup inven
   const siteKey = wrangler.vars.TURNSTILE_SITE_KEY;
   assert.ok(siteKey, 'the public Turnstile site key must be configured');
   assert.match(siteKey, /^0x[A-Za-z0-9_-]+$/);
+});
+
+void test('release declarations retain canonical SQL and require explicit isolated preview inputs', async () => {
+  const tooling = JSON.parse(
+    await readFile(path.resolve(deployDir, '../../.lvbt/tooling.json'), 'utf8'),
+  ) as { release: ReleaseConfiguration & { previewUrlEnv: string; previewBindingsEnv: string } };
+  assert.equal(tooling.release.appDirectory, 'apps/deploy');
+  assert.equal(tooling.release.artifactSource, 'typed-worker');
+  assert.equal(tooling.release.previewBindingsEnv, 'LVBT_PREVIEW_BINDINGS');
+  assert.equal(tooling.release.previewUrlEnv, 'LVBT_PREVIEW_URL');
+  assert.equal(tooling.release.workersDevSubdomain, 'las-vegas-for-better-transit');
+  assert.deepEqual(tooling.release.migrations, [
+    { binding: 'DB', directory: '../site/migrations' },
+  ]);
+});
+void test('staging release replaces automatic production deployment and preserves the existing production credential environment', async () => {
+  const staging = await readFile(
+    path.resolve(deployDir, '../../.github/workflows/deploy.yml'),
+    'utf8',
+  );
+  const promotion = await readFile(
+    path.resolve(deployDir, '../../.github/workflows/promote.yml'),
+    'utf8',
+  );
+  assert.match(staging, /name: Deploy staging/);
+  assert.match(staging, /release-build\.yml@[a-f0-9]{40}/);
+  assert.match(staging, /artifact-source: typed-worker/);
+  assert.match(staging, /target: preview/);
+  assert.doesNotMatch(staging, /wrangler deploy|target: production/);
+  assert.match(promotion, /workflow_dispatch:/);
+  assert.match(promotion, /production-environment: production/);
+  assert.match(promotion, /target: production/);
+  assert.match(promotion, /release-source\.yml@[a-f0-9]{40}/);
+  assert.match(promotion, /release-publish\.yml@[a-f0-9]{40}/);
+  assert.doesNotMatch(promotion, /pnpm build|wrangler deploy/);
+});
+
+function previewConfiguration(bindings: unknown = previewBindings()) {
+  const previousUrl = process.env.LVBT_PREVIEW_URL;
+  const previousBindings = process.env.LVBT_PREVIEW_BINDINGS;
+  process.env.LVBT_PREVIEW_URL = 'https://preview.example.test';
+  process.env.LVBT_PREVIEW_BINDINGS = JSON.stringify(bindings);
+  try {
+    assert.equal(typeof cloudflareFactory, 'function');
+    return cloudflareFactory({ mode: 'preview', isPreview: true });
+  } finally {
+    if (previousUrl === undefined) delete process.env.LVBT_PREVIEW_URL;
+    else process.env.LVBT_PREVIEW_URL = previousUrl;
+    if (previousBindings === undefined) delete process.env.LVBT_PREVIEW_BINDINGS;
+    else process.env.LVBT_PREVIEW_BINDINGS = previousBindings;
+  }
+}
+function previewBindings() {
+  return {
+    ...cloudflare.worker.env,
+    DB: { type: 'd1', name: 'lvwwd-preview', id: 'fixture-isolated-database' },
+    PHOTOS: { type: 'r2', name: 'lvwwd-preview-photos' },
+    SMS_ORIGIN: { type: 'text', value: 'https://preview.example.test' },
+    TURNSTILE_SITE_KEY: { type: 'text', value: '1x00000000000000000000AA' },
+  };
+}
+void test('preview preserves declared secrets and asset behavior while isolating data and disabling schedules', () => {
+  const preview = previewConfiguration();
+  assert.equal(preview.worker.name, 'lvwwd-preview');
+  assert.deepEqual(preview.worker.domains, ['preview.example.test']);
+  assert.deepEqual(preview.worker.triggers, []);
+  assert.deepEqual(preview.worker.assets, cloudflare.worker.assets);
+  assert.deepEqual(preview.worker.unsafe, cloudflare.worker.unsafe);
+  assert.deepEqual(preview.worker.env, previewBindings());
+  assert.throws(() => previewConfiguration(cloudflare.worker.env), /isolated resources/);
+});
+void test('preview refuses undeclared data resources and production communication settings', () => {
+  const candidates = [
+    {
+      ...previewBindings(),
+      DB: { type: 'd1', name: 'other-preview', id: 'fixture-isolated-database' },
+    },
+    { ...previewBindings(), PHOTOS: { type: 'r2', name: 'other-preview-photos' } },
+    { ...previewBindings(), SMS_ORIGIN: cloudflare.worker.env.SMS_ORIGIN },
+    { ...previewBindings(), SMS_REMINDERS_ENABLED: { type: 'text', value: 'true' } },
+    { ...previewBindings(), EVENT_REMINDERS_ENABLED: { type: 'text', value: 'true' } },
+    { ...previewBindings(), TURNSTILE_SITE_KEY: cloudflare.worker.env.TURNSTILE_SITE_KEY },
+  ];
+  for (const candidate of candidates) assert.throws(() => previewConfiguration(candidate));
 });
