@@ -36,6 +36,7 @@
     "workersDevSubdomain": "las-vegas-for-better-transit",
     "artifactPrefix": "lvwwd-release",
     "artifactSource": "typed-worker",
+    "publicationMode": "named-staging",
     "typedConfig": "cloudflare.config.ts",
     "assetsDirectory": "../site/dist",
     "previewBindingsEnv": "LVBT_PREVIEW_BINDINGS",
