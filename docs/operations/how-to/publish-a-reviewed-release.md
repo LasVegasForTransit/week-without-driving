@@ -57,12 +57,13 @@ configuration, then regenerate the mirror.
 
 ## Review and promote
 
-The shared build workflow reads the existing public analytics token and `COMPARE_PUBLISHED` switch
-from the `production` environment, preserving the production-shaped static build without using its
-deployment credential. A saved artifact includes its compiled Worker, assets, configuration, binding
-declarations and exact SQL migration files, all covered by the release inventory hash. Staging uses
-the isolated database and bucket and disables scheduled jobs; production keeps both existing cron
-schedules and release switches.
+The shared build workflow reads the existing public analytics token from the `production`
+environment, preserving the production-shaped static build without using its deployment credential.
+Route comparison links are published with the site now that the production provider has been
+verified. A saved artifact includes its compiled Worker, assets, configuration, binding declarations
+and exact SQL migration files, all covered by the release inventory hash. Staging uses the isolated
+database and bucket and disables scheduled jobs; production keeps both existing cron schedules and
+release switches.
 
 After checking the staging homepage, first-ride guide and affected product flows, run:
 

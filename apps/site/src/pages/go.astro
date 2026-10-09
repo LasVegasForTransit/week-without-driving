@@ -5,7 +5,6 @@ import { destinations, finderPlaces, routesIn } from '../lib/destinations';
 import routeData from '../../public/data/routes.json';
 import { parseInlineLinks } from '../lib/inline-links';
 import { buildMapLinks } from '../lib/map-links';
-import { comparePublished } from '../lib/compare-release';
 import { fares, wwd } from '../lib/wwd';
 import { Icon } from 'astro-icon/components';
 
@@ -227,13 +226,7 @@ const mapButtonClass =
     </div>
 
     <nav class="where__more" aria-label="More ways to plan">
-      {
-        comparePublished && (
-          <a href="/go/compare" class="where__chip">
-            Compare ways to go
-          </a>
-        )
-      }
+      <a href="/go/compare" class="where__chip">Compare ways to go</a>
       <a href="#find-routes" class="where__chip">Stops near you</a>
       <a href="#places-to-go" class="where__chip">Step-by-step trips</a>
     </nav>

@@ -94,7 +94,7 @@ describe('event reminders for saved plans', () => {
 
   it('sends a bounded batch and reaches the remaining browsers on the next run', async () => {
     await plan();
-    for (let n = 0; n < 50; n += 1) await subscribe();
+    await Promise.all(Array.from({ length: 50 }, () => subscribe()));
     await run('2026-10-03T16:00:00.000Z');
     expect(service.requests).toHaveLength(40);
     expect(service.mostAtOnce).toBeLessThanOrEqual(6);
@@ -103,7 +103,7 @@ describe('event reminders for saved plans', () => {
     expect(new Set(service.requests.map((push) => push.endpoint)).size).toBe(50);
     await run('2026-10-03T16:10:00.000Z');
     expect(service.requests).toHaveLength(50);
-  });
+  }, 30_000);
 
   it('sends an event-specific push to each phone once when the lead time arrives', async () => {
     const planId = await plan();

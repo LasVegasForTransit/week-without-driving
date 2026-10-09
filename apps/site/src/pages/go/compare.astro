@@ -1,12 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { comparePublished } from '../../lib/compare-release';
 ---
 
 <BaseLayout
   title="Compare ways to go · Week Without Driving Las Vegas"
   description="Compare driving with a bus, walk, bike, or scooter trip."
-  noindex={!comparePublished}
 >
   <div class="container-page page-top compare-page">
     <a href="/go" class="body-link">← Plan a trip</a>

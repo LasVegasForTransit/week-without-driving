@@ -8,7 +8,6 @@ import { minifyScripts } from './src/integrations/minify-scripts';
 import { preloadModules } from './src/integrations/preload-modules';
 import { reminderCheck } from './src/integrations/reminder-check';
 import { serviceWorker } from './src/integrations/service-worker';
-import { comparePublished } from './src/lib/compare-release';
 
 export default defineConfig({
   // The canonical URL. The sitemap and absolute links are built from it.
@@ -32,10 +31,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => {
         const path = new URL(page).pathname;
-        return (
-          !/\/(?:my-week|open|offline|get-involved)(?:\/|$)/.test(path) &&
-          (comparePublished || path !== '/go/compare')
-        );
+        return !/\/(?:my-week|open|offline|get-involved)(?:\/|$)/.test(path);
       },
     }),
     icon(),

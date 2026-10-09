@@ -2,8 +2,6 @@
 // and tablets show the same list, with a line of help under each link, in
 // the menu that the ☰ button opens. Labels say what a visitor will do
 // there, in plain words, rather than naming the page.
-import { comparePublished } from './compare-release';
-
 export const mainNav = [
   {
     href: '/how-it-works',
@@ -14,9 +12,7 @@ export const mainNav = [
   {
     href: '/go',
     label: 'Plan a trip',
-    help: comparePublished
-      ? 'Compare ways to go, find a bus, or pick a place.'
-      : 'Find a bus or pick a place.',
+    help: 'Compare ways to go, find a bus, or pick a place.',
     icon: 'mdi:routes',
   },
   {
