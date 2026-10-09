@@ -52,7 +52,8 @@ describe('my week', () => {
     await platform.dispose();
   });
   beforeEach(async () => {
-    vi.useRealTimers();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-29T12:00:00Z'));
     await platform.reset();
     cookie = await signUpAs(platform);
   });

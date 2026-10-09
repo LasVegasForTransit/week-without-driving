@@ -46,9 +46,12 @@ describe('participant trip plans', () => {
   }, 60_000);
   afterAll(async () => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
     await platform.dispose();
   });
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-29T12:00:00Z'));
     await platform.reset();
     cookie = await signUpAs(platform);
   });
@@ -63,6 +66,7 @@ describe('participant trip plans', () => {
 
   it('saves more than one plan on a day and returns them in My week', async () => {
     const first = await create();
+    vi.setSystemTime(Date.now() + 1);
     const second = await create({
       ...SAMPLE,
       destination: 'RTC Bonneville Transit Center',
