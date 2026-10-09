@@ -55,9 +55,12 @@ describe('partner credit and shared devices', () => {
   }, 60_000);
   afterAll(async () => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
     await platform.dispose();
   });
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-29T12:00:00Z'));
     await platform.reset();
     const outbound = fakeOutbound(realFetch);
     outbound.accessKeys = [keys.publicJwk];
