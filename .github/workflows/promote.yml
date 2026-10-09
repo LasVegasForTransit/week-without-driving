@@ -47,6 +47,7 @@ jobs:
     uses: LasVegasForTransit/repository-tooling/.github/workflows/release-publish.yml@3567f0cb1345e8756eb5d84e0a3ea7b62695125a
     with:
       target: production
+      publication-mode: named-staging
       expected-version: ${{ inputs.expected_version }}
       production-environment: production
       preview-environment: worker-preview

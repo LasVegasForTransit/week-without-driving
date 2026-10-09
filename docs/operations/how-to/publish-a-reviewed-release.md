@@ -73,9 +73,13 @@ pnpm promote
 pnpm promote --run-id <run-id>
 ```
 
+For the first named-staging publication, select a run built after this mode was configured. Older
+retained releases keep their original version-preview settings and must not be used for this switch.
+
 Promotion resolves the selected staging marker and successful originating run, verifies the saved
-artifact, applies its saved SQL to the production database, checks the candidate, and activates that
-exact version. It performs no rebuild. Failed migration or activation can have a partial or unknown
+artifact, checks it on the protected named staging Worker, applies its saved SQL to the production
+database, and deploys those exact bytes to production. Version preview URLs stay disabled on both
+Workers. It performs no rebuild. Failed migration or activation can have a partial or unknown
 outcome; inspect the exact run and database migration history before retrying. Reminders and live
 route comparisons retain their separate provider and real-device acceptance gates.
 
