@@ -11,9 +11,10 @@
   //
   // Reminders: VAPID_PRIVATE_KEY is a test key used only here
   // (`wrangler secret put VAPID_PRIVATE_KEY -c ...`), never production's.
-  // The shared reminder trigger matches production. Browser notifications
-  // concern saved plans; daily texts require separately confirmed consent.
-  // Enable either release switch only for a controlled test. SMS also needs
+  // This legacy preview retains only daily cleanup. Automatic reminder
+  // schedules are disabled; use the admin test action for controlled checks.
+  // Browser notifications concern saved plans; daily texts require separately
+  // confirmed consent. SMS also needs
   // preview-only Twilio services and this preview's HTTPS SMS_ORIGIN.
   // The "Send test reminder" button in /admin sends a push straight away.
   //
@@ -53,7 +54,7 @@
     "EVENT_REMINDERS_ENABLED": "false",
     "SMS_REMINDERS_ENABLED": "false",
   },
-  "triggers": { "crons": ["0 13 * * *", "2-59/5 * * * *"] },
+  "triggers": { "crons": ["0 13 * * *"] },
   "observability": {
     "enabled": true,
     "redact_query_string": true,
