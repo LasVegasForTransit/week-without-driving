@@ -13,7 +13,8 @@ const SEND_LINK_NOTICE = 'You’re offline. Try requesting your link when you’
 let offline = false;
 let apiCallsOffline: string[] = [];
 
-test.beforeEach(({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
   offline = false;
   apiCallsOffline = [];
   page.on('request', (request) => {

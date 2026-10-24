@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 // The bot check's script comes from challenges.cloudflare.com, which content
 // blockers and school or work networks can block on a working connection.
 // The sign-up says so, and loads the script again when the visitor retries.

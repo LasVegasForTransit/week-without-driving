@@ -14,6 +14,7 @@ async function mark(page: Page, labels: string[]) {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
   await page.goto('/bingo');
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();

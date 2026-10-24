@@ -1,5 +1,10 @@
 import { type Page, expect, test } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 test.use({ serviceWorkers: 'block' });
 
 // The Worker writes this state into the HTML when a required provider is

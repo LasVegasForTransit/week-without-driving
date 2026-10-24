@@ -1,5 +1,10 @@
 import { type BrowserContext, type Page, expect, test } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 // A volunteer at a partner's table signs people up one after another on one
 // tablet: "Sign up someone else" signs the tablet out and shows the empty
 // form, and each sign-up carries the partner link the tab was opened with.
@@ -179,6 +184,7 @@ test('a partner link opened in another tab does not follow into a new one', asyn
 }) => {
   await page.goto('/giveaway?ref=campus-riders');
   const other = await context.newPage();
+  await other.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
   const api = await standInApi(other, context);
   await other.goto('/sign-up');
   await fillSignUp(other, 'ana@example.com');

@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 // A recovery link can change the participant without an explicit sign-out.
 test('does not upload the previous participant’s Bingo marks into the next account', async ({
   page,

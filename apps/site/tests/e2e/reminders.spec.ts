@@ -225,6 +225,7 @@ test.describe('the reminder section on My week', () => {
   test('does not show the previous participant’s subscription as the new participant’s reminders', async ({
     page,
   }) => {
+    await page.clock.setFixedTime(new Date(BEFORE_THE_WEEK));
     await signIn(page);
     await standInPushService(page, { subscribed: true });
     await page.route('**/api/push/status', (route) =>
