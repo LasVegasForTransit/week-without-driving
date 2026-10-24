@@ -61,7 +61,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   {/* Old one-page links like /#giveaway: runs before the page shows, so it can't wait. */}
   <script is:inline slot="head" src="/scripts/old-links.js"></script>
 
-  {/* HERO: what it is, when, and one button. */}
+  {/* A clear thank-you beside a view from the bus. */}
   <section class="home-hero" aria-labelledby="hero-heading">
     <PhotoSlot
       class="home-hero__photo"
@@ -69,23 +69,22 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       photo={photos.deuceView}
       quiet
       eager
+      sizes="(min-width: 64rem) 50vw, 100vw"
     />
-    <div class="home-hero__shade" aria-hidden="true"></div>
     <div class="container-page home-hero__content">
-      <p class="home-hero__when">
-        <Icon name="mdi:calendar-blank" class="size-5" aria-hidden="true" />
-        2026 wrapped up · Las Vegas
-      </p>
-      <h1 id="hero-heading" class="home-hero__title">Thanks for a great Week Without Driving.</h1>
+      <p class="home-hero__when">Week Without Driving 2026</p>
+      <h1 id="hero-heading" class="home-hero__title">Thank you, Las Vegas.</h1>
       <p class="home-hero__sub">
-        Our 2026 week has wrapped up. Thank you to everyone who took the bus, walked, rolled, biked
-        or shared a ride. We’ll see you in 2027!
+        Our 2026 week has wrapped up. Thanks for taking the bus, walking, rolling, biking and
+        sharing the ride. We’ll see you in 2027!
       </p>
       <div class="home-hero__actions">
         <a href="#stay-involved" class="btn btn--primary btn--big" data-stay-involved-link
           >Stay involved with LVBT</a
         >
-        <a href="/guides" class="btn btn--ghost">Read the rider guides</a>
+        <a href="/guides" class="home-hero__guides"
+          >Read the rider guides <span aria-hidden="true">→</span></a
+        >
       </div>
     </div>
   </section>
@@ -245,15 +244,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
 </BaseLayout>
 
 <style>
-  .btn--ghost {
-    color: #fff;
-    border: 2px solid rgb(255 255 255 / 0.85);
-  }
-  .btn--ghost:hover,
-  .btn--ghost:focus-visible {
-    background: #fff;
-    color: #111;
-  }
   .home-link {
     display: inline-flex;
     align-items: center;
@@ -269,20 +259,14 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
 
   /* Hero */
-  /* The hero is always a dark photo under a dark shade, in both themes, so
-     its text and ghost button are fixed white. */
   .home-hero {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    min-height: min(80svh, 42rem);
-    color: #fff;
-    background: #152b36;
+    display: grid;
+    color: var(--color-on-surface);
+    background: var(--color-surface);
   }
   .home-hero :global(.home-hero__photo) {
-    position: absolute;
-    inset: 0;
-    background: #152b36;
+    grid-row: 2;
+    aspect-ratio: 16 / 9;
   }
   /* The photo is taken from the Deuce's top deck: show the Strip ahead,
      not the bus's ceiling. */
@@ -293,50 +277,47 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .home-hero :global(.home-hero__photo[data-photo-unavailable] .photo__credit) {
     display: none;
   }
-  .home-hero__shade {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to top,
-      rgb(10 12 14 / 0.9) 0%,
-      rgb(10 12 14 / 0.6) 50%,
-      rgb(10 12 14 / 0.1) 85%
-    );
-  }
   .home-hero__content {
-    position: relative;
+    grid-row: 1;
     width: 100%;
-    padding-block: 2.5rem 3rem;
+    padding-block: clamp(2.5rem, 6vw, 5rem);
   }
   .home-hero__when {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.9rem;
-    font-weight: 700;
-    color: var(--color-on-primary-warm);
-    background: var(--color-primary-warm);
-    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-on-surface-variant);
   }
   .home-hero__title {
     margin-top: 1rem;
-    max-width: 18ch;
-    font-size: clamp(2.6rem, 8vw, 4.5rem);
-    line-height: 1;
-    letter-spacing: -0.02em;
+    max-width: 11ch;
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
     text-wrap: balance;
   }
   .home-hero__sub {
     margin-top: 1rem;
-    max-width: 34rem;
-    font-size: clamp(1.1rem, 3.8vw, 1.3rem);
-    line-height: 1.45;
+    max-width: 32rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--color-on-surface-variant);
   }
   .home-hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.75rem;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .home-hero__guides {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   /* Shared section rhythm */
@@ -666,6 +647,18 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     }
   }
   @media (max-width: 47.99rem) {
+    .home-farewell {
+      padding-block: 0;
+      background: var(--color-slab);
+    }
+    .home-farewell__panel {
+      gap: 1.5rem;
+      padding: 2rem 0;
+      border-radius: 0;
+    }
+    .home-farewell__contact {
+      padding-top: 1rem;
+    }
     .home-section,
     .home-leaders,
     .home-why {
@@ -675,7 +668,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       padding-block: 2.5rem;
     }
     .home-hero__title {
-      font-size: clamp(2.5rem, 9.5vw, 4.5rem);
+      font-size: clamp(2.75rem, 9.5vw, 4.5rem);
       line-height: 1.05;
     }
     .home-hero__sub {
@@ -683,7 +676,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       line-height: 1.6;
     }
     .home-hero__actions {
-      gap: 0.625rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
     .home-hero__actions .btn {
       min-height: 52px;
@@ -707,7 +702,18 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
   @media (min-width: 64rem) {
     .home-hero {
-      min-height: 40rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: stretch;
+    }
+    .home-hero__content {
+      align-self: center;
+      padding-inline-start: max(var(--page-pad), calc((100vw - 80rem) / 2 + var(--page-pad)));
+    }
+    .home-hero :global(.home-hero__photo) {
+      grid-column: 2;
+      grid-row: 1;
+      aspect-ratio: auto;
+      min-height: 34rem;
     }
     .home-why__grid {
       grid-template-columns: 1fr 1fr;

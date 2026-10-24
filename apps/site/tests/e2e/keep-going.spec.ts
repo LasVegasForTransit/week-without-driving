@@ -96,9 +96,7 @@ test('Home keeps the thank-you message even when the visitor’s clock is wrong'
 }) => {
   await page.clock.setFixedTime(new Date(CLOSES.getTime() - 1));
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Thanks for a great Week Without Driving.',
-  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thank you, Las Vegas.');
   const button = page.getByRole('link', { name: 'Stay involved with LVBT', exact: true });
   await expect(button).toBeVisible();
   await button.click();
@@ -112,9 +110,7 @@ test('signed-in visitors see the thank-you message and can still open My week', 
   await page.clock.setFixedTime(CLOSES);
   await signIn(context, page);
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Thanks for a great Week Without Driving.',
-  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thank you, Las Vegas.');
   await expect(page.locator('.site-cta')).toHaveAttribute('href', '/my-week');
   await expect(page.locator('.site-cta')).toContainText('My week');
   await expect(

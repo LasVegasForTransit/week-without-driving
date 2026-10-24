@@ -12,7 +12,7 @@ test('the home hero stays readable when its photo is unavailable', async ({ page
   );
   await expect(photo.locator('.photo__credit')).toBeHidden();
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Thanks for a great Week Without Driving.' }),
+    page.getByRole('heading', { level: 1, name: 'Thank you, Las Vegas.' }),
   ).toBeVisible();
 });
 
@@ -28,9 +28,7 @@ test.describe('the campaign has ended', () => {
 
   test('thanks visitors and offers useful next steps without JavaScript', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Thanks for a great Week Without Driving.',
-    );
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thank you, Las Vegas.');
     await expect(page.locator('.home-hero')).toContainText('We’ll see you in 2027!');
     await expect(
       page.getByRole('link', { name: 'Stay involved with LVBT', exact: true }),

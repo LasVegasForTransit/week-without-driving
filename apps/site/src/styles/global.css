@@ -115,6 +115,7 @@
      Tailwind doesn't generate utilities for it — same reason as the palette
      primitives below. */
   --page-pad: clamp(1.25rem, 4vw, 3rem);
+  --tab-bar-height: 56px;
 
   /* Site-chrome stacking ladder. Markup consumes these via Tailwind's var
      shorthand (z-(--z-footer)). Two relations are load-bearing and
@@ -315,6 +316,8 @@
    the semantic role tokens to dark values; every consumer follows via var().
    MUST be unlayered so it outranks @theme, which Tailwind v4 emits into
    @layer theme. */
+/* Wider phones can put the label beside its icon without crowding targets. */
+
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
@@ -528,6 +531,38 @@ html:active-view-transition-type(from-qr)::view-transition-old(root) {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+  }
+
+  /* Keep the page and nested scrollers quiet without hiding their position. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-on-surface-variant) var(--color-surface);
+  }
+
+  @supports not (scrollbar-width: thin) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+      background: var(--color-surface);
+    }
+    ::-webkit-scrollbar-thumb {
+      border: 2px solid var(--color-surface);
+      border-radius: 999px;
+      background: var(--color-on-surface-variant);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-on-surface);
+    }
+  }
+
+  @media (forced-colors: active) {
+    * {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
   }
 
   body {
@@ -1106,113 +1141,190 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
 
   .site-footer {
     border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 16%, transparent);
-    background: var(--color-surface-container);
+    background: var(--paper);
+  }
+  .site-footer :focus-visible {
+    outline-color: var(--color-on-surface);
   }
   .site-footer__inner {
     display: grid;
-    gap: 1.75rem;
-    padding-block: 2rem 1.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem 2rem;
+    padding-block: 1.5rem 0.75rem;
+  }
+  .footer-brand {
+    display: grid;
+    min-width: 0;
+    align-content: start;
+    gap: 0;
   }
   .footer-identity {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: grid;
+    gap: 0.125rem;
+    align-content: start;
     width: fit-content;
+    max-width: 100%;
     color: var(--color-on-surface);
     text-decoration: none;
   }
-  .footer-identity img {
-    flex: none;
-    width: 56px;
-    height: 56px;
-    padding: 4px;
-    border-radius: 4px;
-    background: var(--sand);
-  }
   .footer-identity__eyebrow {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
+    line-height: 1.3;
     color: var(--color-on-surface-variant);
   }
-  .footer-identity__name {
+  .footer-wordmark {
     display: block;
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.3rem;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    width: 16rem;
+    max-width: 100%;
+    aspect-ratio: 72 / 19;
+  }
+  .footer-wordmark svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .footer-wordmark--dark {
+    display: none;
   }
   .footer-utilities {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    min-width: 0;
+    margin-top: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+  }
+  .footer-utilities > div > ul {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.25rem;
+  }
+  .footer-social {
+    grid-column: 1 / -1;
+  }
+  .footer-utilities .footer-social > ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2rem;
   }
   .footer-label {
-    margin-bottom: 0.4rem;
-    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: normal;
     color: var(--color-on-surface-variant);
   }
   .footer-utilities a {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    width: fit-content;
-    min-height: 44px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: 100%;
+    min-height: 28px;
+    padding-block: 0.125rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
     color: var(--color-on-surface);
     text-decoration: none;
   }
+  .footer-link-icon {
+    flex: none;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: 0.28em;
+  }
+  /* The explicit icons also cover external links that open in the same tab. */
+  .footer-utilities a[target='_blank']::after {
+    content: none;
+  }
   .footer-utilities a:hover,
-  .footer-identity:hover .footer-identity__name,
+  .footer-identity:hover .footer-identity__eyebrow,
   .footer-details a:hover {
     text-decoration: underline;
     text-underline-offset: 0.22em;
   }
+  .footer-bottom {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+  }
   .footer-details {
     display: flex;
     flex-wrap: wrap;
-    column-gap: 1.25rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+    gap: 0.25rem 1rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .footer-details > li:last-child {
+    margin-inline-start: auto;
   }
   .footer-details a {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    font-size: 0.8rem;
+    min-width: 24px;
+    min-height: 24px;
+    font-size: 0.8125rem;
     color: var(--color-on-surface-variant);
     text-decoration: none;
+    white-space: nowrap;
   }
-  .footer-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: -1.5rem;
+  @media (min-width: 30rem) {
+    .footer-utilities {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 1.5rem;
+    }
+    .footer-social {
+      grid-column: auto;
+    }
+    .footer-utilities .footer-social > ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   .footer-mission {
-    font-size: 0.75rem;
-    line-height: 1.6;
+    display: grid;
+    justify-items: start;
+    font-size: 0.8125rem;
+    line-height: 1.3;
     color: var(--color-on-surface-variant);
+  }
+  .footer-mission span {
+    white-space: nowrap;
   }
   .footer-install {
     flex: none;
   }
   @media (min-width: 48rem) {
     .site-footer__inner {
-      grid-template-columns: 1fr 1fr;
-      column-gap: 4rem;
-      padding-block: 3rem 2rem;
+      padding-block: 2rem 0.75rem;
     }
-    .footer-details,
-    .footer-meta {
+  }
+  @media (min-width: 64rem) {
+    .site-footer__inner {
+      grid-template-columns: minmax(15rem, 1fr) minmax(0, 32rem);
+      column-gap: 3rem;
+    }
+    .footer-utilities {
+      margin-top: 0;
+    }
+    .footer-bottom {
       grid-column: 1 / -1;
     }
-    .footer-identity {
-      align-self: start;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .site-footer {
+      background: var(--ink);
+    }
+    .footer-wordmark--light {
+      display: none;
+    }
+    .footer-wordmark--dark {
+      display: block;
     }
   }
 
@@ -1407,7 +1519,7 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
 body {
   font-family: var(--font-sans);
 }
-:is(h1, h2, h3) {
+:is(h1, h2, h3):not(.footer-label) {
   font-weight: 700;
 }
 
@@ -1657,7 +1769,7 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--color-surface);
     border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
-    box-shadow: 0 -4px 24px -16px rgb(67 26 40 / 0.25);
+    box-shadow: none;
     /* Comes back a moment after a text field loses focus, so a tap that
        started on the page (and closed the keyboard) never lands on a tab. */
     transition: visibility 0s linear 0.4s;
@@ -1673,10 +1785,10 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.15rem;
-    min-height: 3.75rem;
-    padding: 0.4rem 0.15rem;
-    font-size: 0.8rem;
+    gap: 0.2rem;
+    min-height: var(--tab-bar-height);
+    padding: 0.375rem 0.15rem;
+    font-size: 0.75rem;
     font-weight: 700;
     line-height: 1.1;
     text-align: center;
@@ -1685,9 +1797,9 @@ body {
     overflow-wrap: anywhere;
   }
   .tab-bar__icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    padding: 0.1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
     border-radius: 999px;
   }
   .tab-bar__link:hover {
@@ -1697,8 +1809,8 @@ body {
     color: var(--color-primary-ink);
   }
   .tab-bar__link[aria-current='page'] .tab-bar__icon {
-    width: 3.25rem;
-    padding-inline: 0.85rem;
+    width: 2.5rem;
+    padding-inline: 0.625rem;
     background: var(--color-primary-soft);
   }
   .tab-bar__link:focus-visible {
@@ -1717,10 +1829,10 @@ body {
      Screens only: a printed page is narrower than 72rem too. */
   @media screen and (max-width: 71.99rem) {
     html {
-      scroll-padding-bottom: 5rem;
+      scroll-padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + 0.75rem);
     }
     body {
-      padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--tab-bar-height) + 1px + env(safe-area-inset-bottom));
     }
     .site-header .site-cta {
       display: none;
@@ -1782,7 +1894,7 @@ body {
 /* Headline face: Fraunces (SIL Open Font License 1.1), a warm serif that
    gives the campaign a voice of its own, apart from LVBT's Public Sans. Its
    @font-face rules are in fonts.css. */
-:is(h1, h2) {
+:is(h1, h2):not(.footer-label) {
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -2273,4 +2385,16 @@ body {
     font-weight: 600;
     border-radius: 999px;
   }
+}
+
+/* The approved SVG wordmark uses Public Sans. This local subset contains only
+   “Las Vegans for Better Transit” at weight 900, preserving the original glyphs
+   without adding the full variable font to every campaign page. Inline artwork
+   uses this font rather than falling back inside an external SVG image. */
+@font-face {
+  font-family: 'Public Sans';
+  src: url('/fonts/public-sans-wordmark-900.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
 }
