@@ -76,7 +76,7 @@ test('signs the tablet out on the sign-up page and readies the empty form', asyn
   await expect(page.getByLabel('County where you live')).toHaveValue('');
   await expect(page.locator('input[name="age"]:checked')).toHaveCount(0);
   await expect(page.locator('input[name="newsletter"]')).toHaveCount(0);
-  await expect(page.locator('.site-cta').first()).toContainText('Sign up to win');
+  await expect(page.locator('.site-cta').first()).toContainText('My week');
   expect(await page.evaluate(() => localStorage.getItem('lvwwd_bingo_2026'))).toBeNull();
 
   await page.keyboard.press('Tab');

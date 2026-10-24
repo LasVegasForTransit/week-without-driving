@@ -15,14 +15,23 @@ const description = 'Maps, fares, apps, and help for getting around Las Vegas wi
 const afterTheWeek = [
   {
     title: 'Tell us about your week',
+    icon: 'mdi:message-text-outline',
+    href: 'mailto:wwd@lasvegasfortransit.org',
+    action: 'Share your story',
     body: 'Tag @lasvegasfortransit on Instagram or email your story to wwd@lasvegasfortransit.org. We only share a post or story with your permission.',
   },
   {
     title: 'Plan another trip',
+    icon: 'mdi:routes',
+    href: '/go',
+    action: 'Plan a trip',
     body: 'The riding guides and Find a bus stay on this site. Check RTC for current routes, fares and stop closures before you travel.',
   },
   {
     title: 'Stay with LVBT',
+    icon: 'mdi:hand-heart-outline',
+    href: lvbt.joinUrl,
+    action: 'Join LVBT',
     body: 'Las Vegans for Better Transit works year-round for better buses and safer streets in the valley.',
   },
 ];
@@ -33,7 +42,7 @@ const afterTheWeek = [
   <section class="container-page page-top" aria-labelledby="resources-heading">
     <div>
       <h1 id="resources-heading" class="page-title">Resources</h1>
-      <p class="page-lede">Find local bus information and more guides for taking part.</p>
+      <p class="page-lede">Maps, fares, apps, and help for getting around without a car.</p>
     </div>
     <div class="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
       {
@@ -44,8 +53,8 @@ const afterTheWeek = [
           ] as const
         ).map(([audience, heading]) => (
           <div class="reveal">
-            <h2 class="border-b-2 border-outline pb-3 text-title-lg">{heading}</h2>
-            <ul class="divide-y divide-outline-variant/15">
+            <h2 class="resource-heading text-title-lg">{heading}</h2>
+            <ul class="resource-cards">
               {wwdResources
                 .filter((r) => r.audience === audience)
                 .map((r) => (
@@ -55,7 +64,8 @@ const afterTheWeek = [
                       data-print-url={r.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="group block py-5 no-underline"
+                      class="resource-card group"
+                      data-external-icon="false"
                     >
                       <span class="block font-semibold transition-colors group-hover:text-primary-ink group-focus-visible:text-primary-ink">
                         {r.title}
@@ -63,7 +73,7 @@ const afterTheWeek = [
                       <span class="mt-1 block text-body-sm leading-relaxed text-on-surface-variant text-pretty">
                         {r.blurb}
                       </span>
-                      <span class="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary-ink">
+                      <span class="resource-card__destination">
                         {r.linkLabel}
                         <Icon name="mdi:open-in-new" class="size-3.5" aria-hidden="true" />
                       </span>
@@ -78,10 +88,7 @@ const afterTheWeek = [
   </section>
 
   {/* AFTER THE WEEK */}
-  <section
-    class="container-page border-t border-outline-variant/15 py-16 md:py-24"
-    aria-labelledby="after"
-  >
+  <section class="container-page section" aria-labelledby="after">
     <div class="reveal max-w-3xl">
       <h2 id="after" class="text-headline-lg">After the week</h2>
       <p class="lede mt-4">What you noticed outlasts the week.</p>
@@ -89,9 +96,13 @@ const afterTheWeek = [
     <div class="reveal-stagger mt-10 grid gap-8 md:grid-cols-3">
       {
         afterTheWeek.map((item) => (
-          <div class="reveal border-t-2 border-outline pt-5">
+          <div class="reveal resource-next">
+            <Icon name={item.icon} class="resource-next__icon" aria-hidden="true" />
             <h3 class="text-title-lg">{item.title}</h3>
             <p class="mt-2 leading-relaxed text-on-surface-variant text-pretty">{item.body}</p>
+            <a href={item.href} class="resource-next__action body-link">
+              {item.action} <span aria-hidden="true">→</span>
+            </a>
           </div>
         ))
       }
@@ -108,3 +119,66 @@ const afterTheWeek = [
     </p>
   </section>
 </BaseLayout>
+
+<style>
+  .resource-heading {
+    margin-bottom: 1rem;
+  }
+  .resource-cards {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .resource-card {
+    display: block;
+    height: 100%;
+    padding: 1.25rem;
+    color: var(--color-on-surface);
+    background: var(--color-surface-container);
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    text-decoration: none;
+  }
+  .resource-card:hover,
+  .resource-card:focus-visible {
+    border-color: var(--color-primary);
+  }
+  .resource-card__destination {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary-ink);
+    overflow-wrap: anywhere;
+  }
+  .resource-card__destination :global(svg) {
+    flex: none;
+  }
+  .resource-next {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: var(--color-surface-container);
+    border-radius: 1rem;
+  }
+  .resource-next :global(.resource-next__icon) {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.55rem;
+    margin-bottom: 1rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 0.8rem;
+  }
+  .resource-next__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin-top: auto;
+    padding-top: 1rem;
+    font-weight: 600;
+  }
+</style>

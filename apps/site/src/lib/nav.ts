@@ -6,7 +6,7 @@ export const mainNav = [
   {
     href: '/how-it-works',
     label: 'How it works',
-    help: 'What the week is, and how to win.',
+    help: 'What the week is, and ways to get around.',
     icon: 'mdi:hand-heart-outline',
   },
   {
@@ -29,30 +29,29 @@ export const mainNav = [
   },
   {
     href: '/giveaway',
-    label: 'Win a bus pass',
-    help: 'Share a trip without the car to win a bus pass.',
+    label: '2026 giveaway',
+    help: 'The closed 2026 giveaway and its rules.',
     icon: 'mdi:gift-outline',
   },
   {
     href: '/partners',
     label: 'Partners',
-    help: 'Bring your group, school or workplace.',
+    help: 'Our 2026 partners and how to join us next year.',
     icon: 'mdi:account-group-outline',
   },
 ] as const;
 
 // The tab bar along the bottom of phones and tablets: the five things a
-// rider does during the week, one tap from any page. The last tab is
-// "Sign up" until this phone signs up, then "My week" (site-nav.js swaps
-// it, as it does every sign-up button).
+// rider can use year round, one tap from any page. My week opens sign-in
+// unless this phone is already signed in (site-nav.js uses its cookie).
 export const tabNav = [
   { href: '/', label: 'Home', icon: 'mdi:home-outline', match: ['/'] },
   { href: '/go', label: 'Plan', icon: 'mdi:map-marker-path', match: ['/go'] },
   { href: '/guides', label: 'Guides', icon: 'mdi:book-open-variant-outline', match: ['/guides'] },
   { href: '/bingo', label: 'Bingo', icon: 'mdi:grid', match: ['/bingo'] },
   {
-    href: '/sign-up',
-    label: 'Sign up',
+    href: '/my-week/link',
+    label: 'My week',
     icon: 'mdi:calendar-check-outline',
     match: ['/sign-up', '/my-week'],
     signup: true,

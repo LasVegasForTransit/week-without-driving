@@ -91,40 +91,46 @@ test('My week offers LVBT membership and other ways to help', async ({ page, con
   await expect(keepGoing.getByRole('button', { name: 'Join the newsletter' })).toBeHidden();
 });
 
-test('Home switches from campaign sign-up to staying involved at campaign close', async ({
+test('Home keeps the thank-you message even when the visitor’s clock is wrong', async ({
   page,
 }) => {
   await page.clock.setFixedTime(new Date(CLOSES.getTime() - 1));
   await page.goto('/');
-  await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
-  await expect(
-    page.locator('.home-final').getByRole('link', { name: 'Sign up to win' }),
-  ).toBeVisible();
-
-  await page.clock.setFixedTime(CLOSES);
-  await page.reload();
-  const button = page.getByRole('link', { name: 'Stay involved with LVBT' });
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Thanks for a great Week Without Driving.',
+  );
+  const button = page.getByRole('link', { name: 'Stay involved with LVBT', exact: true });
   await expect(button).toBeVisible();
-  await expect(
-    page.locator('.home-final').getByRole('link', { name: 'Sign up to win' }),
-  ).toBeHidden();
   await button.click();
   await expect(card(page, 'Stay involved with LVBT').getByRole('heading')).toBeFocused();
 });
 
-test('a signed-in visitor keeps their way back to My week after campaign close', async ({
+test('signed-in visitors see the thank-you message and can still open My week', async ({
   page,
   context,
 }) => {
   await page.clock.setFixedTime(CLOSES);
   await signIn(context, page);
   await page.goto('/');
-  await expect(page.locator('.home-hero__actions [data-signup-link]')).toBeVisible();
-  await expect(page.locator('.home-hero__actions [data-signup-link]')).toHaveAttribute(
-    'href',
-    '/my-week',
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Thanks for a great Week Without Driving.',
   );
-  await expect(page.getByRole('link', { name: 'Stay involved with LVBT' })).toBeHidden();
+  await expect(page.locator('.site-cta')).toHaveAttribute('href', '/my-week');
+  await expect(page.locator('.site-cta')).toContainText('My week');
+  await expect(
+    page.getByRole('link', { name: 'Stay involved with LVBT', exact: true }),
+  ).toBeVisible();
+});
+
+test('My week thanks returning participants after the campaign without promising a future draw', async ({
+  page,
+  context,
+}) => {
+  await signIn(context, page, { ...PARTICIPANT, today: 9 });
+  await page.goto('/my-week');
+  await expect(page.locator('[data-me-phase]')).toContainText('We’ll see you in 2027!');
+  await expect(page.locator('[data-trip-form]')).toBeHidden();
+  await expect(page.getByText('LVBT will draw one winner by October 15, 2026.')).toHaveCount(0);
 });
 
 test.describe('with JavaScript off', () => {

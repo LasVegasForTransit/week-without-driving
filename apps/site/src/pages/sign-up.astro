@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import { lvbt } from '../lib/site';
-import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
+import { wwd } from '../lib/wwd';
 
 // Sign up to win. Signing up makes someone eligible for LVBT's giveaway
 // (each logged trip is then an entry) and becomes their identity on
@@ -13,13 +13,14 @@ import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 // someone else" instead, for a volunteer signing people up one after
 // another on one tablet, and /modules/needs-connection.js dims "Sign up"
 // while the phone is offline.
-const title = 'Sign up to win · Week Without Driving Las Vegas';
-const description = `Sign up to win a 30-day RTC bus pass. Each day you log a trip without driving, ${WWD_DATE_RANGE}, is one more chance.`;
+const title = '2026 entries closed · Week Without Driving Las Vegas';
+const description =
+  'The 2026 giveaway closed October 8. Thank you for taking part. We’ll see you in 2027! Existing participants can still open My week.';
 ---
 
 <BaseLayout title={title} description={description}>
   <section class="signup container-page">
-    <div class="signup__intro" data-signup-intro>
+    <div class="signup__intro" data-signup-intro hidden>
       <p class="signup__prize">
         <Icon name="mdi:gift-outline" class="size-5" aria-hidden="true" />
         Win a 30-day RTC bus pass
@@ -41,8 +42,9 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
       </ol>
     </div>
 
-    <div data-signup-closed hidden class="signup__card">
+    <div data-signup-closed class="signup__card">
       <h1 class="signup__h2">Entries are closed.</h1>
+      <p class="mt-3">Thank you for taking part. We’ll see you in 2027!</p>
       <p class="mt-3">The last day to enter was October 8, 2026.</p>
       <p class="mt-3">
         Already signed up? <a href="/my-week/link" class="body-link">Email me a sign-in link</a> to open
@@ -74,7 +76,7 @@ const description = `Sign up to win a 30-day RTC bus pass. Each day you log a tr
       </p>
     </div>
 
-    <form data-signup-form class="signup__card" novalidate data-needs-connection="sign-up">
+    <form data-signup-form class="signup__card" novalidate data-needs-connection="sign-up" hidden>
       <p class="signup__ready" data-next-person tabindex="-1" hidden>
         Ready for the next person. The last sign-up is saved.
       </p>

@@ -2,80 +2,80 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import PhotoSlot from '../../components/PhotoSlot.astro';
-import Steps from '../../components/Steps.astro';
-import { mysteryPrize, prizes, winSteps } from '../../lib/campaign';
-import { wwd } from '../../lib/wwd';
+import { prizes } from '../../lib/campaign';
 
 // The giveaway: one eligible trip description per day on My week, with an
 // optional post, screenshot or registered Instagram tag.
 
-const title = 'Win a bus pass · Week Without Driving Las Vegas';
+const title = '2026 giveaway closed · Week Without Driving Las Vegas';
 const description =
-  'Describe a trip without driving each day, October 1 to 8, for a chance to win a 30-day RTC bus pass.';
+  'The 2026 Week Without Driving Las Vegas giveaway closed October 8. Thank you for taking part. Read the 2026 rules and stay involved with LVBT.';
 ---
 
 <BaseLayout {title} {description}>
   <PageHeader
-    title="Win a bus pass"
-    lede={`Each day from October 1 to 8 that you describe a trip without driving is one entry, up to ${wwd.maxEntries}. No post or purchase is needed.`}
+    title="The 2026 giveaway has closed."
+    lede="The last day to enter was October 8, 2026. Thank you to everyone who took part in Week Without Driving. We’ll see you in 2027!"
   >
     <div class="giveaway-cta">
-      <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link>
-        <span data-signup-label>Sign up to win</span>
-      </a>
+      <a href="/#stay-involved" class="btn btn--primary btn--big"> Stay involved with LVBT </a>
     </div>
   </PageHeader>
 
   {/* PRIZE */}
   <section class="container-page section" aria-labelledby="prizes-heading">
-    <h2 id="prizes-heading" class="section-title">Prizes</h2>
+    <h2 id="prizes-heading" class="section-title">The 2026 prize</h2>
     <ul class="section-body giveaway-prizes">
       {
-        [...prizes, mysteryPrize].map((prize) => (
+        prizes.map((prize) => (
           <li class="giveaway-prize">
             <PhotoSlot
               class="giveaway-prize__photo"
               shows={prize.photo}
               photo={prize.image}
               icon={prize.icon}
-              sizes="(min-width: 48rem) 36rem, 100vw"
+              sizes="(min-width: 48rem) 10rem, 6rem"
             />
             <div class="giveaway-prize__text">
               <h3 class="giveaway-prize__name">{prize.name}</h3>
               <p class="giveaway-prize__body">{prize.body}</p>
             </div>
+            {prize.image && (
+              <p class="giveaway-prize__credit">
+                Photo:{' '}
+                <a href={prize.image.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  {prize.image.credit}
+                </a>
+                {' · '}
+                {prize.image.licenseUrl ? (
+                  <a href={prize.image.licenseUrl} target="_blank" rel="noopener noreferrer">
+                    {prize.image.license}
+                  </a>
+                ) : (
+                  prize.image.license
+                )}
+              </p>
+            )}
           </li>
         ))
       }
     </ul>
   </section>
 
-  {/* HOW TO ENTER */}
-  <section class="container-page section scroll-mt-24" aria-labelledby="enter-heading">
-    <h2 id="enter-heading" class="section-title">How to enter</h2>
-    <Steps steps={winSteps} class="section-body" />
-    <p class="section-intro giveaway-note">
-      A post is optional. If you share one, you can add its link or screenshot on My week. If you
-      registered your Instagram handle and tag @lasvegasfortransit, we can count that trip for you.
-      Every entry is reviewed before the draw.
-    </p>
-  </section>
-
   {/* THE SHORT VERSION OF THE RULES */}
   <section class="container-page section" aria-labelledby="rules-heading">
-    <h2 id="rules-heading" class="section-title">The short version of the rules</h2>
+    <h2 id="rules-heading" class="section-title">How the 2026 giveaway worked</h2>
     <ul class="section-body giveaway-rules">
       <li>
-        The giveaway is open to residents of Clark, Esmeralda, Lincoln and Nye counties who are 13
+        The giveaway was open to residents of Clark, Esmeralda, Lincoln and Nye counties who were 13
         or older.
       </li>
-      <li>If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.</li>
+      <li>Entrants aged 13 to 17 needed a parent or guardian’s agreement to the Official Rules.</li>
       <li>
-        You get one entry for each day, October 1 to 8, that you describe a trip you took without
-        driving, for up to 8 entries.
+        Participants could earn one entry per day from October 1 to 8, 2026 by describing a trip
+        without driving, for up to 8 entries.
       </li>
-      <li>No purchase or social media post is necessary.</li>
-      <li>LVBT will draw one winner at random by October 15, 2026. Each entry has one chance.</li>
+      <li>No purchase or social media post was necessary.</li>
     </ul>
     <a href="/giveaway/rules" class="arrow-link giveaway-rules__link">Read the Official Rules</a>
   </section>
@@ -90,15 +90,38 @@ const description =
     gap: 1.25rem;
   }
   .giveaway-prize {
+    display: grid;
+    grid-template-columns: clamp(6rem, 22vw, 10rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    padding: 1rem;
+    max-width: 40rem;
     overflow: hidden;
     background: var(--color-surface-container);
     border-radius: 1rem;
   }
   .giveaway-prize :global(.giveaway-prize__photo) {
-    aspect-ratio: 16 / 9;
+    flex: none;
+    width: clamp(6rem, 22vw, 10rem);
+    aspect-ratio: 1;
+    border-radius: 0.75rem;
+  }
+  .giveaway-prize :global(.photo__credit) {
+    display: none;
+  }
+  .giveaway-prize__credit {
+    grid-column: 1 / -1;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  .giveaway-prize__credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
   .giveaway-prize__text {
-    padding: 1.1rem 1.25rem 1.35rem;
+    padding: 0;
   }
   .giveaway-prize__name {
     font-size: 1.3rem;
@@ -125,7 +148,7 @@ const description =
   }
   @media (min-width: 48rem) {
     .giveaway-prizes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
     }
   }
 </style>

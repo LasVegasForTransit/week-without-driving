@@ -32,7 +32,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </p>
     </div>
 
-    <form data-link-form class="getlink__card" novalidate data-needs-connection="get-link">
+    <form
+      data-link-form
+      class="getlink__card tool-panel"
+      novalidate
+      data-needs-connection="get-link"
+    >
       <div class="form-field">
         <label for="gl-contact" class="form-label">Email address</label>
         <input
@@ -61,7 +66,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <p class="form-error mt-3 text-center" data-link-status aria-live="polite"></p>
     </form>
 
-    <div data-link-sent hidden class="getlink__card" role="status">
+    <div data-link-sent hidden class="getlink__card tool-panel" role="status">
       <h2 class="getlink__h2">Check your email.</h2>
       <p class="mt-2">
         If that matches a sign-up and delivery is available, a link should arrive in a few minutes.
@@ -76,7 +81,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     </div>
 
     <p class="getlink__alt">
-      Haven’t signed up yet? <a href="/sign-up" class="arrow-link">Sign up to win</a>
+      The 2026 giveaway has closed. <a href="/#stay-involved" class="arrow-link"
+        >Stay involved with LVBT</a
+      >
     </p>
   </section>
 
@@ -97,9 +104,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   }
   .getlink__card {
     margin-top: 1.75rem;
-    padding: clamp(1.25rem, 4vw, 1.75rem);
-    background: var(--color-surface-container);
-    border-radius: 1.25rem;
   }
   form[data-turnstile-unavailable] {
     display: none !important;

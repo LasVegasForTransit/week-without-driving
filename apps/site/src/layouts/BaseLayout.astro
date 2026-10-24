@@ -100,7 +100,7 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
         <div class="container-page site-header__row">
           <a href="/" class="wordmark">
             <span class="wordmark__name">Week Without Driving</span>
-            <span class="wordmark__meta">Las Vegas · Oct 1–8, 2026</span>
+            <span class="wordmark__meta">Las Vegas, Nevada</span>
           </a>
           <nav aria-label="Main" class="site-topnav">
             <ul>
@@ -120,9 +120,9 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
             </ul>
           </nav>
           <div class="site-header__actions">
-            <a href="/sign-up" class="site-cta" data-signup-link>
-              <span class="site-cta__long" data-signup-label>Sign up to win</span>
-              <span class="site-cta__short" data-signup-label>Sign up</span>
+            <a href="/my-week/link" class="site-cta" data-signup-link>
+              <span class="site-cta__long" data-signup-label>My week</span>
+              <span class="site-cta__short" data-signup-label>My week</span>
             </a>
             <a
               href="#site-menu"
@@ -146,14 +146,14 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
       <div class="site-menu__head">
         <span class="wordmark" aria-hidden="true">
           <span class="wordmark__name">Week Without Driving</span>
-          <span class="wordmark__meta">Las Vegas · Oct 1–8, 2026</span>
+          <span class="wordmark__meta">Las Vegas, Nevada</span>
         </span>
         <button type="button" class="site-menu__close" data-menu-close aria-label="Close the menu">
           <Icon name="mdi:close" class="size-7" aria-hidden="true" />
         </button>
       </div>
-      <a href="/sign-up" class="site-menu__cta" data-signup-link>
-        <span data-signup-label>Sign up to win</span>
+      <a href="/my-week/link" class="site-menu__cta" data-signup-link>
+        <span data-signup-label>My week</span>
         <Icon name="mdi:arrow-right" class="size-6" aria-hidden="true" />
       </a>
       <ul class="site-menu__list">
@@ -181,67 +181,63 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
     </dialog>
     <footer id="site-footer" class="site-footer">
       <div class="container-page site-footer__inner">
-        <div class="footer-primary">
-          <div class="footer-brand">
-            <p class="footer-brand__date">Las Vegas · Oct 1–8, 2026</p>
-            <p class="footer-brand__name">Week Without Driving</p>
+        <a class="footer-identity" href={lvbt.url} data-print-url={lvbt.url}>
+          <img src="/brand/lvbt-logo-128.png" width="56" height="56" alt="" loading="lazy" />
+          <span>
+            <span class="footer-identity__eyebrow">An initiative by</span>
+            <span class="footer-identity__name">Las Vegans for<br />Better Transit</span>
+          </span>
+        </a>
+        <nav class="footer-utilities" aria-label="Footer">
+          <div>
+            <p class="footer-label">Explore</p>
+            <ul>
+              {
+                footerExploreLinks.map((link) => (
+                  <li>
+                    <a href={link.href}>{link.label}</a>
+                  </li>
+                ))
+              }
+              <li>
+                <a
+                  href="https://www.instagram.com/lvweekwithoutdriving/"
+                  aria-label="Week Without Driving on Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer">WWD Instagram</a
+                >
+              </li>
+            </ul>
           </div>
-          <nav class="footer-utilities" aria-label="Footer">
-            <div class="footer-group">
-              <h2>Explore</h2>
-              <ul>
-                {
-                  footerExploreLinks.map((link) => (
-                    <li>
-                      <a href={link.href}>{link.label}</a>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-            <div class="footer-group">
-              <h2>Stay connected</h2>
-              <ul>
-                <li>
-                  <a
-                    href={lvbt.instagramUrl}
-                    data-print-url={lvbt.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer">LVBT on Instagram</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="https://www.instagram.com/lvweekwithoutdriving/"
-                    data-print-url="https://www.instagram.com/lvweekwithoutdriving/"
-                    target="_blank"
-                    rel="noopener noreferrer">Week Without Driving on Instagram</a
-                  >
-                </li>
-                <li><a href="mailto:wwd@lasvegasfortransit.org">Email us</a></li>
-                <li><a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl}>Join LVBT</a></li>
-              </ul>
-            </div>
-            <div class="footer-group footer-group--details">
-              <h2>The details</h2>
-              <ul>
-                {
-                  footerDetailLinks.map((link) => (
-                    <li>
-                      <a href={link.href}>{link.label}</a>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
-          </nav>
-        </div>
+          <div>
+            <p class="footer-label">Connect</p>
+            <ul>
+              <li>
+                <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl}>Join LVBT</a>
+              </li>
+              <li><a href="mailto:wwd@lasvegasfortransit.org">Email us</a></li>
+              <li>
+                <a
+                  href={lvbt.instagramUrl}
+                  data-print-url={lvbt.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer">LVBT Instagram</a
+                >
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <ul class="footer-details">
+          {
+            footerDetailLinks.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
         <div class="footer-meta">
-          <p class="footer-mission">
-            An initiative by{' '}
-            <a href={lvbt.url} data-print-url={lvbt.url} class="body-link">{lvbt.name}</a>, a
-            501(c)(3) nonprofit (EIN {lvbt.ein}).
-          </p>
+          <p class="footer-mission">A 501(c)(3) nonprofit · EIN {lvbt.ein}</p>
           {/* Shown by /modules/app.js where installing is possible. */}
           <button type="button" class="install-button footer-install" data-install-button hidden>
             <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />

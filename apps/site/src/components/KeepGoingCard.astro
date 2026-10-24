@@ -187,4 +187,46 @@ const headingId = `${id}-heading`;
   .keep-going__member {
     min-height: 44px;
   }
+  /* On Home this card forms the right half of the farewell panel. */
+  .keep-going[data-source='home'] .keep-going__heading {
+    font-size: clamp(1.35rem, 4vw, 1.65rem);
+    color: inherit;
+  }
+  .keep-going[data-source='home'] .keep-going__text {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-on-slab-variant);
+  }
+  .keep-going[data-source='home'] .btn--primary {
+    color: var(--color-slab);
+    background: var(--color-on-slab);
+    min-height: 48px;
+    padding-inline: 1.5rem;
+    font-size: 1rem;
+  }
+  .keep-going[data-source='home'] .btn--primary:hover {
+    background: var(--color-on-slab-accent);
+  }
+  .keep-going[data-source='home'] .keep-going__more {
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--color-on-slab-variant);
+  }
+  .keep-going[data-source='home'] .body-link,
+  .keep-going[data-source='home'] .keep-going__other {
+    color: inherit;
+  }
+  .keep-going[data-source='home'] .keep-going__member {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .keep-going[data-source='home'] .keep-going__note {
+    color: var(--color-on-slab-variant);
+  }
+  .keep-going[data-source='home'] .keep-going__error {
+    color: var(--error-night);
+  }
 </style>

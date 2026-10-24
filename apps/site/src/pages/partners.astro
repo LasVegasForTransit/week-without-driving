@@ -9,13 +9,12 @@ import { partners, contactEmail, joinMailto } from '../lib/partners';
 // src/data/partners.ts; with none yet, the roster is left out entirely and
 // the page opens with "Bring your organization".
 //
-// After the week ends (12:00 am October 9, 2026, Las Vegas time, by the
-// phone's clock), /modules/partners.js swaps "Bring your organization" for
-// a note about next year. Without JavaScript the page keeps its
-// during-the-week text.
+// The ended message is visible without JavaScript; 2026 materials remain
+// available as an archive for partners following existing links.
 
 const title = 'Partners · Week Without Driving Las Vegas';
-const description = 'Meet the groups taking part and find materials to share.';
+const description =
+  'Thank you to our 2026 partners. Contact us to take part in Week Without Driving Las Vegas in 2027.';
 
 const weWantToHear = [
   'Disability and senior advocates',
@@ -37,13 +36,14 @@ const whatPartnersDo = [
 <BaseLayout title={title} description={description}>
   <div class="container-page page-header partners-page pb-16">
     <div class="partners-hero">
+      <Icon name="mdi:account-group-outline" class="partners-hero__icon" aria-hidden="true" />
       <h1 class="page-title">Partners</h1>
-      <p class="partners-hero__lede">
-        Meet local partners and find materials to share Week Without Driving.
+      <p class="page-lede partners-hero__lede">
+        Thank you to the organizations that joined us in 2026. We’ll see you in 2027!
       </p>
       <div class="partners-hero__actions">
-        <a href="#partner-kit" class="partners-hero__primary">Get materials</a>
-        <a href={joinMailto} class="partners-hero__secondary">Become a partner</a>
+        <a href={joinMailto} class="partners-hero__primary">Partner with us in 2027</a>
+        <a href="#partner-kit" class="partners-hero__secondary">About 2026 materials</a>
       </div>
     </div>
 
@@ -67,7 +67,14 @@ const whatPartnersDo = [
                   </h2>
                   <div class="partner-roster__mark">
                     {partner.logo && (
-                      <img class="partner-roster__logo" src={partner.logo} alt="" loading="lazy" />
+                      <img
+                        class="partner-roster__logo"
+                        src={partner.logo}
+                        width="160"
+                        height="96"
+                        alt=""
+                        loading="lazy"
+                      />
                     )}
                   </div>
                   <p class="partner-roster__type">{partner.type}</p>
@@ -84,7 +91,7 @@ const whatPartnersDo = [
       )
     }
 
-    <div class="section mt-12" data-partners-ended hidden>
+    <div class="section mt-12" data-partners-ended>
       <p class="section-intro">
         Week Without Driving 2026 has ended. Want to take part next year? Email <a
           href={`mailto:${contactEmail}`}
@@ -94,7 +101,7 @@ const whatPartnersDo = [
       </p>
     </div>
 
-    <div class="section mt-12 partners-join" data-partners-join>
+    <div class="section mt-12 partners-join" data-partners-join hidden>
       <h2 class="section-title">Bring your organization</h2>
       <p class="section-intro">Organizations of any size can join. There is no fee.</p>
 
@@ -155,66 +162,56 @@ const whatPartnersDo = [
 </BaseLayout>
 
 <style>
-  .partners-page {
-    padding-top: clamp(1.25rem, 2.5vw, 2rem);
-  }
   .partners-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 2rem;
-    padding: clamp(1.5rem, 4vw, 3rem);
-    border-top: 0.5rem solid var(--color-primary-warm);
-    border-radius: 0.75rem;
-    background: var(--color-slab);
-    color: var(--color-on-slab);
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.85rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    background: var(--color-surface-container);
+    border-radius: 1.25rem;
   }
-  .partners-hero .page-title {
-    max-width: 12ch;
+  .partners-hero :global(.partners-hero__icon) {
+    width: 3rem;
+    height: 3rem;
+    padding: 0.6rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 0.9rem;
   }
-  .partners-hero__lede {
-    grid-column: 1;
-    max-width: 42rem;
-    margin-top: 1rem;
-    font-size: var(--text-body-lg);
-    line-height: 1.45;
-    text-wrap: pretty;
+  .partners-hero__lede,
+  .partners-hero__actions {
+    grid-column: 1 / -1;
   }
   .partners-hero__actions {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: end;
-    gap: 0.75rem;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
   }
   .partners-hero__primary,
   .partners-hero__secondary {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-height: 2.75rem;
-    padding: 0.65rem 1rem;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .partners-hero__primary,
-  .partners-hero__secondary {
-    border-radius: 0.5rem;
+    min-height: 44px;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
   .partners-hero__primary {
-    background: var(--color-primary-warm);
-    color: var(--color-on-primary-warm);
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    text-decoration: none;
+  }
+  .partners-hero__primary:hover {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
   }
   .partners-hero__secondary {
-    border: 2px solid currentcolor;
-    color: var(--color-on-slab);
-  }
-  .partners-hero__primary:hover,
-  .partners-hero__primary:focus-visible,
-  .partners-hero__secondary:hover,
-  .partners-hero__secondary:focus-visible {
-    outline: 3px solid var(--color-on-slab);
-    outline-offset: 3px;
+    color: var(--color-primary-ink);
+    text-underline-offset: 0.2em;
   }
   .partners-join {
     padding: clamp(1.25rem, 3vw, 2.5rem);
@@ -266,7 +263,7 @@ const whatPartnersDo = [
     margin-top: 1.5rem;
   }
   .partner-roster-section {
-    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: 2.5rem;
   }
   .partner-roster {
     display: grid;
@@ -324,7 +321,11 @@ const whatPartnersDo = [
     align-items: center;
     justify-content: center;
     min-height: 8rem;
-    margin-top: 1rem;
+    max-width: 14rem;
+    margin: 1rem auto 0;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--sand);
   }
   .partner-roster__logo {
     display: block;
@@ -351,18 +352,6 @@ const whatPartnersDo = [
     color: var(--color-on-surface-variant);
   }
   @media (max-width: 47.999rem) {
-    .partners-page {
-      padding-top: 0;
-    }
-    .partners-hero {
-      display: block;
-      margin-inline: calc(-1 * var(--page-pad));
-      padding-inline: var(--page-pad);
-      border-radius: 0;
-    }
-    .partners-hero__actions {
-      margin-top: 1.5rem;
-    }
     .partners-join__card,
     .partners-join__contact {
       padding: 1.25rem 0 0;

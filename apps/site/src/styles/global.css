@@ -1105,161 +1105,114 @@ body[data-canvas='dark'] [data-site-header]:not([data-stuck]):not([data-nav-open
   }
 
   .site-footer {
-    border-top: 5px solid var(--color-primary);
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 16%, transparent);
     background: var(--color-surface-container);
   }
-
   .site-footer__inner {
-    padding-block: clamp(2.75rem, 6vw, 4.5rem) 1.5rem;
-  }
-
-  .footer-primary {
     display: grid;
-    gap: clamp(2.25rem, 5vw, 4rem);
+    gap: 1.75rem;
+    padding-block: 2rem 1.5rem;
   }
-
-  .footer-brand__date {
-    margin-bottom: 0.75rem;
-    color: var(--color-primary-ink);
-    font-size: var(--text-body-sm);
-    font-weight: 700;
+  .footer-identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: fit-content;
+    color: var(--color-on-surface);
+    text-decoration: none;
   }
-
-  .footer-brand__name {
-    max-width: 12ch;
-    font-size: clamp(2rem, 4vw, 3.25rem);
-    font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 1.03;
-    text-wrap: balance;
+  .footer-identity img {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    padding: 4px;
+    border-radius: 4px;
+    background: var(--sand);
   }
-
+  .footer-identity__eyebrow {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--color-on-surface-variant);
+  }
+  .footer-identity__name {
+    display: block;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
   .footer-utilities {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 1.75rem 1.25rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
   }
-
-  .footer-group--details {
-    grid-column: 1 / -1;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-outline-variant);
-  }
-
-  .footer-group h2 {
-    margin-bottom: 0.65rem;
+  .footer-label {
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
     color: var(--color-on-surface-variant);
-    font-size: var(--text-body-sm);
-    font-weight: 700;
   }
-
-  .footer-group ul {
-    display: grid;
-    gap: 0.1rem;
-  }
-
-  .footer-group--details ul {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.25rem;
-  }
-
-  .footer-group a {
-    display: inline-block;
-    min-height: 2.75rem;
-    padding-block: 0.6rem;
+  .footer-utilities a {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    min-height: 44px;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: var(--color-on-surface);
-    font-size: var(--text-body-md);
-    font-weight: 650;
-    line-height: 1.25;
-    text-decoration-color: transparent;
-    text-decoration-thickness: 0.1em;
-    text-underline-offset: 0.2em;
-    transition:
-      color 160ms var(--ease-out),
-      text-decoration-color 160ms var(--ease-out);
+    text-decoration: none;
   }
-
-  .footer-group a:hover,
-  .footer-group a:focus-visible {
-    color: var(--color-primary-ink);
+  .footer-utilities a:hover,
+  .footer-identity:hover .footer-identity__name,
+  .footer-details a:hover {
     text-decoration: underline;
-    text-decoration-color: currentColor;
+    text-underline-offset: 0.22em;
   }
-
+  .footer-details {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 18%, transparent);
+  }
+  .footer-details a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.8rem;
+    color: var(--color-on-surface-variant);
+    text-decoration: none;
+  }
   .footer-meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem 2rem;
-    margin-top: clamp(2.5rem, 5vw, 4rem);
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--color-outline-variant);
+    gap: 1rem;
+    margin-top: -1.5rem;
   }
-
   .footer-mission {
-    max-width: 68ch;
-    color: var(--color-on-surface-variant);
-    font-size: var(--text-body-sm);
+    font-size: 0.75rem;
     line-height: 1.6;
+    color: var(--color-on-surface-variant);
   }
-
   .footer-install {
     flex: none;
   }
-
-  /* On phones the tab bar does the navigating, so the footer is a short
-     list of links: no second wordmark, and each group's links run across
-     the line instead of down it. */
-  @media (max-width: 47.99rem) {
-    .site-footer__inner {
-      padding-block: 1.75rem 1.25rem;
-    }
-    .footer-brand {
-      display: none;
-    }
-    .footer-utilities {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 1rem;
-    }
-    .footer-group h2 {
-      margin-bottom: 0.1rem;
-    }
-    .footer-group ul,
-    .footer-group--details ul {
-      display: flex;
-      flex-wrap: wrap;
-      column-gap: 1.25rem;
-    }
-    .footer-group--details {
-      padding-top: 1rem;
-    }
-    .footer-meta {
-      margin-top: 1.25rem;
-    }
-  }
-
   @media (min-width: 48rem) {
-    .footer-utilities {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.5rem;
+    .site-footer__inner {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 4rem;
+      padding-block: 3rem 2rem;
     }
-
-    .footer-group--details {
-      grid-column: auto;
-      padding-top: 0;
-      border-top: 0;
+    .footer-details,
+    .footer-meta {
+      grid-column: 1 / -1;
     }
-
-    .footer-group--details ul {
-      grid-template-columns: none;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .footer-primary {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-      align-items: start;
+    .footer-identity {
+      align-self: start;
     }
   }
 
@@ -1492,11 +1445,10 @@ body {
     white-space: nowrap;
   }
   .wordmark__meta {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-primary-ink);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--color-on-surface-variant);
     white-space: nowrap;
   }
 
@@ -1705,7 +1657,7 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--color-surface);
     border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
-    box-shadow: 0 -6px 20px -14px rgb(0 0 0 / 0.35);
+    box-shadow: 0 -4px 24px -16px rgb(67 26 40 / 0.25);
     /* Comes back a moment after a text field loses focus, so a tap that
        started on the page (and closed the keyboard) never lands on a tab. */
     transition: visibility 0s linear 0.4s;
@@ -2069,6 +2021,21 @@ body {
    left edges line up from page to page. Layered, so a page can still
    refine them with its own scoped styles. ---- */
 @layer components {
+  .tool-panel {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    background: var(--color-surface-container);
+    border: 1px solid color-mix(in srgb, var(--color-on-surface) 20%, transparent);
+    border-radius: 1.25rem;
+  }
+  .tool-panel .form-label {
+    font-size: 1rem;
+  }
+  .tool-panel .form-input {
+    min-height: 52px;
+    font-size: 1rem;
+    border-width: 1px;
+    border-radius: 0.5rem;
+  }
   .page-header {
     padding-block: clamp(2.25rem, 6vw, 4rem) clamp(1.5rem, 4vw, 2.5rem);
   }
@@ -2082,16 +2049,16 @@ body {
   }
   .page-title {
     max-width: 22ch;
-    font-size: clamp(2.3rem, 6.5vw, 3.5rem);
-    line-height: 1.02;
+    font-size: clamp(2.15rem, 6.5vw, 3.5rem);
+    line-height: 1.08;
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
   .page-lede {
     max-width: 38rem;
     margin-top: 0.9rem;
-    font-size: clamp(1.1rem, 3.5vw, 1.25rem);
-    line-height: 1.5;
+    font-size: clamp(1.0625rem, 3.5vw, 1.25rem);
+    line-height: 1.6;
     color: var(--color-on-surface-variant);
     text-wrap: pretty;
   }
@@ -2127,6 +2094,27 @@ body {
 @layer components {
   .page-top {
     padding-block: clamp(2.25rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+  }
+  @media (max-width: 47.99rem) {
+    .page-header,
+    .page-top {
+      padding-top: 1.75rem;
+    }
+    .page-title {
+      font-size: 2rem;
+      line-height: 1.12;
+    }
+    .page-lede {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .section {
+      padding-block: 2rem;
+    }
+    .section-title {
+      font-size: 1.6rem;
+      line-height: 1.2;
+    }
   }
   /* Long reading pages (Privacy, Terms, Official Rules): the same left
      edge as every other page, with lines kept to a readable length. */

@@ -102,7 +102,7 @@ function showClosed(today) {
   const text =
     today === 0
       ? 'Sharing trips opens October 1.'
-      : 'The week is over. LVBT will draw one winner by October 15, 2026.';
+      : 'The 2026 week has ended. Thank you for taking part. We’ll see you in 2027!';
   setText('[data-me-phase]', text);
   const closed = document.querySelector('[data-log-closed]');
   if (closed) {
@@ -156,7 +156,7 @@ function renderEntries() {
   setText(
     '[data-me-progress-line]',
     count === 0
-      ? 'Your eight days start October 1. Each day you describe a trip can be one entry.'
+      ? 'No trips logged for October 1–8, 2026.'
       : `${count} ${count === 1 ? 'day' : 'days'} with a trip logged. One entry can count for each day after volunteer review.`,
   );
   const progress = document.querySelector('[data-me-progress]');
