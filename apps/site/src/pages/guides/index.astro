@@ -6,7 +6,6 @@
 // change when a guide's copy does.
 import { Icon } from 'astro-icon/components';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import WinBand from '../../components/WinBand.astro';
 import { getSortedGuides } from '../../lib/guides';
 
 const guides = await getSortedGuides();
@@ -19,21 +18,14 @@ const description =
     <h1 id="guides-heading" class="page-title">Rider guides</h1>
     <p class="page-lede">{description}</p>
 
-    <ul class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <ul class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {
         guides.map((guide) => (
           <li class="reveal">
-            <a
-              href={`/guides/${guide.id}`}
-              class="group flex h-full flex-col gap-3 border border-outline bg-surface-container p-6 no-underline transition-colors hover:border-primary focus-visible:border-primary"
-            >
-              <Icon name={guide.data.icon} class="size-8 text-primary-ink" aria-hidden="true" />
-              <h2 class="text-title-lg text-on-surface group-hover:text-primary-ink group-focus-visible:text-primary-ink">
-                {guide.data.title}
-              </h2>
-              <p class="text-body-sm leading-relaxed text-on-surface-variant text-pretty">
-                {guide.data.cardSummary}
-              </p>
+            <a href={`/guides/${guide.id}`} class="guide-link group">
+              <Icon name={guide.data.icon} class="guide-link__icon" aria-hidden="true" />
+              <h2 class="guide-link__title">{guide.data.title}</h2>
+              <p class="guide-link__summary">{guide.data.cardSummary}</p>
             </a>
           </li>
         ))
@@ -46,5 +38,68 @@ const description =
       </a>
     </p>
   </section>
-  <WinBand />
 </BaseLayout>
+
+<style>
+  .guide-link {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    gap: 0.4rem 1rem;
+    height: 100%;
+    padding: 1.25rem;
+    color: var(--color-on-surface);
+    background: var(--color-surface-container);
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    text-decoration: none;
+    transition:
+      border-color 160ms var(--ease-out),
+      background-color 160ms var(--ease-out);
+  }
+  .guide-link:hover,
+  .guide-link:focus-visible {
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+  }
+  .guide-link :global(.guide-link__icon) {
+    grid-row: 1 / span 2;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.55rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 0.8rem;
+  }
+  .guide-link__title {
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+  .guide-link:hover .guide-link__title {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .guide-link__summary {
+    grid-column: 2;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
+  @media (min-width: 48rem) {
+    .guide-link {
+      grid-template-columns: 1fr;
+      align-content: start;
+      row-gap: 0.75rem;
+      padding: 1.5rem;
+    }
+    .guide-link :global(.guide-link__icon) {
+      grid-row: auto;
+      margin-bottom: 0.25rem;
+    }
+    .guide-link__summary {
+      grid-column: auto;
+    }
+    .guide-link__title {
+      font-size: 1.35rem;
+    }
+  }
+</style>

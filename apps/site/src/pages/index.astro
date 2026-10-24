@@ -3,35 +3,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { Icon } from 'astro-icon/components';
 import PhotoSlot from '../components/PhotoSlot.astro';
-import Steps from '../components/Steps.astro';
 import { photos } from '../lib/photos';
 import { lvbt, site } from '../lib/site';
 import { wwd } from '../lib/wwd';
-import { days, mysteryPrize, prizes, proclamations } from '../lib/campaign';
+import { days, proclamations } from '../lib/campaign';
 import { partners } from '../lib/partners';
 import KeepGoingCard from '../components/KeepGoingCard.astro';
 import { STAY_INVOLVED } from '../lib/newsletter';
 
-// The Home page, for someone who has five seconds: what the week is, when
-// it is, and one button. Below that, the three steps, why it matters, the
-// prizes, the daily Instagram hosts, the partners and the local leaders.
-// Hosts, partners and proclamations fill in from src/lib/campaign.ts and
-// src/data/partners.ts as LVBT confirms them.
-
 const dateRange = `October 1 to 8, ${wwd.year}`;
 const canonical = `${site.url}/`;
 
-const description = `Try getting around Las Vegas without driving, ${dateRange}. Anyone can take part. Sign up for a chance to win a 30-day RTC bus pass.`;
+const description = site.description;
 
 const eventSchema = {
   '@context': 'https://schema.org',
   '@type': 'SocialEvent',
   '@id': `${canonical}#event`,
   name: `Week Without Driving ${wwd.year} in Las Vegas`,
-  description,
+  description: `Week Without Driving brought Las Vegans together to get around without driving, ${dateRange}.`,
   startDate: wwd.startDate,
   endDate: wwd.endDate,
-  eventStatus: 'https://schema.org/EventScheduled',
   eventAttendanceMode: 'https://schema.org/MixedEventAttendanceMode',
   location: {
     '@type': 'Place',
@@ -54,32 +46,6 @@ const eventSchema = {
   mainEntityOfPage: canonical,
 };
 
-// The three steps, drawn as stops on a bus line because they happen in
-// this order.
-const steps = [
-  {
-    icon: 'mdi:account-plus-outline',
-    title: 'Sign up',
-    body: 'Use your first name, email address, ZIP code and county.',
-    cta: 'Sign up to win',
-    href: '/sign-up',
-  },
-  {
-    icon: 'mdi:bus',
-    title: 'Make the trip',
-    body: 'Take the bus, walk, roll, bike or get a ride. We’ll help you plan it.',
-    cta: 'Plan a trip',
-    href: '/go',
-  },
-  {
-    icon: 'mdi:calendar-check-outline',
-    title: 'Tell us about your trip',
-    body: 'Describe it on My week. A post or photo is optional. One entry per day.',
-    cta: 'See the prize',
-    href: '/giveaway',
-  },
-] as const;
-
 // Sections for content LVBT confirms over time (daily hosts, partners,
 // proclamations) show only once there is something real to show.
 const hasHosts = days.some((d) => d.host !== null);
@@ -90,7 +56,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
 )}`;
 ---
 
-<BaseLayout title={`${site.name} · ${dateRange}`} description={description}>
+<BaseLayout title={`${site.name} · See you in 2027`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
   {/* Old one-page links like /#giveaway: runs before the page shows, so it can't wait. */}
   <script is:inline slot="head" src="/scripts/old-links.js"></script>
@@ -108,38 +74,19 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     <div class="container-page home-hero__content">
       <p class="home-hero__when">
         <Icon name="mdi:calendar-blank" class="size-5" aria-hidden="true" />
-        October 1–8, {wwd.year} · Las Vegas
+        2026 wrapped up · Las Vegas
       </p>
-      <h1 id="hero-heading" class="home-hero__title">Try a week without driving.</h1>
+      <h1 id="hero-heading" class="home-hero__title">Thanks for a great Week Without Driving.</h1>
       <p class="home-hero__sub">
-        Take the bus, walk, bike or get a ride. Anyone can take part. Sign up for a chance to win a
-        30-day RTC bus pass.
-      </p>
-      {/* From October 9, /modules/keep-going.js swaps "Sign up to win" for these. */}
-      <p class="home-hero__sub home-hero__ended" data-home-closed hidden>
-        Week Without Driving 2026 has ended. Thanks to everyone who took part.
+        Our 2026 week has wrapped up. Thank you to everyone who took the bus, walked, rolled, biked
+        or shared a ride. We’ll see you in 2027!
       </p>
       <div class="home-hero__actions">
-        <a href="/sign-up" class="btn btn--primary btn--big" data-signup-link data-home-open>
-          <span data-signup-label>Sign up to win</span>
-        </a>
-        <a
-          href="#stay-involved"
-          class="btn btn--primary btn--big"
-          data-home-closed
-          data-stay-involved-link
-          hidden>Stay involved with LVBT</a
+        <a href="#stay-involved" class="btn btn--primary btn--big" data-stay-involved-link
+          >Stay involved with LVBT</a
         >
-        <a href="#how" class="btn btn--ghost">How it works</a>
+        <a href="/guides" class="btn btn--ghost">Read the rider guides</a>
       </div>
-    </div>
-  </section>
-
-  {/* HOW IT WORKS: three stops on one line. */}
-  <section id="how" class="home-section scroll-mt-20" aria-labelledby="how-heading">
-    <div class="container-page">
-      <h2 id="how-heading" class="home-h2">How it works</h2>
-      <Steps steps={steps} class="section-body" />
     </div>
   </section>
 
@@ -155,7 +102,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
           They’re kids and grandparents. They’re people with disabilities, and neighbors who can’t
           afford a car.
         </p>
-        <p><strong>For one week, get around Las Vegas the way they do.</strong></p>
+        <p><strong>The week is over. The need for better ways to get around isn’t.</strong></p>
         <a
           href="https://weekwithoutdriving.org/resource/"
           class="home-link"
@@ -167,53 +114,16 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     </div>
   </section>
 
-  {/* PRIZES */}
-  <section class="home-section" aria-labelledby="prizes-heading">
-    <div class="container-page home-prizes">
-      <div>
-        <h2 id="prizes-heading" class="home-h2">Tell us about your trip. Enter to win.</h2>
-        <p class="home-intro">
-          Each day from October 1 to 8 that you describe a trip without driving on My week is one
-          entry, up to{' '}
-          {wwd.maxEntries}. No purchase or social media post is needed.
-        </p>
-        <div class="home-actions">
-          <a href="/sign-up" class="btn btn--primary" data-signup-link>
-            <span data-signup-label>Sign up to win</span>
-          </a>
-          <a href="/giveaway" class="btn btn--outline">How to win</a>
-        </div>
-      </div>
-      <ul class="home-prizes__list">
-        {
-          [...prizes, mysteryPrize].map((p) => (
-            <li class="home-prize">
-              <PhotoSlot
-                class="home-prize__photo"
-                shows={p.photo}
-                photo={p.image}
-                icon={p.icon}
-                sizes="(min-width: 64rem) 25vw, calc(50vw - 2rem)"
-              />
-              <h3 class="home-prize__name">{p.name}</h3>
-              <p class="home-prize__body">{p.body}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
   {/* EVERY DAY: who hosts our Instagram each day, once hosts are confirmed. */}
   {
     hasHosts && (
       <section class="home-days" aria-labelledby="days-heading">
         <div class="container-page">
           <h2 id="days-heading" class="home-h2">
-            Follow along every day
+            A look back at the week
           </h2>
           <p class="home-intro">
-            Each day, a different Las Vegan takes over our Instagram and shows how they got around.
+            During the week, Las Vegans shared how they got around on our Instagram.
           </p>
           <ol class="home-days__list">
             {days.map((d) => (
@@ -239,7 +149,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   <section class="home-section home-partners" aria-labelledby="partners-heading">
     <div class="container-page">
       <h2 id="partners-heading" class="home-h2">Partners</h2>
-      <p class="home-intro">Meet the groups taking part in Week Without Driving.</p>
+      <p class="home-intro">
+        Thank you to the organizations that joined us for Week Without Driving 2026.
+      </p>
       {
         partners.length > 0 && (
           <ul
@@ -271,7 +183,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       <p class="home-intro">
         {
           issued.length > 0
-            ? 'Cities and the county recognizing October 1–8 as Week Without Driving.'
+            ? 'Cities and the county that recognized October 1–8, 2026 as Week Without Driving.'
             : 'Elected leaders across the country spend the week without driving to see their city the way their constituents do.'
         }
       </p>
@@ -301,44 +213,38 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
         </blockquote>
         <div>
           <p class="home-leader-ask__q">Are you an elected leader or a public agency?</p>
-          <a href={leaderMailto} class="home-link">Take the challenge with your staff</a>
+          <a href={leaderMailto} class="home-link">Talk with us about 2027</a>
         </div>
       </div>
     </div>
   </section>
 
-  {/* STAY INVOLVED: from October 9, in place of the last call to sign up. */}
-  <section class="home-section" data-home-closed hidden>
+  <section class="home-farewell" aria-labelledby="farewell-heading">
     <div class="container-page">
-      <KeepGoingCard
-        id="stay-involved"
-        heading={STAY_INVOLVED.heading}
-        text={STAY_INVOLVED.text}
-        source="home"
-      />
-    </div>
-  </section>
-
-  {/* LAST CALL */}
-  <section class="home-final" aria-labelledby="final-heading">
-    <div class="container-page home-final__inner">
-      <h2 id="final-heading" class="home-final__title" data-home-open>Try it this October.</h2>
-      <a href="/sign-up" class="btn btn--light btn--big" data-signup-link data-home-open>
-        <span data-signup-label>Sign up to win</span>
-      </a>
-      <p class="home-final__help">
-        Questions? Email <a href="mailto:wwd@lasvegasfortransit.org">wwd@lasvegasfortransit.org</a>
-      </p>
+      <div class="home-farewell__panel">
+        <div class="home-farewell__intro">
+          <p class="home-farewell__note">Thank you, Las Vegas.</p>
+          <h2 id="farewell-heading" class="home-farewell__title">See you in <span>2027.</span></h2>
+          <a href="/go" class="home-farewell__trip"
+            >Plan your next trip <span aria-hidden="true">↗</span></a
+          >
+        </div>
+        <KeepGoingCard
+          id="stay-involved"
+          heading={STAY_INVOLVED.heading}
+          text={STAY_INVOLVED.text}
+          source="home"
+        />
+        <p class="home-farewell__contact">
+          Questions? <a href="mailto:wwd@lasvegasfortransit.org">wwd@lasvegasfortransit.org</a>
+        </p>
+      </div>
     </div>
   </section>
   <script is:inline type="module" src="/modules/keep-going.js"></script>
 </BaseLayout>
 
 <style>
-  [data-home-closed][hidden],
-  [data-home-open][hidden] {
-    display: none;
-  }
   .btn--ghost {
     color: #fff;
     border: 2px solid rgb(255 255 255 / 0.85);
@@ -347,15 +253,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .btn--ghost:focus-visible {
     background: #fff;
     color: #111;
-  }
-  .btn--light {
-    color: var(--color-primary);
-    background: var(--color-on-primary);
-  }
-  .btn--light:hover,
-  .btn--light:focus-visible {
-    color: var(--color-on-primary-container);
-    background: var(--color-primary-container);
   }
   .home-link {
     display: inline-flex;
@@ -423,8 +320,8 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
   .home-hero__title {
     margin-top: 1rem;
-    max-width: 14ch;
-    font-size: clamp(2.6rem, 10vw, 5rem);
+    max-width: 18ch;
+    font-size: clamp(2.6rem, 8vw, 4.5rem);
     line-height: 1;
     letter-spacing: -0.02em;
     text-wrap: balance;
@@ -505,31 +402,6 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   }
   .home-why .home-link {
     color: var(--color-on-slab);
-  }
-
-  /* Prizes */
-  .home-prizes {
-    display: grid;
-    gap: 2rem;
-  }
-  .home-prizes__list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-  .home-prize :global(.home-prize__photo) {
-    aspect-ratio: 1;
-    border-radius: 0.75rem;
-  }
-  .home-prize__name {
-    margin-top: 0.75rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  .home-prize__body {
-    margin-top: 0.25rem;
-    color: var(--color-on-surface-variant);
   }
 
   /* Every day */
@@ -733,27 +605,94 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     margin-top: 0.4rem;
   }
 
-  /* Last call */
-  .home-final {
-    padding-block: clamp(3.5rem, 9vw, 5.5rem);
-    color: var(--color-on-primary);
-    background: var(--color-primary);
+  .home-farewell {
+    padding-block: 1rem clamp(2.5rem, 6vw, 5rem);
   }
-  .home-final__inner {
-    display: flex;
-    flex-direction: column;
+  .home-farewell__panel {
+    display: grid;
+    gap: 2rem;
+    padding: clamp(1.5rem, 5vw, 3.5rem);
+    color: var(--color-on-slab);
+    background: var(--color-slab);
+    border-radius: 1.5rem;
+  }
+  .home-farewell__note {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-on-slab-variant);
+  }
+  .home-farewell__title {
+    scroll-margin-top: 6rem;
+    max-width: 12ch;
+    font-size: clamp(2.75rem, 9vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .home-farewell__title span {
+    color: var(--color-on-slab-accent);
+  }
+  .home-farewell__trip {
+    display: inline-flex;
     align-items: center;
-    gap: 1.25rem;
-    text-align: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
   }
-  .home-final__title {
-    font-size: clamp(2.2rem, 8vw, 3.5rem);
-    line-height: 1.05;
+  .home-farewell__contact {
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-on-slab) 22%, transparent);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-on-slab-variant);
+    overflow-wrap: anywhere;
   }
-  .home-final__help a {
-    font-weight: 700;
+  .home-farewell__contact a {
     color: inherit;
     text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  @media (min-width: 48rem) {
+    .home-farewell__panel {
+      grid-template-columns: 1fr 1fr;
+      column-gap: clamp(2rem, 6vw, 5rem);
+    }
+    .home-farewell__contact {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .home-section,
+    .home-leaders,
+    .home-why {
+      padding-block: 2.75rem;
+    }
+    .home-hero__content {
+      padding-block: 2.5rem;
+    }
+    .home-hero__title {
+      font-size: clamp(2.5rem, 9.5vw, 4.5rem);
+      line-height: 1.05;
+    }
+    .home-hero__sub {
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    .home-hero__actions {
+      gap: 0.625rem;
+    }
+    .home-hero__actions .btn {
+      min-height: 52px;
+      padding-inline: 1.25rem;
+      font-size: 1rem;
+    }
+    .home-intro {
+      font-size: 1.0625rem;
+    }
   }
 
   @media (min-width: 48rem) {
@@ -770,13 +709,9 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     .home-hero {
       min-height: 40rem;
     }
-    .home-why__grid,
-    .home-prizes {
+    .home-why__grid {
       grid-template-columns: 1fr 1fr;
       column-gap: 4rem;
-    }
-    .home-prizes {
-      align-items: center;
     }
     .home-split {
       grid-template-columns: 1fr auto;

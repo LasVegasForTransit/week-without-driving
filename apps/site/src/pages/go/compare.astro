@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <BaseLayout
@@ -7,14 +8,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   description="Compare driving with a bus, walk, bike, or scooter trip."
 >
   <div class="container-page page-top compare-page">
-    <a href="/go" class="body-link">← Plan a trip</a>
+    <a href="/go" class="page-eyebrow body-link">← Plan a trip</a>
     <header class="compare-intro">
-      <p class="compare-eyebrow">PLAN A TRIP</p>
       <h1 class="page-title">What if you left the car?</h1>
       <p class="page-lede">Pick where you’re going. See two ways to get there.</p>
     </header>
 
-    <form data-compare-form class="compare-form" novalidate>
+    <form data-compare-form class="compare-form tool-panel" novalidate>
       <div class="compare-fields">
         <label
           >Starting place
@@ -49,10 +49,26 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <fieldset class="compare-modes">
         <legend>Go without driving by</legend>
         <div class="compare-mode-choices">
-          <label><input name="mode" type="radio" value="bus" checked /><span>Bus</span></label>
-          <label><input name="mode" type="radio" value="walk" /><span>Walk</span></label>
-          <label><input name="mode" type="radio" value="bike" /><span>Bike</span></label>
-          <label><input name="mode" type="radio" value="scooter" /><span>Scooter</span></label>
+          <label
+            ><input name="mode" type="radio" value="bus" checked /><span
+              ><Icon name="mdi:bus" aria-hidden="true" />Bus</span
+            ></label
+          >
+          <label
+            ><input name="mode" type="radio" value="walk" /><span
+              ><Icon name="mdi:walk" aria-hidden="true" />Walk</span
+            ></label
+          >
+          <label
+            ><input name="mode" type="radio" value="bike" /><span
+              ><Icon name="mdi:bike" aria-hidden="true" />Bike</span
+            ></label
+          >
+          <label
+            ><input name="mode" type="radio" value="scooter" /><span
+              ><Icon name="mdi:scooter" aria-hidden="true" />Scooter</span
+            ></label
+          >
         </div>
       </fieldset>
       <label class="compare-purpose"
@@ -91,7 +107,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </div>
       <div class="compare-next" data-compare-next hidden>
         <a data-save-plan href="/my-week/plan/where" class="btn btn--primary">Save to My week</a>
-        <p>A plan is not a giveaway entry. After your trip, describe what you did in My week.</p>
+        <p>The 2026 giveaway has closed. You can still compare ways to get around.</p>
       </div>
     </div>
 
@@ -186,9 +202,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     padding-bottom: 5rem;
   }
   .compare-intro {
-    margin: 1.25rem 0 2rem;
+    margin: 0 0 1.75rem;
   }
-  .compare-eyebrow,
   .compare-card__eyebrow {
     color: var(--color-primary);
     font-size: 0.75rem;
@@ -196,10 +211,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     letter-spacing: 0.14em;
   }
   .compare-form {
-    padding: clamp(1.25rem, 3vw, 2rem);
-    background: var(--color-surface-container);
-    border: 1px solid var(--color-outline-variant);
-    border-top: 8px solid var(--color-primary);
     margin-bottom: 2rem;
   }
   .compare-fields {
@@ -219,10 +230,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     width: 100%;
     min-height: 3rem;
     border: 1px solid var(--color-outline);
-    background: var(--color-surface);
+    background: var(--color-field);
     color: var(--color-on-surface);
     padding: 0.65rem 0.8rem;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
+    min-width: 0;
+    font-size: 1rem;
+  }
+  .compare-fields input:is([type='date'], [type='time']) {
+    padding-inline: 0.5rem;
+    font-size: 0.95rem;
   }
   .compare-modes {
     margin: 1.5rem 0 1rem;
@@ -244,13 +261,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     opacity: 0;
   }
   .compare-mode-choices span {
-    display: block;
-    min-width: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    min-height: 44px;
     text-align: center;
     padding: 0.7rem 1rem;
-    border: 2px solid var(--color-outline);
-    font-weight: 800;
+    border: 1px solid var(--color-outline);
+    border-radius: 0.5rem;
+    font-weight: 600;
     cursor: pointer;
+  }
+  .compare-mode-choices :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
   }
   .compare-mode-choices input:checked + span {
     background: var(--color-primary);
@@ -262,6 +288,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     outline-offset: 3px;
   }
   .compare-purpose {
+    min-height: 44px;
     display: flex;
     gap: 0.6rem;
     align-items: center;
@@ -291,8 +318,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     gap: 1rem;
   }
   .compare-card {
+    border-radius: 1rem;
     padding: clamp(1.25rem, 3vw, 2rem);
-    border: 2px solid var(--color-outline);
+    border: 1px solid var(--color-outline);
     background: var(--color-surface);
     min-width: 0;
   }
@@ -422,13 +450,32 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   .compare-method p {
     margin-top: 1rem;
   }
+  @media (max-width: 23rem) {
+    .compare-fields > label {
+      grid-column: 1 / -1;
+    }
+  }
   @media (max-width: 700px) {
-    .compare-fields,
+    .compare-fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .compare-fields > label:nth-child(-n + 2) {
+      grid-column: 1 / -1;
+    }
     .compare-cards {
       grid-template-columns: 1fr;
     }
-    .compare-mode-choices label {
-      flex: 1 1 40%;
+    .compare-mode-choices {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+    .compare-mode-choices span {
+      padding-inline: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .compare-submit {
+      width: 100%;
     }
     .compare-next {
       display: block;

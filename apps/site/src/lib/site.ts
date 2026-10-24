@@ -5,7 +5,7 @@ export const site = {
   name: 'Week Without Driving Las Vegas',
   url: 'https://lvwwd.org',
   description:
-    'Take a trip without driving during Week Without Driving in Las Vegas. Sign up and describe your trip to enter the giveaway.',
+    'Week Without Driving Las Vegas 2026 has wrapped up. Thank you for taking part. We’ll see you in 2027! Stay involved with LVBT all year.',
 } as const;
 
 export const lvbt = {

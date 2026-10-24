@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WinBand from '../components/WinBand.astro';
 import BingoPrintSheet from '../components/BingoPrintSheet.astro';
 import ShareScreen from '../components/ShareScreen.astro';
 import { Icon } from 'astro-icon/components';
@@ -51,7 +50,7 @@ const description =
       Small things to try from {WWD_DATE_RANGE}, {wwd.year}. Tap a square when you've done it. Five
       in a row is a bingo.
     </p>
-    <p class="mt-3 text-title-md font-semibold text-primary-ink" data-bingo-day-line>{dayLine}</p>
+    <p class="bingo-day-line" data-bingo-day-line>{dayLine}</p>
 
     {/* View switch */}
     <div class="bingo-views mt-8" role="group" aria-label="Show the card as">
@@ -281,10 +280,8 @@ const description =
         </li>
         <li>It's on the honor system. Nobody checks your card.</li>
         <li>
-          Bingos are for fun and don't win a prize by themselves. To win, <a
-            href="/sign-up"
-            class="body-link">sign up</a
-          > and describe each trip you take without driving in My week, October 1 to 8.
+          Bingos are for fun. The 2026 giveaway has closed, but you can keep playing and finding new
+          ways to get around.
         </li>
       </ol>
     </section>
@@ -346,7 +343,6 @@ const description =
   <script is:inline type="module" src="/modules/bingo-print.js"></script>
   <script is:inline type="module" src="/modules/bingo.js"></script>
   <script is:inline type="module" src="/modules/bingo-sync.js"></script>
-  <WinBand />
   <BingoPrintSheet />
 </BaseLayout>
 
@@ -383,11 +379,20 @@ const description =
   /* ---- The card as an object: a bingo card printed like a transit ticket.
      Card stock sits above the paper page; an ember band carries the B I N G O
      columns; perforated rules separate squares; a stub holds the tally. */
+  .bingo-day-line {
+    margin-top: 0.75rem;
+    max-width: 38rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-on-surface-variant);
+  }
   .bingo-views {
     display: inline-flex;
     overflow: hidden;
-    border: 1.5px solid var(--color-on-surface);
-    border-radius: 999px;
+    padding: 0.2rem;
+    gap: 0.2rem;
+    background: var(--color-surface-container);
+    border-radius: 0.65rem;
   }
   .bingo-view-btn {
     min-height: 44px;
@@ -395,6 +400,7 @@ const description =
     font-size: var(--text-body-sm);
     font-weight: 700;
     background: transparent;
+    border-radius: 0.45rem;
   }
   .bingo-view-btn[aria-pressed='true'] {
     background: var(--color-on-surface);

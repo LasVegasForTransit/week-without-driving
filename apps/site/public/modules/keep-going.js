@@ -10,10 +10,8 @@
  * /modules/my-week.js already made; otherwise, and on Home, with an email
  * field. A tap asks Turnstile for a token, then sends POST /api/newsletter.
  *
- * On Home, from 12:00 am October 9, 2026, Las Vegas time, by the phone's
- * clock, a visitor who isn't signed in sees the ended message, the "Stay
- * involved with LVBT" button and section, and the closing band without its
- * heading and "Sign up to win" button.
+ * Home’s thank-you message is part of the page. Its link scrolls to
+ * the stay-involved section and focuses the heading.
  */
 import { whenMe } from './me.js';
 
@@ -50,17 +48,7 @@ function messageFor(status, error) {
 
 export { checkEmail, messageFor, CLOSES };
 
-const signedIn = () => /(?:^|; )lvwwd_signed_in=1(?:;|$)/.test(document.cookie);
-
-function switchHome() {
-  const home = document.querySelector('[data-home-closed]');
-  if (!home || signedIn() || Date.now() < CLOSES) return;
-  document.querySelectorAll('[data-home-open]').forEach((el) => {
-    el.hidden = true;
-  });
-  document.querySelectorAll('[data-home-closed]').forEach((el) => {
-    el.hidden = false;
-  });
+function setUpHomeLink() {
   const section = document.getElementById('stay-involved');
   document.querySelector('[data-stay-involved-link]')?.addEventListener('click', (event) => {
     if (!section) return;
@@ -229,7 +217,7 @@ function setUpCard(card) {
 
 /** Starts the page once its markup is known to be there. */
 function startPage() {
-  switchHome();
+  setUpHomeLink();
   document.querySelectorAll('[data-keep-going][data-one-tap="on"]').forEach(setUpCard);
 }
 

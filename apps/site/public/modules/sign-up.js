@@ -201,6 +201,8 @@ function showClosed() {
 
 function startSignUp() {
   if (Date.now() >= SIGN_UP_ENDS) return showClosed();
+  if (closed) closed.hidden = true;
+  if (intro) intro.hidden = false;
   if (form.hasAttribute('data-turnstile-unavailable')) {
     form.hidden = true;
     if (unavailable) unavailable.hidden = false;
@@ -214,6 +216,7 @@ function startSignUp() {
 
 function startEditing(me) {
   editing = true;
+  if (closed) closed.hidden = true;
   if (unavailable) unavailable.hidden = true;
   // The server blocks unavailable sign-up forms even if an older cached
   // script clears `hidden`. Only a verified signed-in edit can unlock it.
@@ -276,6 +279,7 @@ function offerSomeoneElse() {
 }
 
 function showAlready(me) {
+  if (closed) closed.hidden = true;
   if (unavailable) unavailable.hidden = true;
   const title = already.querySelector('[data-signup-already-title]');
   if (title) title.textContent = `You’re signed up, ${me.firstName}.`;

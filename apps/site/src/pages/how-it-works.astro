@@ -2,9 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import PhotoSlot from '../components/PhotoSlot.astro';
-import Steps from '../components/Steps.astro';
-import WinBand from '../components/WinBand.astro';
-import { winSteps } from '../lib/campaign';
 import { photos } from '../lib/photos';
 
 // How it works. Anyone can take part in Week Without Driving without
@@ -13,7 +10,7 @@ import { photos } from '../lib/photos';
 
 const title = 'How it works · Week Without Driving Las Vegas';
 const description =
-  'Anyone can take part in Week Without Driving, October 1 to 8. Sign up with us for a chance to win a 30-day RTC bus pass.';
+  'Week Without Driving 2026 has ended. Learn about the challenge and keep exploring ways to get around Las Vegas without driving.';
 
 const ways = [
   {
@@ -41,43 +38,12 @@ const ways = [
     icon: 'mdi:car-outline',
   },
 ] as const;
-
-const fields = [
-  {
-    field: 'First name',
-    why: 'To show your name in My week and match your entries.',
-  },
-  {
-    field: 'Email address',
-    why: 'For My week sign-in links and the winner notice.',
-  },
-  {
-    field: 'ZIP code',
-    why: 'To help confirm where you live.',
-  },
-  {
-    field: 'County',
-    why: 'The giveaway is open to people in Clark, Esmeralda, Lincoln and Nye counties.',
-  },
-  {
-    field: 'Instagram handle (optional)',
-    why: 'If you post a trip and tag @lasvegasfortransit, we can count it for you.',
-  },
-  {
-    field: 'Age',
-    why: 'The giveaway is open to people 13 and older. If you’re 13 to 17, a parent or guardian agrees to the Official Rules for you.',
-  },
-  {
-    field: 'The trips you describe',
-    why: 'How you got around, with an optional post or screenshot. You can also tell us what was hard, separately.',
-  },
-] as const;
 ---
 
 <BaseLayout title={title} description={description}>
   <PageHeader
     title="How it works"
-    lede="Anyone can take part in Week Without Driving, October 1–8. You don’t need to sign up. Sign up with us for a chance to win a 30-day RTC bus pass."
+    lede="Our 2026 week ran October 1–8. Thank you for taking part! We’ll see you in 2027. You can keep using these ideas and our rider guides all year."
   />
 
   {/* TAKE PART YOUR WAY */}
@@ -105,40 +71,6 @@ const fields = [
     </ul>
   </section>
 
-  {/* GIVEAWAY: the same three steps as the giveaway page. */}
-  <section
-    id="how-it-works"
-    class="container-page section scroll-mt-24"
-    aria-labelledby="win-heading"
-  >
-    <h2 id="win-heading" class="section-title">Win a bus pass</h2>
-    <p class="section-intro">
-      Signing up is free. Do these three things for a chance to win a 30-day RTC bus pass.
-    </p>
-    <Steps steps={winSteps} class="section-body" />
-  </section>
-
-  {/* WHAT WE ASK FOR, AND WHY */}
-  <section class="container-page section" aria-labelledby="ask-heading">
-    <h2 id="ask-heading" class="section-title">What we ask for, and why</h2>
-    <p class="section-intro">
-      We delete all of it on November 30, 2026. Signing up means agreeing to the <a
-        href="/giveaway/rules"
-        class="body-link">Official Rules</a
-      >. Read our <a href="/privacy" class="body-link">Privacy page</a>.
-    </p>
-    <dl class="ask-list section-body">
-      {
-        fields.map((row) => (
-          <div class="ask-list__row">
-            <dt>{row.field}</dt>
-            <dd>{row.why}</dd>
-          </div>
-        ))
-      }
-    </dl>
-  </section>
-
   {/* FAQ */}
   <section class="container-page section" aria-labelledby="faq-heading">
     <h2 id="faq-heading" class="section-title">Questions</h2>
@@ -146,16 +78,14 @@ const fields = [
       <details class="faq-item">
         <summary class="faq-item__summary">Do I have to sign up to take part?</summary>
         <p class="faq-item__body">
-          No. Anyone can take part in Week Without Driving without signing up. The guides, the bus
-          finder and bingo are open to everyone. Sign up only if you want a chance to win the bus
-          pass.
+          No. The guides, the bus finder and bingo are open to everyone. The 2026 campaign and
+          giveaway have ended, but you can keep using these tools year round.
         </p>
       </details>
       <details class="faq-item">
         <summary class="faq-item__summary">Does it cost anything?</summary>
         <p class="faq-item__body">
-          No. Taking part and entering are free. Describe a trip without driving on My week. You
-          never need to post it.
+          Our tools are free to use. Your trip may have its own costs, such as a bus fare.
         </p>
       </details>
       <details class="faq-item">
@@ -168,7 +98,8 @@ const fields = [
       <details class="faq-item">
         <summary class="faq-item__summary">What if I don’t use Instagram?</summary>
         <p class="faq-item__body">
-          You don’t need Instagram or any social media account. Describe your trip on My week.
+          You don’t need Instagram or any social media account to use the guides, trip planner or
+          bingo.
         </p>
       </details>
       <details class="faq-item">
@@ -181,8 +112,6 @@ const fields = [
       </details>
     </div>
   </section>
-
-  <WinBand />
 </BaseLayout>
 
 <style>
@@ -216,41 +145,17 @@ const fields = [
     }
     .take-part-way :global(.take-part-way__photo) {
       flex: none;
-      width: 7.5rem;
+      width: 6rem;
       aspect-ratio: auto;
     }
     .take-part-way :global(.photo__credit) {
       display: none;
     }
     .take-part-way__text {
-      padding: 0.9rem 1rem 1rem;
+      padding: 1rem;
     }
     .take-part-way__title {
       font-size: 1.1rem;
-    }
-  }
-
-  /* Stacked on phones, two columns on wider screens, never scrolling sideways. */
-  .ask-list {
-    max-width: 48rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
-  }
-  .ask-list__row {
-    display: grid;
-    gap: 0.25rem 2rem;
-    padding-block: 0.9rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
-  }
-  .ask-list dt {
-    font-weight: 700;
-  }
-  .ask-list dd {
-    line-height: 1.5;
-    color: var(--color-on-surface-variant);
-  }
-  @media (min-width: 48rem) {
-    .ask-list__row {
-      grid-template-columns: 14rem 1fr;
     }
   }
 

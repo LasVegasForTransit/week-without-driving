@@ -1,12 +1,12 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { BANNER_DESCRIPTION as DESCRIPTION, BANNERS } from '../lib/banners';
-import { contactEmail, GENERAL, partners } from '../lib/partners';
+import { GENERAL, partners } from '../lib/partners';
 
 // The partner kit starts with ready-to-share general materials, then lets a
 // listed organization switch to its tracked link. It needs JavaScript
 // (/modules/partner-kit.js fills in the chosen organization's link), so
-// without it the kit shows only its heading and a way to ask by email.
+// without it partners can still read the notice about their 2026 links.
 // The copy buttons are run by /modules/partners.js.
 
 const bannerCards = BANNERS.map((banner) => ({
@@ -25,16 +25,7 @@ const bannerCards = BANNERS.map((banner) => ({
 >
   <h2 id="kit-heading" class="section-title">Partner kit</h2>
 
-  <noscript>
-    <p class="section-intro">
-      The partner kit needs JavaScript turned on. Or email <a
-        href={`mailto:${contactEmail}`}
-        class="body-link font-semibold">{contactEmail}</a
-      > for a link, QR code, banners and flyers.
-    </p>
-  </noscript>
-
-  <p class="section-intro" data-kit-ended hidden>
+  <p class="section-intro" data-kit-ended>
     Week Without Driving 2026 has ended. Thank you for taking part. Your link and any banner on your
     website keep working and open lvwwd.org/giveaway, and you can take the banner down whenever you
     like.

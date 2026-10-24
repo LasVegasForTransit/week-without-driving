@@ -34,14 +34,9 @@ const storyAngles = [
   <section class="container-page section--flush" aria-labelledby="contact-heading">
     <div class="press-card">
       <h2 id="contact-heading" class="press-card__title">Media contact</h2>
-      <p class="mt-2">
-        <a href={mediaMailto} data-print-url={contactEmail} class="body-link font-bold">
-          {contactEmail}
-        </a>
-      </p>
-      <a href={mediaMailto} data-print-url={contactEmail} class="btn btn--primary mt-5">
+      <a href={mediaMailto} data-print-url={contactEmail} class="press-card__email body-link">
         <Icon name="mdi:email-outline" class="size-5" aria-hidden="true" />
-        Email the media contact
+        <span>{contactEmail.split('@')[0]}@<wbr />{contactEmail.split('@')[1]}</span>
       </a>
     </div>
   </section>
@@ -74,10 +69,10 @@ const storyAngles = [
         </dd>
       </div>
       <div>
-        <dt>Take part</dt>
+        <dt>2026 campaign</dt>
         <dd>
-          Anyone can take part. Eligible residents can sign up to win at{' '}
-          <a href="/sign-up" class="body-link font-bold">lvwwd.org/sign-up</a>.
+          The 2026 campaign and giveaway have ended. Find the 2026 giveaway details at{' '}
+          <a href="/giveaway" class="body-link font-bold">lvwwd.org/giveaway</a>.
         </dd>
       </div>
       <div>
@@ -102,12 +97,31 @@ const storyAngles = [
     max-width: 40rem;
     padding: clamp(1.25rem, 4vw, 1.75rem);
     background: var(--color-surface-container);
-    border-radius: 1rem;
+    border-radius: 1.25rem;
   }
   .press-card__title {
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.2;
+  }
+  .press-card__email {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .press-card__email :global(svg) {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    padding: 0.4rem;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-soft);
+    border-radius: 0.6rem;
   }
   .facts {
     border-top: 1px solid color-mix(in srgb, var(--color-on-surface) 14%, transparent);
