@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 // The Partners page with the current roster and an extra partner added
 // to the kit picker for referral-link coverage.
 
@@ -121,11 +126,12 @@ test('after the week, the kit shows only its closing message and the join sectio
   ).toBeVisible();
 });
 
-test('one moment before the week ends, the page is unchanged', async ({ page }) => {
+test('the archive invitation remains available with an earlier visitor clock', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-10-09T06:59:59.999Z'));
   await page.goto('/partners');
   await expect(picker(page)).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeHidden();
+  await expect(page.locator('[data-partners-ended]')).toBeVisible();
 });
 
 test('the page never scrolls sideways on a phone or a tablet', async ({ page }) => {
@@ -143,16 +149,17 @@ test('the page never scrolls sideways on a phone or a tablet', async ({ page }) 
 test.describe('with JavaScript off', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('the kit asks for an email, and the address stays visible without its copy button', async ({
-    page,
-  }) => {
+  test('the archive invitation and contact address work without JavaScript', async ({ page }) => {
     await page.goto('/partners');
     await expect(page.locator('[data-kit-body]')).toBeHidden();
     await expect(page.getByRole('combobox', { name: 'Choose a sharing link' })).toBeHidden();
     await expect(page.getByRole('button', { name: 'Copy email address' })).toBeHidden();
     await expect(
-      page.locator('[data-partners-join]').getByText('wwd@lasvegasfortransit.org', { exact: true }),
+      page
+        .locator('[data-partners-ended]')
+        .getByText('wwd@lasvegasfortransit.org', { exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeHidden();
+    await expect(page.locator('[data-partners-ended]')).toBeVisible();
   });
 });

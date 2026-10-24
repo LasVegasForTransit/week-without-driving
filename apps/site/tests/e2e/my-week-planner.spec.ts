@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Historical campaign interactions use a fixed date; archive states have their own tests.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-02T19:00:00Z'));
+});
+
 // The preview server has no Worker, so these routes stand in for the signed-in
 // participant and the plan API. The test checks the browser journey itself.
 const ME = {

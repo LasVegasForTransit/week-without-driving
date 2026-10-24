@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
 
 test.use({ serviceWorkers: 'block' });
 
-const tabs = ['Home', 'Plan', 'Guides', 'Bingo', 'Sign up'];
+const tabs = ['Home', 'Plan', 'Guides', 'Bingo', 'My week'];
 
 test.describe('the tab bar on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -24,7 +24,7 @@ test.describe('the tab bar on a phone', () => {
     }
   });
 
-  test('turns Sign up into My week once this phone has signed up', async ({
+  test('opens the saved My week once this phone has signed up', async ({
     page,
     context,
     baseURL,
