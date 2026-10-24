@@ -14,13 +14,27 @@ test.describe('the tab bar on a phone', () => {
     await page.goto('/guides/first-ride');
     const bar = page.getByRole('navigation', { name: 'Tabs' });
     await expect(bar).toBeVisible();
+    expect((await bar.boundingBox())?.height).toBeLessThanOrEqual(57);
     await expect(bar.getByRole('link')).toHaveText(tabs);
     await expect(bar.getByRole('link', { name: 'Guides' })).toHaveAttribute('aria-current', 'page');
     await expect(bar.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current');
     for (const link of await bar.getByRole('link').all()) {
       const box = await link.boundingBox();
-      expect(box?.height).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(56);
       expect(box?.width).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  test('keeps comfortably sized stacked tabs on wider phones', async ({ page }) => {
+    await page.setViewportSize({ width: 572, height: 844 });
+    await page.goto('/guides');
+    const bar = page.getByRole('navigation', { name: 'Tabs' });
+    expect((await bar.boundingBox())?.height).toBeLessThanOrEqual(57);
+    for (const link of await bar.getByRole('link').all()) {
+      expect((await link.boundingBox())?.height).toBeGreaterThanOrEqual(56);
+      const icon = await link.locator('svg').boundingBox();
+      const label = await link.locator('.tab-bar__label').boundingBox();
+      expect(icon && label && icon.y + icon.height).toBeLessThanOrEqual(label?.y ?? 0);
     }
   });
 
@@ -42,9 +56,9 @@ test.describe('the tab bar on a phone', () => {
     await page.evaluate(() =>
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }),
     );
-    const install = page.locator('footer .footer-mission');
+    const policies = page.locator('footer .footer-details');
     const bar = await page.getByRole('navigation', { name: 'Tabs' }).boundingBox();
-    const last = await install.boundingBox();
+    const last = await policies.boundingBox();
     expect(last && bar && last.y + last.height).toBeLessThanOrEqual(bar?.y ?? 0);
   });
 

@@ -3,6 +3,8 @@ import '../styles/global.css';
 // Must import after global.css: print.css's non-!important declarations win
 // same-specificity screen rules by source order (see its header comment).
 import '../styles/print.css';
+import lvbtWordmark from '../assets/lvbt-wordmark.svg?raw';
+import lvbtWordmarkDark from '../assets/lvbt-wordmark-dark.svg?raw';
 import { lvbt, site } from '../lib/site';
 import { Icon } from 'astro-icon/components';
 import { footerDetailLinks, footerExploreLinks, isCurrent, mainNav, tabNav } from '../lib/nav';
@@ -181,16 +183,32 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
     </dialog>
     <footer id="site-footer" class="site-footer">
       <div class="container-page site-footer__inner">
-        <a class="footer-identity" href={lvbt.url} data-print-url={lvbt.url}>
-          <img src="/brand/lvbt-logo-128.png" width="56" height="56" alt="" loading="lazy" />
-          <span>
+        <div class="footer-brand">
+          <a
+            class="footer-identity"
+            href={lvbt.url}
+            data-print-url={lvbt.url}
+            aria-label="An initiative by Las Vegans for Better Transit"
+          >
             <span class="footer-identity__eyebrow">An initiative by</span>
-            <span class="footer-identity__name">Las Vegans for<br />Better Transit</span>
-          </span>
-        </a>
+            <span
+              class="footer-wordmark footer-wordmark--light"
+              aria-hidden="true"
+              set:html={lvbtWordmark}
+            />
+            <span
+              class="footer-wordmark footer-wordmark--dark"
+              aria-hidden="true"
+              set:html={lvbtWordmarkDark}
+            />
+          </a>
+          <p class="footer-mission">
+            <span>A 501(c)(3) nonprofit</span><span>EIN {lvbt.ein}</span>
+          </p>
+        </div>
         <nav class="footer-utilities" aria-label="Footer">
-          <div>
-            <p class="footer-label">Explore</p>
+          <div role="group" aria-labelledby="footer-explore-label">
+            <h2 id="footer-explore-label" class="footer-label">Explore</h2>
             <ul>
               {
                 footerExploreLinks.map((link) => (
@@ -199,45 +217,73 @@ const tabCurrent = (match: readonly string[]) => match.some((href) => isCurrent(
                   </li>
                 ))
               }
+            </ul>
+          </div>
+          <div role="group" aria-labelledby="footer-connect-label">
+            <h2 id="footer-connect-label" class="footer-label">Connect</h2>
+            <ul>
+              <li>
+                <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl}>
+                  <span>Join LVBT</span><Icon
+                    name="mdi:arrow-top-right"
+                    class="footer-link-icon"
+                    aria-hidden="true"
+                  />
+                </a>
+              </li>
+              <li>
+                <a href="mailto:wwd@lasvegasfortransit.org"
+                  ><span>Email us</span><Icon
+                    name="mdi:email-outline"
+                    class="footer-link-icon"
+                    aria-hidden="true"
+                  /></a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-social" role="group" aria-labelledby="footer-social-label">
+            <h2 id="footer-social-label" class="footer-label">Follow</h2>
+            <ul>
               <li>
                 <a
                   href="https://www.instagram.com/lvweekwithoutdriving/"
                   aria-label="Week Without Driving on Instagram"
                   target="_blank"
-                  rel="noopener noreferrer">WWD Instagram</a
+                  rel="noopener noreferrer"
+                  ><span>WWD Instagram</span><Icon
+                    name="mdi:arrow-top-right"
+                    class="footer-link-icon"
+                    aria-hidden="true"
+                  /></a
                 >
               </li>
-            </ul>
-          </div>
-          <div>
-            <p class="footer-label">Connect</p>
-            <ul>
-              <li>
-                <a href={lvbt.joinUrl} data-print-url={lvbt.joinUrl}>Join LVBT</a>
-              </li>
-              <li><a href="mailto:wwd@lasvegasfortransit.org">Email us</a></li>
               <li>
                 <a
                   href={lvbt.instagramUrl}
                   data-print-url={lvbt.instagramUrl}
                   target="_blank"
-                  rel="noopener noreferrer">LVBT Instagram</a
+                  rel="noopener noreferrer"
+                  ><span>LVBT Instagram</span><Icon
+                    name="mdi:arrow-top-right"
+                    class="footer-link-icon"
+                    aria-hidden="true"
+                  /></a
                 >
               </li>
             </ul>
           </div>
         </nav>
-        <ul class="footer-details">
-          {
-            footerDetailLinks.map((link) => (
-              <li>
-                <a href={link.href}>{link.label}</a>
-              </li>
-            ))
-          }
-        </ul>
-        <div class="footer-meta">
-          <p class="footer-mission">A 501(c)(3) nonprofit · EIN {lvbt.ein}</p>
+        <div class="footer-bottom">
+          <ul class="footer-details" aria-label="Policies">
+            {
+              footerDetailLinks.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))
+            }
+          </ul>
           {/* Shown by /modules/app.js where installing is possible. */}
           <button type="button" class="install-button footer-install" data-install-button hidden>
             <Icon name="mdi:cellphone-arrow-down" class="size-5" aria-hidden="true" />

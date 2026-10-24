@@ -737,3 +737,12 @@
     border-bottom: 0.06in solid var(--color-primary);
   }
 }
+
+@media print {
+  .footer-wordmark--light {
+    display: block !important;
+  }
+  .footer-wordmark--dark {
+    display: none !important;
+  }
+}

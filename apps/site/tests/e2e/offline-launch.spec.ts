@@ -13,9 +13,7 @@ test('an installed phone opens Home and public tools after the connection is los
   await context.setOffline(true);
   for (const path of ['/', '/?ref=partner']) {
     await page.goto(path);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Thanks for a great Week Without Driving.',
-    );
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Thank you, Las Vegas.');
     await expect(page.getByRole('heading', { level: 1, name: 'You’re offline' })).toHaveCount(0);
   }
   for (const [path, heading] of [

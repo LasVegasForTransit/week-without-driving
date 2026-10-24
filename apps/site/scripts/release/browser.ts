@@ -37,9 +37,7 @@ try {
   assert.equal(response?.status(), 200, 'The reviewed homepage did not render.');
   assert.equal(new URL(page.url()).origin, origin, 'Release browser left the selected origin.');
   assert.ok(
-    await page
-      .getByRole('heading', { level: 1, name: 'Thanks for a great Week Without Driving.' })
-      .isVisible(),
+    await page.getByRole('heading', { level: 1, name: 'Thank you, Las Vegas.' }).isVisible(),
   );
   const tabs = page.getByRole('navigation', { name: 'Tabs' });
   assert.ok(await tabs.isVisible(), 'The phone navigation did not render.');
