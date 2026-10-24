@@ -37,7 +37,9 @@ try {
   assert.equal(response?.status(), 200, 'The reviewed homepage did not render.');
   assert.equal(new URL(page.url()).origin, origin, 'Release browser left the selected origin.');
   assert.ok(
-    await page.getByRole('heading', { level: 1, name: 'Try a week without driving.' }).isVisible(),
+    await page
+      .getByRole('heading', { level: 1, name: 'Thanks for a great Week Without Driving.' })
+      .isVisible(),
   );
   const tabs = page.getByRole('navigation', { name: 'Tabs' });
   assert.ok(await tabs.isVisible(), 'The phone navigation did not render.');
@@ -46,7 +48,7 @@ try {
     'Plan',
     'Guides',
     'Bingo',
-    'Sign up',
+    'My week',
   ]);
   const guide = await page.goto(`${origin}/guides/first-ride`, { waitUntil: 'networkidle' });
   assert.equal(guide?.status(), 200, 'The first-ride guide did not render.');
