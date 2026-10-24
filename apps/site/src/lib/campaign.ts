@@ -31,7 +31,7 @@ export const proclamations: Array<{ government: string; url: string | null }> = 
 /** The giveaway prizes, as the Giveaway page describes them. */
 interface Prize {
   name: string;
-  body: string;
+  body?: string;
   photo: string;
   image?: Photo;
   icon: string;
@@ -40,7 +40,6 @@ interface Prize {
 export const prizes: Prize[] = [
   {
     name: 'A 30-day RTC bus pass',
-    body: 'One 30-day pass for RTC buses.',
     photo: 'An RTC bus traveling through Las Vegas',
     image: photos.rtcBusMlk,
     icon: 'mdi:bus',

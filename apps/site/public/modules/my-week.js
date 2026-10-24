@@ -102,16 +102,22 @@ function showClosed(today) {
   const text =
     today === 0
       ? 'Sharing trips opens October 1.'
-      : 'The 2026 week has ended. Thank you for taking part. We’ll see you in 2027!';
+      : 'Your recorded trips and saved plans from October 1–8, 2026 are below.';
   setText('[data-me-phase]', text);
   const closed = document.querySelector('[data-log-closed]');
   if (closed) {
     closed.hidden = false;
-    closed.textContent = text;
+    closed.textContent =
+      today === 0
+        ? 'Come back during the week to log your first trip.'
+        : 'Trip logging is closed. You can still review the days you recorded.';
   }
 }
 
 function renderToday(today, done) {
+  document
+    .querySelector('[data-me-plan-trip]')
+    ?.setAttribute('href', today > 8 ? '/go' : '/my-week/plan/where');
   const form = document.querySelector('[data-trip-form]');
   const entered = document.querySelector('[data-trip-done]');
   const closed = document.querySelector('[data-log-closed]');
@@ -399,6 +405,7 @@ async function start() {
   const { ok, status, data } = await api.call('GET', '/api/me');
   if (status === 401) return showSignedOut();
   if (!ok) {
+    document.querySelector('[data-me-unavailable]')?.removeAttribute('hidden');
     if (offline) {
       offline.textContent = data.message;
       offline.hidden = false;

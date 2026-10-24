@@ -10,6 +10,7 @@ const PAGES = [
   '/',
   '/how-it-works',
   '/go',
+  '/go/compare',
   '/guides',
   '/guides/first-ride',
   '/guides/pay-your-fare',
@@ -22,11 +23,17 @@ const PAGES = [
   '/giveaway/rules',
   '/sign-up',
   '/my-week',
+  '/my-week/link',
+  '/my-week/plan/where',
   '/partners',
+  '/partners/flyer',
   '/press',
   '/resources',
   '/privacy',
   '/terms',
+  '/offline',
+  '/open',
+  '/404',
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {

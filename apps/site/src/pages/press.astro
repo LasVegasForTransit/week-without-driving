@@ -28,7 +28,10 @@ const storyAngles = [
 ---
 
 <BaseLayout title={title} description={description}>
-  <PageHeader title="Press" lede="Covering Week Without Driving in Las Vegas? Start here." />
+  <PageHeader
+    title="Press"
+    lede="Find local campaign facts, request interviews and explore stories about getting around Las Vegas without driving."
+  />
 
   {/* MEDIA CONTACT */}
   <section class="container-page section--flush" aria-labelledby="contact-heading">
@@ -53,7 +56,7 @@ const storyAngles = [
         </dd>
       </div>
       <div>
-        <dt>When</dt>
+        <dt>2026 dates</dt>
         <dd>{WWD_DATE_RANGE}, {wwd.year}</dd>
       </div>
       <div>
@@ -66,13 +69,6 @@ const storyAngles = [
           <a href={lvbt.url} data-print-url={lvbt.url} class="body-link font-bold">{lvbt.name}</a>{
             ' '
           }(LVBT), a 501(c)(3) nonprofit.
-        </dd>
-      </div>
-      <div>
-        <dt>2026 campaign</dt>
-        <dd>
-          The 2026 campaign and giveaway have ended. Find the 2026 giveaway details at{' '}
-          <a href="/giveaway" class="body-link font-bold">lvwwd.org/giveaway</a>.
         </dd>
       </div>
       <div>

@@ -12,7 +12,11 @@ const ROW_THREE = [
 ];
 
 async function pageCount(page: Page): Promise<number> {
-  const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
+  const pdf = await page.pdf({
+    preferCSSPageSize: true,
+    printBackground: true,
+    path: test.info().outputPath('bingo.pdf'),
+  });
   const text = new TextDecoder('latin1').decode(pdf);
   return Number(/\/Count\s+(\d+)/.exec(text)?.[1] ?? 0);
 }

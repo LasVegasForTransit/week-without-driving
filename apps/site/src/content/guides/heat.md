@@ -4,8 +4,8 @@ order: 4
 icon: 'mdi:weather-sunny'
 cardSummary: 'Stay cool and safe on the way to the bus, whether you walk or roll.'
 intro: >-
-  October afternoons in Las Vegas can still pass 90°F. A little planning makes the trip to the bus
-  stop cooler and safer, whether you walk, roll, or push a stroller.
+  Plan for Las Vegas heat on the way to the bus stop. Find shade, bring water and watch for hot
+  surfaces, whether you walk, roll, or push a stroller.
 steps:
   - heading: 'Pick a cooler time and bring water'
     icon: 'mdi:water-outline'

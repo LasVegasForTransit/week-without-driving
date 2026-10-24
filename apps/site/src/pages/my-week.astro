@@ -37,20 +37,28 @@ const shortcuts = [
 <BaseLayout title={title} description="Your shared trips, entries and details." noindex>
   <div class="container-page myweek narrow">
     {/* Shown when the API can't be reached */}
-    <p data-me-offline hidden class="myweek__lede" role="alert"></p>
+    <section data-me-unavailable hidden aria-labelledby="unavailable-heading">
+      <h1 id="unavailable-heading" class="page-title">We couldn’t open My week.</h1>
+      <p data-me-offline hidden class="myweek__lede" role="alert"></p>
+      <div class="myweek__actions">
+        <a href="/my-week" class="btn btn--primary">Try again</a>
+        <a href="/go" class="btn btn--outline">Plan a trip</a>
+      </div>
+      <p class="myweek__note">The public trip planner and rider guides don’t need a sign-in.</p>
+    </section>
 
     {/* Signed out on this phone */}
     <section data-me-out hidden class="myweek__out" aria-labelledby="out-heading">
       <h1 id="out-heading" class="page-title">Your Week Without Driving</h1>
       <p class="myweek__lede">
-        Week Without Driving 2026 has ended. Sign in to revisit your trips. We’ll see you in 2027!
+        Open your recorded trips, saved plans and Bingo card from the 2026 campaign.
       </p>
       <div class="myweek__actions">
-        <a href="/#stay-involved" class="btn btn--primary btn--big">Stay involved with LVBT</a>
-        <a href="/my-week/link" class="btn btn--outline">Email me a sign-in link</a>
+        <a href="/my-week/link" class="btn btn--primary btn--big">Email me a sign-in link</a>
+        <a href="/guides" class="btn btn--outline">Browse rider guides</a>
       </div>
       <p class="myweek__note">
-        Already signed up? Use the same email. We’ll send a link that opens My Week on this phone.
+        Use the email address you signed up with. Your sign-in link opens My week on this phone.
       </p>
     </section>
 
@@ -67,7 +75,7 @@ const shortcuts = [
         <p class="myweek__lede" data-me-phase>
           Describe a trip each day you skip the car, October 1 to 8.
         </p>
-        <a href="/my-week/plan/where" class="btn btn--outline mt-4">Plan a trip</a>
+        <a href="/go" class="btn btn--outline mt-4" data-me-plan-trip>Plan a trip</a>
         <div class="preview-link" data-preview-link hidden></div>
       </section>
 
@@ -472,7 +480,16 @@ const shortcuts = [
     </div>
 
     <noscript>
-      <p class="myweek__lede">My week needs JavaScript turned on in your browser.</p>
+      <h1 class="page-title">Your Week Without Driving</h1>
+      <p class="myweek__lede">
+        Turn on JavaScript in your browser to open your personal trips and plans.
+      </p>
+      <p class="myweek__note">
+        You can still use the <a href="/guides" class="body-link">rider guides</a> and <a
+          href="/go"
+          class="body-link">step-by-step outings</a
+        > without it.
+      </p>
     </noscript>
   </div>
 

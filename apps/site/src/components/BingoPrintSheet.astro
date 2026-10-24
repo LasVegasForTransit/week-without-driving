@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { BINGO_SQUARES } from '../lib/bingo';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 import { encodeQr, qrPathData, QUIET_ZONE } from '../lib/qrcode';
 
 // The paper bingo card. Both layouts are built from the same square list as
@@ -15,15 +16,18 @@ const qr = encodeQr('https://lvwwd.org/bingo');
 const qrSide = qr.size + QUIET_ZONE * 2;
 const qrPath = qrPathData(qr, QUIET_ZONE);
 
-const DATES = 'Week Without Driving Las Vegas · October 1 to 8, 2026';
+const archived = new Date() > wwd.end;
+const DATES = `Week Without Driving Las Vegas · ${WWD_DATE_RANGE}, ${wwd.year}`;
 const HOW_TO_PLAY_CARD =
   "Mark a square with a pen when you've done it. Five in a row, down a column, or corner to corner is a bingo. The middle square is free. Every way of getting around counts: by bus, walking or rolling, biking, or getting a ride. If you still have to drive, you haven't failed.";
 const HOW_TO_PLAY_LARGE =
   "Tick a box with a pen when you've done it. A bingo is all five squares in one row, or the same numbered square in all five rows, or a diagonal: square 1 in row 1, square 2 in row 2, and so on to square 5 in row 5, or square 5 in row 1, square 4 in row 2, and so on to square 1 in row 5. Square 3 in row 3 is free. Every way of getting around counts: by bus, walking or rolling, biking, or getting a ride. If you still have to drive, you haven't failed.";
-const QR_CAPTION = 'Scan to play on a phone: lvwwd.org/bingo';
+const QR_CAPTION = archived ? 'Cards: lvwwd.org/bingo' : 'Scan to play on a phone: lvwwd.org/bingo';
 const FOOTER = [
   'Share your card, find bus stops near you, and read our guides at lvwwd.org.',
-  'Giveaway: sign up free at lvwwd.org/sign-up with your email address. Describe a trip without driving on My week for one entry per day, up to 8. Bingo squares do not add entries. A post or photo is optional. No purchase necessary. Prize: one 30-day RTC bus pass. Official Rules: lvwwd.org/giveaway/rules.',
+  archived
+    ? `Play anytime. This card comes from our ${wwd.year} campaign; it does not enter a giveaway. Archived giveaway rules: lvwwd.org/giveaway/rules.`
+    : 'Giveaway: sign up free at lvwwd.org/sign-up with your email address. Describe a trip without driving on My week for one entry per day, up to 8. Bingo squares do not add entries. A post or photo is optional. No purchase necessary. Prize: one 30-day RTC bus pass. Official Rules: lvwwd.org/giveaway/rules.',
   'Week Without Driving Las Vegas is run by Las Vegans for Better Transit. Questions: wwd@lasvegasfortransit.org',
 ];
 const rows = [1, 2, 3, 4, 5].map((row) =>

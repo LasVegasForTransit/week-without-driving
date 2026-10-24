@@ -118,14 +118,18 @@ test('signed-in visitors see the thank-you message and can still open My week', 
   ).toBeVisible();
 });
 
-test('My week thanks returning participants after the campaign without promising a future draw', async ({
+test('My week lets returning participants review trips without promising a future draw', async ({
   page,
   context,
 }) => {
   await signIn(context, page, { ...PARTICIPANT, today: 9 });
   await page.goto('/my-week');
-  await expect(page.locator('[data-me-phase]')).toContainText('We’ll see you in 2027!');
+  await expect(page.locator('[data-me-phase]')).toContainText(
+    'Your recorded trips and saved plans',
+  );
   await expect(page.locator('[data-trip-form]')).toBeHidden();
+  await expect(page.locator('[data-me-plan-trip]')).toHaveAttribute('href', '/go');
+  await expect(page.locator('[data-log-closed]')).toContainText('Trip logging is closed.');
   await expect(page.getByText('LVBT will draw one winner by October 15, 2026.')).toHaveCount(0);
 });
 

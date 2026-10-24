@@ -52,8 +52,8 @@ const planModes = [
   <section class="container-page plan-flow narrow" data-plan-page={step}>
     <a href="/my-week" class="body-link plan-flow__return">← My week</a>
     <h1 class="page-title" tabindex="-1" data-plan-heading>{steps[current]?.title}</h1>
-    <p class="plan-flow__lead">{steps[current]?.description}</p>
-    <div class="plan-flow__progress-group">
+    <p class="plan-flow__lead" data-plan-lead>{steps[current]?.description}</p>
+    <div class="plan-flow__progress-group" data-plan-progress>
       <p>Step {current + 1} of {steps.length}</p>
       <div
         class="plan-flow__progress"
@@ -77,7 +77,9 @@ const planModes = [
       Reconnect to plan a trip in My week.
     </p>
     <p data-plan-closed hidden class="plan-flow__notice">
-      The week has ended. Your saved plans are still in My week.
+      Saving new campaign plans is closed. <a href="/my-week" class="body-link"
+        >Review your saved plans in My week</a
+      >, or <a href="/go" class="body-link">plan another trip</a> with our public tools.
     </p>
     <p data-plan-status class="plan-flow__status" role="status" aria-live="polite"></p>
 

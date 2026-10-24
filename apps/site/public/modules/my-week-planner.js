@@ -379,6 +379,9 @@ async function start() {
     return;
   }
   if (me.today > 8) {
+    document.querySelector('[data-plan-heading]').textContent = 'Your campaign trip plans';
+    document.querySelector('[data-plan-lead]')?.setAttribute('hidden', '');
+    document.querySelector('[data-plan-progress]')?.setAttribute('hidden', '');
     document.querySelector('[data-plan-closed]')?.removeAttribute('hidden');
     return;
   }

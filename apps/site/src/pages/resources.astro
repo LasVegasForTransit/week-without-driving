@@ -10,7 +10,8 @@ import { wwdResources } from '../lib/wwd';
 // not a copy-edit here.
 
 const title = 'Resources · Week Without Driving Las Vegas';
-const description = 'Maps, fares, apps, and help for getting around Las Vegas without a car.';
+const description =
+  'Local travel tools and national campaign resources for participants and organizers.';
 
 const afterTheWeek = [
   {
@@ -18,14 +19,14 @@ const afterTheWeek = [
     icon: 'mdi:message-text-outline',
     href: 'mailto:wwd@lasvegasfortransit.org',
     action: 'Share your story',
-    body: 'Tag @lasvegasfortransit on Instagram or email your story to wwd@lasvegasfortransit.org. We only share a post or story with your permission.',
+    body: 'What worked? What got in the way? Send us a story or photo from your trips. We ask permission before sharing it.',
   },
   {
     title: 'Plan another trip',
     icon: 'mdi:routes',
     href: '/go',
     action: 'Plan a trip',
-    body: 'The riding guides and Find a bus stay on this site. Check RTC for current routes, fares and stop closures before you travel.',
+    body: 'Find a nearby bus stop or a step-by-step outing. Check RTC for current routes, fares and stop closures before you travel.',
   },
   {
     title: 'Stay with LVBT',
@@ -42,7 +43,9 @@ const afterTheWeek = [
   <section class="container-page page-top" aria-labelledby="resources-heading">
     <div>
       <h1 id="resources-heading" class="page-title">Resources</h1>
-      <p class="page-lede">Maps, fares, apps, and help for getting around without a car.</p>
+      <p class="page-lede">
+        Local travel tools and national campaign resources for participants and organizers.
+      </p>
     </div>
     <div class="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
       {
@@ -91,7 +94,9 @@ const afterTheWeek = [
   <section class="container-page section" aria-labelledby="after">
     <div class="reveal max-w-3xl">
       <h2 id="after" class="text-headline-lg">After the week</h2>
-      <p class="lede mt-4">What you noticed outlasts the week.</p>
+      <p class="lede mt-4">
+        Put what you noticed into practice, on your next trip or in your community.
+      </p>
     </div>
     <div class="reveal-stagger mt-10 grid gap-8 md:grid-cols-3">
       {
@@ -108,13 +113,13 @@ const afterTheWeek = [
       }
     </div>
     <p class="reveal mt-10 leading-relaxed">
-      Want the longer version of why we are doing this?{' '}
+      For the local campaign’s background and goals,{' '}
       <a
         href={lvbt.projectPageUrl}
         data-print-url={lvbt.projectPageUrl}
         class="body-link font-semibold"
       >
-        Read the project page &#8594;
+        read LVBT’s project page &#8594;
       </a>
     </p>
   </section>

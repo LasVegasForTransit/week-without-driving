@@ -33,7 +33,7 @@ const { title, intro, cardSummary, steps } = guide.data;
       {
         steps.map((step, index) => (
           <li class="reveal border-t-2 border-outline pt-6 md:pt-8">
-            <div class="flex items-start gap-4">
+            <div class="guide-step__header">
               <span
                 class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-black text-on-primary tnum"
                 aria-hidden="true"
@@ -43,11 +43,11 @@ const { title, intro, cardSummary, steps } = guide.data;
               {step.icon !== 'shade-diagram' && (
                 <Icon
                   name={step.icon}
-                  class="mt-1.5 size-7 shrink-0 text-primary-ink"
+                  class="guide-step__icon size-7 text-primary-ink"
                   aria-hidden="true"
                 />
               )}
-              <h2 class="text-title-lg mt-1.5">
+              <h2 class="guide-step__title text-title-lg">
                 <span class="sr-only">Step {index + 1}: </span>
                 {step.heading}
               </h2>
@@ -133,3 +133,30 @@ const { title, intro, cardSummary, steps } = guide.data;
     </nav>
   </article>
 </BaseLayout>
+
+<style>
+  .guide-step__header {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.75rem;
+  }
+  .guide-step__title {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0.35rem;
+  }
+  .guide-step__header :global(.guide-step__icon) {
+    grid-column: 3;
+    grid-row: 1;
+    margin-top: 0.4rem;
+  }
+  @media (max-width: 39.99rem) {
+    .guide-step__header {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+    }
+    .guide-step__header :global(.guide-step__icon) {
+      display: none;
+    }
+  }
+</style>
