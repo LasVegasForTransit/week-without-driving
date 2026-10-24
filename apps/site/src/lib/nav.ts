@@ -24,7 +24,7 @@ export const mainNav = [
   {
     href: '/bingo',
     label: 'Bingo',
-    help: 'Play transit bingo all week.',
+    help: 'View your card or print a game to try.',
     icon: 'mdi:grid',
   },
   {

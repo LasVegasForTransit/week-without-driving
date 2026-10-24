@@ -7,7 +7,7 @@ import { contactEmail } from '../../lib/partners';
 // sheet, not a generated PDF. The partner kit on /partners links here. Its
 // QR code opens lvwwd.org, so it credits no organization.
 
-const title = 'Printable flyer · Week Without Driving Las Vegas';
+const title = '2026 flyer archive · Week Without Driving Las Vegas';
 const description = 'A printable Week Without Driving Las Vegas flyer with a QR code to lvwwd.org.';
 
 const qr = encodeQr('https://lvwwd.org/');
@@ -18,11 +18,10 @@ const qrViewBox = qr.size + qrQuiet * 2;
 
 <BaseLayout title={title} description={description}>
   <section class="container-page py-16 md:py-24">
-    <h1 class="text-display-sm">Printable flyer</h1>
+    <h1 class="text-display-sm">2026 flyer archive</h1>
     <p class="lede mt-4 max-w-2xl">
-      This is what LVBT hands out at tables, meetings and noticeboards. To print it, use your
-      browser's Print command (Ctrl+P on Windows, Cmd+P on Mac). Choose US Letter paper and 100%
-      scale, or "Fit to page" — both work, in color or black and white.
+      This flyer is kept as a record of the October 1–8, 2026 campaign. Its giveaway invitation is
+      no longer active. Contact LVBT for materials before promoting next year’s week.
     </p>
     <p class="mt-4">
       <a href="/partners" class="body-link font-semibold">&#8592; Back to Partners</a>

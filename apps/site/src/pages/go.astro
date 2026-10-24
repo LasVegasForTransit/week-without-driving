@@ -95,7 +95,9 @@ const mapButtonClass =
 <BaseLayout title="Plan a trip · Week Without Driving Las Vegas" description={description}>
   <section class="container-page page-top" aria-labelledby="plan-heading">
     <h1 id="plan-heading" class="page-title">Plan a trip</h1>
-    <p class="page-lede">Type where you’re going. We’ll open bus directions from where you are.</p>
+    <p class="page-lede">
+      Get bus directions, find nearby stops or choose an outing across the valley.
+    </p>
 
     {/* WHERE TO: shown by where-to.js. It needs no account and sends nothing to us. */}
     <div class="where mt-8 max-w-2xl" data-where>
@@ -199,9 +201,11 @@ const mapButtonClass =
             <a href="/guides/heat" class="body-link where__tile-link">Stay cool</a>
           </li>
           <li class="where__tile">
-            <Icon name="mdi:gift-outline" class="where__icon" aria-hidden="true" />
-            <span>Keep exploring Las Vegas without driving.</span>
-            <a href="/#stay-involved" class="body-link where__tile-link">Stay involved with LVBT</a>
+            <Icon name="mdi:wheelchair-accessibility" class="where__icon" aria-hidden="true" />
+            <span>Need a ramp or lift?</span>
+            <a href="/guides/accessible-riding" class="body-link where__tile-link"
+              >Accessible riding</a
+            >
           </li>
         </ul>
         <p class="mt-3 text-sm text-on-surface-variant">

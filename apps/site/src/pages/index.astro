@@ -5,7 +5,7 @@ import { Icon } from 'astro-icon/components';
 import PhotoSlot from '../components/PhotoSlot.astro';
 import { photos } from '../lib/photos';
 import { lvbt, site } from '../lib/site';
-import { wwd } from '../lib/wwd';
+import { wwd, WWD_DATE_RANGE } from '../lib/wwd';
 import { days, proclamations } from '../lib/campaign';
 import { partners } from '../lib/partners';
 import KeepGoingCard from '../components/KeepGoingCard.astro';
@@ -56,7 +56,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
 )}`;
 ---
 
-<BaseLayout title={`${site.name} · See you in 2027`} description={description}>
+<BaseLayout title={`${site.name} · See you in ${wwd.year + 1}`} description={description}>
   <StructuredData slot="head" data={eventSchema} />
   {/* Old one-page links like /#giveaway: runs before the page shows, so it can't wait. */}
   <script is:inline slot="head" src="/scripts/old-links.js"></script>
@@ -69,14 +69,15 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       photo={photos.deuceView}
       quiet
       eager
+      compactCredit
       sizes="(min-width: 64rem) 50vw, 100vw"
     />
     <div class="container-page home-hero__content">
-      <p class="home-hero__when">Week Without Driving 2026</p>
+      <p class="home-hero__when">Week Without Driving {wwd.year}</p>
       <h1 id="hero-heading" class="home-hero__title">Thank you, Las Vegas.</h1>
       <p class="home-hero__sub">
-        Our 2026 week has wrapped up. Thanks for taking the bus, walking, rolling, biking and
-        sharing the ride. We’ll see you in 2027!
+        From {WWD_DATE_RANGE}, you tried the bus, walked, rolled, biked and shared the ride. We’ll
+        see you in {wwd.year + 1}!
       </p>
       <div class="home-hero__actions">
         <a href="#stay-involved" class="btn btn--primary btn--big" data-stay-involved-link
@@ -149,7 +150,7 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     <div class="container-page">
       <h2 id="partners-heading" class="home-h2">Partners</h2>
       <p class="home-intro">
-        Thank you to the organizations that joined us for Week Without Driving 2026.
+        The organizations that helped bring Week Without Driving to Las Vegas in {wwd.year}.
       </p>
       {
         partners.length > 0 && (
@@ -222,10 +223,13 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
     <div class="container-page">
       <div class="home-farewell__panel">
         <div class="home-farewell__intro">
-          <p class="home-farewell__note">Thank you, Las Vegas.</p>
-          <h2 id="farewell-heading" class="home-farewell__title">See you in <span>2027.</span></h2>
+          <p class="home-farewell__note">Everyday travel</p>
+          <h2 id="farewell-heading" class="home-farewell__title">Where to <span>next?</span></h2>
+          <p class="home-farewell__text">
+            Find a nearby bus stop or a step-by-step trip to a place across the valley.
+          </p>
           <a href="/go" class="home-farewell__trip"
-            >Plan your next trip <span aria-hidden="true">↗</span></a
+            >Plan your next trip <span aria-hidden="true">→</span></a
           >
         </div>
         <KeepGoingCard
@@ -613,6 +617,12 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
   .home-farewell__title span {
     color: var(--color-on-slab-accent);
   }
+  .home-farewell__text {
+    margin-top: 1rem;
+    max-width: 30rem;
+    line-height: 1.65;
+    color: var(--color-on-slab-variant);
+  }
   .home-farewell__trip {
     display: inline-flex;
     align-items: center;
@@ -665,7 +675,31 @@ const leaderMailto = `mailto:wwd@lasvegasfortransit.org?subject=${encodeURICompo
       padding-block: 2.75rem;
     }
     .home-hero__content {
-      padding-block: 2.5rem;
+      padding-block: 2.5rem 1.5rem;
+    }
+    .home-hero :global(.home-hero__photo) {
+      aspect-ratio: auto;
+      margin: 0 var(--page-pad) 2rem;
+      overflow: visible;
+      background: transparent;
+    }
+    .home-hero :global(.home-hero__photo img) {
+      height: auto;
+      aspect-ratio: 16 / 10;
+      border-radius: 0.75rem;
+    }
+    .home-hero :global(.photo__credit) {
+      position: static;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0.375rem 0 0;
+      color: var(--color-on-surface-variant);
+      background: transparent;
+      font-size: 0.75rem;
+    }
+    .home-hero :global(.photo__credit a::after) {
+      content: none;
     }
     .home-hero__title {
       font-size: clamp(2.75rem, 9.5vw, 4.5rem);

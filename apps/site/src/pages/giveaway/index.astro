@@ -9,16 +9,16 @@ import { prizes } from '../../lib/campaign';
 
 const title = '2026 giveaway closed · Week Without Driving Las Vegas';
 const description =
-  'The 2026 Week Without Driving Las Vegas giveaway closed October 8. Thank you for taking part. Read the 2026 rules and stay involved with LVBT.';
+  'Review the prize, eligibility and rules for the October 1–8, 2026 giveaway, or open your recorded trips in My week.';
 ---
 
 <BaseLayout {title} {description}>
   <PageHeader
     title="The 2026 giveaway has closed."
-    lede="The last day to enter was October 8, 2026. Thank you to everyone who took part in Week Without Driving. We’ll see you in 2027!"
+    lede="Entries closed October 8, 2026. This page keeps the prize and entry details for reference. Already took part? You can revisit your recorded trips in My week."
   >
     <div class="giveaway-cta">
-      <a href="/#stay-involved" class="btn btn--primary btn--big"> Stay involved with LVBT </a>
+      <a href="/my-week" class="btn btn--primary btn--big">Open My week</a>
     </div>
   </PageHeader>
 
@@ -38,7 +38,7 @@ const description =
             />
             <div class="giveaway-prize__text">
               <h3 class="giveaway-prize__name">{prize.name}</h3>
-              <p class="giveaway-prize__body">{prize.body}</p>
+              {prize.body && <p class="giveaway-prize__body">{prize.body}</p>}
             </div>
             {prize.image && (
               <p class="giveaway-prize__credit">

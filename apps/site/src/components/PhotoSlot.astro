@@ -19,6 +19,8 @@ interface Props {
   eager?: boolean;
   /** How wide the photo is drawn, for choosing a file size. */
   sizes?: string;
+  /** Show a small license information link beside the photographer credit. */
+  compactCredit?: boolean;
 }
 const {
   shows,
@@ -28,6 +30,7 @@ const {
   icon = 'mdi:bus',
   eager = false,
   sizes = '100vw',
+  compactCredit = false,
 } = Astro.props;
 const set = (stem: string, widths: readonly number[], format: 'avif' | 'webp') =>
   widths.map((w) => `/photos/${stem}-${w}.${format} ${w}w`).join(', ');
@@ -77,9 +80,20 @@ const phoneMedia = '(max-width: 30rem) and (orientation: portrait)';
         </a>
         {photo.licenseUrl ? (
           <>
-            {', '}
-            <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">
-              {photo.license}
+            {!compactCredit && ', '}
+            <a
+              href={photo.licenseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class:list={{ photo__license: compactCredit }}
+              aria-label={compactCredit ? `Photo license: ${photo.license}` : undefined}
+              title={compactCredit ? photo.license : undefined}
+            >
+              {compactCredit ? (
+                <Icon name="mdi:information-outline" aria-hidden="true" />
+              ) : (
+                photo.license
+              )}
             </a>
           </>
         ) : (
@@ -95,6 +109,22 @@ const phoneMedia = '(max-width: 30rem) and (orientation: portrait)';
 }
 
 <style>
+  .photo__license {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-inline-start: 0.25rem;
+    vertical-align: middle;
+  }
+  .photo__license :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+  .photo__license::after {
+    content: none;
+  }
   .photo {
     position: relative;
     overflow: hidden;

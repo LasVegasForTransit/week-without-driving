@@ -179,13 +179,16 @@ function dayOfWeek() {
 
 function dayLineText() {
   if (isBeforeWeek) return 'The week starts October 1. You can start marking squares now.';
-  if (isAfterWeek) return "The week has ended. Thanks for playing! Your card can't be changed now.";
+  if (isAfterWeek)
+    return 'Your 2026 card is locked for reference. Print a blank card to play anytime.';
   return `The week is on: day ${dayOfWeek()} of 8.`;
 }
 
 function applyDateState() {
   if (dayLineEl) dayLineEl.textContent = dayLineText();
   if (giveawayLinkEl) giveawayLinkEl.style.display = isBeforeWeek || isAfterWeek ? 'none' : '';
+  document.querySelector('[data-bingo-live-help]')?.toggleAttribute('hidden', isAfterWeek);
+  document.querySelector('[data-bingo-archive-help]')?.toggleAttribute('hidden', !isAfterWeek);
   if (!isAfterWeek) return;
   inputs.forEach((input) => {
     input.disabled = true;
@@ -194,7 +197,7 @@ function applyDateState() {
 }
 
 function celebrationSuggestion() {
-  return isBeforeWeek
+  return isBeforeWeek || isAfterWeek
     ? 'Share your card with friends.'
     : 'Share your card with friends. And share today’s trip on My week for a giveaway entry.';
 }

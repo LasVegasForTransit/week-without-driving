@@ -1996,6 +1996,9 @@ body {
     border: 2px solid color-mix(in srgb, var(--color-on-surface) 45%, transparent);
     border-radius: 0.75rem;
   }
+  #main,
+  main :where([id]),
+  footer[id],
   .form-input,
   .form-choices {
     scroll-margin-top: 6rem;

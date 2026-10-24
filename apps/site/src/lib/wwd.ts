@@ -64,7 +64,7 @@ export const wwdResources: Array<{
   {
     audience: 'participants',
     title: 'Follow the national campaign',
-    blurb: 'Week Without Driving on Instagram. Tag them alongside us.',
+    blurb: 'Stories and updates from Week Without Driving communities across the country.',
     url: 'https://www.instagram.com/weekwithoutdriving/',
     linkLabel: '@weekwithoutdriving',
   },
@@ -92,7 +92,7 @@ export const wwdResources: Array<{
   {
     audience: 'organizations',
     title: '2026 media advisory',
-    blurb: 'The national announcement for this year’s week, for press and partner communications.',
+    blurb: 'The national announcement for the 2026 campaign, kept for press and partner reference.',
     url: 'https://weekwithoutdriving.org/2026/week-without-driving-2026/',
     linkLabel: 'Read the advisory',
   },

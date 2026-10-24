@@ -117,13 +117,13 @@ test('after the week, the kit shows only its closing message and the join sectio
   await page.clock.setFixedTime(new Date('2026-10-09T07:00:00Z'));
   await page.goto('/partners');
   await expect(
-    page.getByText('Week Without Driving 2026 has ended. Thank you for taking part.'),
+    page.getByText('Existing 2026 links and website banners still open the giveaway archive.', {
+      exact: false,
+    }),
   ).toBeVisible();
   await expect(picker(page)).toBeHidden();
   await expect(page.getByRole('heading', { name: 'Bring your organization' })).toBeHidden();
-  await expect(
-    page.getByText('Week Without Driving 2026 has ended. Want to take part next year?'),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bring your group next year' })).toBeVisible();
 });
 
 test('the archive invitation remains available with an earlier visitor clock', async ({ page }) => {

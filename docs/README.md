@@ -17,5 +17,7 @@ for), and `security`. Every document is listed here so it can be found.
 
 ## Reference
 
+- [Copy and campaign states](product/reference/copy-and-campaign-states.md)
+
 - [Analytics](operations/reference/analytics.md)
 - [Glossary](development/reference/glossary.md)

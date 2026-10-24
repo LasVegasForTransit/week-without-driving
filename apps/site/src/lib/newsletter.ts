@@ -14,10 +14,10 @@ export const GIVEAWAY_CLOSES = '2026-10-09T07:00:00Z';
 
 export const KEEP_GOING = {
   heading: 'Keep going after the week',
-  text: 'Week Without Driving lasts eight days, but Las Vegans for Better Transit works all year for better buses and safer streets across the valley. Keep going with us.',
+  text: 'Turn what you noticed on your trips into support for better buses and safer streets. Join Las Vegans for Better Transit’s year-round work across the valley.',
 } as const;
 
 export const STAY_INVOLVED = {
   heading: 'Stay involved with LVBT',
-  text: 'Las Vegans for Better Transit works all year for better buses and safer streets across the valley. Stay involved with us.',
+  text: 'Help Las Vegans for Better Transit advocate for better buses and safer streets across the valley, all year long.',
 } as const;

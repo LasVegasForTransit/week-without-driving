@@ -34,7 +34,9 @@ test.describe('lvwwd.org/get-involved', () => {
     test('offers both ways and stays out of search engines', async ({ page }) => {
       await page.goto('/get-involved');
       await expect(page.getByRole('heading', { name: 'Stay involved with LVBT' })).toBeVisible();
-      await expect(page.getByText(/Week Without Driving 2026 has wrapped up/)).toBeVisible();
+      await expect(
+        page.getByText(/Join Las Vegans for Better Transit’s year-round work/),
+      ).toBeVisible();
       await expect(page.getByRole('link', { name: 'Join LVBT' }).first()).toHaveAttribute(
         'href',
         'https://lasvegasfortransit.org/join/member/?from=wwd',

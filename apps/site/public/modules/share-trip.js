@@ -30,7 +30,11 @@ function modesPhrase(modes) {
   return `${words.slice(0, -1).join(', ')} and ${words.at(-1)}`;
 }
 
+const archived = () => Date.now() >= Date.parse('2026-10-09T07:00:00Z');
+
 function caption(trip) {
+  if (archived())
+    return `Looking back at day ${trip.day} of Week Without Driving Las Vegas 2026: I got around ${modesPhrase(trip.modes)}. Plan your next trip at lvwwd.org #WeekWithoutDriving @lasvegasfortransit`;
   return `Week Without Driving giveaway entry: I skipped the car today, ${modesPhrase(trip.modes)}, in Las Vegas. Try it October 1–8 and you could win a 30-day RTC bus pass: lvwwd.org #WeekWithoutDriving @lasvegasfortransit`;
 }
 
@@ -85,7 +89,11 @@ async function draw(trip) {
 
   c.fillStyle = COLORS.sand;
   c.font = '600 118px Fraunces, Georgia, serif';
-  const headline = wrap(c, 'I skipped the car today.', WIDTH - pad * 2);
+  const headline = wrap(
+    c,
+    archived() ? 'I skipped the car.' : 'I skipped the car today.',
+    WIDTH - pad * 2,
+  );
   headline.forEach((line, i) => c.fillText(line, pad, 460 + i * 128));
 
   // The ways they got around, big, in coral: "Bus + Walk".
@@ -109,7 +117,11 @@ async function draw(trip) {
   c.fillRect(pad, HEIGHT - 300, 120, 10);
   c.fillStyle = COLORS.sand;
   c.font = '700 50px "Atkinson Hyperlegible Next", sans-serif';
-  c.fillText('Try it Oct 1–8 · lvwwd.org', pad, HEIGHT - 205);
+  c.fillText(
+    archived() ? 'My 2026 week · lvwwd.org' : 'Try it Oct 1–8 · lvwwd.org',
+    pad,
+    HEIGHT - 205,
+  );
   c.fillStyle = COLORS.mist;
   c.font = '700 38px "Atkinson Hyperlegible Next", sans-serif';
   c.fillText('#WeekWithoutDriving  @lasvegasfortransit', pad, HEIGHT - 140);
@@ -184,7 +196,7 @@ async function setUp(root, trip) {
   const preview = root.querySelector('[data-share-preview]');
   if (preview instanceof HTMLImageElement) {
     preview.src = URL.createObjectURL(blob);
-    preview.alt = `A picture that says: Day ${trip.day} of 8. I skipped the car today. I got around ${modesPhrase(trip.modes)}.`;
+    preview.alt = `A picture that says: Day ${trip.day} of 8. ${archived() ? 'I skipped the car.' : 'I skipped the car today.'} I got around ${modesPhrase(trip.modes)}.`;
     preview.hidden = false;
   }
   if (!current.has(root)) bind(root);
